@@ -26,7 +26,18 @@ set(QT_USE_QTNETWORK 1)
 
 include(${QT_USE_FILE})
 
+####################
+# Setup for VTK
+####################
+find_package(VTK)
+if (VTK_FOUND)
+  include(${USE_VTK_FILE})
+endif(VTK_FOUND)
 
+
+####################
+# Start Building
+####################
 
 add_subdirectory(UI)
 add_subdirectory(rtObject)

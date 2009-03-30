@@ -4,6 +4,7 @@
 namespace rtConstants {
 
 enum rtObjectType {
+  OT_None,
   OT_4DObject,
   OT_3DObject,
   OT_2DObject,
@@ -14,7 +15,8 @@ enum rtObjectType {
   OT_vtkColorTransferFunction,
   OT_ImageBuffer,
   OT_2DPointBuffer,
-  OT_3DPointBuffer
+  OT_3DPointBuffer,
+  OT_TextLabel
 };
 
 }
