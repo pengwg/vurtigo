@@ -29,12 +29,14 @@ include(${QT_USE_FILE})
 
 
 add_subdirectory(UI)
-
+add_subdirectory(rtObject)
 
 set (SRC_FILES
   rtMain.cpp
 )
 
 include_directories(UI ${CMAKE_CURRENT_BINARY_DIR}/UI)
+include_directories(rtObject ${CMAKE_CURRENT_BINARY_DIR}/rtObject)
+
 add_executable(vurtigo ${SRC_FILES})
 target_link_libraries(vurtigo rtUI)
