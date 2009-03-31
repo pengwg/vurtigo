@@ -39,6 +39,11 @@ if (VTK_FOUND)
   include(${USE_VTK_FILE})
 endif(VTK_FOUND)
 
+####################
+# Doxygen target called 'doc'
+####################
+INCLUDE("TargetDoc.cmake" OPTIONAL)
+
 
 ####################
 # Start Building
