@@ -5,6 +5,10 @@
 #include "rtMainWindow.h"
 #include "rtRenderObject.h"
 
+//!  The Object Manager. 
+/*!
+  This should be the only class that can create or delete rtRenderObject instances. As a result it can keep track of all such instances and hand them out to other classes when requested. 
+*/
 class rtObjectManager {
  public:
   rtObjectManager();
