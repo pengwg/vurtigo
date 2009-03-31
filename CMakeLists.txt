@@ -59,4 +59,4 @@ set (SRC_FILES
 )
 
 add_executable(vurtigo ${SRC_FILES})
-target_link_libraries(vurtigo rtUI rtObject rtControl)
+target_link_libraries(vurtigo rtUI rtObject rtControl QVTK)
