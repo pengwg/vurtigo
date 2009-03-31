@@ -18,6 +18,10 @@ class rtObjectManager {
   rtMainWindow* getMainWinHandle();
 
  protected:
+  //! A pointer to the main window object.
+  /*!
+    The object manager needs to communicate with the GUI. In general, it updates lists. This hamdle will not be modified by the object manager and should not be modified by any object. It is only meant as a way to modify the GUI. 
+  */
   rtMainWindow *m_mainWinHandle;
   QHash<int, rtRenderObject*> m_objectHash;
 
