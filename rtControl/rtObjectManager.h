@@ -14,6 +14,10 @@ class rtObjectManager {
   rtObjectManager();
   ~rtObjectManager();
 
+  //! Give the object manager the main window object.
+  /*!
+    The object manager needs to communicate with the GUI so it needs to be given an instance of the handle.  
+  */
   void setMainWinHandle(rtMainWindow* mainWin);
   rtMainWindow* getMainWinHandle();
 
