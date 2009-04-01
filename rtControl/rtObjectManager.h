@@ -11,6 +11,7 @@
 */
 class rtObjectManager {
  public:
+  //! Object Manager constructor.
   rtObjectManager();
   ~rtObjectManager();
 
