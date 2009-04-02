@@ -2,6 +2,7 @@
 #define RT_OBJECT_MANAGER_H
 
 #include <QHash>
+#include <QList>
 #include "rtMainWindow.h"
 #include "rtRenderObject.h"
 
@@ -11,21 +12,19 @@
 */
 class rtObjectManager {
  public:
-  //! Object Manager constructor.
   rtObjectManager();
   ~rtObjectManager();
 
-  //! Give the object manager the main window object.
-  /*!
-    The object manager needs to communicate with the GUI so it needs to be given an instance of the handle.  
-  */
   void setMainWinHandle(rtMainWindow* mainWin);
-
-  //! Return an instance of the main window handle.
-  /*!
-    Objects that make use of the object manager can get a handle to the main window through the manager. 
-  */
   rtMainWindow* getMainWinHandle();
+
+  rtRenderObject* addObjectOfType(rtConstants::rtObjectType objType);
+  rtRenderObject* addReadOnlyObject(rtConstants::rtObjectType objType);
+  bool removeObject(int objID);
+  bool removeReadOnly(int objID);
+  rtRenderObject* getObjectWithID(int objID);
+  QList<int> getObjectsOfType(rtConstants::rtObjectType objType);
+  int getNumObjectsOfType(rtConstants::rtObjectType objType);
 
  protected:
   //! A pointer to the main window object.

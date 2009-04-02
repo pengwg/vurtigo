@@ -12,7 +12,7 @@ class rtRenderOptions {
   rtConstants::rtObjectType getType() { return m_objType; }
   void setType(rtConstants::rtObjectType ot) { m_objType = ot; }
 
-  QWidget* getBaseWidget() { return &m_baseWidget; }
+  virtual QWidget* getBaseWidget() { return &m_baseWidget; }
 
  protected:
   rtRenderOptions();

@@ -19,6 +19,11 @@ enum rtObjectType {
   OT_TextLabel
 };
 
+/*! Threshold for read-only objects.
+  Some data objects are created by the base and while the plugins may be able to read them they will not be able to modify the contents. All objects with ID less than this threshold cannot be modified by a plugin. 
+*/
+ const int ReadOnlyObjectThresh = 1000;
+
 }
 
 #endif

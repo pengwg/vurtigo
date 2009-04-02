@@ -8,8 +8,8 @@ class rtDataObject {
  public:
   ~rtDataObject();
 
-  rtRenderOptions* getRenderOptions();
-  void setRenderOptions(rtRenderOptions* renOpt);
+  virtual rtRenderOptions* getRenderOptions();
+  virtual void setRenderOptions(rtRenderOptions* renOpt);
 
   int getId();
   void setId(int id);

@@ -10,15 +10,15 @@ class rtRenderObject {
   //! Destructor
   ~rtRenderObject();
 
-  vtkProp* get3DPipeline();
-  vtkProp* get2DPipeline();
+  virtual vtkProp* get3DPipeline();
+  virtual vtkProp* get2DPipeline();
   rtDataObject* getDataObject();
   QString getName();
   rtConstants::rtObjectType getObjectType();
 
 
   void setDataObject(rtDataObject* dataObj);
-  
+  void setName(QString renName);
 
  protected:
   //! The rtRenderObject constructor.
@@ -29,13 +29,14 @@ class rtRenderObject {
 
   void set3DPipeline(vtkProp* pipe3D);
   void set2DPipeline(vtkProp* pipe2D);
-  void setName(QString renName);
   void setObjectType(rtConstants::rtObjectType objType);
 
- private:
+  rtDataObject* m_dataObj;
+  rtRenderOptions* m_renderObj;
   vtkProp *m_pipe3D;
   vtkProp *m_pipe2D;
-  rtDataObject* m_dataObj;
+
+ private:
   QString m_renderName;
   rtConstants::rtObjectType m_objType;
 };
