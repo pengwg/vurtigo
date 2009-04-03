@@ -20,6 +20,12 @@ class rtDataObject {
   rtConstants::rtObjectType getObjectType();
   void setObjectType(rtConstants::rtObjectType ot);
 
+  bool isReadOnly() { return m_readOnly; }
+  void setReadOnly() { m_readOnly = true; }
+  void setReadWrite() { m_readOnly = false; }
+  void setReadFlag(bool f) { m_readOnly = f; }
+  
+
  protected:
   rtDataObject();
 
@@ -28,6 +34,7 @@ class rtDataObject {
   int m_objId;
   QString m_objName;
   rtConstants::rtObjectType m_objType;
+  bool m_readOnly;
 };
 
 #endif

@@ -1,6 +1,7 @@
 #include "rtDataObject.h"
 
 rtDataObject::rtDataObject() {
+  m_readOnly = false;
 }
 
 rtDataObject::~rtDataObject() {

@@ -6,10 +6,11 @@ rtRenderObject::rtRenderObject() {
   m_dataObj = NULL;
   m_renderName = "None";
   m_objType = rtConstants::OT_None;
+  m_treeItem = new QTreeWidgetItem();
 }
 
 rtRenderObject::~rtRenderObject() {
-
+  if (m_treeItem) delete m_treeItem;
 }
 
 vtkProp* rtRenderObject::get3DPipeline() {
@@ -50,4 +51,23 @@ void rtRenderObject::setName(QString renName) {
 
 void rtRenderObject::setObjectType(rtConstants::rtObjectType objType) {
   m_objType = objType;
+}
+
+
+void rtRenderObject::updateTreeItem() {
+  if (m_treeItem) {
+    m_treeItem->setText(0, m_dataObj->getObjName());
+    m_treeItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+    m_treeItem->setText(1, QString::number(m_dataObj->getId()));
+    m_treeItem->setTextAlignment(1, Qt::AlignHCenter);
+    if (m_pipe3D) {
+      m_treeItem->setText(2, "3D");
+      m_treeItem->setCheckState(2,Qt::Unchecked); 
+    } else {
+      m_treeItem->setText(2, "NA");
+    }
+
+
+
+  }
 }

@@ -18,8 +18,8 @@ class rtObjectManager {
   void setMainWinHandle(rtMainWindow* mainWin);
   rtMainWindow* getMainWinHandle();
 
-  rtRenderObject* addObjectOfType(rtConstants::rtObjectType objType);
-  rtRenderObject* addReadOnlyObject(rtConstants::rtObjectType objType);
+  rtRenderObject* addObjectOfType(rtConstants::rtObjectType objType, QString objName="Not Named");
+  rtRenderObject* addReadOnlyObject(rtConstants::rtObjectType objType, QString objName="Not Named");
   bool removeObject(int objID);
   bool removeReadOnly(int objID);
   rtRenderObject* getObjectWithID(int objID);
@@ -33,9 +33,11 @@ class rtObjectManager {
   */
   rtMainWindow *m_mainWinHandle;
   QHash<int, rtRenderObject*> m_objectHash;
-
  private:
+  //! Maximum number of objects.
+  int m_max_object;
 
+  int getNextID();
 };
 
 #endif

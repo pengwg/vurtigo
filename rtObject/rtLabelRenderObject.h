@@ -9,12 +9,14 @@ class rtLabelRenderObject : public rtRenderObject {
   rtLabelRenderObject();
   ~rtLabelRenderObject();
 
+
+
  protected:
   void setupDataObject();
   void setupRenderOptions();
   void setupPipeline();
  private:
-  vtkTextActor *textActor2D;
+  vtkTextActor *m_textActor2D;
 };
 
 #endif

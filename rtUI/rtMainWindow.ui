@@ -36,6 +36,16 @@
              <string>Object Name</string>
             </property>
            </column>
+           <column>
+            <property name="text">
+             <string>Object ID</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Show in 3D</string>
+            </property>
+           </column>
           </widget>
          </item>
          <item>

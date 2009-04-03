@@ -1,13 +1,14 @@
 #include "rtObjectManager.h"
+#include "rtLabelRenderObject.h"
 
 //! Object Manager constructor.
 rtObjectManager::rtObjectManager() {
-
+  m_max_object = 10000;
+  m_objectHash.clear();
 }
 
 //! Object Manager destructor.
 rtObjectManager::~rtObjectManager() {
-
 }
 
 //! Give the object manager the main window object.
@@ -34,8 +35,43 @@ rtMainWindow* rtObjectManager::getMainWinHandle() {
  This function will create a new object and add it to the object list. It will then return an instance of that object to the caller. The function returns NULL if the object was not created. Since the Object Manager is the only class that can create objects all other classes must call this particular function to request a new object. 
  @return An instance of a new object of a particular type. NULL is returned if the object could not be created.
  */
-rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objType) {
-  return NULL;
+rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objType, QString objName) {
+  rtRenderObject* temp = NULL;
+  rtDataObject* dataO = NULL;
+  int nextID;
+
+  // Try to get a valid ID. 
+  nextID = getNextID();
+  if (nextID == -1) return NULL;
+ 
+  // Find out which object will be used. 
+  switch(objType) {
+  case rtConstants::OT_None:
+    temp=NULL;
+    break;
+  case rtConstants::OT_4DObject:
+    temp=NULL;
+    break;
+  case rtConstants::OT_TextLabel:
+    temp=new rtLabelRenderObject();
+    break;
+  default:
+    temp=NULL;
+    break;
+  }
+
+  // Debug Statement:
+  //std::cout << "Created Object with ID: " << nextID << " " << temp << std::endl;
+  // The object has been created.
+  if (temp){
+    dataO = temp->getDataObject();
+    dataO->setId(nextID);
+    dataO->setObjName(objName);
+    m_objectHash.insert(nextID, temp);
+    if (m_mainWinHandle) m_mainWinHandle->updateObjectList(&m_objectHash);
+  }
+  
+  return temp;
 }
 
 //! Create and return a new read-only object.
@@ -44,7 +80,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   @see addObjectOfType()
   @return An instance of a new object of a particular type. NULL is returned if the object could not be created. 
  */
-rtRenderObject* rtObjectManager::addReadOnlyObject(rtConstants::rtObjectType objType) {
+rtRenderObject* rtObjectManager::addReadOnlyObject(rtConstants::rtObjectType objType, QString objName) {
   return NULL;
 }
 
@@ -98,4 +134,17 @@ QList<int> rtObjectManager::getObjectsOfType(rtConstants::rtObjectType objType) 
  */
 int rtObjectManager::getNumObjectsOfType(rtConstants::rtObjectType objType) {
   return 0;
+}
+
+//! Get the next unused ID. 
+int rtObjectManager::getNextID() {
+  int i; 
+
+  for (i=1; i<=m_max_object; i++) {
+    if ( !m_objectHash.contains(i) ) {
+      return i;
+    }
+  }
+
+  return -1;
 }

@@ -2,6 +2,7 @@
 #define RT_RENDER_OBJECT_H
 
 #include <QString>
+#include <QTreeWidgetItem>
 #include <vtkProp.h>
 #include "rtDataObject.h"
 
@@ -20,6 +21,9 @@ class rtRenderObject {
   void setDataObject(rtDataObject* dataObj);
   void setName(QString renName);
 
+  QTreeWidgetItem* getTreeItem() { return m_treeItem; }
+  virtual void updateTreeItem();
+
  protected:
   //! The rtRenderObject constructor.
   /*!
@@ -35,6 +39,7 @@ class rtRenderObject {
   rtRenderOptions* m_renderObj;
   vtkProp *m_pipe3D;
   vtkProp *m_pipe2D;
+  QTreeWidgetItem* m_treeItem;
 
  private:
   QString m_renderName;
