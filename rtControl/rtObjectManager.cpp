@@ -111,7 +111,7 @@ bool rtObjectManager::removeReadOnly(int objID) {
   @return The object with that ID or NULL if no such object exists. 
  */
 rtRenderObject* rtObjectManager::getObjectWithID(int objID) {
-  return NULL;
+  return m_objectHash.value(objID);
 }
 
 //! Get a list of IDs for all objects of a particular type. 

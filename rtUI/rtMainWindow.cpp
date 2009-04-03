@@ -2,9 +2,12 @@
 #include <QApplication>
 #include "rtMainWindow.h"
 #include <iostream>
+#include "rtObjectManager.h"
 
 rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupUi(this);
+
+  m_currentObjectWidget = NULL;
 
   m_render3DVTKWidget = new QVTKWidget(this->frame3DRender);
   m_render3DLayout = new QHBoxLayout();
@@ -25,6 +28,9 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   mainUDSplitter->setStretchFactor(0, 5);
   mainUDSplitter->setStretchFactor(1, 1);
 
+  m_objectBrowseLayout = new QHBoxLayout();
+  objBrowseFrame->setLayout(m_objectBrowseLayout);
+
   populateObjectTypeNames();
   connectSignals();
   setupObjectTree();
@@ -33,6 +39,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 rtMainWindow::~rtMainWindow() {
   if (m_render3DVTKWidget) delete m_render3DVTKWidget;
   if (m_render3DLayout) delete m_render3DLayout;
+  if (m_objectBrowseLayout) delete m_objectBrowseLayout;
 
   if (m_renderer3D) m_renderer3D->Delete();
 }
@@ -68,9 +75,43 @@ void rtMainWindow::updateObjectList(QHash<int, rtRenderObject*>* hash) {
   }
 }
 
-void rtMainWindow::connectSignals() {
+void rtMainWindow::setObjectManager(rtObjectManager* man){
+  m_objMan = man;
+}
 
+//! This slot is called every time a new object is selected in the tree. 
+void rtMainWindow::itemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous) {
+  rtRenderObject *temp;
+  QWidget * baseWid;
+
+  if (!current) return;
+  
+  // Check for a heading. 
+  if (current->columnCount() == 1) {
+    if (m_currentObjectWidget) {
+      m_objectBrowseLayout->removeWidget(m_currentObjectWidget);
+      m_currentObjectWidget->setParent(NULL);
+      m_currentObjectWidget = NULL;
+    }
+    return;
+  }
+
+  if (m_currentObjectWidget) {
+    m_objectBrowseLayout->removeWidget(m_currentObjectWidget);
+    m_currentObjectWidget->setParent(NULL);
+  }
+
+  temp = m_objMan->getObjectWithID(current->text(1).toInt());
+  baseWid = temp->getDataObject()->getRenderOptions()->getBaseWidget();
+
+  m_objectBrowseLayout->addWidget(baseWid);
+  m_currentObjectWidget = baseWid;
+}
+
+
+void rtMainWindow::connectSignals() {
   connect(actionQuit, SIGNAL(triggered()), qApp, SLOT(quit()));
+  connect(objectTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(itemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
 }
 
 void rtMainWindow::setupObjectTree() {

@@ -12,6 +12,8 @@
 
 #include "rtRenderObject.h"
 
+class rtObjectManager;
+
 class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 {
   Q_OBJECT
@@ -26,15 +28,29 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   void updateObjectList(QHash<int, rtRenderObject*>*);
 
+  void setObjectManager(rtObjectManager* man);
+
+ public slots:
+  void itemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
+
  protected:
+  //! Handle to the object manager.
+  rtObjectManager* m_objMan;
+
   QVTKWidget *m_render3DVTKWidget;
   QHBoxLayout *m_render3DLayout;
+  QHBoxLayout *m_objectBrowseLayout;
+  QWidget* m_currentObjectWidget;
+
   vtkRenderWindowInteractor *m_inter3D;
   vtkRenderWindow *m_renWin3D;
   vtkRenderer *m_renderer3D;
 
-  //! List of tree root objects.
+
+
+  //! Hash of tree root objects.
   QHash<rtConstants::rtObjectType, QTreeWidgetItem *> m_topItems;
+  //! Hash of the names root objects.
   QHash<rtConstants::rtObjectType, QString> m_rtObjectTypeNames;
 
   void connectSignals();

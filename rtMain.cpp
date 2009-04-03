@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
     rtRenderObject* label2;
 
     objManager.setMainWinHandle(&mainWin);
+    mainWin.setObjectManager(&objManager);
     label = objManager.addObjectOfType(rtConstants::OT_TextLabel, "MyLabel");
     label2 = objManager.addObjectOfType(rtConstants::OT_TextLabel, "MyLabel2");
 
