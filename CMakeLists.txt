@@ -53,11 +53,23 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-include_directories(rtUI rtObject rtControl ${CMAKE_CURRENT_BINARY_DIR}/rtUI)
+include_directories(rtUI rtObject rtControl ${CMAKE_BINARY_DIR})
+
+set (UI_FILES 
+  rtUI/rtMainWindow.ui
+)
+
+qt4_wrap_ui(UI_FILES_OUT ${UI_FILES})
+message(STATUS "UI Files: " ${UI_FILES_OUT})
+add_custom_target(UIFirst DEPENDS ${UI_FILES_OUT})
 
 add_subdirectory(rtUI)
 add_subdirectory(rtObject)
 add_subdirectory(rtControl)
+
+add_dependencies(rtObject UIFirst)
+add_dependencies(rtUI UIFirst)
+add_dependencies(rtControl UIFirst)
 
 set (SRC_FILES
   rtMain.cpp

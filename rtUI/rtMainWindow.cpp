@@ -3,6 +3,7 @@
 #include "rtMainWindow.h"
 #include <iostream>
 #include "rtObjectManager.h"
+#include "rtRenderObject.h"
 
 rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupUi(this);

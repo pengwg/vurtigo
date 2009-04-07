@@ -10,9 +10,9 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 
-#include "rtRenderObject.h"
-
+class rtRenderObject;
 class rtObjectManager;
+#include "objTypes.h"
 
 //! Object that controls the visible Qt widgets. 
 class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
