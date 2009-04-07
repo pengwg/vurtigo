@@ -14,6 +14,7 @@
 
 class rtObjectManager;
 
+//! Object that controls the visible Qt widgets. 
 class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 {
   Q_OBJECT
@@ -25,13 +26,22 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   vtkRenderWindow* getRenderWindow();
   vtkRenderWindowInteractor* getInteractor();
   vtkRenderer* getRenderer();
+  QTreeWidget* getObjectTree();
 
   void updateObjectList(QHash<int, rtRenderObject*>*);
-
   void setObjectManager(rtObjectManager* man);
 
+  //! Set the value of the render flag.
+  /*!
+    If the render flag is set to true then the next render operation will do a redraw in the 3D window. 
+   */
+  void setRenderFlag3D(bool flag) { m_renderFlag3D=flag; }
+
+  void tryRender3D();
+
  public slots:
-  void itemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
+  void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
+  void itemChanged(QTreeWidgetItem * current, int column);
 
  protected:
   //! Handle to the object manager.
@@ -46,7 +56,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   vtkRenderWindow *m_renWin3D;
   vtkRenderer *m_renderer3D;
 
-
+  bool m_renderFlag3D;
 
   //! Hash of tree root objects.
   QHash<rtConstants::rtObjectType, QTreeWidgetItem *> m_topItems;

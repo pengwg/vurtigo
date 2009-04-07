@@ -8,6 +8,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupUi(this);
 
   m_currentObjectWidget = NULL;
+  m_renderFlag3D = false;
 
   m_render3DVTKWidget = new QVTKWidget(this->frame3DRender);
   m_render3DLayout = new QHBoxLayout();
@@ -36,7 +37,21 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupObjectTree();
 }
 
+//! Destructor
+/*!
+  Removes the current widget from the viewer at the bottom.
+  Also deletes objects that were created in this class. 
+ */
 rtMainWindow::~rtMainWindow() {
+  m_renderFlag3D = false;
+
+  // Remove any remaining widget from the dialog. 
+  if (m_currentObjectWidget) {
+    m_objectBrowseLayout->removeWidget(m_currentObjectWidget);
+    m_currentObjectWidget->setParent(NULL);
+    m_currentObjectWidget = NULL;
+  }
+
   if (m_render3DVTKWidget) delete m_render3DVTKWidget;
   if (m_render3DLayout) delete m_render3DLayout;
   if (m_objectBrowseLayout) delete m_objectBrowseLayout;
@@ -55,6 +70,11 @@ vtkRenderWindowInteractor* rtMainWindow::getInteractor() {
 //! Get the vtkRenderer object for the 3D view. 
 vtkRenderer* rtMainWindow::getRenderer() {
   return m_renderer3D;
+}
+
+//! Get the object tree
+QTreeWidget* rtMainWindow::getObjectTree() {
+  return objectTree;
 }
 
 //! Called with the newest set of render objects. 
@@ -80,7 +100,7 @@ void rtMainWindow::setObjectManager(rtObjectManager* man){
 }
 
 //! This slot is called every time a new object is selected in the tree. 
-void rtMainWindow::itemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous) {
+void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous) {
   rtRenderObject *temp;
   QWidget * baseWid;
 
@@ -108,10 +128,51 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, QTreeWidgetItem * prev
   m_currentObjectWidget = baseWid;
 }
 
+//! Called when the content of a tree item has changed.
+void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
+  rtRenderObject *temp;
+  vtkProp* propTemp;
+
+  if (!current) return;
+
+  // Check for a heading. 
+  if (current->columnCount() == 1) {
+    return;
+  }
+
+  temp = m_objMan->getObjectWithID(current->text(1).toInt());
+  propTemp = temp->get3DPipeline();
+  if (current->checkState(column) == Qt::Checked) {
+    // Add the item.
+    if (!m_renderer3D->HasViewProp(propTemp)) {
+      m_renderer3D->AddViewProp(propTemp);
+      m_renderFlag3D = true;
+    }
+  } else {
+    // Remove the item
+    if (m_renderer3D->HasViewProp(propTemp)) {
+      m_renderer3D->RemoveViewProp(propTemp);
+      m_renderFlag3D = true;
+    }
+  }
+   
+}
+
+//! Try to render the 3D window.
+/*!
+  This function will only render if the render flag has been set to true. Once the function runs it will reset the flag back to false.
+ */
+void rtMainWindow::tryRender3D() {
+  if (m_renderFlag3D) {
+    m_renWin3D->Render();
+    m_renderFlag3D = false;
+  }
+}
 
 void rtMainWindow::connectSignals() {
   connect(actionQuit, SIGNAL(triggered()), qApp, SLOT(quit()));
-  connect(objectTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(itemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
+  connect(objectTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(currItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
+  connect(objectTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemChanged(QTreeWidgetItem*,int)));
 }
 
 void rtMainWindow::setupObjectTree() {
@@ -128,6 +189,10 @@ void rtMainWindow::setupObjectTree() {
   
 }
 
+//! Assign string names to the object types.
+/*!
+  With string names the objects can be displayed in the GUI.
+*/
 void rtMainWindow::populateObjectTypeNames() {
   m_rtObjectTypeNames.insert(rtConstants::OT_4DObject, "4D Object");
   m_rtObjectTypeNames.insert(rtConstants::OT_3DObject, "3D Object");

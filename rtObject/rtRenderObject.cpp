@@ -7,6 +7,7 @@ rtRenderObject::rtRenderObject() {
   m_renderName = "None";
   m_objType = rtConstants::OT_None;
   m_treeItem = new QTreeWidgetItem();
+  m_mainWin = NULL;
 }
 
 rtRenderObject::~rtRenderObject() {
@@ -66,8 +67,20 @@ void rtRenderObject::updateTreeItem() {
     } else {
       m_treeItem->setText(2, "NA");
     }
-
-
-
   }
+}
+
+//! Setup all the signals and slots. 
+/*!
+  This function will create all the connections between the three parts that make an object. 
+  The way this is done is through update() and apply(). The update() call will use new data in the rtDataObject and propagate that to the other objects. The apply call will use the user input from the GUI (rtRenderOptions) and propagate that to the other objects. This function is called by the rtObjectManager after the object has been created. 
+ */
+void rtRenderObject::initCommLinks() {
+  connect(m_renderObj->getApplyButton(), SIGNAL(pressed()), this, SLOT(apply()));
+  connect(m_renderObj->getApplyButton(), SIGNAL(pressed()), m_dataObj, SLOT(apply()));
+  connect(m_renderObj->getApplyButton(), SIGNAL(pressed()), m_renderObj, SLOT(apply()));
+
+  connect(this, SIGNAL(updateEvent()), this, SLOT(update()));
+  connect(this, SIGNAL(updateEvent()), m_dataObj, SLOT(update()));
+  connect(this, SIGNAL(updateEvent()), m_renderObj, SLOT(update()));
 }

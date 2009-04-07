@@ -1,6 +1,13 @@
 set ( SRC_FILES
   rtObjectManager.cpp
+  rtTimeManager.cpp
 )
 
-add_library(rtControl SHARED ${SRC_FILES} )
+set (MOC_FILES
+  rtTimeManager.h
+)
+
+qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES})
+
+add_library(rtControl SHARED ${SRC_FILES} ${MOC_FILES_OUT} )
 target_link_libraries(rtControl ${QT_LIBRARIES} rtUI)

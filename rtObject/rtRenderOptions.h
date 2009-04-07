@@ -3,8 +3,12 @@
 
 #include "objTypes.h"
 #include <QWidget>
+#include <QPushButton>
+#include <QObject>
 
-class rtRenderOptions {
+class rtRenderOptions : public QObject{
+
+Q_OBJECT
 
  public:
   ~rtRenderOptions();
@@ -13,6 +17,13 @@ class rtRenderOptions {
   void setType(rtConstants::rtObjectType ot) { m_objType = ot; }
 
   virtual QWidget* getBaseWidget() { return &m_baseWidget; }
+  virtual QPushButton* getApplyButton() { return m_applyButton; }
+
+ public slots:
+  //! Takes data from the GUI
+  virtual void apply() = 0;
+  //! Takes data from the data object
+  virtual void update() = 0;
 
  protected:
   rtRenderOptions();
@@ -20,6 +31,7 @@ class rtRenderOptions {
  private:
   rtConstants::rtObjectType m_objType;
   QWidget m_baseWidget;
+  QPushButton* m_applyButton;
 };
 
 #endif

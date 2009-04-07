@@ -1,4 +1,5 @@
 #include "rtLabelDataObject.h"
+#include "rtLabelRenderOptions.h"
 
 rtLabelDataObject::rtLabelDataObject() {
   setObjectType(rtConstants::OT_TextLabel);
@@ -9,6 +10,20 @@ rtLabelDataObject::rtLabelDataObject() {
 
 rtLabelDataObject::~rtLabelDataObject() {
   if (m_textProp) m_textProp->Delete();
+}
+
+//! Take the info from the GUI
+void rtLabelDataObject::apply() {
+  rtLabelRenderOptions* tempRenderOpt;
+  tempRenderOpt = dynamic_cast<rtLabelRenderOptions*>(getRenderOptions());
+  m_labelText = tempRenderOpt->getChooseTextEdit()->text();
+}
+
+//! Send the info to the GUI
+void rtLabelDataObject::update() {
+  rtLabelRenderOptions* tempRenderOpt;
+  tempRenderOpt = dynamic_cast<rtLabelRenderOptions*>(getRenderOptions());
+  tempRenderOpt->getChooseTextEdit()->setText(m_labelText);
 }
 
 void rtLabelDataObject::setText(QString text) {

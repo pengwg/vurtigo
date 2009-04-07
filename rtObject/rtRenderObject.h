@@ -3,10 +3,16 @@
 
 #include <QString>
 #include <QTreeWidgetItem>
+#include <QObject>
 #include <vtkProp.h>
 #include "rtDataObject.h"
 
-class rtRenderObject {
+class rtMainWindow;
+
+class rtRenderObject : public QObject {
+
+Q_OBJECT
+
  public:
   //! Destructor
   ~rtRenderObject();
@@ -24,6 +30,22 @@ class rtRenderObject {
   QTreeWidgetItem* getTreeItem() { return m_treeItem; }
   virtual void updateTreeItem();
 
+  void initCommLinks();
+
+  //! Invokes an updateEvent.
+  void forceUpdate() { emit updateEvent(); }
+
+  void setMainWindow(rtMainWindow* mainWin) { m_mainWin = mainWin; }
+
+ public slots:
+  //! Bring info from modified data object.
+  virtual void update() = 0;
+  //! Brings info from render options GUI.
+  virtual void apply() = 0;
+
+ signals:
+  void updateEvent();
+
  protected:
   //! The rtRenderObject constructor.
   /*!
@@ -40,6 +62,7 @@ class rtRenderObject {
   vtkProp *m_pipe3D;
   vtkProp *m_pipe2D;
   QTreeWidgetItem* m_treeItem;
+  rtMainWindow* m_mainWin;
 
  private:
   QString m_renderName;

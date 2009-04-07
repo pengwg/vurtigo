@@ -64,11 +64,14 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   //std::cout << "Created Object with ID: " << nextID << " " << temp << std::endl;
   // The object has been created.
   if (temp){
+    temp->initCommLinks();
+    temp->forceUpdate();
     dataO = temp->getDataObject();
     dataO->setId(nextID);
     dataO->setObjName(objName);
     m_objectHash.insert(nextID, temp);
     if (m_mainWinHandle) m_mainWinHandle->updateObjectList(&m_objectHash);
+    temp->setMainWindow(m_mainWinHandle);
   }
   
   return temp;

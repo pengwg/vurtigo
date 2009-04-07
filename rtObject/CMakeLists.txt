@@ -11,5 +11,13 @@ set (OBJ_SRC_FILES
   rtLabelRenderObject.cpp
 )
 
-add_library(rtObject SHARED ${SRC_FILES} ${OBJ_SRC_FILES} )
+set (MOC_FILES
+  rtRenderOptions.h
+  rtDataObject.h
+  rtRenderObject.h
+)
+
+qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES})
+
+add_library(rtObject SHARED ${SRC_FILES} ${OBJ_SRC_FILES} ${MOC_FILES_OUT} )
 target_link_libraries(rtObject ${QT_LIBRARIES} vtkCommon)

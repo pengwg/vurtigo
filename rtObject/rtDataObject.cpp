@@ -1,6 +1,7 @@
 #include "rtDataObject.h"
 
 rtDataObject::rtDataObject() {
+  m_renderOptions = NULL;
   m_readOnly = false;
 }
 
@@ -13,7 +14,9 @@ rtRenderOptions* rtDataObject::getRenderOptions() {
 }
 
 void rtDataObject::setRenderOptions(rtRenderOptions* renOpt) {
-  m_renderOptions = renOpt;
+  if (m_renderOptions != renOpt) {
+    m_renderOptions = renOpt;
+  }
 }
 
 

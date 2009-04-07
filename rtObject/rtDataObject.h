@@ -3,8 +3,12 @@
 
 #include "rtRenderOptions.h"
 #include <QString>
+#include <QObject>
 
-class rtDataObject {
+class rtDataObject : public QObject {
+
+Q_OBJECT
+
  public:
   ~rtDataObject();
 
@@ -24,7 +28,12 @@ class rtDataObject {
   void setReadOnly() { m_readOnly = true; }
   void setReadWrite() { m_readOnly = false; }
   void setReadFlag(bool f) { m_readOnly = f; }
-  
+
+ public slots: 
+  //! Bring info from modified data object.
+  virtual void update() = 0;
+  //! Brings info from render options GUI.
+  virtual void apply() = 0;
 
  protected:
   rtDataObject();

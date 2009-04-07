@@ -18,6 +18,9 @@ class rtLabelDataObject : public rtDataObject {
 
   vtkTextProperty* getTextProperty();
 
+  void apply();
+  void update();
+
  protected:
   QString m_labelText;
   vtkTextProperty* m_textProp;
