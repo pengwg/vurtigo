@@ -12,6 +12,7 @@ set (OBJ_SRC_FILES
 set (MOC_FILES
   rtDataObject.h
   rtRenderObject.h
+  rtLabelDataObject.h
 )
 
 qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES})
