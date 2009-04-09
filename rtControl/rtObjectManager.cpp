@@ -1,10 +1,14 @@
 #include "rtObjectManager.h"
 #include "rtLabelRenderObject.h"
+#include "rtTimeManager.h"
+#include "rtDataObject.h"
 
 //! Object Manager constructor.
 rtObjectManager::rtObjectManager() {
   m_max_object = 10000;
   m_objectHash.clear();
+  m_mainWinHandle = NULL;
+  m_timeManager = NULL;
 }
 
 //! Object Manager destructor.
@@ -64,11 +68,11 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   //std::cout << "Created Object with ID: " << nextID << " " << temp << std::endl;
   // The object has been created.
   if (temp){
-    temp->initCommLinks();
-    temp->forceUpdate();
+    temp->setTimeManager(m_timeManager);
     dataO = temp->getDataObject();
     dataO->setId(nextID);
     dataO->setObjName(objName);
+    dataO->update();
     m_objectHash.insert(nextID, temp);
     if (m_mainWinHandle) m_mainWinHandle->updateObjectList(&m_objectHash);
     temp->setMainWindow(m_mainWinHandle);

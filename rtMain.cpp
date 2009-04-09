@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
 
     timeMan.startRenderTimer(&mainWin, 40);
     objManager.setMainWinHandle(&mainWin);
+    objManager.setTimeManager(&timeMan);
     mainWin.setObjectManager(&objManager);
     label = objManager.addObjectOfType(rtConstants::OT_TextLabel, "MyLabel");
     label2 = objManager.addObjectOfType(rtConstants::OT_TextLabel, "MyLabel2");

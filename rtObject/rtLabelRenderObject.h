@@ -14,7 +14,6 @@ class rtLabelRenderObject : public rtRenderObject {
 
  protected:
   void setupDataObject();
-  void setupRenderOptions();
   void setupPipeline();
  private:
   vtkTextActor *m_textActor2D;

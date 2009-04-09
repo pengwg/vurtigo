@@ -1,24 +1,15 @@
 #include "rtDataObject.h"
 
 rtDataObject::rtDataObject() {
-  m_renderOptions = NULL;
   m_readOnly = false;
+  m_applyButton = new QPushButton("Apply");
+
+  connect(m_applyButton, SIGNAL(pressed()), this, SLOT(apply()));
 }
 
 rtDataObject::~rtDataObject() {
+  if (m_applyButton) delete m_applyButton;
 }
-
-
-rtRenderOptions* rtDataObject::getRenderOptions() {
-  return m_renderOptions;
-}
-
-void rtDataObject::setRenderOptions(rtRenderOptions* renOpt) {
-  if (m_renderOptions != renOpt) {
-    m_renderOptions = renOpt;
-  }
-}
-
 
 int rtDataObject::getId() {
   return m_objId;
@@ -44,4 +35,14 @@ rtConstants::rtObjectType rtDataObject::getObjectType() {
 
 void rtDataObject::setObjectType(rtConstants::rtObjectType ot) {
   m_objType = ot;
+}
+
+//! The object was just modified. Adjust the time.
+void rtDataObject::Modified() {
+  m_modifyTime=QDateTime::currentDateTime();
+}
+
+//! Get the last time the object was modified.
+QDateTime rtDataObject::getModified() {
+  return m_modifyTime;
 }

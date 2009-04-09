@@ -1,18 +1,15 @@
 
 set ( SRC_FILES
-  rtRenderOptions.cpp
   rtDataObject.cpp
   rtRenderObject.cpp
 )
 
 set (OBJ_SRC_FILES
-  rtLabelRenderOptions.cpp
   rtLabelDataObject.cpp
   rtLabelRenderObject.cpp
 )
 
 set (MOC_FILES
-  rtRenderOptions.h
   rtDataObject.h
   rtRenderObject.h
 )

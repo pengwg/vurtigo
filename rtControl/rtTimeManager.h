@@ -1,11 +1,14 @@
 #ifndef RT_TIME_MANAGER_H
 #define RT_TIME_MANAGER_H
 
-#include <QTimer>
 #include <QObject>
+#include <QList>
 
-#include "rtObjectManager.h"
-#include "rtMainWindow.h"
+class QTimer;
+
+class rtObjectManager;
+class rtMainWindow;
+class rtRenderObject;
 
 //! Controls timing for the base and all plugins. 
 /*!
@@ -21,13 +24,24 @@ class rtTimeManager : public QObject {
 
   void startRenderTimer(rtMainWindow* mainWin, int delay=34);
 
+  void addToWatchList(rtRenderObject* obj);
+  bool isInWatchList(rtRenderObject* obj);
+  void removeFromWatchList(rtRenderObject* obj);
+
+  void checkWatchList();
+
  public slots:
   void renderTimeout();
 
  protected:
   //! The timer that services the renderer.
   QTimer *m_renderTime;
+
+  //! Handle to the main window.
   rtMainWindow* m_mainWin;
+
+  //! Objects that are updated at every iteration.
+  QList<rtRenderObject*> m_watchList;
  private:
  
 };

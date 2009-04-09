@@ -6,6 +6,9 @@
 #include "rtMainWindow.h"
 #include "rtRenderObject.h"
 
+class rtDataObject;
+class rtTimeManager;
+
 //!  The Object Manager. 
 /*!
   This should be the only class that can create or delete rtRenderObject instances. As a result it can keep track of all such instances and hand them out to other classes when requested. 
@@ -17,6 +20,9 @@ class rtObjectManager {
 
   void setMainWinHandle(rtMainWindow* mainWin);
   rtMainWindow* getMainWinHandle();
+
+  void setTimeManager(rtTimeManager* time) { m_timeManager = time; }
+  rtTimeManager* getTimeManager() { return m_timeManager; }
 
   rtRenderObject* addObjectOfType(rtConstants::rtObjectType objType, QString objName="Not Named");
   rtRenderObject* addReadOnlyObject(rtConstants::rtObjectType objType, QString objName="Not Named");
@@ -32,6 +38,7 @@ class rtObjectManager {
     The object manager needs to communicate with the GUI. In general, it updates lists. This hamdle will not be modified by the object manager and should not be modified by any object. It is only meant as a way to modify the GUI. 
   */
   rtMainWindow *m_mainWinHandle;
+  rtTimeManager *m_timeManager;
   QHash<int, rtRenderObject*> m_objectHash;
  private:
   //! Maximum number of objects.

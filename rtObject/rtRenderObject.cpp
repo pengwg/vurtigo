@@ -1,4 +1,6 @@
 #include "rtRenderObject.h"
+#include "rtTimeManager.h"
+#include "rtDataObject.h"
 
 rtRenderObject::rtRenderObject() {
   m_pipe3D = NULL;
@@ -8,6 +10,7 @@ rtRenderObject::rtRenderObject() {
   m_objType = rtConstants::OT_None;
   m_treeItem = new QTreeWidgetItem();
   m_mainWin = NULL;
+  m_visible3D = false;
 }
 
 rtRenderObject::~rtRenderObject() {
@@ -54,7 +57,6 @@ void rtRenderObject::setObjectType(rtConstants::rtObjectType objType) {
   m_objType = objType;
 }
 
-
 void rtRenderObject::updateTreeItem() {
   if (m_treeItem) {
     m_treeItem->setText(0, m_dataObj->getObjName());
@@ -70,17 +72,12 @@ void rtRenderObject::updateTreeItem() {
   }
 }
 
-//! Setup all the signals and slots. 
-/*!
-  This function will create all the connections between the three parts that make an object. 
-  The way this is done is through update() and apply(). The update() call will use new data in the rtDataObject and propagate that to the other objects. The apply call will use the user input from the GUI (rtRenderOptions) and propagate that to the other objects. This function is called by the rtObjectManager after the object has been created. 
- */
-void rtRenderObject::initCommLinks() {
-  connect(m_renderObj->getApplyButton(), SIGNAL(pressed()), this, SLOT(apply()));
-  connect(m_renderObj->getApplyButton(), SIGNAL(pressed()), m_dataObj, SLOT(apply()));
-  connect(m_renderObj->getApplyButton(), SIGNAL(pressed()), m_renderObj, SLOT(apply()));
-
-  connect(this, SIGNAL(updateEvent()), this, SLOT(update()));
-  connect(this, SIGNAL(updateEvent()), m_dataObj, SLOT(update()));
-  connect(this, SIGNAL(updateEvent()), m_renderObj, SLOT(update()));
+void rtRenderObject::setVisible3D(bool v) {
+  m_visible3D = v;
+  if (v) {
+    update();
+    m_timeManager->addToWatchList(this);
+  } else {
+    m_timeManager->removeFromWatchList(this);
+  }
 }

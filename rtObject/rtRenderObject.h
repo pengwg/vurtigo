@@ -5,9 +5,11 @@
 #include <QTreeWidgetItem>
 #include <QObject>
 #include <vtkProp.h>
-#include "rtDataObject.h"
 
+#include "objTypes.h"
+class rtDataObject;
 class rtMainWindow;
+class rtTimeManager;
 
 class rtRenderObject : public QObject {
 
@@ -30,21 +32,16 @@ Q_OBJECT
   QTreeWidgetItem* getTreeItem() { return m_treeItem; }
   virtual void updateTreeItem();
 
-  void initCommLinks();
-
-  //! Invokes an updateEvent.
-  void forceUpdate() { emit updateEvent(); }
-
   void setMainWindow(rtMainWindow* mainWin) { m_mainWin = mainWin; }
 
- public slots:
-  //! Bring info from modified data object.
-  virtual void update() = 0;
-  //! Brings info from render options GUI.
-  virtual void apply() = 0;
+  void setTimeManager(rtTimeManager* time) { m_timeManager = time; }
+  rtTimeManager* getTimeManager() { return m_timeManager; }
 
- signals:
-  void updateEvent();
+  void setVisible3D(bool v);
+  bool getVisible3D(){ return m_visible3D; }
+
+  //! Apply changes from the modified data object.
+  virtual void update() = 0;
 
  protected:
   //! The rtRenderObject constructor.
@@ -58,11 +55,14 @@ Q_OBJECT
   void setObjectType(rtConstants::rtObjectType objType);
 
   rtDataObject* m_dataObj;
-  rtRenderOptions* m_renderObj;
   vtkProp *m_pipe3D;
   vtkProp *m_pipe2D;
   QTreeWidgetItem* m_treeItem;
   rtMainWindow* m_mainWin;
+  rtTimeManager* m_timeManager;
+
+  //! True if the variable is being rendered in the 3D window.
+  bool m_visible3D;
 
  private:
   QString m_renderName;

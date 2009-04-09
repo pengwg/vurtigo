@@ -1,9 +1,12 @@
 #ifndef RT_DATA_OBJECT_H
 #define RT_DATA_OBJECT_H
 
-#include "rtRenderOptions.h"
 #include <QString>
 #include <QObject>
+#include <QWidget>
+#include <QPushButton>
+#include <QDateTime>
+#include "objTypes.h"
 
 class rtDataObject : public QObject {
 
@@ -11,9 +14,6 @@ Q_OBJECT
 
  public:
   ~rtDataObject();
-
-  virtual rtRenderOptions* getRenderOptions();
-  virtual void setRenderOptions(rtRenderOptions* renOpt);
 
   int getId();
   void setId(int id);
@@ -29,21 +29,34 @@ Q_OBJECT
   void setReadWrite() { m_readOnly = false; }
   void setReadFlag(bool f) { m_readOnly = f; }
 
- public slots: 
-  //! Bring info from modified data object.
+  virtual QWidget* getBaseWidget() { return &m_baseWidget; }
+  virtual QPushButton* getApplyButton() { return m_applyButton; }
+
+  void Modified();
+  QDateTime getModified();
+
+  //! Update the GUI with the modified data object info.
   virtual void update() = 0;
-  //! Brings info from render options GUI.
+
+ public slots:
+  //! The apply button has been pressed. 
   virtual void apply() = 0;
 
  protected:
   rtDataObject();
 
  private:
-  rtRenderOptions* m_renderOptions;
+  //! The object ID
   int m_objId;
+  //! Object Name
   QString m_objName;
   rtConstants::rtObjectType m_objType;
   bool m_readOnly;
+  QWidget m_baseWidget;
+  QPushButton* m_applyButton;
+
+  //! Time when this object was last modified.
+  QDateTime m_modifyTime;
 };
 
 #endif

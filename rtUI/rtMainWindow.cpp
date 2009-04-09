@@ -4,6 +4,7 @@
 #include <iostream>
 #include "rtObjectManager.h"
 #include "rtRenderObject.h"
+#include "rtDataObject.h"
 
 rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupUi(this);
@@ -123,7 +124,7 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
   }
 
   temp = m_objMan->getObjectWithID(current->text(1).toInt());
-  baseWid = temp->getDataObject()->getRenderOptions()->getBaseWidget();
+  baseWid = temp->getDataObject()->getBaseWidget();
 
   m_objectBrowseLayout->addWidget(baseWid);
   m_currentObjectWidget = baseWid;
@@ -146,12 +147,14 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   if (current->checkState(column) == Qt::Checked) {
     // Add the item.
     if (!m_renderer3D->HasViewProp(propTemp)) {
+      temp->setVisible3D(true);
       m_renderer3D->AddViewProp(propTemp);
       m_renderFlag3D = true;
     }
   } else {
     // Remove the item
     if (m_renderer3D->HasViewProp(propTemp)) {
+      temp->setVisible3D(false);
       m_renderer3D->RemoveViewProp(propTemp);
       m_renderFlag3D = true;
     }
