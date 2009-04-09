@@ -81,3 +81,17 @@ void rtRenderObject::setVisible3D(bool v) {
     m_timeManager->removeFromWatchList(this);
   }
 }
+
+//! Set the update time to the current time.
+void rtRenderObject::resetUpdateTime() {
+  m_lastUpdate = QDateTime::currentDateTime();
+}
+
+//! Check if an update is needed.
+bool rtRenderObject::updateNeeded() {
+  if(m_dataObj->getModified() > m_lastUpdate) {
+    // Modified after the last update.
+    return true;
+  }
+  return false;
+}

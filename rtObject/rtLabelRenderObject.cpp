@@ -17,6 +17,10 @@ rtLabelRenderObject::~rtLabelRenderObject() {
 
 //! Take the info from the DataObject
 void rtLabelRenderObject::update() {
+
+  if (!updateNeeded()) return;
+  resetUpdateTime();
+
   rtLabelDataObject *dObj = dynamic_cast<rtLabelDataObject*>(m_dataObj);
 
   m_textActor2D->SetInput(dObj->getText().toStdString().c_str());

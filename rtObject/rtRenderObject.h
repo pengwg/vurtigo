@@ -4,6 +4,7 @@
 #include <QString>
 #include <QTreeWidgetItem>
 #include <QObject>
+#include <QDateTime>
 #include <vtkProp.h>
 
 #include "objTypes.h"
@@ -43,6 +44,9 @@ Q_OBJECT
   //! Apply changes from the modified data object.
   virtual void update() = 0;
 
+  void resetUpdateTime();
+  bool updateNeeded();
+
  protected:
   //! The rtRenderObject constructor.
   /*!
@@ -63,6 +67,8 @@ Q_OBJECT
 
   //! True if the variable is being rendered in the 3D window.
   bool m_visible3D;
+
+  QDateTime m_lastUpdate;
 
  private:
   QString m_renderName;
