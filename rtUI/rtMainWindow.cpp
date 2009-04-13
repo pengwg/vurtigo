@@ -25,7 +25,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   // The GUI must be stretched more than the tabs. 
   mainRLSplitter->setStretchFactor(0, 1);
-  mainRLSplitter->setStretchFactor(1, 25);
+  mainRLSplitter->setStretchFactor(1, 5);
 
   // The 3D view must be larger than the 2D view. 
   mainUDSplitter->setStretchFactor(0, 5);
@@ -33,6 +33,11 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   m_objectBrowseLayout = new QHBoxLayout();
   objBrowseFrame->setLayout(m_objectBrowseLayout);
+
+  view3D->setLayout(&m_only3DLayout);
+  view2D->setLayout(&m_only2DLayout);
+
+  viewChangedMixed();
 
   populateObjectTypeNames();
   connectSignals();
@@ -174,9 +179,19 @@ void rtMainWindow::tryRender3D() {
 }
 
 void rtMainWindow::connectSignals() {
+  // File Menu
   connect(actionQuit, SIGNAL(triggered()), qApp, SLOT(quit()));
+
+  // View Menu
+  connect(actionMixed, SIGNAL(triggered()), this, SLOT(viewChangedMixed()));
+  connect(action3D_Only, SIGNAL(triggered()), this, SLOT(viewChanged3DOnly()));
+  connect(action2D_Only, SIGNAL(triggered()), this, SLOT(viewChanged2DOnly()));
+
+  // Object Tree
   connect(objectTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(currItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
   connect(objectTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemChanged(QTreeWidgetItem*,int)));
+  
+
 }
 
 void rtMainWindow::setupObjectTree() {
@@ -190,7 +205,8 @@ void rtMainWindow::setupObjectTree() {
     temp->setText(0, i.value());
     m_topItems.insert(i.key(), temp);
   }
-  
+  objectTree->setColumnWidth(0, 150);
+  objectTree->setColumnWidth(1, 60);
 }
 
 //! Assign string names to the object types.
@@ -210,4 +226,20 @@ void rtMainWindow::populateObjectTypeNames() {
   m_rtObjectTypeNames.insert(rtConstants::OT_2DPointBuffer, "2D Point Buffer");
   m_rtObjectTypeNames.insert(rtConstants::OT_3DPointBuffer, "3D Point Buffer");
   m_rtObjectTypeNames.insert(rtConstants::OT_TextLabel, "Text Label");
+}
+
+void rtMainWindow::viewChangedMixed() {
+  stackedWidget->setCurrentIndex(0);
+  mainUDSplitter->insertWidget(0, frame3DRender);
+  mainUDSplitter->insertWidget(1, scrollArea2DImages);
+}
+
+void rtMainWindow::viewChanged3DOnly() {
+  stackedWidget->setCurrentIndex(1);
+  m_only3DLayout.addWidget(frame3DRender);
+}
+
+void rtMainWindow::viewChanged2DOnly() {
+  stackedWidget->setCurrentIndex(2);
+  m_only2DLayout.addWidget(scrollArea2DImages);
 }

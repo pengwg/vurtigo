@@ -14,7 +14,7 @@
    <string>Vurtigo</string>
   </property>
   <widget class="QWidget" name="mainWinCentralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
      <widget class="QSplitter" name="mainRLSplitter">
       <property name="orientation">
@@ -87,39 +87,49 @@
         </layout>
        </widget>
       </widget>
-      <widget class="QSplitter" name="mainUDSplitter">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <widget class="QFrame" name="frame3DRender">
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
+      <widget class="QStackedWidget" name="stackedWidget">
+       <widget class="QWidget" name="dualView">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QSplitter" name="mainUDSplitter">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <widget class="QFrame" name="frame3DRender">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+           </widget>
+           <widget class="QScrollArea" name="scrollArea2DImages">
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOn</enum>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidget">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>185</width>
+               <height>167</height>
+              </rect>
+             </property>
+            </widget>
+           </widget>
+          </widget>
+         </item>
+        </layout>
        </widget>
-       <widget class="QScrollArea" name="scrollArea2DImages">
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOn</enum>
-        </property>
-        <property name="widgetResizable">
-         <bool>true</bool>
-        </property>
-        <widget class="QWidget" name="scrollAreaWidget">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>79</width>
-           <height>174</height>
-          </rect>
-         </property>
-        </widget>
-       </widget>
+       <widget class="QWidget" name="view3D"/>
+       <widget class="QWidget" name="view2D"/>
       </widget>
      </widget>
     </item>
@@ -146,7 +156,22 @@
      <string>Help</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuLayout">
+     <property name="title">
+      <string>Layout</string>
+     </property>
+     <addaction name="actionMixed"/>
+     <addaction name="action3D_Only"/>
+     <addaction name="action2D_Only"/>
+    </widget>
+    <addaction name="menuLayout"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuView"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -167,6 +192,21 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionMixed">
+   <property name="text">
+    <string>Mixed</string>
+   </property>
+  </action>
+  <action name="action3D_Only">
+   <property name="text">
+    <string>3D Only</string>
+   </property>
+  </action>
+  <action name="action2D_Only">
+   <property name="text">
+    <string>2D Only</string>
    </property>
   </action>
  </widget>

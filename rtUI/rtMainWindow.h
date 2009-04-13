@@ -2,6 +2,7 @@
 #define RT_MAIN_WINDOW_H
 
 #include <QHBoxLayout>
+#include <QBoxLayout>
 #include <QHash>
 
 #include "ui_rtMainWindow.h"
@@ -42,6 +43,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
   void itemChanged(QTreeWidgetItem * current, int column);
+  void viewChangedMixed();
+  void viewChanged3DOnly();
+  void viewChanged2DOnly();
 
  protected:
   //! Handle to the object manager.
@@ -51,6 +55,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   QHBoxLayout *m_render3DLayout;
   QHBoxLayout *m_objectBrowseLayout;
   QWidget* m_currentObjectWidget;
+
+  QHBoxLayout m_only3DLayout;
+  QHBoxLayout m_only2DLayout;
 
   vtkRenderWindowInteractor *m_inter3D;
   vtkRenderWindow *m_renWin3D;
