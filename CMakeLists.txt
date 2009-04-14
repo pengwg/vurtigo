@@ -26,6 +26,7 @@ find_package(Qt4 REQUIRED)
 if (QT4_FOUND)
   # Qt Core and Qt Gui are included by default.
   set(QT_USE_QTNETWORK 1)
+  set(QT_USE_QTXML 1)
 
   include(${QT_USE_FILE})
 endif(QT4_FOUND)
@@ -42,7 +43,12 @@ endif(VTK_FOUND)
 ####################
 # Doxygen target called 'doc'
 ####################
-INCLUDE("TargetDoc.cmake" OPTIONAL)
+
+include(FindDoxygen)
+if (DOXYGEN_DOT_PATH)
+  set(DOXYGEN_DOT_FOUND YES)
+endif(DOXYGEN_DOT_PATH)
+include("TargetDoc.cmake" OPTIONAL)
 
 
 ####################
@@ -53,7 +59,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-include_directories(rtUI rtObject rtControl ${CMAKE_BINARY_DIR})
+include_directories(rtUI rtObject rtControl rtPlugin ${CMAKE_BINARY_DIR})
 
 set (UI_FILES 
   rtUI/rtMainWindow.ui
@@ -66,6 +72,7 @@ add_custom_target(UIFirst DEPENDS ${UI_FILES_OUT})
 add_subdirectory(rtUI)
 add_subdirectory(rtObject)
 add_subdirectory(rtControl)
+add_subdirectory(rtPlugin)
 
 add_dependencies(rtObject UIFirst)
 add_dependencies(rtUI UIFirst)

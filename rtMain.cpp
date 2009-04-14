@@ -4,6 +4,7 @@
 #include "rtObjectManager.h"
 #include "rtLabelRenderObject.h"
 #include "rtTimeManager.h"
+#include "rtPluginLoader.h"
  
 int main(int argc, char *argv[])
 {
@@ -11,7 +12,7 @@ int main(int argc, char *argv[])
     rtObjectManager objManager;
     rtMainWindow mainWin;
     rtTimeManager timeMan;
-
+    
     rtRenderObject* label;
     rtRenderObject* label2;
 
