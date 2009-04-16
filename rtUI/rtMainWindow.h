@@ -46,6 +46,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void viewChangedMixed();
   void viewChanged3DOnly();
   void viewChanged2DOnly();
+  void loadPluginFile();
 
  protected:
   //! Handle to the object manager.

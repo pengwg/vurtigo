@@ -1,10 +1,14 @@
 #include <QtGui>
 #include <QApplication>
-#include "rtMainWindow.h"
+#include <QFileDialog>
+
 #include <iostream>
+
+#include "rtMainWindow.h"
 #include "rtObjectManager.h"
 #include "rtRenderObject.h"
 #include "rtDataObject.h"
+#include "rtPluginLoader.h"
 
 rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupUi(this);
@@ -180,6 +184,7 @@ void rtMainWindow::tryRender3D() {
 
 void rtMainWindow::connectSignals() {
   // File Menu
+  connect(actionPlugin_File, SIGNAL(triggered()), this, SLOT(loadPluginFile()));
   connect(actionQuit, SIGNAL(triggered()), qApp, SLOT(quit()));
 
   // View Menu
@@ -242,4 +247,17 @@ void rtMainWindow::viewChanged3DOnly() {
 void rtMainWindow::viewChanged2DOnly() {
   stackedWidget->setCurrentIndex(2);
   m_only2DLayout.addWidget(scrollArea2DImages);
+}
+
+
+void rtMainWindow::loadPluginFile() {
+  QString fName;
+
+  fName = QFileDialog::getOpenFileName(this, "Select Plugin XML File", ".", "*.XML *.xml");
+
+  QFile file(fName);
+  if (!file.exists()) return;
+  if (!rtPluginLoader::instance().loadPluginsFromConfig(&file)) {
+    std::cout << "Failed to load plugins from: " << fName.toStdString() << std::endl;
+  }
 }

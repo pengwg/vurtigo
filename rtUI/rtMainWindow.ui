@@ -148,6 +148,7 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionPlugin_File"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -207,6 +208,11 @@
   <action name="action2D_Only">
    <property name="text">
     <string>2D Only</string>
+   </property>
+  </action>
+  <action name="actionPlugin_File">
+   <property name="text">
+    <string>Load Plugin File...</string>
    </property>
   </action>
  </widget>

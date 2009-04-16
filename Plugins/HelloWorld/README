@@ -1,0 +1,11 @@
+
+Welcome to the Hello World plugin!
+
+The purpose of this plugin is to demonstrate how to write a simple plugin for Vurtigo. It will include all the elements needed in this directory. 
+
+Files are as follows:
+  HelloWorldPlugin.cpp
+  HelloWorldPlugin.h
+  CMakeLists.txt
+  HelloWorldConfig.xml
+

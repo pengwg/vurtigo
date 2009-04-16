@@ -3,6 +3,8 @@
 
 #include <QHash>
 #include <QFile>
+#include <QXmlSimpleReader>
+#include <QPluginLoader>
 
 #include "rtPluginInterface.h"
 
@@ -26,11 +28,15 @@ class rtPluginLoader {
 
   ~rtPluginLoader();
 
-  bool loadPluginsFromConfig(QFile file);
+  bool loadPluginsFromConfig(QFile *file);
   DataInterface* getPluginWithID(int ID);
 
  protected:
+  QHash<int, QPluginLoader*> m_loaderHash;
   QHash<int, DataInterface*> m_pluginHash;
+  QXmlSimpleReader m_xmlReader;
+
+  int getNextFreeID();
 
  private:
   //! Private constructor since this is a singleton.
