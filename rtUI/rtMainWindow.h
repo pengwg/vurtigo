@@ -12,7 +12,6 @@
 #include <vtkRenderer.h>
 
 class rtRenderObject;
-class rtObjectManager;
 #include "objTypes.h"
 
 //! Object that controls the visible Qt widgets. 
@@ -30,7 +29,6 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   QTreeWidget* getObjectTree();
 
   void updateObjectList(QHash<int, rtRenderObject*>*);
-  void setObjectManager(rtObjectManager* man);
 
   //! Set the value of the render flag.
   /*!
@@ -49,9 +47,6 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void loadPluginFile();
 
  protected:
-  //! Handle to the object manager.
-  rtObjectManager* m_objMan;
-
   QVTKWidget *m_render3DVTKWidget;
   QHBoxLayout *m_render3DLayout;
   QHBoxLayout *m_objectBrowseLayout;

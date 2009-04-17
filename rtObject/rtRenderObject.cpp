@@ -76,9 +76,9 @@ void rtRenderObject::setVisible3D(bool v) {
   m_visible3D = v;
   if (v) {
     update();
-    m_timeManager->addToWatchList(this);
+    rtTimeManager::instance().addToWatchList(this);
   } else {
-    m_timeManager->removeFromWatchList(this);
+    rtTimeManager::instance().removeFromWatchList(this);
   }
 }
 

@@ -1,20 +1,36 @@
 #ifndef RT_BASE_HANDLE_H
 #define RT_BASE_HANDLE_H
 
-//! The handle that the Plugin can use.
+#include "objTypes.h"
+#include <QList>
+
+class rtDataObject;
+
+//! The handle that the Plugin can use. [Singleton]
 /*!
   Plugins may need to ask the base for instances of object or they may need to register for callbacks. This base handle is the way plugins should access the base. The functions here are specifically designed for the plugins to use.
-  The plugins SHOULD NOT use the rtObjectManager or rtPluginLoader directly. 
+  It is higly reccomnded that the plugins SHOULD NOT use the other singleton classes (ex. rtObjectManager or rtPluginLoader) directly. There are plugin-specific safety features set in the rtBaseHandle class that protect the functioning of the base. If the other classes are used directly then these features are bypassed and as a result the plugin can cause bugs in the base. 
   This class is also a singleton meaning that there will only be one instance of it for the whole program. Plugins should get access to this via the instance() function.
  */
 class rtBaseHandle {
  public:
   ~rtBaseHandle();
 
+  //! Get the instance of rtBaseHandle
   static rtBaseHandle& instance() {
     static rtBaseHandle handle;
     return handle;
   }
+
+  int requestNewObject(rtConstants::rtObjectType objType);
+  bool removeObject(int ID);
+  QList<int> getObjectsOfType(rtConstants::rtObjectType objType);
+  int getNumObjectsOfType(rtConstants::rtObjectType objType);
+  rtDataObject* const getObjectWithID(int ID);
+  const rtDataObject* const getROObjectWithID(int ID);
+  bool watchObject(int ID, bool watch);
+  bool watchClick(bool watch);
+  bool timerUpdate(int milis, bool watch);
 
  private:
   //! Private constructor

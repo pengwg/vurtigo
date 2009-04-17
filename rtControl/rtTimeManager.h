@@ -6,21 +6,25 @@
 
 class QTimer;
 
-class rtObjectManager;
 class rtMainWindow;
 class rtRenderObject;
 
-//! Controls timing for the base and all plugins. 
+//! Controls timing for the base and all plugins. [Singleton]
 /*!
   This is a control class for the whole program. It is important that the objects are timed correctly otherwise some tasks will be starved. This class inherits from QObject because it needs to use signals and slots. 
+  Note that this is also a singleton class. 
  */
 class rtTimeManager : public QObject {
 
   Q_OBJECT
 
  public:
-  rtTimeManager();
   ~rtTimeManager();
+
+  static rtTimeManager& instance() {
+    static rtTimeManager handle;
+    return handle;
+  }
 
   void startRenderTimer(rtMainWindow* mainWin, int delay=34);
 
@@ -43,7 +47,9 @@ class rtTimeManager : public QObject {
   //! Objects that are updated at every iteration.
   QList<rtRenderObject*> m_watchList;
  private:
- 
+  rtTimeManager();
+  rtTimeManager(const rtTimeManager&);
+  rtTimeManager& operator=(const rtTimeManager&);
 };
 
 #endif

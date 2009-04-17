@@ -106,10 +106,6 @@ void rtMainWindow::updateObjectList(QHash<int, rtRenderObject*>* hash) {
   }
 }
 
-void rtMainWindow::setObjectManager(rtObjectManager* man){
-  m_objMan = man;
-}
-
 //! This slot is called every time a new object is selected in the tree. 
 void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous) {
   rtRenderObject *temp;
@@ -132,7 +128,7 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
     m_currentObjectWidget->setParent(NULL);
   }
 
-  temp = m_objMan->getObjectWithID(current->text(1).toInt());
+  temp = rtObjectManager::instance().getObjectWithID(current->text(1).toInt());
   baseWid = temp->getDataObject()->getBaseWidget();
 
   m_objectBrowseLayout->addWidget(baseWid);
@@ -151,7 +147,7 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
     return;
   }
 
-  temp = m_objMan->getObjectWithID(current->text(1).toInt());
+  temp = rtObjectManager::instance().getObjectWithID(current->text(1).toInt());
   propTemp = temp->get3DPipeline();
   if (current->checkState(column) == Qt::Checked) {
     // Add the item.

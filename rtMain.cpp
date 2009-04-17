@@ -9,20 +9,16 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    rtObjectManager objManager;
     rtMainWindow mainWin;
-    rtTimeManager timeMan;
     
     rtRenderObject* label;
     rtRenderObject* label2;
 
-    timeMan.startRenderTimer(&mainWin, 40);
-    objManager.setMainWinHandle(&mainWin);
-    objManager.setTimeManager(&timeMan);
-    mainWin.setObjectManager(&objManager);
-    label = objManager.addObjectOfType(rtConstants::OT_TextLabel, "MyLabel");
-    label2 = objManager.addObjectOfType(rtConstants::OT_TextLabel, "MyLabel2");
+    rtTimeManager::instance().startRenderTimer(&mainWin, 40);
+    rtObjectManager::instance().setMainWinHandle(&mainWin);
 
+    label = rtObjectManager::instance().addObjectOfType(rtConstants::OT_TextLabel, "MyLabel");
+    label2 = rtObjectManager::instance().addObjectOfType(rtConstants::OT_TextLabel, "MyLabel2");
 
     mainWin.show();
     return app.exec();

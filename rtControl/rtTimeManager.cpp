@@ -1,6 +1,5 @@
 #include "rtTimeManager.h"
 #include "rtMainWindow.h"
-#include "rtObjectManager.h"
 #include "rtRenderObject.h"
 
 #include <iostream>
