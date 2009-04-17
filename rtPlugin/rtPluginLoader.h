@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QXmlSimpleReader>
 #include <QPluginLoader>
+#include <QTreeWidgetItem>
 
 #include "rtPluginInterface.h"
 
@@ -34,6 +35,7 @@ class rtPluginLoader {
  protected:
   QHash<int, QPluginLoader*> m_loaderHash;
   QHash<int, DataInterface*> m_pluginHash;
+  QHash<int, QTreeWidgetItem*> m_widgetItemHash;
   QXmlSimpleReader m_xmlReader;
 
   int getNextFreeID();

@@ -29,6 +29,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   QTreeWidget* getObjectTree();
 
   void updateObjectList(QHash<int, rtRenderObject*>*);
+  void updatePluginList(QHash<int, QTreeWidgetItem*>*);
+  void clearObjectList();
+  void clearPluginList();
 
   //! Set the value of the render flag.
   /*!
@@ -45,6 +48,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void viewChanged3DOnly();
   void viewChanged2DOnly();
   void loadPluginFile();
+
+  void pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
 
  protected:
   QVTKWidget *m_render3DVTKWidget;

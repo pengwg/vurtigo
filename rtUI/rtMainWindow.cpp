@@ -56,6 +56,9 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 rtMainWindow::~rtMainWindow() {
   m_renderFlag3D = false;
 
+  clearPluginList();
+  clearObjectList();
+
   // Remove any remaining widget from the dialog. 
   if (m_currentObjectWidget) {
     m_objectBrowseLayout->removeWidget(m_currentObjectWidget);
@@ -104,6 +107,27 @@ void rtMainWindow::updateObjectList(QHash<int, rtRenderObject*>* hash) {
     i.value()->updateTreeItem();
     m_topItems.value(i.value()->getObjectType())->addChild(i.value()->getTreeItem());
   }
+}
+
+//! Empty the object list from the GUI
+void rtMainWindow::clearObjectList() {
+  while (objectTree->takeTopLevelItem(0));
+}
+
+//! Update the GUI with a new set of pligins.
+void rtMainWindow::updatePluginList(QHash<int, QTreeWidgetItem*>* hash) {
+  QHash<int, QTreeWidgetItem*>::iterator i;
+
+  while (pluginTree->takeTopLevelItem(0));
+
+  for (i = hash->begin(); i != hash->end(); ++i) {
+    pluginTree->addTopLevelItem(i.value());
+  }
+}
+
+//! Empty the plugin list from the GUI.
+void rtMainWindow::clearPluginList() {
+  while (pluginTree->takeTopLevelItem(0));
 }
 
 //! This slot is called every time a new object is selected in the tree. 
@@ -167,6 +191,10 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
    
 }
 
+void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous) {
+  std::cout << "Plugin selection changed." << std::endl;
+}
+
 //! Try to render the 3D window.
 /*!
   This function will only render if the render flag has been set to true. Once the function runs it will reset the flag back to false.
@@ -192,6 +220,9 @@ void rtMainWindow::connectSignals() {
   connect(objectTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(currItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
   connect(objectTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemChanged(QTreeWidgetItem*,int)));
   
+
+  // Plugin Tree
+  connect(pluginTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(pluginItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
 
 }
 

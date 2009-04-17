@@ -1,8 +1,11 @@
 #include "rtPluginLoader.h"
 #include "pluginConfigHandler.h"
+#include "rtObjectManager.h"
+#include "rtMainWindow.h"
 
 #include <QApplication>
 #include <QDir>
+#include <QFile>
 #include <QXmlInputSource>
 #include <iostream>
 
@@ -14,12 +17,17 @@ rtPluginLoader::rtPluginLoader() {
 
 rtPluginLoader::~rtPluginLoader() {
   QPluginLoader* tempLoader;
+  QTreeWidgetItem* treeItem;
   QList<int> keys = m_loaderHash.uniqueKeys();
   int currKey;
 
   while(!m_loaderHash.empty()) {
     currKey = keys.takeFirst();
     tempLoader = m_loaderHash.take(currKey);
+
+    treeItem = m_widgetItemHash.take(currKey);
+    if(treeItem) delete treeItem;
+
     m_pluginHash.take(currKey)->cleanup();
     if (tempLoader) {
       tempLoader->unload();
@@ -43,6 +51,7 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
     PluginConfigHandler handler;
     QPluginLoader* tempLoader;
     DataInterface* tempPlugin;
+    QTreeWidgetItem* tempTreeItem;
     QString fullName;
 
     m_xmlReader.setContentHandler(&handler);
@@ -56,7 +65,7 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
 
 	// Format the plugin name according to the OS
 #ifdef Q_OS_LINUX	
-	fullName = "lib"+handler.pluginInfo[ix1].libName+".so";
+	fullName = handler.pluginInfo[ix1].libName+".so";
 #endif
 #ifdef Q_OS_WIN32
 	fullName = handler.pluginInfo[ix1].libName+".dll";
@@ -65,24 +74,41 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
 	fullName = handler.pluginInfo[ix1].libName+".dylib";
 #endif
 	
-	if (QLibrary::isLibrary(appDir.absoluteFilePath(fullName))) {
+	if (!QFile::exists(appDir.absoluteFilePath(fullName)) && !QFile::exists(givenDir.absoluteFilePath(fullName))) {
+	  fullName = "lib"+fullName;
+	}
+
+	if ( QLibrary::isLibrary(appDir.absoluteFilePath(fullName)) ) {
 	  tempLoader = new QPluginLoader(appDir.absoluteFilePath(fullName));
-	} else if (QLibrary::isLibrary(givenDir.absoluteFilePath(fullName))) {
+	} 
+	else if ( QLibrary::isLibrary(givenDir.absoluteFilePath(fullName)) ) {
 	  tempLoader = new QPluginLoader(givenDir.absoluteFilePath(fullName));
-	} else {
+	} 
+	else {
 	  tempLoader = NULL;
 	  std::cout << "No such library: " << fullName.toStdString() << std::endl;
 	}
 
 	if (tempLoader && tempLoader->load()) {
 	  tempPlugin = qobject_cast<DataInterface*>(tempLoader->instance());
+
+	  tempTreeItem = new QTreeWidgetItem();
+	  tempTreeItem->setText(0, QString::number(nextID));
+	  tempTreeItem->setText(1, handler.pluginInfo[ix1].title);
+	  tempTreeItem->setText(2, handler.pluginInfo[ix1].version);
+
 	  m_loaderHash.insert(nextID, tempLoader);
 	  m_pluginHash.insert(nextID, tempPlugin);
+	  m_widgetItemHash.insert(nextID, tempTreeItem);
 	  tempPlugin->init();
+
+	  rtObjectManager::instance().getMainWinHandle()->updatePluginList(&m_widgetItemHash);
+
 	  ok = true;
 	} else if (tempLoader) {
-	  std::cout << "Plugin: " << fullName.toStdString() << " could not be loaded." << std::endl;
+	  std::cout << "Plugin: " << tempLoader->fileName().toStdString() << " could not be loaded." << std::endl;
 	  std::cout << tempLoader->errorString().toStdString() << std::endl;
+	  delete tempLoader;
 	}
       }
     }
@@ -93,9 +119,14 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
 
 //! Return a plugin with a specific ID.
 DataInterface* rtPluginLoader::getPluginWithID(int ID) {
-  return NULL;
+  DataInterface* obj = NULL;
+  if (m_pluginHash.contains(ID)) {
+    obj=m_pluginHash.value(ID);
+  }
+  return obj;
 }
 
+//! Return the next available unique ID.
 int rtPluginLoader::getNextFreeID() {
   int ix1;
 

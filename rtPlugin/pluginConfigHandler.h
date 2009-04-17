@@ -5,6 +5,7 @@
 #include <QList>
 #include <QString>
 
+//! The info from a plugin extracted from XML
 class PluginXmlInfo {
  public:
   QString title;
@@ -13,6 +14,7 @@ class PluginXmlInfo {
   QString libPath;
 };
 
+//! XML handler for plugin config files.
 class PluginConfigHandler : public QXmlDefaultHandler {
  public:
   PluginConfigHandler();
