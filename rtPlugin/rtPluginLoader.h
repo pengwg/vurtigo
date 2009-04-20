@@ -2,12 +2,15 @@
 #define RT_PLUGIN_LOADER_H
 
 #include <QHash>
+#include <QList>
 #include <QFile>
 #include <QXmlSimpleReader>
 #include <QPluginLoader>
 #include <QTreeWidgetItem>
 
 #include "rtPluginInterface.h"
+
+
 
 //! Tries to load all of the plugins. [Singleton]
 /*!
@@ -32,10 +35,21 @@ class rtPluginLoader {
   bool loadPluginsFromConfig(QFile *file);
   DataInterface* getPluginWithID(int ID);
 
+  bool addToClickWatch(int ID);
+  bool removeFromClickWatch(int ID);
+  void point3DSelected(double px, double py, double pz, int intensity);
+
+  void updatePlugins();
+
+  void objectModified(int objId);
+
  protected:
   QHash<int, QPluginLoader*> m_loaderHash;
   QHash<int, DataInterface*> m_pluginHash;
   QHash<int, QTreeWidgetItem*> m_widgetItemHash;
+
+  QList<int> m_clickWatchList;
+
   QXmlSimpleReader m_xmlReader;
 
   int getNextFreeID();

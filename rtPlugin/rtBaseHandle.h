@@ -3,6 +3,7 @@
 
 #include "objTypes.h"
 #include <QList>
+#include <QString>
 
 class rtDataObject;
 
@@ -14,6 +15,7 @@ class rtDataObject;
  */
 class rtBaseHandle {
  public:
+  //! Destructor
   ~rtBaseHandle();
 
   //! Get the instance of rtBaseHandle
@@ -22,15 +24,13 @@ class rtBaseHandle {
     return handle;
   }
 
-  int requestNewObject(rtConstants::rtObjectType objType);
+  int requestNewObject(rtConstants::rtObjectType objType, QString name="pluginObj");
   bool removeObject(int ID);
   QList<int> getObjectsOfType(rtConstants::rtObjectType objType);
   int getNumObjectsOfType(rtConstants::rtObjectType objType);
   rtDataObject* const getObjectWithID(int ID);
   const rtDataObject* const getROObjectWithID(int ID);
-  bool watchObject(int ID, bool watch);
-  bool watchClick(bool watch);
-  bool timerUpdate(int milis, bool watch);
+  bool watchClick(int pluginID, bool watch);
 
  private:
   //! Private constructor

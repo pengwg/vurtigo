@@ -1,4 +1,5 @@
 #include "rtDataObject.h"
+#include "rtPluginLoader.h"
 
 rtDataObject::rtDataObject() {
   m_readOnly = false;
@@ -40,6 +41,7 @@ void rtDataObject::setObjectType(rtConstants::rtObjectType ot) {
 //! The object was just modified. Adjust the time.
 void rtDataObject::Modified() {
   m_modifyTime=QDateTime::currentDateTime();
+  rtPluginLoader::instance().objectModified(m_objId);
 }
 
 //! Get the last time the object was modified.

@@ -36,6 +36,7 @@ class rtTimeManager : public QObject {
 
  public slots:
   void renderTimeout();
+  void pluginUpdate();
 
  protected:
   //! The timer that services the renderer.
@@ -46,6 +47,8 @@ class rtTimeManager : public QObject {
 
   //! Objects that are updated at every iteration.
   QList<rtRenderObject*> m_watchList;
+
+  QTimer *m_pluginUpdateTime;
  private:
   rtTimeManager();
   rtTimeManager(const rtTimeManager&);

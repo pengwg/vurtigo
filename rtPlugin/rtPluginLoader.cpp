@@ -100,6 +100,7 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
 	  m_loaderHash.insert(nextID, tempLoader);
 	  m_pluginHash.insert(nextID, tempPlugin);
 	  m_widgetItemHash.insert(nextID, tempTreeItem);
+          tempPlugin->setUniqueID(nextID);
 	  tempPlugin->init();
 
 	  rtObjectManager::instance().getMainWinHandle()->updatePluginList(&m_widgetItemHash);
@@ -124,6 +125,59 @@ DataInterface* rtPluginLoader::getPluginWithID(int ID) {
     obj=m_pluginHash.value(ID);
   }
   return obj;
+}
+
+// Add a plugin to the click watch list.
+bool rtPluginLoader::addToClickWatch(int ID) {
+  if (!m_clickWatchList.contains(ID) && m_pluginHash.contains(ID)) {
+    m_clickWatchList.append(ID);
+    return true;
+  }
+  return false;
+}
+
+//! Remove a plugin from the click watch list
+bool rtPluginLoader::removeFromClickWatch(int ID) {
+  if (m_clickWatchList.contains(ID)) {
+    m_clickWatchList.removeAll(ID);
+    return true;
+  }
+  return false;
+}
+
+//! A point in the 3D view has been selected. Pass it to all the plugins in the click watch list.
+void rtPluginLoader::point3DSelected(double px, double py, double pz, int intensity) {
+  int ix1;
+  for (ix1=0; ix1<m_clickWatchList.size(); ix1++) {
+    m_pluginHash.value(m_clickWatchList.value(ix1))->point3DSelected(px, py, pz, intensity);
+  }
+}
+
+//! Call update on each plugin
+/*!
+  Each plugin can determine if it needs to call the update function. The update function will not be called on plugins where the required update time has not elapsed.
+  */
+void rtPluginLoader::updatePlugins() {
+  QHashIterator<int, DataInterface*> i(m_pluginHash);
+   while (i.hasNext()) {
+     i.next();
+     i.value()->tryUpdate();
+   }
+}
+
+//! Called every time an object is modified.
+/*!
+  This function may be called quite often since every object that changes will call this function.
+  @param objId The object ID of the object that was modified.
+  */
+void rtPluginLoader::objectModified(int objId) {
+  QHashIterator<int, DataInterface*> i(m_pluginHash);
+  while (i.hasNext()) {
+    i.next();
+    if ( i.value()->isInWatchList(objId) ) {
+      i.value()->objectModified(objId);
+    }
+  }
 }
 
 //! Return the next available unique ID.

@@ -1,10 +1,14 @@
 #ifndef RT_LABEL_DATA_OBJECT_H
 #define RT_LABEL_DATA_OBJECT_H
 
+// Local Includes
 #include "rtDataObject.h"
-#include <QString>
+
+// VTK includes
 #include "vtkTextProperty.h"
 
+// Qt Includes
+#include <QString>
 #include <QLabel>
 #include <QPushButton>
 

@@ -39,7 +39,10 @@ class rtObjectManager {
     The object manager needs to communicate with the GUI. In general, it updates lists. This hamdle will not be modified by the object manager and should not be modified by any object. It is only meant as a way to modify the GUI. 
   */
   rtMainWindow *m_mainWinHandle;
+
+  //! Hash table of all the objects listed by unique ID
   QHash<int, rtRenderObject*> m_objectHash;
+
  private:
   //! Maximum number of objects.
   int m_max_object;
