@@ -220,6 +220,9 @@ void rtMainWindow::removeRenderItem(vtkProp* prop) {
 
 
 //! Called when the user clicks on a different plugin in the viewer.
+/*!
+  @todo Implement this function to add plugin options to the bottom of the GUI.
+ */
 void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous) {
   if (!current) return;
 
@@ -291,23 +294,26 @@ void rtMainWindow::populateObjectTypeNames() {
   m_rtObjectTypeNames.insert(rtConstants::OT_TextLabel, "Text Label");
 }
 
+//! Change the view to mixed mode where both the 2D and 3D windows are visible.
 void rtMainWindow::viewChangedMixed() {
   stackedWidget->setCurrentIndex(0);
   mainUDSplitter->insertWidget(0, frame3DRender);
   mainUDSplitter->insertWidget(1, scrollArea2DImages);
 }
 
+//! Make only the 3D render window visible.
 void rtMainWindow::viewChanged3DOnly() {
   stackedWidget->setCurrentIndex(1);
   m_only3DLayout.addWidget(frame3DRender);
 }
 
+//! Make only the 2D window visible
 void rtMainWindow::viewChanged2DOnly() {
   stackedWidget->setCurrentIndex(2);
   m_only2DLayout.addWidget(scrollArea2DImages);
 }
 
-
+//! Load a plugin based on an XML file the user chooses. 
 void rtMainWindow::loadPluginFile() {
   QString fName;
 

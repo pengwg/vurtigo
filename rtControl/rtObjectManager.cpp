@@ -7,6 +7,8 @@
 #include "rt3dPointBufferRenderObject.h"
 #include "rtNoneRenderObject.h"
 #include "rtLabelRenderObject.h"
+#include "rtCathRenderObject.h"
+#include "rt3dVolumeRenderObject.h"
 
 //! Object Manager constructor.
 /*!
@@ -65,13 +67,13 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     temp=NULL;
     break;
   case rtConstants::OT_3DObject:
-    temp=NULL;
+    temp=new rt3DVolumeRenderObject();
     break;
   case rtConstants::OT_2DObject:
     temp=NULL;
     break;
   case rtConstants::OT_Cath:
-    temp=NULL;
+    temp=new rtCathRenderObject();
     break;
   case rtConstants::OT_vtkMatrix4x4:
     temp=NULL;

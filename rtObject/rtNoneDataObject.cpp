@@ -13,33 +13,21 @@ rtNoneDataObject::~rtNoneDataObject() {
 
 
 //! Take the info from the GUI
-/*!
-  @todo Write the GUI
- */
 void rtNoneDataObject::apply() {
 
 }
 
 //! Send the info to the GUI
-/*!
-  @todo Write the GUI
- */
 void rtNoneDataObject::update() {
 
 }
 
 //! Set the GUI widgets.
-/*!
-  @todo Write the GUI
- */
 void rtNoneDataObject::setupGUI() {
 
 }
 
 //! Clean the GUI widgets.
-/*!
-  @todo Write the GUI
- */
 void rtNoneDataObject::cleanupGUI() {
 
 }
