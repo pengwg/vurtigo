@@ -45,6 +45,11 @@ Q_OBJECT
  protected:
   rtDataObject();
 
+  //! Setup the GUI
+  virtual void setupGUI() = 0;
+  //! Cleanup the GUI
+  virtual void cleanupGUI() = 0;
+
  private:
   //! The object ID
   int m_objId;

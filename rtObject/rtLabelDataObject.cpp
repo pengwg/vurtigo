@@ -8,10 +8,8 @@
 rtLabelDataObject::rtLabelDataObject() {
   setObjectType(rtConstants::OT_TextLabel);
   m_labelText = "Sample Text";
-
   m_textProp = vtkTextProperty::New();
   setupGUI();
-
 }
 
 rtLabelDataObject::~rtLabelDataObject() {

@@ -4,7 +4,6 @@
 rtDataObject::rtDataObject() {
   m_readOnly = false;
   m_applyButton = new QPushButton("Apply");
-
   connect(m_applyButton, SIGNAL(pressed()), this, SLOT(apply()));
 }
 

@@ -1,9 +1,12 @@
 #include "rtObjectManager.h"
-#include "rtLabelRenderObject.h"
 #include "rtDataObject.h"
 #include "rtMainWindow.h"
 #include "rtRenderObject.h"
+
+// Types of render objects
 #include "rt3dPointBufferRenderObject.h"
+#include "rtNoneRenderObject.h"
+#include "rtLabelRenderObject.h"
 
 //! Object Manager constructor.
 /*!
@@ -55,7 +58,8 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   // Find out which object will be used. 
   switch(objType) {
   case rtConstants::OT_None:
-    temp=NULL;
+    temp=new rtNoneRenderObject();
+    std::cout << "Warning: None Object Requested." << std::endl;
     break;
   case rtConstants::OT_4DObject:
     temp=NULL;
@@ -64,6 +68,27 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     temp=NULL;
     break;
   case rtConstants::OT_2DObject:
+    temp=NULL;
+    break;
+  case rtConstants::OT_Cath:
+    temp=NULL;
+    break;
+  case rtConstants::OT_vtkMatrix4x4:
+    temp=NULL;
+    break;
+  case rtConstants::OT_vtkPolyData:
+    temp=NULL;
+    break;
+  case rtConstants::OT_vtkPiecewiseFunction:
+    temp=NULL;
+    break;
+  case rtConstants::OT_vtkColorTransferFunction:
+    temp=NULL;
+    break;
+  case rtConstants::OT_ImageBuffer:
+    temp=NULL;
+    break;
+  case rtConstants::OT_2DPointBuffer:
     temp=NULL;
     break;
   case rtConstants::OT_3DPointBuffer:

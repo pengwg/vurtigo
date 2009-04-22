@@ -8,11 +8,13 @@
 
 #include "rt3dPointBufferDataObject.h"
 
+
 //! Just a function to load some test datasets. 
 void loadTestData() {
   rtRenderObject* label;
   rtRenderObject* label2;
   rtRenderObject* pointList;
+  rtRenderObject* noneObj;
 
   rt3DPointBufferDataObject::SimplePoint p1, p2, p3, p4;
 
@@ -50,6 +52,9 @@ void loadTestData() {
   static_cast<rt3DPointBufferDataObject*>(pointList->getDataObject())->addPoint(p3);
   static_cast<rt3DPointBufferDataObject*>(pointList->getDataObject())->addPoint(p4);
   pointList->update();
+
+  // This call creates several warnings. It is only for a test. None objects should not be created. 
+  noneObj = rtObjectManager::instance().addObjectOfType(rtConstants::OT_None, "None Object");
 }
 
 int main(int argc, char *argv[])
