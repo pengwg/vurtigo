@@ -3,8 +3,6 @@
 #include "rtDataObject.h"
 
 rtRenderObject::rtRenderObject() {
-  m_pipe3D = NULL;
-  m_pipe2D = NULL;
   m_dataObj = NULL;
   m_renderName = "None";
   m_objType = rtConstants::OT_None;
@@ -17,12 +15,14 @@ rtRenderObject::~rtRenderObject() {
   if (m_treeItem) delete m_treeItem;
 }
 
-vtkProp* rtRenderObject::get3DPipeline() {
-  return m_pipe3D;
+//! Get a version of the 3D pipeline that cannot be modified
+QList<vtkProp*> const * const rtRenderObject::get3DPipeline() {
+  return &m_pipe3D;
 }
 
-vtkProp* rtRenderObject::get2DPipeline() {
-  return m_pipe2D;
+//! Get a version of the 2D pipeline that cannot be modified.
+QList<vtkProp*> const * const rtRenderObject::get2DPipeline() {
+  return &m_pipe2D;
 }
 
 rtDataObject* rtRenderObject::getDataObject() {
@@ -35,14 +35,6 @@ QString rtRenderObject::getName() {
 
 rtConstants::rtObjectType rtRenderObject::getObjectType() {
   return m_objType;
-}
-
-void rtRenderObject::set3DPipeline(vtkProp* pipe3D){
-  m_pipe3D = pipe3D;
-}
-
-void rtRenderObject::set2DPipeline(vtkProp* pipe2D) {
-  m_pipe2D = pipe2D;
 }
 
 void rtRenderObject::setDataObject(rtDataObject* dataObj) {
@@ -63,7 +55,7 @@ void rtRenderObject::updateTreeItem() {
     m_treeItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     m_treeItem->setText(1, QString::number(m_dataObj->getId()));
     m_treeItem->setTextAlignment(1, Qt::AlignHCenter);
-    if (m_pipe3D) {
+    if (!m_pipe3D.empty()) {
       m_treeItem->setText(2, "3D");
       m_treeItem->setCheckState(2,Qt::Unchecked); 
     } else {

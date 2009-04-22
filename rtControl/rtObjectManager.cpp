@@ -3,6 +3,7 @@
 #include "rtDataObject.h"
 #include "rtMainWindow.h"
 #include "rtRenderObject.h"
+#include "rt3dPointBufferRenderObject.h"
 
 //! Object Manager constructor.
 /*!
@@ -58,6 +59,15 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     break;
   case rtConstants::OT_4DObject:
     temp=NULL;
+    break;
+  case rtConstants::OT_3DObject:
+    temp=NULL;
+    break;
+  case rtConstants::OT_2DObject:
+    temp=NULL;
+    break;
+  case rtConstants::OT_3DPointBuffer:
+    temp=new rt3DPointBufferRenderObject();
     break;
   case rtConstants::OT_TextLabel:
     temp=new rtLabelRenderObject();

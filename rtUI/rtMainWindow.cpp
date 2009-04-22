@@ -105,7 +105,11 @@ void rtMainWindow::updateObjectList(QHash<int, rtRenderObject*>* hash) {
 
   for (i = hash->begin(); i != hash->end(); ++i) {
     i.value()->updateTreeItem();
-    m_topItems.value(i.value()->getObjectType())->addChild(i.value()->getTreeItem());
+    if ( m_topItems.contains(i.value()->getObjectType()) ) {
+      m_topItems.value(i.value()->getObjectType())->addChild(i.value()->getTreeItem());
+    } else {
+      std::cout << "Could not find category: " << i.value()->getObjectType() << std::endl;
+    }
   }
 }
 
@@ -171,27 +175,54 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
     return;
   }
 
+  // Get the object
   temp = rtObjectManager::instance().getObjectWithID(current->text(1).toInt());
-  propTemp = temp->get3DPipeline();
+  QList<vtkProp*>const * const propTempList = temp->get3DPipeline();
+
   if (current->checkState(column) == Qt::Checked) {
-    // Add the item.
-    if (!m_renderer3D->HasViewProp(propTemp)) {
-      temp->setVisible3D(true);
-      m_renderer3D->AddViewProp(propTemp);
-      m_renderFlag3D = true;
-    }
+    temp->setVisible3D(true);
   } else {
-    // Remove the item
-    if (m_renderer3D->HasViewProp(propTemp)) {
-      temp->setVisible3D(false);
-      m_renderer3D->RemoveViewProp(propTemp);
-      m_renderFlag3D = true;
-    }
+    temp->setVisible3D(false);
   }
-   
+
+  for (int ix1=0; ix1<propTempList->size(); ix1++) {
+    propTemp = propTempList->at(ix1);
+    if (current->checkState(column) == Qt::Checked) {
+      addRenderItem(propTemp);
+    } else {
+      removeRenderItem(propTemp);
+    }
+  } 
 }
 
+//! Render items can be added directly.
+/*!
+  Note that this function does not keep track of the objects it adds.
+ */
+void rtMainWindow::addRenderItem(vtkProp* prop) {
+  if (!m_renderer3D->HasViewProp(prop)) {
+    m_renderer3D->AddViewProp(prop);
+    m_renderFlag3D = true;
+  }
+}
+
+//! Render items can be removed directly. 
+/*!
+  Note that this function does not keep track of the objects it removes.
+ */
+void rtMainWindow::removeRenderItem(vtkProp* prop) {
+  if (m_renderer3D->HasViewProp(prop)) {
+    m_renderer3D->RemoveViewProp(prop);
+    m_renderFlag3D = true;
+  }
+}
+
+
+
+//! Called when the user clicks on a different plugin in the viewer.
 void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous) {
+  if (!current) return;
+
   std::cout << "Plugin selection changed." << std::endl;
 }
 

@@ -41,6 +41,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   void tryRender3D();
 
+  void addRenderItem(vtkProp* prop);
+  void removeRenderItem(vtkProp* prop);
+
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
   void itemChanged(QTreeWidgetItem * current, int column);

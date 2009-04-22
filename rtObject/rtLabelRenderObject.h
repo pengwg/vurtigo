@@ -9,7 +9,6 @@ class rtLabelRenderObject : public rtRenderObject {
   rtLabelRenderObject();
   ~rtLabelRenderObject();
 
-  void apply();
   void update();
 
  protected:
