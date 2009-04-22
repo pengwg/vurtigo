@@ -108,7 +108,8 @@ void rtMainWindow::updateObjectList(QHash<int, rtRenderObject*>* hash) {
     if ( m_topItems.contains(i.value()->getObjectType()) ) {
       m_topItems.value(i.value()->getObjectType())->addChild(i.value()->getTreeItem());
     } else {
-      std::cout << "Could not find category: " << i.value()->getObjectType() << std::endl;
+      // Debug messages.
+      // std::cout << "Could not find category: " << i.value()->getObjectType() << std::endl;
     }
   }
 }

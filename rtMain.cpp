@@ -15,6 +15,7 @@ void loadTestData() {
   rtRenderObject* label2;
   rtRenderObject* pointList;
   rtRenderObject* noneObj;
+  rtRenderObject* cath;
 
   rt3DPointBufferDataObject::SimplePoint p1, p2, p3, p4;
 
@@ -55,6 +56,8 @@ void loadTestData() {
 
   // This call creates several warnings. It is only for a test. None objects should not be created. 
   noneObj = rtObjectManager::instance().addObjectOfType(rtConstants::OT_None, "None Object");
+  cath = rtObjectManager::instance().addObjectOfType(rtConstants::OT_Cath, "Cath Object");
+  
 }
 
 int main(int argc, char *argv[])
