@@ -3,9 +3,24 @@
 
 #include "rtRenderObject.h"
 
+#include "vtkActor.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkTubeFilter.h"
+#include "vtkPolyData.h"
+#include "vtkCellArray.h"
+#include "vtkPoints.h"
+#include "vtkKochanekSpline.h"
+
+#include "vtkAppendPolyData.h"
+#include "vtkSphereSource.h"
+
+#include "vtkConeSource.h"
+
+#include <QList>
+
 //! The catheter render object
 /*!
-  @todo Implement this Catheter Render Object.
+  Renders a catheter as a spline with points where coils are located.
   */
 class rtCathRenderObject : public rtRenderObject {
 
@@ -19,6 +34,27 @@ class rtCathRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+
+  // Spline Pipeline
+  int m_numSplinePoints;
+  vtkActor* m_splineActor;
+  vtkPolyDataMapper* m_splineMapper;
+  vtkTubeFilter* m_splineFilter;
+  vtkPolyData* m_splineLineData;
+  vtkCellArray* m_splineCellArray;
+  vtkPoints* m_splinePoints;
+  vtkKochanekSpline* m_spline[3];
+
+  // Spheres Pipeline
+  QList<vtkSphereSource*> m_sphereList;
+  vtkAppendPolyData* m_sphereAppend;
+  vtkPolyDataMapper* m_sphereMapper;
+  vtkActor* m_sphereActor;
+
+  // Cath Tip Pipeline
+  vtkConeSource* m_coneSource;
+  vtkPolyDataMapper* m_coneMapper;
+  vtkActor* m_coneActor;
 
  private:
 

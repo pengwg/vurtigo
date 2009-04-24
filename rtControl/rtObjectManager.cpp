@@ -61,7 +61,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   switch(objType) {
   case rtConstants::OT_None:
     temp=new rtNoneRenderObject();
-    std::cout << "Warning: None Object Requested." << std::endl;
+    qWarning("Warning: None Object Requested.");
     break;
   case rtConstants::OT_4DObject:
     temp=NULL;
@@ -105,7 +105,8 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   }
 
   // Debug Statement:
-  //std::cout << "Created Object with ID: " << nextID << " " << temp << std::endl;
+  qDebug("Created Object with ID: %d", nextID);
+
   // The object has been created.
   if (temp){
     dataO = temp->getDataObject();

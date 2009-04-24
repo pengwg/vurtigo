@@ -55,6 +55,15 @@ include("TargetDoc.cmake" OPTIONAL)
 # Start Building
 ####################
 
+
+message("Build Type: " ${CMAKE_BUILD_TYPE})
+
+message("Debug Build Flags: " ${CMAKE_C_FLAGS_DEBUG})
+message("Release Build Flags: " ${CMAKE_C_FLAGS_RELEASE})
+
+set(QT_DEFINITIONS ${QT_DEFINITIONS} " " -DQT_NO_DEBUG_OUTPUT)
+message("Qt Flags: " ${QT_DEFINITIONS})
+
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")

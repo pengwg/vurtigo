@@ -2,6 +2,9 @@
 #include "rtMainWindow.h"
 #include "rtRenderObject.h"
 #include "rtPluginLoader.h"
+#include "rtLabelRenderObject.h"
+#include "rtLabelDataObject.h"
+#include "rtObjectManager.h"
 
 #include <iostream>
 
@@ -23,6 +26,13 @@ rtTimeManager::rtTimeManager() {
   m_pluginUpdateTime->start();
 
   m_mainWin = NULL;
+
+  for (int ix1=0; ix1<10; ix1++) {
+    m_renderTimeBuffer[ix1] = 1.0;
+  }
+  m_currentSum = 10.0;
+  m_renderTimePosition = 0;
+  m_frameRateLabel = NULL;
 }
 
 //! Destructor
@@ -55,6 +65,30 @@ void rtTimeManager::renderTimeout() {
   if (m_mainWin) {
     checkWatchList();
     m_mainWin->tryRender3D();
+
+    calcFrameRate();
+  }
+}
+
+//! Do the frame rate calculations.
+void rtTimeManager::calcFrameRate() {
+  double frameRate;
+
+  if (!m_frameRateLabel)
+    m_frameRateLabel = rtObjectManager::instance().addObjectOfType(rtConstants::OT_TextLabel, "Frame Rate");
+
+  frameRate = 1.0f/m_mainWin->getRenderer()->GetLastRenderTimeInSeconds();
+  m_currentSum -= m_renderTimeBuffer[m_renderTimePosition];
+  m_currentSum += frameRate;
+  m_renderTimeBuffer[m_renderTimePosition] = frameRate;
+  m_renderTimePosition = (m_renderTimePosition+1) % 10;
+
+  // Update only every thenth.
+  if (m_renderTimePosition == 0) {
+    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->setText(QString("  ").append(QString::number(m_currentSum/10.0f).append(QString(" FPS"))));
+    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->getTextProperty()->SetFontSize(14);
+    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->getTextProperty()->SetLineOffset(-4);
+    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->Modified();
   }
 }
 

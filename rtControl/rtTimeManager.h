@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QList>
 
+
+
 class QTimer;
 
 class rtMainWindow;
@@ -49,6 +51,15 @@ class rtTimeManager : public QObject {
   QList<rtRenderObject*> m_watchList;
 
   QTimer *m_pluginUpdateTime;
+
+  // Render Time Estimation
+  double m_renderTimeBuffer[10];
+  double m_currentSum;
+  int m_renderTimePosition;
+  rtRenderObject* m_frameRateLabel;
+
+  void calcFrameRate();
+
  private:
   rtTimeManager();
   rtTimeManager(const rtTimeManager&);
