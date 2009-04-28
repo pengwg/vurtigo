@@ -1,4 +1,5 @@
 #include "rtCathDataObject.h"
+#include "rtPropertyChooserDialog.h"
 
 //! Constructor
 rtCathDataObject::rtCathDataObject() {
@@ -237,12 +238,33 @@ bool rtCathDataObject::getSNRAtLocation(int loc, double &SNR) {
 
 //! Set the GUI widgets.
 void rtCathDataObject::setupGUI() {
+  QWidget* wid = getBaseWidget();
 
+  m_masterLayout = new QGridLayout();
+  wid->setLayout(m_masterLayout);
+
+  m_splinePropLabel.setText("Spline Options: ");
+  m_splinePropButton.setText("Property");
+  m_masterLayout->addWidget(&m_splinePropLabel, 0, 0);
+  m_masterLayout->addWidget(&m_splinePropButton, 0, 1);
+  connect(&m_splinePropButton, SIGNAL(pressed()), this, SLOT(splinePropertyDialog()));
+
+  m_pointPropLabel.setText("Sphere Options: ");
+  m_pointPropButton.setText("Property");
+  m_masterLayout->addWidget(&m_pointPropLabel, 1, 0);
+  m_masterLayout->addWidget(&m_pointPropButton, 1, 1);
+  connect(&m_pointPropButton, SIGNAL(pressed()), this, SLOT(pointPropertyDialog()));
+
+  m_tipPropLabel.setText("Cath Tip Options: ");
+  m_tipPropButton.setText("Property");
+  m_masterLayout->addWidget(&m_tipPropLabel, 2, 0);
+  m_masterLayout->addWidget(&m_tipPropButton, 2, 1);
+  connect(&m_tipPropButton, SIGNAL(pressed()), this, SLOT(tipPropertyDialog()));
 }
 
 //! Clean the GUI widgets.
 void rtCathDataObject::cleanupGUI() {
-
+  if (m_masterLayout) delete m_masterLayout;
 }
 
 //! Return the next unused coil ID
@@ -253,3 +275,26 @@ int rtCathDataObject::getNewCoilID() {
   }
   return -1;
 }
+
+//! Called when the spline properties are requested.
+void rtCathDataObject::splinePropertyDialog() {
+  rtPropertyChooserDialog splineDlg(m_splineProperty);
+  splineDlg.exec();
+  if (splineDlg.isChanged()) Modified();
+}
+
+//! Called when the point properties are requested.
+void rtCathDataObject::pointPropertyDialog() {
+  rtPropertyChooserDialog pointDlg(m_pointProperty);
+  pointDlg.exec();
+  if (pointDlg.isChanged()) Modified();
+}
+
+
+//! Called when the tip properties are requested.
+void rtCathDataObject::tipPropertyDialog() {
+  rtPropertyChooserDialog tipDlg(m_tipProperty);
+  tipDlg.exec();
+  if (tipDlg.isChanged()) Modified();
+}
+

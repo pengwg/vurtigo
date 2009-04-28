@@ -21,8 +21,6 @@ rtLabelDataObject::~rtLabelDataObject() {
 //! Create the elements for the GUI
 void rtLabelDataObject::setupGUI() {
   QWidget* wid = getBaseWidget();
-  QPalette btnColor;
-  double Cr,Cg,Cb;
 
   m_masterLayout = new QGridLayout();
   wid->setLayout(m_masterLayout);

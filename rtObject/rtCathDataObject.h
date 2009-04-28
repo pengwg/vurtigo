@@ -5,6 +5,9 @@
 
 #include <QHash>
 #include <QMultiMap>
+#include <QGridLayout>
+#include <QLabel>
+#include <QPushButton>
 
 #include "vtkProperty.h"
 
@@ -62,6 +65,11 @@ public:
   EstimationType getEstimationType() { return m_eType; }
   void setEstimationType(EstimationType et) { m_eType = et; }
 
+ public slots:
+  void splinePropertyDialog();
+  void pointPropertyDialog();
+  void tipPropertyDialog();
+
  protected:
   // Functions
   void setupGUI();
@@ -83,6 +91,19 @@ public:
   EstimationType m_eType;
 
   int m_max_coils;
+
+  ////////////
+  // GUI Elements
+  /////////////
+
+  //! The master grid layout
+  QGridLayout* m_masterLayout;
+  QLabel m_splinePropLabel;
+  QPushButton m_splinePropButton;
+  QLabel m_pointPropLabel;
+  QPushButton m_pointPropButton;
+  QLabel m_tipPropLabel;
+  QPushButton m_tipPropButton;
 };
 
 #endif 

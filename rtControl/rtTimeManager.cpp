@@ -85,9 +85,8 @@ void rtTimeManager::calcFrameRate() {
 
   // Update only every thenth.
   if (m_renderTimePosition == 0) {
-    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->setText(QString("  ").append(QString::number(m_currentSum/10.0f).append(QString(" FPS"))));
-    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->getTextProperty()->SetFontSize(14);
-    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->getTextProperty()->SetLineOffset(-4);
+    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->setText(QString("  ").append(QString::number(m_currentSum/10.0f).append(QString(" FPS "))));
+    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->getTextProperty()->SetLineOffset(4);
     static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->Modified();
   }
 }

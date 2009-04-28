@@ -46,7 +46,7 @@ class rtLabelDataObject : public rtDataObject {
 
   //GUI elements
 
-  //! The master vertical layout
+  //! The master grid layout
   QGridLayout* m_masterLayout;
   //! Just a title label.
   QLabel* m_nameLabel;

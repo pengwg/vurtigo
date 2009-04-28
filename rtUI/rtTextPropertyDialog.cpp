@@ -50,7 +50,7 @@ rtTextPropertyDialog::~rtTextPropertyDialog() {
 
 }
 
-//! The user has clicked on OK so the changes to the vtkProperty will be made.
+//! The user has clicked on OK so the changes to the vtkTextProperty will be made.
 void rtTextPropertyDialog::settingsChanged() {
   if (!m_textProp) return;
   m_changed = true;
