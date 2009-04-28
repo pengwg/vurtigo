@@ -72,6 +72,8 @@ include_directories(rtUI rtObject rtControl rtPlugin ${CMAKE_BINARY_DIR})
 
 set (UI_FILES 
   rtUI/rtMainWindow.ui
+  rtUI/propertyChooserDialog.ui
+  rtUI/textPropertyDialog.ui
 )
 
 qt4_wrap_ui(UI_FILES_OUT ${UI_FILES})

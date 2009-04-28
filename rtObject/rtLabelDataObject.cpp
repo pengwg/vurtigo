@@ -1,4 +1,5 @@
 #include "rtLabelDataObject.h"
+#include "rtTextPropertyDialog.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -34,15 +35,12 @@ void rtLabelDataObject::setupGUI() {
   m_masterLayout->addWidget(&m_chooseTextLabel, 1, 0);
   m_masterLayout->addWidget(m_chooseTextEdit, 1, 1);
 
-  m_chooseColorLabel.setText("Choose Colour: ");
-  m_colorButton.setText("");
-  m_textProp->GetColor(Cr, Cg, Cb);
-  btnColor.setColor(QPalette::Button, QColor(Cr*255,Cg*255,Cb*255));
-  m_colorButton.setPalette(btnColor);
-  connect(&m_colorButton, SIGNAL(pressed()), this, SLOT(chooseColor()));
+  m_propertyLabel.setText("Text Options: ");
+  m_propertyButton.setText("Render Options");
+  connect(&m_propertyButton, SIGNAL(pressed()), this, SLOT(propertyDialog()));
 
-  m_masterLayout->addWidget(&m_chooseColorLabel, 2, 0);
-  m_masterLayout->addWidget(&m_colorButton, 2, 1);
+  m_masterLayout->addWidget(&m_propertyLabel, 2, 0);
+  m_masterLayout->addWidget(&m_propertyButton, 2, 1);
 
   m_masterLayout->addWidget(getApplyButton(), 3, 1);
 }
@@ -68,6 +66,7 @@ void rtLabelDataObject::update() {
 
 void rtLabelDataObject::setText(QString text) {
   m_labelText = text;
+  m_chooseTextEdit->setText(m_labelText);
 }
 
 QString rtLabelDataObject::getText() {
@@ -91,14 +90,9 @@ vtkTextProperty* rtLabelDataObject::getTextProperty() {
   return m_textProp;
 }
 
-//! Choose the text color
-void rtLabelDataObject::chooseColor() {
-  QColor temp;
-  QPalette btnColor;
-  temp = QColorDialog::getColor(m_colorButton.palette().color(QPalette::Button));
-  if (temp.isValid()) {
-    btnColor.setColor(QPalette::Button, temp);
-    m_colorButton.setPalette(btnColor);
-    this->setColor(temp.red()/255.0f, temp.green()/255.0f, temp.blue()/255.0f);
-  }
+//! Modify text properties
+void rtLabelDataObject::propertyDialog() {
+  rtTextPropertyDialog textDlg(m_textProp);
+  textDlg.exec();
+  if (textDlg.isChanged()) Modified();
 }

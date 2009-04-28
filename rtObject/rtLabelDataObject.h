@@ -37,7 +37,7 @@ class rtLabelDataObject : public rtDataObject {
   void update();
 
  public slots:
-  void chooseColor();
+  void propertyDialog();
 
  protected:
   //Properties
@@ -62,8 +62,8 @@ class rtLabelDataObject : public rtDataObject {
   ////
   // Colour Choice
   ////
-  QLabel m_chooseColorLabel;
-  QPushButton m_colorButton;
+  QLabel m_propertyLabel;
+  QPushButton m_propertyButton;
 
   // Functions
   void setupGUI();

@@ -3,9 +3,15 @@
 
 #include "rtDataObject.h"
 
+#include "vtkImageData.h"
+#include "vtkTransform.h"
+#include "vtkPiecewiseFunction.h"
+#include "vtkColorTransferFunction.h"
+#include "vtkProperty.h"
+
 //! 3D Volume Data Object
 /*!
-  @todo Implement this 3D Volume Data Object.
+  Data object that represents a 3D object.
   */
 class rt3DVolumeDataObject : public rtDataObject
 {
@@ -15,6 +21,18 @@ public:
   rt3DVolumeDataObject();
   ~rt3DVolumeDataObject();
 
+  vtkImageData* getImageData();
+  vtkTransform* getTransform();
+  vtkPiecewiseFunction* getPieceFunc();
+  vtkColorTransferFunction* getColorTransFunc();
+  vtkProperty* getVolumeProperty();
+
+  void translateData(double x, double y, double z);
+  void scaleData(double x, double y, double z);
+  void flipX();
+  void flipY();
+  void flipZ();
+
   void apply();
   void update();
 
@@ -22,7 +40,12 @@ public:
   // Functions
   void setupGUI();
   void cleanupGUI();
-  
+
+  vtkImageData* m_imgData;
+  vtkTransform* m_dataTransform;
+  vtkPiecewiseFunction* m_pieceFunc;
+  vtkColorTransferFunction* m_colorTransFunc;
+  vtkProperty* m_volumeProperty;
 };
 
 #endif 
