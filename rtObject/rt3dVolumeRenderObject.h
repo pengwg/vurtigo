@@ -3,9 +3,16 @@
 
 #include "rtRenderObject.h"
 
+#include <vtkTransformFilter.h>
+#include <vtkVolumeRayCastMapper.h>
+#include <vtkVolume.h>
+#include <vtkOutlineFilter.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
+
 //! The 3D Volume render object
 /*!
-  @todo Implement this 3D Volume Render Object.
+  Rendering pipeline for the 3D object.
   */
 class rt3DVolumeRenderObject : public rtRenderObject {
 
@@ -19,6 +26,14 @@ class rt3DVolumeRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+
+  vtkTransformFilter* m_tranformFilter;
+  vtkVolumeRayCastMapper* m_rayMapper;
+  vtkVolume* m_volumeActor;
+
+  vtkOutlineFilter *m_outline;
+  vtkPolyDataMapper *m_outlineMapper;
+  vtkActor* m_outlineActor;
 
  private:
 

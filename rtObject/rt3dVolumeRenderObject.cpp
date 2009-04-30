@@ -10,6 +10,13 @@ rt3DVolumeRenderObject::rt3DVolumeRenderObject() {
 
 
 rt3DVolumeRenderObject::~rt3DVolumeRenderObject() {
+  if(m_tranformFilter) m_tranformFilter->Delete();
+  if(m_rayMapper) m_rayMapper->Delete();
+  if(m_volumeActor) m_volumeActor->Delete();
+
+  if(m_outline) m_outline->Delete();
+  if(m_outlineMapper) m_outlineMapper->Delete();
+  if(m_outlineActor) m_outlineActor->Delete();
 }
 
 
@@ -27,4 +34,13 @@ void rt3DVolumeRenderObject::setupDataObject() {
 
 //! Create the part of the pipeline that is done first. 
 void rt3DVolumeRenderObject::setupPipeline() {
+
+  m_tranformFilter = vtkTransformFilter::New();
+  m_rayMapper = vtkVolumeRayCastMapper::New();
+  m_volumeActor = vtkVolume::New();
+
+  m_outline = vtkOutlineFilter::New();
+  m_outlineMapper = vtkPolyDataMapper::New();
+  m_outlineActor = vtkActor::New();
+
 }

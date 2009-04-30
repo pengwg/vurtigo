@@ -7,7 +7,7 @@
 #include "vtkTransform.h"
 #include "vtkPiecewiseFunction.h"
 #include "vtkColorTransferFunction.h"
-#include "vtkProperty.h"
+#include "vtkVolumeProperty.h"
 
 //! 3D Volume Data Object
 /*!
@@ -25,7 +25,7 @@ public:
   vtkTransform* getTransform();
   vtkPiecewiseFunction* getPieceFunc();
   vtkColorTransferFunction* getColorTransFunc();
-  vtkProperty* getVolumeProperty();
+  vtkVolumeProperty* getVolumeProperty();
 
   void translateData(double x, double y, double z);
   void scaleData(double x, double y, double z);
@@ -45,7 +45,7 @@ public:
   vtkTransform* m_dataTransform;
   vtkPiecewiseFunction* m_pieceFunc;
   vtkColorTransferFunction* m_colorTransFunc;
-  vtkProperty* m_volumeProperty;
+  vtkVolumeProperty* m_volumeProperty;
 };
 
 #endif 

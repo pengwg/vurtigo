@@ -8,7 +8,10 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   m_dataTransform = vtkTransform::New();
   m_pieceFunc = vtkPiecewiseFunction::New();
   m_colorTransFunc = vtkColorTransferFunction::New();
-  m_volumeProperty = vtkProperty::New();
+  m_volumeProperty = vtkVolumeProperty::New();
+
+  m_volumeProperty->SetScalarOpacity(m_pieceFunc);
+  m_volumeProperty->SetColor(m_colorTransFunc);
 
   setupGUI();
 }
@@ -66,7 +69,7 @@ vtkColorTransferFunction* rt3DVolumeDataObject::getColorTransFunc() {
 }
 
 //! Get volume property
-vtkProperty* rt3DVolumeDataObject::getVolumeProperty() {
+vtkVolumeProperty* rt3DVolumeDataObject::getVolumeProperty() {
   return m_volumeProperty;
 }
 
