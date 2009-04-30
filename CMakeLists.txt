@@ -74,6 +74,7 @@ set (UI_FILES
   rtUI/rtMainWindow.ui
   rtUI/propertyChooserDialog.ui
   rtUI/textPropertyDialog.ui
+  rtUI/axesProperties.ui
 )
 
 qt4_wrap_ui(UI_FILES_OUT ${UI_FILES})

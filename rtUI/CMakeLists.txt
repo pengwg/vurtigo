@@ -3,12 +3,14 @@ set (MOC_FILES
   rtMainWindow.h
   rtTextPropertyDialog.h
   rtPropertyChooserDialog.h
+  rtAxesProperties.h
 )
 
 set (SRC_FILES
   rtMainWindow.cpp
   rtTextPropertyDialog.cpp
   rtPropertyChooserDialog.cpp
+  rtAxesProperties.cpp
 )
 
 

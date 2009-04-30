@@ -180,6 +180,7 @@
      <addaction name="action2D_Only"/>
     </widget>
     <addaction name="menuLayout"/>
+    <addaction name="actionCoordinate_Axes"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -223,6 +224,11 @@
   <action name="actionPlugin_File">
    <property name="text">
     <string>Load Plugin File...</string>
+   </property>
+  </action>
+  <action name="actionCoordinate_Axes">
+   <property name="text">
+    <string>Coordinate Axes...</string>
    </property>
   </action>
  </widget>

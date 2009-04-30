@@ -10,6 +10,7 @@
 #include "rtDataObject.h"
 #include "rtPluginLoader.h"
 
+
 rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupUi(this);
 
@@ -23,6 +24,23 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_renWin3D = m_inter3D->GetRenderWindow();
   m_renderer3D = vtkRenderer::New();
   m_renWin3D->AddRenderer(m_renderer3D);
+
+  m_axesActor = vtkAxesActor::New();
+  m_propAssembly = vtkPropAssembly::New();
+  m_orientationWidget = vtkOrientationMarkerWidget::New();
+
+  m_propAssembly->AddPart( m_axesActor );
+  m_orientationWidget->SetOrientationMarker(m_propAssembly);
+
+  m_orientationWidget->SetInteractor( m_inter3D );
+  m_orientationWidget->SetViewport( 0.75, 0.0, 1.0, 0.25 );
+
+  m_axesProperties = new rtAxesProperties();
+
+  if (m_axesProperties) {
+    setViewType( m_axesProperties->getViewType() );
+    setCoordType( m_axesProperties->getCoordType() );
+  }
 
   m_render3DLayout->addWidget(m_render3DVTKWidget);
   this->frame3DRender->setLayout(m_render3DLayout);
@@ -71,6 +89,10 @@ rtMainWindow::~rtMainWindow() {
   if (m_objectBrowseLayout) delete m_objectBrowseLayout;
 
   if (m_renderer3D) m_renderer3D->Delete();
+  if (m_axesActor) m_axesActor->Delete();
+  if (m_propAssembly) m_propAssembly->Delete();
+  if (m_orientationWidget) m_orientationWidget->Delete();
+  if (m_axesProperties) delete m_axesProperties;
 }
 
 vtkRenderWindow* rtMainWindow::getRenderWindow() {
@@ -249,6 +271,7 @@ void rtMainWindow::connectSignals() {
   connect(actionMixed, SIGNAL(triggered()), this, SLOT(viewChangedMixed()));
   connect(action3D_Only, SIGNAL(triggered()), this, SLOT(viewChanged3DOnly()));
   connect(action2D_Only, SIGNAL(triggered()), this, SLOT(viewChanged2DOnly()));
+  connect(actionCoordinate_Axes, SIGNAL(triggered()), this, SLOT(showAxesOptions()));
 
   // Object Tree
   connect(objectTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(currItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
@@ -313,6 +336,16 @@ void rtMainWindow::viewChanged2DOnly() {
   m_only2DLayout.addWidget(scrollArea2DImages);
 }
 
+//! Bring up the dialog that gives the options for the axes widget
+void rtMainWindow::showAxesOptions() {
+  if (!m_axesProperties) return;
+
+  if (m_axesProperties->exec() == QDialog::Accepted) {
+    setViewType( m_axesProperties->getViewType() );
+    setCoordType( m_axesProperties->getCoordType() );
+  }
+}
+
 //! Load a plugin based on an XML file the user chooses. 
 void rtMainWindow::loadPluginFile() {
   QString fName;
@@ -324,4 +357,38 @@ void rtMainWindow::loadPluginFile() {
   if (!rtPluginLoader::instance().loadPluginsFromConfig(&file)) {
     std::cout << "Failed to load plugins from: " << fName.toStdString() << std::endl;
   }
+}
+
+
+void rtMainWindow::setViewType(rtAxesProperties::ViewType vt) {
+  switch (vt) {
+    case(rtAxesProperties::VT_NONE):
+    m_orientationWidget->SetEnabled(0);
+    break;
+    case(rtAxesProperties::VT_VISIBLE):
+    m_orientationWidget->SetEnabled(1);
+    m_orientationWidget->InteractiveOff();
+    break;
+    case(rtAxesProperties::VT_INTERACT):
+    m_orientationWidget->SetEnabled(1);
+    m_orientationWidget->InteractiveOn();
+    break;
+  }
+  m_renderFlag3D = true;
+}
+
+void rtMainWindow::setCoordType(rtAxesProperties::CoordType ct) {
+  switch (ct) {
+    case (rtAxesProperties::CT_PATIENT):
+    m_axesActor->SetXAxisLabelText("Left");
+    m_axesActor->SetYAxisLabelText("Posterior");
+    m_axesActor->SetZAxisLabelText("Superior");
+    break;
+    case (rtAxesProperties::CT_VTK):
+    m_axesActor->SetXAxisLabelText("X");
+    m_axesActor->SetYAxisLabelText("Y");
+    m_axesActor->SetZAxisLabelText("Z");
+    break;
+  }
+  m_renderFlag3D = true;
 }

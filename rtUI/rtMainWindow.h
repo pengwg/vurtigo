@@ -10,8 +10,12 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
+#include <vtkAxesActor.h>
+#include <vtkPropAssembly.h>
+#include <vtkOrientationMarkerWidget.h>
 
 class rtRenderObject;
+#include "rtAxesProperties.h"
 #include "objTypes.h"
 
 //! Object that controls the visible Qt widgets. 
@@ -52,6 +56,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void viewChanged2DOnly();
   void loadPluginFile();
 
+  void showAxesOptions();
+
   void pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
 
  protected:
@@ -67,6 +73,12 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   vtkRenderWindow *m_renWin3D;
   vtkRenderer *m_renderer3D;
 
+  // The Axes in the corner
+  vtkAxesActor *m_axesActor;
+  vtkPropAssembly *m_propAssembly;
+  vtkOrientationMarkerWidget *m_orientationWidget;
+  rtAxesProperties* m_axesProperties;
+
   bool m_renderFlag3D;
 
   //! Hash of tree root objects.
@@ -77,6 +89,10 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void connectSignals();
   void setupObjectTree();
   void populateObjectTypeNames();
+
+  void setViewType(rtAxesProperties::ViewType);
+  void setCoordType(rtAxesProperties::CoordType);
+
 };
 
 
