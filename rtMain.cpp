@@ -8,6 +8,9 @@
 
 #include "rt3dPointBufferDataObject.h"
 #include "rtCathDataObject.h"
+#include "rt3dVolumeDataObject.h"
+
+#include "vtkImageSinusoidSource.h"
 
 //! Just a function to load some test datasets. 
 void loadTestData() {
@@ -18,6 +21,7 @@ void loadTestData() {
   rtRenderObject* cath;
   rtRenderObject* cath2;
   rtRenderObject* cath4;
+  rtRenderObject* vol3D;
 
   rt3DPointBufferDataObject::SimplePoint p1, p2, p3, p4;
 
@@ -107,6 +111,20 @@ void loadTestData() {
   static_cast<rtCathDataObject*>(cath4->getDataObject())->setCoilSNR(c44, 40);
   static_cast<rtCathDataObject*>(cath4->getDataObject())->Modified();
 
+  vol3D = rtObjectManager::instance().addObjectOfType(rtConstants::OT_3DObject, "3D Volume 256 by 256 by 256");
+  rt3DVolumeDataObject* vol3DData = static_cast<rt3DVolumeDataObject*>( vol3D->getDataObject() );
+  vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
+  vol3DData->getImageData();
+
+  sinSrc->SetDirection(1, 2, 3);
+  sinSrc->SetPeriod(10);
+  sinSrc->SetPhase(10);
+  sinSrc->SetAmplitude(20);
+  sinSrc->Update();
+
+  vol3DData->getImageData()->DeepCopy(sinSrc->GetOutput());
+
+  sinSrc->Delete();
 }
 
 int main(int argc, char *argv[])
