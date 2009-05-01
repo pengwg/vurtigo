@@ -34,6 +34,7 @@ void rt3DVolumeRenderObject::setupDataObject() {
 
 //! Create the part of the pipeline that is done first. 
 void rt3DVolumeRenderObject::setupPipeline() {
+  rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
 
   m_tranformFilter = vtkTransformFilter::New();
   m_rayMapper = vtkVolumeRayCastMapper::New();
@@ -42,5 +43,20 @@ void rt3DVolumeRenderObject::setupPipeline() {
   m_outline = vtkOutlineFilter::New();
   m_outlineMapper = vtkPolyDataMapper::New();
   m_outlineActor = vtkActor::New();
+
+  // Volume Rendering
+  m_tranformFilter->SetTransform( dObj->getTransform() );
+  m_tranformFilter->AddInput( dObj->getImageData() );
+  m_rayMapper->SetInput( m_tranformFilter->GetOutput() );
+  m_rayMapper->SetVolumeRayCastFunction( dObj->getRayCastFunction() );
+  m_volumeActor->SetMapper(m_rayMapper);
+  m_volumeActor->SetProperty( dObj->getVolumeProperty() );
+
+  m_outline->SetInput( m_tranformFilter->GetOutput() );
+  m_outlineMapper->SetInput( m_outline->GetOutput() );
+  m_outlineActor->SetMapper( m_outlineMapper );
+
+  m_pipe3D->AddPart(m_volumeActor);
+  m_pipe3D->AddPart(m_outlineActor);
 
 }

@@ -9,7 +9,7 @@
 #include "rtRenderObject.h"
 #include "rtDataObject.h"
 #include "rtPluginLoader.h"
-
+#include "vtkPropAssembly.h"
 
 rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupUi(this);
@@ -188,7 +188,6 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
 //! Called when the content of a tree item has changed.
 void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   rtRenderObject *temp;
-  vtkProp* propTemp;
 
   if (!current) return;
 
@@ -199,22 +198,16 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
 
   // Get the object
   temp = rtObjectManager::instance().getObjectWithID(current->text(1).toInt());
-  QList<vtkProp*>const * const propTempList = temp->get3DPipeline();
+  vtkPropAssembly* propTemp = temp->get3DPipeline();
 
+  // If the box is checked then add it to the renderer.
   if (current->checkState(column) == Qt::Checked) {
     temp->setVisible3D(true);
+    addRenderItem(propTemp);
   } else {
     temp->setVisible3D(false);
+    removeRenderItem(propTemp);
   }
-
-  for (int ix1=0; ix1<propTempList->size(); ix1++) {
-    propTemp = propTempList->at(ix1);
-    if (current->checkState(column) == Qt::Checked) {
-      addRenderItem(propTemp);
-    } else {
-      removeRenderItem(propTemp);
-    }
-  } 
 }
 
 //! Render items can be added directly.

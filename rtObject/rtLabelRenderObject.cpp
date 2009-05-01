@@ -26,7 +26,7 @@ void rtLabelRenderObject::update() {
   m_textActor2D->SetInput(dObj->getText().toStdString().c_str());
   m_textActor2D->SetTextProperty(dObj->getTextProperty());
 
-  if (m_mainWin && m_pipe3D.at(0)->GetNumberOfConsumers() > 0) {
+  if (m_mainWin && m_pipe3D->GetNumberOfConsumers() > 0) {
     m_mainWin->setRenderFlag3D(true);
   }
 }
@@ -45,7 +45,7 @@ void rtLabelRenderObject::setupPipeline() {
   m_textActor2D->SetTextProperty(dObj->getTextProperty());
 
   // This should work the same way in both the 3D and 2D render windows. 
-  m_pipe3D.append(m_textActor2D);
-  m_pipe2D.append(m_textActor2D);
+  m_pipe3D->AddPart(m_textActor2D);
+  m_pipe2D->AddPart(m_textActor2D);
 }
 

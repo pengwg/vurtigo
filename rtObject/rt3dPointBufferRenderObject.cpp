@@ -27,14 +27,12 @@ void rt3DPointBufferRenderObject::update() {
 
   // Clean the previous list.
   while(!m_pipeList.empty()) {
-    if (m_visible3D) {
-      rtObjectManager::instance().getMainWinHandle()->removeRenderItem(m_pipe3D.takeFirst());
-    } else {
-      m_pipe3D.removeFirst();
-    }
-    delete m_pipeList.takeFirst();
+    tempPipe = m_pipeList.takeFirst();
+    m_pipe3D->RemovePart(tempPipe->actor);
+    delete tempPipe;
   }
 
+  // Get the new list
   QList<rt3DPointBufferDataObject::SimplePoint>* pointList = dObj->getPointList();
   for (int ix1=0; ix1<pointList->size(); ix1++) {
     tempPipe = new SinglePointPipeline();
@@ -45,7 +43,7 @@ void rt3DPointBufferRenderObject::update() {
     tempPipe->actor->SetProperty(pointList->at(ix1).pProp);
 
     m_pipeList.append(tempPipe);
-    m_pipe3D.append(tempPipe->actor);
+    m_pipe3D->AddPart(tempPipe->actor);
     if (m_visible3D) {
       rtObjectManager::instance().getMainWinHandle()->addRenderItem(tempPipe->actor);
     }

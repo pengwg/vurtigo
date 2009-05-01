@@ -9,6 +9,10 @@
 #include "vtkColorTransferFunction.h"
 #include "vtkVolumeProperty.h"
 
+#include "vtkVolumeRayCastCompositeFunction.h"
+#include "vtkVolumeRayCastIsosurfaceFunction.h"
+#include "vtkVolumeRayCastMIPFunction.h"
+
 //! 3D Volume Data Object
 /*!
   Data object that represents a 3D object.
@@ -18,6 +22,13 @@ class rt3DVolumeDataObject : public rtDataObject
 Q_OBJECT
 
 public:
+
+  enum RayCastFunction {
+    RCF_COMPOSITE,
+    RCF_ISOSURFACE,
+    RCF_MIP
+  };
+
   rt3DVolumeDataObject();
   ~rt3DVolumeDataObject();
 
@@ -26,6 +37,9 @@ public:
   vtkPiecewiseFunction* getPieceFunc();
   vtkColorTransferFunction* getColorTransFunc();
   vtkVolumeProperty* getVolumeProperty();
+
+  RayCastFunction getRayCastType() { return m_rayCastFunction; }
+  vtkVolumeRayCastFunction* getRayCastFunction();
 
   void translateData(double x, double y, double z);
   void scaleData(double x, double y, double z);
@@ -46,6 +60,13 @@ public:
   vtkPiecewiseFunction* m_pieceFunc;
   vtkColorTransferFunction* m_colorTransFunc;
   vtkVolumeProperty* m_volumeProperty;
+
+  // Ray Cast Functions
+  RayCastFunction m_rayCastFunction;
+  vtkVolumeRayCastCompositeFunction* m_compositeFunc;
+  vtkVolumeRayCastIsosurfaceFunction* m_isosurfaceFunc;
+  vtkVolumeRayCastMIPFunction* m_MIPFunc;
+
 };
 
 #endif 

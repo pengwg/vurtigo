@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QList>
 #include <vtkProp.h>
+#include <vtkPropAssembly.h>
 
 #include "objTypes.h"
 class rtDataObject;
@@ -20,8 +21,8 @@ Q_OBJECT
   //! Destructor
   ~rtRenderObject();
 
-  virtual QList<vtkProp*> const * const get3DPipeline();
-  virtual QList<vtkProp*> const * const get2DPipeline();
+  virtual vtkPropAssembly* get3DPipeline();
+  virtual vtkPropAssembly* get2DPipeline();
   rtDataObject* getDataObject();
   QString getName();
   rtConstants::rtObjectType getObjectType();
@@ -55,8 +56,8 @@ Q_OBJECT
   void setObjectType(rtConstants::rtObjectType objType);
 
   rtDataObject* m_dataObj;
-  QList<vtkProp*> m_pipe3D;
-  QList<vtkProp*> m_pipe2D;
+  vtkPropAssembly* m_pipe3D;
+  vtkPropAssembly* m_pipe2D;
   QTreeWidgetItem* m_treeItem;
   rtMainWindow* m_mainWin;
 

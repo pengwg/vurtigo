@@ -4,6 +4,8 @@
 rt3DVolumeDataObject::rt3DVolumeDataObject() {
   setObjectType(rtConstants::OT_3DObject);
 
+  m_rayCastFunction=RCF_COMPOSITE;
+
   m_imgData = vtkImageData::New();
   m_dataTransform = vtkTransform::New();
   m_pieceFunc = vtkPiecewiseFunction::New();
@@ -12,6 +14,10 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
 
   m_volumeProperty->SetScalarOpacity(m_pieceFunc);
   m_volumeProperty->SetColor(m_colorTransFunc);
+
+  m_compositeFunc = vtkVolumeRayCastCompositeFunction::New();
+  m_isosurfaceFunc = vtkVolumeRayCastIsosurfaceFunction::New();
+  m_MIPFunc = vtkVolumeRayCastMIPFunction::New();
 
   setupGUI();
 }
@@ -25,6 +31,10 @@ rt3DVolumeDataObject::~rt3DVolumeDataObject() {
   m_pieceFunc->Delete();
   m_colorTransFunc->Delete();
   m_volumeProperty->Delete();
+
+  m_compositeFunc->Delete();
+  m_isosurfaceFunc->Delete();
+  m_MIPFunc->Delete();
 }
 
 
@@ -72,6 +82,25 @@ vtkColorTransferFunction* rt3DVolumeDataObject::getColorTransFunc() {
 vtkVolumeProperty* rt3DVolumeDataObject::getVolumeProperty() {
   return m_volumeProperty;
 }
+
+
+vtkVolumeRayCastFunction* rt3DVolumeDataObject::getRayCastFunction() {
+  vtkVolumeRayCastFunction* temp = NULL;
+
+  switch(m_rayCastFunction) {
+    case (RCF_COMPOSITE):
+    temp=m_compositeFunc;
+    break;
+    case (RCF_ISOSURFACE):
+    temp=m_isosurfaceFunc;
+    break;
+    case (RCF_MIP):
+    temp=m_MIPFunc;
+    break;
+  }
+  return temp;
+}
+
 
 //! Translate the data object
 void rt3DVolumeDataObject::translateData(double x, double y, double z) {
