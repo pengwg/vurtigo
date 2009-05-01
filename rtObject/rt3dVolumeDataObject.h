@@ -8,6 +8,7 @@
 #include "vtkPiecewiseFunction.h"
 #include "vtkColorTransferFunction.h"
 #include "vtkVolumeProperty.h"
+#include "vtkImageShiftScale.h"
 
 #include "vtkVolumeRayCastCompositeFunction.h"
 #include "vtkVolumeRayCastIsosurfaceFunction.h"
@@ -33,6 +34,7 @@ public:
   ~rt3DVolumeDataObject();
 
   vtkImageData* getImageData();
+  vtkImageData* getUShortData();
   vtkTransform* getTransform();
   vtkPiecewiseFunction* getPieceFunc();
   vtkColorTransferFunction* getColorTransFunc();
@@ -40,6 +42,9 @@ public:
 
   RayCastFunction getRayCastType() { return m_rayCastFunction; }
   vtkVolumeRayCastFunction* getRayCastFunction();
+
+  bool copyNewImageData(vtkImageData* temp);
+
 
   void translateData(double x, double y, double z);
   void scaleData(double x, double y, double z);
@@ -60,6 +65,7 @@ public:
   vtkPiecewiseFunction* m_pieceFunc;
   vtkColorTransferFunction* m_colorTransFunc;
   vtkVolumeProperty* m_volumeProperty;
+  vtkImageShiftScale * m_imgUShortCast;
 
   // Ray Cast Functions
   RayCastFunction m_rayCastFunction;

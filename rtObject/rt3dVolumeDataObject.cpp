@@ -1,11 +1,14 @@
 #include "rt3dVolumeDataObject.h"
 
+
 //! Constructor
 rt3DVolumeDataObject::rt3DVolumeDataObject() {
   setObjectType(rtConstants::OT_3DObject);
 
   m_rayCastFunction=RCF_COMPOSITE;
+  //m_rayCastFunction=RCF_MIP;
 
+  m_imgUShortCast = vtkImageShiftScale::New();
   m_imgData = vtkImageData::New();
   m_dataTransform = vtkTransform::New();
   m_pieceFunc = vtkPiecewiseFunction::New();
@@ -14,6 +17,8 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
 
   m_volumeProperty->SetScalarOpacity(m_pieceFunc);
   m_volumeProperty->SetColor(m_colorTransFunc);
+  m_imgUShortCast->SetInput(m_imgData);
+  m_imgUShortCast->SetOutputScalarTypeToUnsignedShort();
 
   m_compositeFunc = vtkVolumeRayCastCompositeFunction::New();
   m_isosurfaceFunc = vtkVolumeRayCastIsosurfaceFunction::New();
@@ -26,6 +31,7 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
 rt3DVolumeDataObject::~rt3DVolumeDataObject() {
   cleanupGUI();
 
+  m_imgUShortCast->Delete();
   m_imgData->Delete();
   m_dataTransform->Delete();
   m_pieceFunc->Delete();
@@ -56,6 +62,14 @@ void rt3DVolumeDataObject::update() {
   */
 vtkImageData* rt3DVolumeDataObject::getImageData() {
   return m_imgData;
+}
+
+//! Get the image data but cast to Unsigned Short
+/*!
+  The mapper requires either unsigned short or unsigned char to work properly. This function makes it easier to implement that mapper.
+  */
+vtkImageData* rt3DVolumeDataObject::getUShortData() {
+  return m_imgUShortCast->GetOutput();
 }
 
 //! Get a handle to the transform.
@@ -101,6 +115,37 @@ vtkVolumeRayCastFunction* rt3DVolumeDataObject::getRayCastFunction() {
   return temp;
 }
 
+//! Set the new image data.
+/*!
+  Setting the new image data will cause a lot of re-setting of parameters and options. Volume properites and transfer functions will be modified. The image data will be copied over to this object.
+  @param temp The ImageData to be copied.
+  @return true if the data was copied correctly.
+  */
+bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
+  if (!temp) return false;
+
+  double rangeI[2], rangeP[2];
+
+
+  m_imgData->DeepCopy(temp);
+  m_imgData->GetScalarRange(rangeI);
+
+  m_imgUShortCast->SetShift(-rangeI[0]);
+  m_imgUShortCast->Update();
+  m_imgUShortCast->GetOutput()->GetScalarRange(rangeP);
+
+  //std::cout << "Range: " << rangeP[0] << " " << rangeP[1] << std::endl;
+
+  m_pieceFunc->RemoveAllPoints();
+  m_pieceFunc->AddPoint(rangeP[0], 0.0);
+  m_pieceFunc->AddPoint(rangeP[1], 1.0);
+
+  m_colorTransFunc->RemoveAllPoints();
+  m_colorTransFunc->AddRGBPoint(rangeP[0], 0.0, 0.0, 0.0);
+  m_colorTransFunc->AddRGBPoint(rangeP[1], 255.0, 15.0, 15.0);
+
+  return true;
+}
 
 //! Translate the data object
 void rt3DVolumeDataObject::translateData(double x, double y, double z) {

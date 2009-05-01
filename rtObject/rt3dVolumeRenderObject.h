@@ -3,7 +3,7 @@
 
 #include "rtRenderObject.h"
 
-#include <vtkTransformFilter.h>
+#include <vtkImageCast.h>
 #include <vtkVolumeRayCastMapper.h>
 #include <vtkVolume.h>
 #include <vtkOutlineFilter.h>
@@ -27,7 +27,6 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   void setupDataObject();
   void setupPipeline();
 
-  vtkTransformFilter* m_tranformFilter;
   vtkVolumeRayCastMapper* m_rayMapper;
   vtkVolume* m_volumeActor;
 

@@ -22,6 +22,7 @@ void loadTestData() {
   rtRenderObject* cath2;
   rtRenderObject* cath4;
   rtRenderObject* vol3D;
+  rtRenderObject* bigVol3D;
 
   rt3DPointBufferDataObject::SimplePoint p1, p2, p3, p4;
 
@@ -114,17 +115,34 @@ void loadTestData() {
   vol3D = rtObjectManager::instance().addObjectOfType(rtConstants::OT_3DObject, "3D Volume 256 by 256 by 256");
   rt3DVolumeDataObject* vol3DData = static_cast<rt3DVolumeDataObject*>( vol3D->getDataObject() );
   vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
-  vol3DData->getImageData();
 
+  sinSrc->SetWholeExtent(1,256, 1, 256, 1, 256);
   sinSrc->SetDirection(1, 2, 3);
-  sinSrc->SetPeriod(10);
-  sinSrc->SetPhase(10);
-  sinSrc->SetAmplitude(20);
+  sinSrc->SetPeriod(50);
+  sinSrc->SetPhase(1);
+  sinSrc->SetAmplitude(10);
   sinSrc->Update();
 
-  vol3DData->getImageData()->DeepCopy(sinSrc->GetOutput());
+  vol3DData->copyNewImageData(sinSrc->GetOutput());
 
   sinSrc->Delete();
+
+  bigVol3D = rtObjectManager::instance().addObjectOfType(rtConstants::OT_3DObject, "3D Volume 400 by 400 by 400");
+  rt3DVolumeDataObject* vol3DData2 = static_cast<rt3DVolumeDataObject*>( bigVol3D->getDataObject() );
+  vtkImageSinusoidSource* sinSrc2 = vtkImageSinusoidSource::New();
+
+  sinSrc2->SetWholeExtent(1,400, 1, 400, 1, 400);
+  sinSrc2->SetDirection(1, 2, 3);
+  sinSrc2->SetPeriod(50);
+  sinSrc2->SetPhase(1);
+  sinSrc2->SetAmplitude(10);
+  sinSrc2->Update();
+
+  vol3DData2->copyNewImageData(sinSrc2->GetOutput());
+
+  sinSrc2->Delete();
+
+
 }
 
 int main(int argc, char *argv[])
