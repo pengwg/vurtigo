@@ -2,6 +2,7 @@
 #define RT_3D_VOLUME_DATA_OBJECT_H
 
 #include "rtDataObject.h"
+#include "ui_volume3DOptions.h"
 
 #include "vtkImageData.h"
 #include "vtkTransform.h"
@@ -45,6 +46,17 @@ public:
 
   bool copyNewImageData(vtkImageData* temp);
 
+  //! Check if the volume should be rendered.
+  bool getRenderRayTraceVolume() { return m_optionsWidget.groupRayCastVolume->isChecked(); }
+
+  bool getAxial3D() { return m_optionsWidget.checkAxial3D->isChecked(); }
+  bool getAxial2D() { return m_optionsWidget.checkAxial2D->isChecked(); }
+  bool getSagittal3D() { return m_optionsWidget.checkSagittal3D->isChecked(); }
+  bool getSagittal2D() { return m_optionsWidget.checkSagittal2D->isChecked(); }
+  bool getCoronal3D() { return m_optionsWidget.checkCoronal3D->isChecked(); }
+  bool getCoronal2D() { return m_optionsWidget.checkCoronal2D->isChecked(); }
+
+  bool isDataValid() { return m_imgDataValid; }
 
   void translateData(double x, double y, double z);
   void scaleData(double x, double y, double z);
@@ -54,6 +66,9 @@ public:
 
   void apply();
   void update();
+
+ public slots:
+  void surfaceFunctionChanged();
 
  protected:
   // Functions
@@ -67,11 +82,16 @@ public:
   vtkVolumeProperty* m_volumeProperty;
   vtkImageShiftScale * m_imgUShortCast;
 
+  bool m_imgDataValid;
+
   // Ray Cast Functions
   RayCastFunction m_rayCastFunction;
   vtkVolumeRayCastCompositeFunction* m_compositeFunc;
   vtkVolumeRayCastIsosurfaceFunction* m_isosurfaceFunc;
   vtkVolumeRayCastMIPFunction* m_MIPFunc;
+
+  // UI objects
+  Ui::volume3DOptions m_optionsWidget;
 
 };
 

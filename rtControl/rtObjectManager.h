@@ -9,6 +9,8 @@ class rtRenderObject;
 class rtMainWindow;
 class rtDataObject;
 
+#include "vtkProp.h"
+
 //!  The Object Manager. [Singleton]
 /*!
   This should be the only class that can create or delete rtRenderObject instances. As a result it can keep track of all such instances and hand them out to other classes when requested. 
@@ -32,6 +34,8 @@ class rtObjectManager {
   rtRenderObject* getObjectWithID(int objID);
   QList<int> getObjectsOfType(rtConstants::rtObjectType objType);
   int getNumObjectsOfType(rtConstants::rtObjectType objType);
+
+  rtRenderObject* getObjectWith3DProp(vtkProp* prop);
 
  protected:
   //! A pointer to the main window object.

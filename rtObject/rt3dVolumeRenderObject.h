@@ -2,6 +2,7 @@
 #define RT_3D_VOLUME_RENDER_OBJECT_H
 
 #include "rtRenderObject.h"
+#include "rtImagePlaneWidget.h"
 
 #include <vtkImageCast.h>
 #include <vtkVolumeRayCastMapper.h>
@@ -34,6 +35,8 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   vtkPolyDataMapper *m_outlineMapper;
   vtkActor* m_outlineActor;
 
+  // The 2D planes
+  rtImagePlaneWidget *m_planes[3];
  private:
 
 };

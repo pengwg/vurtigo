@@ -46,6 +46,11 @@ Q_OBJECT
   void resetUpdateTime();
   bool updateNeeded();
 
+  virtual bool mousePressEvent(QMouseEvent* event) { return false; }
+  virtual bool mouseMoveEvent(QMouseEvent* event) { return false; }
+  virtual bool mouseReleaseEvent(QMouseEvent* event) { return false; }
+  virtual bool mouseDoubleClickEvent(QMouseEvent* event) { return false; }
+
  protected:
   //! The rtRenderObject constructor.
   /*!

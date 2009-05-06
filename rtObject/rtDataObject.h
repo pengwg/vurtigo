@@ -32,7 +32,6 @@ Q_OBJECT
   virtual QWidget* getBaseWidget() { return &m_baseWidget; }
   virtual QPushButton* getApplyButton() { return m_applyButton; }
 
-  void Modified();
   QDateTime getModified();
 
   //! Update the GUI with the modified data object info.
@@ -41,6 +40,9 @@ Q_OBJECT
  public slots:
   //! The apply button has been pressed. 
   virtual void apply() = 0;
+
+  void Modified();
+
 
  protected:
   rtDataObject();

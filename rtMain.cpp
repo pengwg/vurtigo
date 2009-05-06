@@ -118,7 +118,7 @@ void loadTestData() {
 
   sinSrc->SetWholeExtent(1,256, 1, 256, 1, 256);
   sinSrc->SetDirection(1, 2, 3);
-  sinSrc->SetPeriod(50);
+  sinSrc->SetPeriod(30);
   sinSrc->SetPhase(1);
   sinSrc->SetAmplitude(10);
   sinSrc->Update();

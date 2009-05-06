@@ -11,6 +11,8 @@ set (SRC_FILES
   rtTextPropertyDialog.cpp
   rtPropertyChooserDialog.cpp
   rtAxesProperties.cpp
+  rtImagePlaneWidget.cpp
+  customQVTKWidget.cpp
 )
 
 

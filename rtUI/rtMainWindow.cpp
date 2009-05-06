@@ -14,10 +14,12 @@
 rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupUi(this);
 
+  m_cellPicker = vtkCellPicker::New();
+
   m_currentObjectWidget = NULL;
   m_renderFlag3D = false;
 
-  m_render3DVTKWidget = new QVTKWidget(this->frame3DRender);
+  m_render3DVTKWidget = new customQVTKWidget(this->frame3DRender);
   m_render3DLayout = new QHBoxLayout();
 
   m_inter3D = m_render3DVTKWidget->GetInteractor();
@@ -73,6 +75,8 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
  */
 rtMainWindow::~rtMainWindow() {
   m_renderFlag3D = false;
+
+  m_cellPicker->Delete();
 
   clearPluginList();
   clearObjectList();
@@ -180,6 +184,8 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
 
   temp = rtObjectManager::instance().getObjectWithID(current->text(1).toInt());
   baseWid = temp->getDataObject()->getBaseWidget();
+
+  //std::cout << "Base Widget: " << baseWid << std::endl;
 
   m_objectBrowseLayout->addWidget(baseWid);
   m_currentObjectWidget = baseWid;

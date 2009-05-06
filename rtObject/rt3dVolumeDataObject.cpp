@@ -6,7 +6,7 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   setObjectType(rtConstants::OT_3DObject);
 
   m_rayCastFunction=RCF_COMPOSITE;
-  //m_rayCastFunction=RCF_MIP;
+  m_imgDataValid = false;
 
   m_imgUShortCast = vtkImageShiftScale::New();
   m_imgData = vtkImageData::New();
@@ -44,14 +44,43 @@ rt3DVolumeDataObject::~rt3DVolumeDataObject() {
 }
 
 
-//! Take the info from the GUI
+//! Take the info from the GUI (When the apply button is pressed)
 void rt3DVolumeDataObject::apply() {
 
 }
 
+void rt3DVolumeDataObject::surfaceFunctionChanged() {
+  if(m_optionsWidget.radioComposite->isChecked()) {
+    m_rayCastFunction=RCF_COMPOSITE;
+    Modified();
+  } else if (m_optionsWidget.radioIsosurface->isChecked()) {
+    m_rayCastFunction=RCF_ISOSURFACE;
+    Modified();
+  } else if (m_optionsWidget.radioMIP->isChecked()) {
+    m_rayCastFunction=RCF_MIP;
+    Modified();
+  }
+}
+
 //! Send the info to the GUI
 void rt3DVolumeDataObject::update() {
-
+  switch(m_rayCastFunction) {
+    case (RCF_COMPOSITE):
+    m_optionsWidget.radioComposite->setChecked(true);
+    m_optionsWidget.radioIsosurface->setChecked(false);
+    m_optionsWidget.radioMIP->setChecked(false);
+    break;
+    case (RCF_ISOSURFACE):
+    m_optionsWidget.radioComposite->setChecked(false);
+    m_optionsWidget.radioIsosurface->setChecked(true);
+    m_optionsWidget.radioMIP->setChecked(false);
+    break;
+    case (RCF_MIP):
+    m_optionsWidget.radioComposite->setChecked(false);
+    m_optionsWidget.radioIsosurface->setChecked(false);
+    m_optionsWidget.radioMIP->setChecked(true);
+    break;
+  }
 }
 
 //! Get a handle to the image data object.
@@ -143,6 +172,8 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
   m_colorTransFunc->RemoveAllPoints();
   m_colorTransFunc->AddRGBPoint(rangeP[0], 0.0, 0.0, 0.0);
   m_colorTransFunc->AddRGBPoint(rangeP[1], 255.0, 15.0, 15.0);
+  m_imgDataValid = true;
+  Modified();
 
   return true;
 }
@@ -174,7 +205,28 @@ void rt3DVolumeDataObject::flipZ() {
 
 //! Set the GUI widgets.
 void rt3DVolumeDataObject::setupGUI() {
+  m_optionsWidget.setupUi(getBaseWidget());
 
+  m_optionsWidget.comboPieceFunc->addItem("Default");
+  m_optionsWidget.comboCTFunc->addItem("Default");
+
+  // Global ray cast volume switch
+  connect(m_optionsWidget.groupRayCastVolume, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+
+  // Surface functions.
+  connect(m_optionsWidget.radioComposite, SIGNAL(toggled(bool)), this, SLOT(surfaceFunctionChanged()));
+  connect(m_optionsWidget.radioIsosurface, SIGNAL(toggled(bool)), this, SLOT(surfaceFunctionChanged()));
+  connect(m_optionsWidget.radioMIP, SIGNAL(toggled(bool)), this, SLOT(surfaceFunctionChanged()));
+
+  // 2D plane check boxes
+  connect(m_optionsWidget.checkAxial3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+  connect(m_optionsWidget.checkAxial2D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+
+  connect(m_optionsWidget.checkSagittal3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+  connect(m_optionsWidget.checkSagittal2D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+
+  connect(m_optionsWidget.checkCoronal3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+  connect(m_optionsWidget.checkCoronal2D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
 }
 
 //! Clean the GUI widgets.

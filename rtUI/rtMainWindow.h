@@ -6,13 +6,15 @@
 #include <QHash>
 
 #include "ui_rtMainWindow.h"
-#include <QVTKWidget.h>
+#include "customQVTKWidget.h"
+
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkAxesActor.h>
 #include <vtkPropAssembly.h>
 #include <vtkOrientationMarkerWidget.h>
+#include <vtkCellPicker.h>
 
 class rtRenderObject;
 #include "rtAxesProperties.h"
@@ -31,6 +33,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   vtkRenderWindowInteractor* getInteractor();
   vtkRenderer* getRenderer();
   QTreeWidget* getObjectTree();
+  vtkCellPicker* getGlobalCellPicker() { return m_cellPicker; }
 
   void updateObjectList(QHash<int, rtRenderObject*>*);
   void updatePluginList(QHash<int, QTreeWidgetItem*>*);
@@ -61,7 +64,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
 
  protected:
-  QVTKWidget *m_render3DVTKWidget;
+  customQVTKWidget *m_render3DVTKWidget;
   QHBoxLayout *m_render3DLayout;
   QHBoxLayout *m_objectBrowseLayout;
   QWidget* m_currentObjectWidget;
@@ -72,6 +75,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   vtkRenderWindowInteractor *m_inter3D;
   vtkRenderWindow *m_renWin3D;
   vtkRenderer *m_renderer3D;
+  vtkCellPicker *m_cellPicker;
 
   // The Axes in the corner
   vtkAxesActor *m_axesActor;
