@@ -8,6 +8,9 @@ rtAxesProperties::rtAxesProperties(QWidget *parent, Qt::WindowFlags flags) {
   m_changed=false;
   m_viewType = VT_VISIBLE;
   m_coordType = CT_PATIENT;
+
+  visibleComboBox->setCurrentIndex(1);
+  coordComboBox->setCurrentIndex(0);
 }
 
 //! Destructor

@@ -9,6 +9,15 @@
 #include "rtLabelRenderObject.h"
 #include "rtCathRenderObject.h"
 #include "rt3dVolumeRenderObject.h"
+#include "rt4dVolumeRenderObject.h"
+#include "rt2dSliceRenderObject.h"
+#include "rtMatrixRenderObject.h"
+#include "rtPolyRenderObject.h"
+#include "rtPieceFuncRenderObject.h"
+#include "rtColorFuncRenderObject.h"
+#include "rtImageBufferRenderObject.h"
+#include "rt2dPointRenderObject.h"
+
 
 //! Object Manager constructor.
 /*!
@@ -45,8 +54,10 @@ rtMainWindow* rtObjectManager::getMainWinHandle() {
 
 //! Create and return a new object.
 /*!
- This function will create a new object and add it to the object list. It will then return an instance of that object to the caller. The function returns NULL if the object was not created. Since the Object Manager is the only class that can create objects all other classes must call this particular function to request a new object. 
- @return An instance of a new object of a particular type. NULL is returned if the object could not be created.
+  This function will create a new object and add it to the object list. It will then return an instance of that object to the caller. The function returns NULL if the object was not created. Since the Object Manager is the only class that can create objects all other classes must call this particular function to request a new object.
+  @param objType The type of object that is to be added
+  @param objName The name of the object to be added. All objects have names.
+  @return An instance of a new object of a particular type. NULL is returned if the object could not be created.
  */
 rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objType, QString objName) {
   rtRenderObject* temp = NULL;
@@ -64,34 +75,34 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     qWarning("Warning: None Object Requested.");
     break;
   case rtConstants::OT_4DObject:
-    temp=NULL;
+    temp=new rt4DVolumeRenderObject();
     break;
   case rtConstants::OT_3DObject:
     temp=new rt3DVolumeRenderObject();
     break;
   case rtConstants::OT_2DObject:
-    temp=NULL;
+    temp=new rt2DSliceRenderObject();
     break;
   case rtConstants::OT_Cath:
     temp=new rtCathRenderObject();
     break;
   case rtConstants::OT_vtkMatrix4x4:
-    temp=NULL;
+    temp=new rtMatrixRenderObject();
     break;
   case rtConstants::OT_vtkPolyData:
-    temp=NULL;
+    temp=new rtPolyRenderObject();
     break;
   case rtConstants::OT_vtkPiecewiseFunction:
-    temp=NULL;
+    temp=new rtPieceFuncRenderObject();
     break;
   case rtConstants::OT_vtkColorTransferFunction:
-    temp=NULL;
+    temp=new rtColorFuncRenderObject();
     break;
   case rtConstants::OT_ImageBuffer:
-    temp=NULL;
+    temp=new rtImageBufferRenderObject();
     break;
   case rtConstants::OT_2DPointBuffer:
-    temp=NULL;
+    temp=new rt2DPointRenderObject();
     break;
   case rtConstants::OT_3DPointBuffer:
     temp=new rt3DPointBufferRenderObject();
@@ -104,11 +115,11 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     break;
   }
 
-  // Debug Statement:
-  qDebug("Created Object with ID: %d", nextID);
-
   // The object has been created.
   if (temp){
+    // Debug Statement:
+    qDebug("Created Object with ID: %d", nextID);
+
     dataO = temp->getDataObject();
     dataO->setId(nextID);
     dataO->setObjName(objName);

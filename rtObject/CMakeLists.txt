@@ -15,6 +15,22 @@ set (OBJ_SRC_FILES
   rtCathRenderObject.cpp
   rt3dVolumeDataObject.cpp
   rt3dVolumeRenderObject.cpp
+  rt4dVolumeDataObject.cpp
+  rt4dVolumeRenderObject.cpp
+  rt2dSliceDataObject.cpp
+  rt2dSliceRenderObject.cpp
+  rtMatrixDataObject.cpp
+  rtMatrixRenderObject.cpp
+  rtPolyDataObject.cpp
+  rtPolyRenderObject.cpp
+  rtPieceFuncDataObject.cpp
+  rtPieceFuncRenderObject.cpp
+  rtColorFuncDataObject.cpp
+  rtColorFuncRenderObject.cpp
+  rtImageBufferDataObject.cpp
+  rtImageBufferRenderObject.cpp
+  rt2dPointDataObject.cpp
+  rt2dPointRenderObject.cpp
 )
 
 set (MOC_FILES
@@ -25,6 +41,14 @@ set (MOC_FILES
   rtNoneDataObject.h
   rtCathDataObject.h
   rt3dVolumeDataObject.h
+  rt4dVolumeDataObject.h
+  rt2dSliceDataObject.h
+  rtMatrixDataObject.h
+  rtPolyDataObject.h
+  rtPieceFuncDataObject.h
+  rtColorFuncDataObject.h
+  rtImageBufferDataObject.h
+  rt2dPointDataObject.h
 )
 
 qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES})
