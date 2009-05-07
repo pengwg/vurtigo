@@ -53,5 +53,5 @@ set (MOC_FILES
 
 qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES})
 
-add_library(rtObject SHARED ${SRC_FILES} ${OBJ_SRC_FILES} ${MOC_FILES_OUT})
-target_link_libraries(rtObject ${QT_LIBRARIES} vtkCommon vtkRendering vtkVolumeRendering)
+add_library(rtObject ${SRC_FILES} ${OBJ_SRC_FILES} ${MOC_FILES_OUT})
+target_link_libraries(rtObject ${QT_LIBRARIES} rtUI vtkCommon vtkRendering vtkVolumeRendering)
