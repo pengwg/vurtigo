@@ -4,6 +4,7 @@ set (MOC_FILES
   rtTextPropertyDialog.h
   rtPropertyChooserDialog.h
   rtAxesProperties.h
+  rtOptions2DView.h
 )
 
 set (SRC_FILES
@@ -13,6 +14,7 @@ set (SRC_FILES
   rtAxesProperties.cpp
   rtImagePlaneWidget.cpp
   customQVTKWidget.cpp
+  rtOptions2DView.cpp
 )
 
 

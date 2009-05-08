@@ -16,10 +16,30 @@ customQVTKWidget::customQVTKWidget(QWidget* parent, Qt::WFlags f) : QVTKWidget(p
   m_objectPicker = vtkPropPicker::New();
   m_currProp = NULL;
   m_currRenObj = NULL;
+
+  m_forceSquare = false;
 }
 
 customQVTKWidget::~customQVTKWidget() {
   if (m_objectPicker) m_objectPicker->Delete();
+}
+
+//! Called when the window is resized.
+void customQVTKWidget::resizeEvent(QResizeEvent* event) {
+  QSize newSize;
+  QResizeEvent* e2;
+  newSize = event->size();
+
+  if (m_forceSquare && newSize.height()!=newSize.width()) {
+    // Force a square
+    newSize.setWidth(newSize.height());
+    resize (newSize.height(), newSize.height());
+    e2 = new QResizeEvent(newSize, event->oldSize());
+    QVTKWidget::resizeEvent(e2);
+    delete e2;
+  } else {
+    QVTKWidget::resizeEvent(event);
+  }
 }
 
 //! Called when one of the mouse buttons is pressed.

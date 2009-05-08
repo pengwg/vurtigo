@@ -18,6 +18,7 @@
 
 class rtRenderObject;
 #include "rtAxesProperties.h"
+#include "rtOptions2DView.h"
 #include "objTypes.h"
 
 //! Object that controls the visible Qt widgets. 
@@ -63,6 +64,10 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   void pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
 
+  int createNew2DWidget();
+  bool remove2DWidget(int id);
+  rtOptions2DView* get2DWidget(int id);
+
  protected:
   customQVTKWidget *m_render3DVTKWidget;
   QHBoxLayout *m_render3DLayout;
@@ -90,12 +95,21 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   //! Hash of the names root objects.
   QHash<rtConstants::rtObjectType, QString> m_rtObjectTypeNames;
 
+  QHBoxLayout m_scrollArea2DImagesLayout;
+
+  //! Hash of 2D view widgets
+  QHash<int, rtOptions2DView*> m_view2DHash;
+  //! Max Number of 2D Widgets
+  int m_max2DWidgets;
+
   void connectSignals();
   void setupObjectTree();
   void populateObjectTypeNames();
 
   void setViewType(rtAxesProperties::ViewType);
   void setCoordType(rtAxesProperties::CoordType);
+
+  void view2DHashCleanup();
 
 };
 

@@ -20,6 +20,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_renderFlag3D = false;
 
   m_render3DVTKWidget = new customQVTKWidget(this->frame3DRender);
+  m_render3DVTKWidget->setMinimumSize(300,300);
   m_render3DLayout = new QHBoxLayout();
 
   m_inter3D = m_render3DVTKWidget->GetInteractor();
@@ -61,6 +62,11 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   view3D->setLayout(&m_only3DLayout);
   view2D->setLayout(&m_only2DLayout);
 
+  m_view2DHash.clear();
+  m_max2DWidgets = 100;
+
+  scrollArea2DImages->setLayout(&m_scrollArea2DImagesLayout);
+
   viewChangedMixed();
 
   populateObjectTypeNames();
@@ -87,6 +93,9 @@ rtMainWindow::~rtMainWindow() {
     m_currentObjectWidget->setParent(NULL);
     m_currentObjectWidget = NULL;
   }
+
+  // Cleanup the 2D widget hash
+  view2DHashCleanup();
 
   if (m_render3DVTKWidget) delete m_render3DVTKWidget;
   if (m_render3DLayout) delete m_render3DLayout;
@@ -358,7 +367,7 @@ void rtMainWindow::loadPluginFile() {
   }
 }
 
-
+//! Set the view type for the coordinate axes
 void rtMainWindow::setViewType(rtAxesProperties::ViewType vt) {
   switch (vt) {
     case(rtAxesProperties::VT_NONE):
@@ -376,6 +385,7 @@ void rtMainWindow::setViewType(rtAxesProperties::ViewType vt) {
   m_renderFlag3D = true;
 }
 
+//! Set the coordinate system that is shown by the axes.
 void rtMainWindow::setCoordType(rtAxesProperties::CoordType ct) {
   switch (ct) {
     case (rtAxesProperties::CT_PATIENT):
@@ -390,4 +400,59 @@ void rtMainWindow::setCoordType(rtAxesProperties::CoordType ct) {
     break;
   }
   m_renderFlag3D = true;
+}
+
+//! Create a new 2D widget and return the ID
+/*! Get the main window to create a new widget where a new 2D plane can be displayed.
+  @return The ID of the newly created widget or -1 if the creation failed.
+  */
+int rtMainWindow::createNew2DWidget() {
+  int currID = -1;
+  rtOptions2DView* view;
+
+  for (int ix1=0; ix1<m_max2DWidgets; ix1++) {
+    if (!m_view2DHash.contains(ix1)) {
+      currID = ix1;
+      view = new rtOptions2DView(scrollArea2DImages);
+      m_scrollArea2DImagesLayout.addWidget(view);
+      m_view2DHash.insert(currID, view);
+      break;
+    }
+  }
+  return currID;
+}
+
+//! Remove the widget with a particular ID.
+/*!
+  @param id The ID of the widget to be removed.
+  @return True if the widget was found and removed. False otherwise.
+  */
+bool rtMainWindow::remove2DWidget(int id) {
+  if (!m_view2DHash.contains(id)) return false;
+
+  rtOptions2DView* view;
+  view = m_view2DHash.take(id);
+  m_scrollArea2DImagesLayout.removeWidget(view);
+  delete view;
+}
+
+//! Get the handle to the widget with a particular ID.
+/*! Attempt to get the handle to the 2D widget with a particular ID. If the widget does not exist then NULL will be returned.
+  @param id The ID of the desired widget
+  @return The handle to the desired widget or NULL if no widget with that ID exists.
+  */
+rtOptions2DView* rtMainWindow::get2DWidget(int id) {
+  if (!m_view2DHash.contains(id)) return false;
+  return m_view2DHash[id];
+}
+
+//! A function that will do the cleanup for all the 2D widgets.
+void rtMainWindow::view2DHashCleanup() {
+  QList<int> keyList;
+
+  keyList = m_view2DHash.keys();
+  while (!keyList.empty()) {
+    remove2DWidget(keyList.takeFirst());
+  }
+
 }
