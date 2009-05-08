@@ -96,7 +96,7 @@ set (SRC_FILES
 )
 
 add_executable(vurtigo ${SRC_FILES})
-target_link_libraries(vurtigo rtUI rtObject rtControl QVTK)
+target_link_libraries(vurtigo rtObject rtUI rtControl QVTK)
 
 # After building the base we can now add the plugins.
 add_subdirectory(Plugins)
