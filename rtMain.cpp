@@ -155,8 +155,9 @@ int main(int argc, char *argv[])
 
     loadTestData();
 
-    int widID;
-    widID = mainWin.createNew2DWidget();
+    int widID[2];
+    widID[0] = mainWin.createNew2DWidget();
+    widID[1] = mainWin.createNew2DWidget();
 
     mainWin.show();
     return app.exec();

@@ -22,7 +22,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_render3DVTKWidget = new customQVTKWidget(this->frame3DRender);
   m_render3DVTKWidget->setMinimumSize(300,300);
   m_render3DLayout = new QHBoxLayout();
-
+  m_render3DLayout->setContentsMargins(0,0,0,0);
   m_inter3D = m_render3DVTKWidget->GetInteractor();
   m_renWin3D = m_inter3D->GetRenderWindow();
   m_renderer3D = vtkRenderer::New();
@@ -53,7 +53,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   mainRLSplitter->setStretchFactor(1, 5);
 
   // The 3D view must be larger than the 2D view. 
-  mainUDSplitter->setStretchFactor(0, 5);
+  mainUDSplitter->setStretchFactor(0, 2);
   mainUDSplitter->setStretchFactor(1, 1);
 
   m_objectBrowseLayout = new QHBoxLayout();
@@ -65,10 +65,9 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_view2DHash.clear();
   m_max2DWidgets = 100;
 
-  scrollArea2DImages->setLayout(&m_scrollArea2DImagesLayout);
+  scrollAreaWidget->setLayout(&m_scrollArea2DImagesLayout);
 
   viewChangedMixed();
-
   populateObjectTypeNames();
   connectSignals();
   setupObjectTree();
@@ -413,7 +412,8 @@ int rtMainWindow::createNew2DWidget() {
   for (int ix1=0; ix1<m_max2DWidgets; ix1++) {
     if (!m_view2DHash.contains(ix1)) {
       currID = ix1;
-      view = new rtOptions2DView(scrollArea2DImages);
+      view = new rtOptions2DView(scrollAreaWidget);
+      view->setContainer(scrollAreaWidget);
       m_scrollArea2DImagesLayout.addWidget(view);
       m_view2DHash.insert(currID, view);
       break;
