@@ -14,16 +14,22 @@
 rtTimeManager::rtTimeManager() {
   m_renderTime = new QTimer();
   m_pluginUpdateTime = new QTimer();
+  m_planeUpdateTime = new QTimer();
 
-  // Fire every 34 mils or 30 fps.
-  m_renderTime->setInterval(34); 
+  // Fire every 40 mils or 25 fps.
+  m_renderTime->setInterval(40);
 
   // About 40 fps
   m_pluginUpdateTime->setInterval(25);
 
+  // About 30 fps.
+  m_planeUpdateTime->setInterval(34);
+
   connect(m_pluginUpdateTime, SIGNAL(timeout()), this, SLOT(pluginUpdate()));
+  connect(m_planeUpdateTime, SIGNAL(timeout()), this, SLOT(planeUpdate()));
 
   m_pluginUpdateTime->start();
+  m_planeUpdateTime->start();
 
   m_mainWin = NULL;
 
@@ -123,4 +129,9 @@ void rtTimeManager::checkWatchList() {
   for (ix1=0; ix1<m_watchList.size(); ix1++) {
     m_watchList.at(ix1)->update();
   }
+}
+
+void rtTimeManager::planeUpdate() {
+  if (!m_mainWin) return;
+  m_mainWin->update2DViews();
 }

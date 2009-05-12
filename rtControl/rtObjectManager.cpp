@@ -27,6 +27,9 @@ rtObjectManager::rtObjectManager() {
   m_max_object = 10000;
   m_objectHash.clear();
   m_mainWinHandle = NULL;
+
+  m_list2DHash.clear();
+  m_list2DHash.insert(-1, "NONE");
 }
 
 //! Object Manager destructor.
@@ -38,7 +41,10 @@ rtObjectManager::~rtObjectManager() {
   The object manager needs to communicate with the GUI so it needs to be given an instance of the handle.  
 */
 void rtObjectManager::setMainWinHandle(rtMainWindow* mainWin) {
+  if (!mainWin) return;
+
   m_mainWinHandle = mainWin;
+  m_mainWinHandle->update2DWindowLists(&m_list2DHash);
 }
 
 
@@ -127,6 +133,15 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     m_objectHash.insert(nextID, temp);
     if (m_mainWinHandle) m_mainWinHandle->updateObjectList(&m_objectHash);
     temp->setMainWindow(m_mainWinHandle);
+
+    QList<QString> twoDViews = temp->get2DViewNameList();
+    for (int ix1=0; ix1<twoDViews.size(); ix1++) {
+      m_list2DHash.insertMulti(nextID, twoDViews[ix1]);
+    }
+    if (twoDViews.size()>0 && m_mainWinHandle) {
+      m_mainWinHandle->update2DWindowLists(&m_list2DHash);
+    }
+
   }
   
   return temp;
@@ -159,6 +174,9 @@ bool rtObjectManager::removeObject(int objID) {
     temp = m_objectHash.value(objID);
     if (!temp || temp->getDataObject()->isReadOnly()) return false;
     m_objectHash.remove(objID);
+    if (m_list2DHash.remove(objID)>0 && m_mainWinHandle) {
+      m_mainWinHandle->update2DWindowLists(&m_list2DHash);
+    }
     delete temp;
     return true;
   }
@@ -178,6 +196,9 @@ bool rtObjectManager::removeReadOnly(int objID) {
     temp = m_objectHash.value(objID);
     if (!temp) return false;
     m_objectHash.remove(objID);
+    if (m_list2DHash.remove(objID)>0 && m_mainWinHandle) {
+      m_mainWinHandle->update2DWindowLists(&m_list2DHash);
+    }
     delete temp;
     return true;
   }

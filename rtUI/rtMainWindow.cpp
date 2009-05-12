@@ -269,6 +269,29 @@ void rtMainWindow::tryRender3D() {
   }
 }
 
+//! Called when the timer decides it is a good time to update the 2D views.
+/*!
+  Try to update each of the 2D views. 2D views that do not have valid 'current objects' will not be updated.
+  */
+void rtMainWindow::update2DViews() {
+  QList<int> keyL;
+  rtRenderObject* renObj;
+
+  keyL = m_view2DHash.keys();
+  for (int ix1=0; ix1<keyL.size(); ix1++) {
+    renObj = m_view2DHash.value(keyL[ix1])->getCurrRenObj();
+    if (renObj) {
+      // Check if we need to update this
+      if (renObj->updateNeeded()) {
+        renObj->update();
+        m_view2DHash.value(keyL[ix1])->renderOn();
+      }
+      // Render it!
+      m_view2DHash.value(keyL[ix1])->tryRender();
+    }
+  }
+}
+
 void rtMainWindow::connectSignals() {
   // File Menu
   connect(actionPlugin_File, SIGNAL(triggered()), this, SLOT(loadPluginFile()));
@@ -342,6 +365,17 @@ void rtMainWindow::viewChanged2DOnly() {
   stackedWidget->setCurrentIndex(2);
   m_only2DLayout.addWidget(scrollArea2DImages);
 }
+
+//! Update  the lists for all the 2D windows.
+void rtMainWindow::update2DWindowLists(QMultiHash<int, QString>* hash) {
+  QList<int> keyL;
+  keyL = m_view2DHash.keys();
+  for (int ix1=0; ix1<m_view2DHash.size(); ix1++) {
+    m_view2DHash[keyL[ix1]]->setStringList(hash);
+  }
+}
+
+
 
 //! Bring up the dialog that gives the options for the axes widget
 void rtMainWindow::showAxesOptions() {

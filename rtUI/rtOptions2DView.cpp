@@ -1,8 +1,12 @@
 #include "rtOptions2DView.h"
+#include "rtObjectManager.h"
+#include "rtRenderObject.h"
+
 #include <QBoxLayout>
 #include <QSizePolicy>
 #include <QResizeEvent>
 #include <QPalette>
+#include <QStringList>
 
 #include "vtkRenderer.h"
 
@@ -31,6 +35,12 @@ rtOptions2DView::rtOptions2DView(QWidget *parent, Qt::WindowFlags flags) {
   m_selected = false;
   area2DView->setFrameStyle(QFrame::NoFrame);
   area2DView->setLineWidth(0);
+
+  m_renderFlag = false;
+  m_currProp=NULL;
+  m_currRenObj=NULL;
+
+  connect(combo2DObjects, SIGNAL(currentIndexChanged(int)), this, SLOT(comboIndexChanged(int)));
 }
 
 
@@ -40,11 +50,52 @@ rtOptions2DView::~rtOptions2DView() {
   if (m_renderWidget) delete m_renderWidget;
 }
 
+//! Set a new string list for the QComboBox
+/*!
+  @param textList A hash of object IDs and a series of names for each 2D object
+  */
+void rtOptions2DView::setStringList(QHash<int, QString> *textList) {
+  QString currTxt;
+  int currIdx;
+  QStringList items;
+  QList<int> keyL;
+
+  items.clear();
+  currIdx = combo2DObjects->currentIndex();
+  currTxt = combo2DObjects->currentText();
+
+  // Remove the old entries.
+  combo2DObjects->clear();
+  keyL = textList->keys();
+  for (int ix1=0; ix1<textList->size(); ix1++) {
+    items.append(QString::number(keyL[ix1]) + QString(" ") + textList->value(keyL[ix1]));
+  }
+
+  // Add the new items.
+  combo2DObjects->addItems(items);
+  if (currIdx > -1 && combo2DObjects->findText(currTxt)>-1) {
+    combo2DObjects->setCurrentIndex(combo2DObjects->findText(currTxt));
+  } else {
+    combo2DObjects->setCurrentIndex(0);
+  }
+
+}
+
+//! Try to re-render (refresh) this 2D window.
+void rtOptions2DView::tryRender() {
+  if (m_renderFlag) {
+    m_renderFlag = false;
+    m_renWin2D->Modified();
+    m_renWin2D->Render();
+  }
+}
+
+//! Overwrite to ensure that the size remains a square.
 QSize rtOptions2DView::sizeHint() {
   QSize hint;
   hint = this->size();
   hint.setWidth( hint.height()-28-this->verticalLayout->spacing() );
-  std::cout << "Size Hint: " << hint.height() << " " << hint.width() << std::endl;
+  //std::cout << "Size Hint: " << hint.height() << " " << hint.width() << std::endl;
   return hint;
 }
 
@@ -97,16 +148,60 @@ void rtOptions2DView::mouseDoubleClickEvent(QMouseEvent* event) {
   }
 }
 
-
+//! Called when the widget is moved.
 void rtOptions2DView::moveEvent ( QMoveEvent * event ) {
-  /*int numWid;
-  int loc;
 
-  numWid = this->parentWidget()->layout()->count();
-  loc = this->parentWidget()->layout()->indexOf(this);
+}
 
-  if (event->pos().x() != this->size().width()*loc+8) {
-    this->move(8+this->size().width()*loc, event->pos().y());
+
+//! The user has changed the index value for the item combo box
+void rtOptions2DView::comboIndexChanged(int index) {
+  QStringList splitter;
+  int id;
+  bool convOK;
+  QString name;
+  QString comboText;
+
+  comboText = combo2DObjects->currentText();
+  splitter = comboText.split(" ");
+
+  if (splitter.size() <= 1) {
+    std::cout << "Could not separate value from name in 2D widget: " << comboText.toStdString() << std::endl;
+    return;
   }
-  std::cout << "move" << std::endl;*/
+  id = splitter.takeFirst().toInt(&convOK);
+  if (!convOK) {
+    std::cout << "First Value not an Integer: " << comboText.toStdString() << std::endl;
+    return;
+  }
+
+  // Check for the NONE object with an ID of -1.
+  if (id < 0) {
+    m_renderer2D->RemoveAllViewProps();
+    m_currProp = NULL;
+    m_currRenObj = NULL;
+    m_renderFlag=true;
+    return;
+  }
+
+  name = splitter.join("");
+
+  //std::cout << id << "  with  " << name.toStdString() << std::endl;
+
+  m_currRenObj = rtObjectManager::instance().getObjectWithID(id);
+  if (!m_currRenObj) {
+    std::cout << "Object with ID: " << id << " no longer exists." << std::endl;
+    return;
+  }
+
+  if (!m_currRenObj->viewWithNameExists(name)) {
+    std::cout << "No view with the name of: " << name.toStdString() << std::endl;
+    return;
+  }
+  m_currProp = m_currRenObj->get2DViewWithName(name);
+
+  // Remove the current prop (if any)
+  m_renderer2D->RemoveAllViewProps();
+  m_renderer2D->AddViewProp(m_currProp);
+  m_renderFlag=true;
 }

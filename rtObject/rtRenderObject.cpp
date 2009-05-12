@@ -11,14 +11,15 @@ rtRenderObject::rtRenderObject() {
   m_visible3D = false;
 
   m_pipe3D = vtkPropAssembly::New();
-  m_pipe2D = vtkPropAssembly::New();
+
+  // Clear the list first.
+  m_pipe2D.clear();
 }
 
 rtRenderObject::~rtRenderObject() {
   if (m_treeItem) delete m_treeItem;
 
   m_pipe3D->Delete();
-  m_pipe2D->Delete();
 }
 
 //! Get a version of the 3D pipeline that cannot be modified
@@ -27,8 +28,8 @@ vtkPropAssembly* rtRenderObject::get3DPipeline() {
 }
 
 //! Get a version of the 2D pipeline that cannot be modified.
-vtkPropAssembly* rtRenderObject::get2DPipeline() {
-  return m_pipe2D;
+QHash<QString, vtkProp*>* rtRenderObject::get2DPipeline() {
+  return &m_pipe2D;
 }
 
 rtDataObject* rtRenderObject::getDataObject() {

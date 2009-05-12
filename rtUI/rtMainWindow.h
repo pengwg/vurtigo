@@ -48,6 +48,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void setRenderFlag3D(bool flag) { m_renderFlag3D=flag; }
 
   void tryRender3D();
+  void update2DViews();
 
   void addRenderItem(vtkProp* prop);
   void removeRenderItem(vtkProp* prop);
@@ -67,6 +68,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   int createNew2DWidget();
   bool remove2DWidget(int id);
   rtOptions2DView* get2DWidget(int id);
+
+  void update2DWindowLists(QMultiHash<int, QString>* hash);
 
  protected:
   customQVTKWidget *m_render3DVTKWidget;
@@ -99,6 +102,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   //! Hash of 2D view widgets
   QHash<int, rtOptions2DView*> m_view2DHash;
+
   //! Max Number of 2D Widgets
   int m_max2DWidgets;
 

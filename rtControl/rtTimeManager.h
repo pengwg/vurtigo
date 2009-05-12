@@ -39,6 +39,7 @@ class rtTimeManager : public QObject {
  public slots:
   void renderTimeout();
   void pluginUpdate();
+  void planeUpdate();
 
  protected:
   //! The timer that services the renderer.
@@ -50,7 +51,11 @@ class rtTimeManager : public QObject {
   //! Objects that are updated at every iteration.
   QList<rtRenderObject*> m_watchList;
 
+  //! Timer to check the plugins for updates
   QTimer *m_pluginUpdateTime;
+
+  //! Timer to check the 2D planes for updates.
+  QTimer *m_planeUpdateTime;
 
   // Render Time Estimation
   double m_renderTimeBuffer[10];

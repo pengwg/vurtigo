@@ -6,6 +6,8 @@
 #include <QObject>
 #include <QDateTime>
 #include <QList>
+#include <QHash>
+
 #include <vtkProp.h>
 #include <vtkPropAssembly.h>
 
@@ -22,11 +24,14 @@ Q_OBJECT
   ~rtRenderObject();
 
   virtual vtkPropAssembly* get3DPipeline();
-  virtual vtkPropAssembly* get2DPipeline();
+  virtual QHash<QString, vtkProp*>* get2DPipeline();
   rtDataObject* getDataObject();
   QString getName();
   rtConstants::rtObjectType getObjectType();
 
+  QList<QString> get2DViewNameList() { return m_pipe2D.keys(); }
+  bool viewWithNameExists(QString name) { return m_pipe2D.contains(name); }
+  vtkProp* get2DViewWithName(QString name) { return m_pipe2D.value(name); }
 
   void setDataObject(rtDataObject* dataObj);
   void setName(QString renName);
@@ -62,7 +67,13 @@ Q_OBJECT
 
   rtDataObject* m_dataObj;
   vtkPropAssembly* m_pipe3D;
-  vtkPropAssembly* m_pipe2D;
+
+  //! There are more than multiple possible 2D views so a Hash is needed
+  /*!
+    The hash is indexed by the name of the 2D view.
+    */
+  QHash<QString, vtkProp*> m_pipe2D;
+
   QTreeWidgetItem* m_treeItem;
   rtMainWindow* m_mainWin;
 

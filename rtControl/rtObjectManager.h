@@ -37,6 +37,8 @@ class rtObjectManager {
 
   rtRenderObject* getObjectWith3DProp(vtkProp* prop);
 
+  QMultiHash<int, QString>* get2DObjectNameHash() { return &m_list2DHash; }
+
  protected:
   //! A pointer to the main window object.
   /*!
@@ -46,6 +48,13 @@ class rtObjectManager {
 
   //! Hash table of all the objects listed by unique ID
   QHash<int, rtRenderObject*> m_objectHash;
+
+  //! A list of strings corresponding to the names of all the 2D objects.
+  /*!
+    The hash is indexed by ID wihich is the unique ID given to the object with that pipeline.
+    However, since one object may have multiple 2D renderable objects the ids in this Hash are not unique.
+    */
+  QMultiHash<int, QString> m_list2DHash;
 
  private:
   //! Maximum number of objects.
