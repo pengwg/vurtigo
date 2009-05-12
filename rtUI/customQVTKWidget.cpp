@@ -107,7 +107,9 @@ void customQVTKWidget::mouseReleaseEvent(QMouseEvent* event) {
 //! Called on a double click.
 /*!
   The double click event will be called AFTER a mouse press and mouse release event.
+  This function calls the event ignore function which passes the event up to the parent.
   */
 void customQVTKWidget::mouseDoubleClickEvent(QMouseEvent* event) {
   QVTKWidget::mouseDoubleClickEvent(event);
+  event->ignore();
 }

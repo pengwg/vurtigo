@@ -2,6 +2,7 @@
 #include <QBoxLayout>
 #include <QSizePolicy>
 #include <QResizeEvent>
+#include <QPalette>
 
 #include "vtkRenderer.h"
 
@@ -19,13 +20,17 @@ rtOptions2DView::rtOptions2DView(QWidget *parent, Qt::WindowFlags flags) {
   this->scrollAreaWidgetContents->setLayout(m_renLayout);
 
   m_renLayout->addWidget(m_renderWidget);
-  m_renLayout->setContentsMargins ( 0,0,0,0 );
+  m_renLayout->setContentsMargins ( 1,1,1,1 );
   m_inter2D = m_renderWidget->GetInteractor();
   m_renWin2D = m_inter2D->GetRenderWindow();
   m_renderer2D = vtkRenderer::New();
   m_renWin2D->AddRenderer(m_renderer2D);
 
   m_container=NULL;
+
+  m_selected = false;
+  area2DView->setFrameStyle(QFrame::NoFrame);
+  area2DView->setLineWidth(0);
 }
 
 
@@ -47,22 +52,48 @@ void rtOptions2DView::resizeEvent ( QResizeEvent * event ) {
   int numWid;
   int spac;
   int mar;
+  int sizeOptionsAbove;
 
   numWid = m_container->layout()->count();
 
   // Spacing.
-  spac = 5;
+  spac = 6;
   // Margins
-  mar = 3;
+  mar = 6;
+  // Size of the options above the render window
+  sizeOptionsAbove = 28;
+
 
   // std::cout << "Resize Event: " << event->size().height() << " " << event->size().width() << std::endl;
-  if (event->size().height() != event->size().width()-28-this->verticalLayout->spacing() && m_container) {
-    resize(event->size().height()-28-this->verticalLayout->spacing(), event->size().height());
+  if (event->size().height() != event->size().width()-sizeOptionsAbove-this->verticalLayout->spacing() && m_container) {
+    resize(event->size().height()-sizeOptionsAbove-this->verticalLayout->spacing(), event->size().height());
 
-    if (m_container->minimumWidth() != (event->size().height()-28-this->verticalLayout->spacing())*numWid+mar*2+(numWid-1)*spac ) {
-      m_container->setMinimumWidth( (event->size().height()-28-this->verticalLayout->spacing())*numWid+mar*2+(numWid-1)*spac);
+    if (m_container->minimumWidth() != (event->size().height()-sizeOptionsAbove-this->verticalLayout->spacing())*numWid+mar*2+(numWid-1)*spac ) {
+      m_container->setMinimumWidth( (event->size().height()-sizeOptionsAbove-this->verticalLayout->spacing())*numWid+mar*2+(numWid-1)*spac);
+      m_container->setMaximumWidth( (event->size().height()-sizeOptionsAbove-this->verticalLayout->spacing())*numWid+mar*2+(numWid-1)*spac);
       m_container->layout()->invalidate();
     }
+  }
+}
+
+//! The mouse double clicked on the widget.
+/*!
+  The widget has been selected. (or de-selected)
+  */
+void rtOptions2DView::mouseDoubleClickEvent(QMouseEvent* event) {
+  QPalette textCol;
+  QColor myRed(255, 0, 0);
+
+  if (m_selected) {
+    m_selected = false;
+    area2DView->setFrameStyle(QFrame::NoFrame);
+    area2DView->setLineWidth(0);
+  } else {
+    m_selected = true;
+    textCol.setColor(QPalette::WindowText, myRed);
+    area2DView->setPalette(textCol);
+    area2DView->setFrameStyle(QFrame::Box | QFrame::Plain);
+    area2DView->setLineWidth(4);
   }
 }
 

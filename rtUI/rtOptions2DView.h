@@ -25,6 +25,9 @@ public:
 
 public slots:
   virtual void resizeEvent ( QResizeEvent * event );
+
+  virtual void mouseDoubleClickEvent(QMouseEvent* event);
+
 protected:
 
   virtual void moveEvent ( QMoveEvent * event );
@@ -37,6 +40,8 @@ protected:
   vtkRenderWindowInteractor *m_inter2D;
   vtkRenderWindow* m_renWin2D;
   vtkRenderer* m_renderer2D;
+
+  bool m_selected;
 };
 
 #endif
