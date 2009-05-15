@@ -30,13 +30,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="checkAxial2D">
-        <property name="text">
-         <string>Axial 2D</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0">
        <widget class="QCheckBox" name="checkSagittal3D">
         <property name="text">
@@ -47,13 +40,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QCheckBox" name="checkSagittal2D">
-        <property name="text">
-         <string>Sagittal 2D</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="0">
        <widget class="QCheckBox" name="checkCoronal3D">
         <property name="text">
@@ -61,13 +47,6 @@
         </property>
         <property name="checked">
          <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QCheckBox" name="checkCoronal2D">
-        <property name="text">
-         <string>Coronal 2D</string>
         </property>
        </widget>
       </item>

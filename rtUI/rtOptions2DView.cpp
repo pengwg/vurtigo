@@ -9,6 +9,8 @@
 #include <QStringList>
 
 #include "vtkRenderer.h"
+#include "vtkProp.h"
+#include "vtkCamera.h"
 
 #include <iostream>
 
@@ -23,13 +25,16 @@ rtOptions2DView::rtOptions2DView(QWidget *parent, Qt::WindowFlags flags) {
 
   this->scrollAreaWidgetContents->setLayout(m_renLayout);
 
+  m_interactor = vtkInteractorStyleRubberBand2D::New();
+
   m_renLayout->addWidget(m_renderWidget);
   m_renLayout->setContentsMargins ( 1,1,1,1 );
+  m_renWin2D = m_renderWidget->GetRenderWindow();
   m_inter2D = m_renderWidget->GetInteractor();
-  m_renWin2D = m_inter2D->GetRenderWindow();
+  m_inter2D->SetInteractorStyle(m_interactor);
   m_renderer2D = vtkRenderer::New();
   m_renWin2D->AddRenderer(m_renderer2D);
-
+  m_renderer2D->GetActiveCamera()->ParallelProjectionOn();
   m_container=NULL;
 
   m_selected = false;
@@ -46,6 +51,7 @@ rtOptions2DView::rtOptions2DView(QWidget *parent, Qt::WindowFlags flags) {
 
 rtOptions2DView::~rtOptions2DView() {
   m_renderer2D->Delete();
+  m_interactor->Delete();
 
   if (m_renderWidget) delete m_renderWidget;
 }
@@ -68,7 +74,7 @@ void rtOptions2DView::setStringList(QHash<int, QString> *textList) {
   combo2DObjects->clear();
   keyL = textList->keys();
   for (int ix1=0; ix1<textList->size(); ix1++) {
-    items.append(QString::number(keyL[ix1]) + QString(" ") + textList->value(keyL[ix1]));
+    items.append(QString::number(keyL[ix1]) + QString(" ") + textList->values()[ix1]);
   }
 
   // Add the new items.
@@ -83,10 +89,12 @@ void rtOptions2DView::setStringList(QHash<int, QString> *textList) {
 
 //! Try to re-render (refresh) this 2D window.
 void rtOptions2DView::tryRender() {
-  if (m_renderFlag) {
+  if (m_renderFlag && m_currProp) {
     m_renderFlag = false;
+    m_currProp->Modified();
     m_renWin2D->Modified();
     m_renWin2D->Render();
+
   }
 }
 
@@ -99,6 +107,7 @@ QSize rtOptions2DView::sizeHint() {
   return hint;
 }
 
+//! When this widget is resized we need to ensure that it remains a square.
 void rtOptions2DView::resizeEvent ( QResizeEvent * event ) {
   int numWid;
   int spac;
@@ -198,10 +207,13 @@ void rtOptions2DView::comboIndexChanged(int index) {
     std::cout << "No view with the name of: " << name.toStdString() << std::endl;
     return;
   }
+  m_currRenObj->update();
   m_currProp = m_currRenObj->get2DViewWithName(name);
+
 
   // Remove the current prop (if any)
   m_renderer2D->RemoveAllViewProps();
   m_renderer2D->AddViewProp(m_currProp);
+
   m_renderFlag=true;
 }

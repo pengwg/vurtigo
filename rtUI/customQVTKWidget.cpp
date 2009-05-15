@@ -50,6 +50,8 @@ void customQVTKWidget::mousePressEvent(QMouseEvent* event) {
   int renSize[2];
   bool eventUsed = false;
   int numItems;
+
+
 /*
   tempRen = rtObjectManager::instance().getMainWinHandle()->getRenderer();
   propCol = tempRen->GetViewProps();

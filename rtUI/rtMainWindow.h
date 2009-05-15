@@ -53,6 +53,10 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void addRenderItem(vtkProp* prop);
   void removeRenderItem(vtkProp* prop);
 
+  int createNew2DWidget();
+  bool remove2DWidget(int id);
+  rtOptions2DView* get2DWidget(int id);
+
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
   void itemChanged(QTreeWidgetItem * current, int column);
@@ -65,9 +69,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   void pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
 
-  int createNew2DWidget();
-  bool remove2DWidget(int id);
-  rtOptions2DView* get2DWidget(int id);
+
 
   void update2DWindowLists(QMultiHash<int, QString>* hash);
 

@@ -10,6 +10,12 @@
 #include <vtkOutlineFilter.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
+#include <vtkImageCast.h>
+#include <vtkImageActor.h>
+#include <vtkActor2D.h>
+#include <vtkImageMapper.h>
+#include <vtkImageReslice.h>
+
 
 //! The 3D Volume render object
 /*!
@@ -28,6 +34,8 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   void setupDataObject();
   void setupPipeline();
 
+  vtkImageReslice* m_transFilter;
+
   vtkVolumeRayCastMapper* m_rayMapper;
   vtkVolume* m_volumeActor;
 
@@ -37,6 +45,9 @@ class rt3DVolumeRenderObject : public rtRenderObject {
 
   // The 2D planes
   rtImagePlaneWidget *m_planes[3];
+  vtkImageCast* m_imgCast[3];
+  vtkImageMapper* m_imgMap[3];
+  vtkActor2D* m_actor2D[3];
  private:
 
 };

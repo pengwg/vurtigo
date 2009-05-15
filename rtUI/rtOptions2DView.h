@@ -7,6 +7,7 @@
 #include "vtkRenderWindowInteractor.h"
 #include "vtkRenderWindow.h"
 #include "vtkProp.h"
+#include "vtkInteractorStyleRubberBand2D.h"
 
 #include <QWidget>
 #include <QBoxLayout>
@@ -58,6 +59,7 @@ protected:
   vtkRenderWindow* m_renWin2D;
   vtkRenderer* m_renderer2D;
   vtkProp* m_currProp;
+  vtkInteractorStyleRubberBand2D* m_interactor;
   rtRenderObject* m_currRenObj;
 
   bool m_selected;

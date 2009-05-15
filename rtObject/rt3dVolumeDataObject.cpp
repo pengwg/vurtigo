@@ -220,13 +220,9 @@ void rt3DVolumeDataObject::setupGUI() {
 
   // 2D plane check boxes
   connect(m_optionsWidget.checkAxial3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
-  connect(m_optionsWidget.checkAxial2D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
-
   connect(m_optionsWidget.checkSagittal3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
-  connect(m_optionsWidget.checkSagittal2D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
-
   connect(m_optionsWidget.checkCoronal3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
-  connect(m_optionsWidget.checkCoronal2D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+
 }
 
 //! Clean the GUI widgets.

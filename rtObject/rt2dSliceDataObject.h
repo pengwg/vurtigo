@@ -3,6 +3,10 @@
 
 #include "rtDataObject.h"
 
+#include "vtkImageData.h"
+#include "vtkTransform.h"
+#include "vtkTransformFilter.h"
+
 //! A Single 2D Slice
 /*!
   @todo Implement this class
@@ -23,6 +27,9 @@ public:
   void setupGUI();
   void cleanupGUI();
   
+  vtkImageData* m_imgData;
+  vtkTransformFilter* m_transFilter;
+  vtkTransform* m_trans;
 };
 
 #endif 

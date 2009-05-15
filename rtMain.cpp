@@ -124,7 +124,8 @@ void loadTestData() {
   sinSrc->Update();
 
   vol3DData->copyNewImageData(sinSrc->GetOutput());
-
+  vol3DData->translateData(200, 20, 2);
+  vol3DData->getTransform()->RotateX(25); // Rotate around X 25 degrees
   sinSrc->Delete();
 
   bigVol3D = rtObjectManager::instance().addObjectOfType(rtConstants::OT_3DObject, "3D Volume 400 by 400 by 400");

@@ -50,11 +50,8 @@ public:
   bool getRenderRayTraceVolume() { return m_optionsWidget.groupRayCastVolume->isChecked(); }
 
   bool getAxial3D() { return m_optionsWidget.checkAxial3D->isChecked(); }
-  bool getAxial2D() { return m_optionsWidget.checkAxial2D->isChecked(); }
   bool getSagittal3D() { return m_optionsWidget.checkSagittal3D->isChecked(); }
-  bool getSagittal2D() { return m_optionsWidget.checkSagittal2D->isChecked(); }
   bool getCoronal3D() { return m_optionsWidget.checkCoronal3D->isChecked(); }
-  bool getCoronal2D() { return m_optionsWidget.checkCoronal2D->isChecked(); }
 
   bool isDataValid() { return m_imgDataValid; }
 

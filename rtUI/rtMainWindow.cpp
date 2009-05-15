@@ -286,12 +286,15 @@ void rtMainWindow::update2DViews() {
         renObj->update();
         m_view2DHash.value(keyL[ix1])->renderOn();
       }
-      // Render it!
+      // Render it! (Force a render)
+      m_view2DHash.value(keyL[ix1])->renderOn();
       m_view2DHash.value(keyL[ix1])->tryRender();
+
     }
   }
 }
 
+//! Connect the menu actions to the functions that handle them.
 void rtMainWindow::connectSignals() {
   // File Menu
   connect(actionPlugin_File, SIGNAL(triggered()), this, SLOT(loadPluginFile()));
