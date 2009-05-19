@@ -5,7 +5,8 @@
 
 #include "vtkImageData.h"
 #include "vtkTransform.h"
-#include "vtkTransformFilter.h"
+#include "vtkImageReslice.h"
+#include "vtkImageShiftScale.h"
 
 //! A Single 2D Slice
 /*!
@@ -22,14 +23,24 @@ public:
   void apply();
   void update();
 
+
+  bool isDataValid() { return m_imgDataValid; }
+  bool copyImageData2D(vtkImageData* img);
+  vtkImageData* getRawData() { return m_imgData; }
+  vtkImageData* getTransformedData() { return m_imgReslice->GetOutput(); }
+  vtkTransform* getTransform() { return m_trans; }
+
  protected:
   // Functions
   void setupGUI();
   void cleanupGUI();
   
   vtkImageData* m_imgData;
-  vtkTransformFilter* m_transFilter;
+  vtkImageShiftScale * m_imgUCharCast;
+  vtkImageReslice* m_imgReslice;
   vtkTransform* m_trans;
+
+  bool m_imgDataValid;
 };
 
 #endif 

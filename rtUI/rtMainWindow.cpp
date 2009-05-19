@@ -217,9 +217,11 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   // If the box is checked then add it to the renderer.
   if (current->checkState(column) == Qt::Checked) {
     temp->setVisible3D(true);
+    propTemp->PickableOn();
     addRenderItem(propTemp);
   } else {
     temp->setVisible3D(false);
+    propTemp->PickableOff();
     removeRenderItem(propTemp);
   }
 }

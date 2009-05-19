@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>1000</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,7 +22,7 @@
       </property>
       <widget class="QTabWidget" name="objectTabs">
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="objBrowse">
         <attribute name="title">
@@ -128,8 +128,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>185</width>
-               <height>167</height>
+               <width>238</width>
+               <height>242</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -156,7 +156,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>1000</width>
      <height>25</height>
     </rect>
    </property>

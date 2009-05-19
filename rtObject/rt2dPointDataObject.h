@@ -12,6 +12,13 @@ class rt2DPointDataObject : public rtDataObject
 Q_OBJECT
 
 public:
+  //! A representation of a 2D point.
+  class SimplePoint2D{
+    public:
+      int x,y;
+
+  };
+
   rt2DPointDataObject();
   ~rt2DPointDataObject();
 
