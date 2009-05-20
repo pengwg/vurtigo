@@ -200,6 +200,9 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
 }
 
 //! Called when the content of a tree item has changed.
+/*!
+  The main element that changes is the state of the check box. This function will add or remove elements form the renderer based on the state of the check box.
+  */
 void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   rtRenderObject *temp;
 
@@ -212,17 +215,16 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
 
   // Get the object
   temp = rtObjectManager::instance().getObjectWithID(current->text(1).toInt());
-  vtkPropAssembly* propTemp = temp->get3DPipeline();
 
   // If the box is checked then add it to the renderer.
   if (current->checkState(column) == Qt::Checked) {
-    temp->setVisible3D(true);
-    propTemp->PickableOn();
-    addRenderItem(propTemp);
+    if ( temp->addToRenderer(m_renderer3D) ) {
+      m_renderFlag3D = true;
+    }
   } else {
-    temp->setVisible3D(false);
-    propTemp->PickableOff();
-    removeRenderItem(propTemp);
+    if ( temp->removeFromRenderer(m_renderer3D) ) {
+      m_renderFlag3D = true;
+    }
   }
 }
 

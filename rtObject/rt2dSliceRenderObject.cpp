@@ -19,6 +19,16 @@ void rt2DSliceRenderObject::update() {
   resetUpdateTime();
 }
 
+//! Add this object to the given renderer.
+bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren) {
+
+}
+
+//! Remove this object from the given renderer.
+bool rt2DSliceRenderObject::removeFromRenderer(vtkRenderer* ren) {
+
+}
+
 //! Create the correct data object.
 void rt2DSliceRenderObject::setupDataObject() {
   m_dataObj = new rt2DSliceDataObject();

@@ -232,6 +232,11 @@ bool rtCathDataObject::getSNRAtLocation(int loc, double &SNR) {
     break;
   }
 
+  if (SNR < 0.01) {
+    // Safety test. All SNR of less than 0.01 is defaulted to the minimum.
+    SNR = 0.01;
+  }
+
   return true;
 }
 

@@ -19,6 +19,16 @@ void rtMatrixRenderObject::update() {
   resetUpdateTime();
 }
 
+//! Add this object to the given renderer.
+bool rtMatrixRenderObject::addToRenderer(vtkRenderer* ren) {
+
+}
+
+//! Remove this object from the given renderer.
+bool rtMatrixRenderObject::removeFromRenderer(vtkRenderer* ren) {
+
+}
+
 //! Create the correct data object.
 void rtMatrixRenderObject::setupDataObject() {
   m_dataObj = new rtMatrixDataObject();

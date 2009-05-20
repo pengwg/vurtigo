@@ -53,6 +53,24 @@ void rt3DPointBufferRenderObject::update() {
   updateTreeItem();
 }
 
+//! Add this object to the given renderer.
+bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren) {
+  if (!ren) return false;
+  setVisible3D(true);
+  if (ren->HasViewProp(m_pipe3D)) return false;
+  ren->AddViewProp(m_pipe3D);
+  return true;
+}
+
+//! Remove this object from the given renderer.
+bool rt3DPointBufferRenderObject::removeFromRenderer(vtkRenderer* ren) {
+  if (!ren) return false;
+  setVisible3D(false);
+  if (!ren->HasViewProp(m_pipe3D)) return false;
+  ren->RemoveViewProp(m_pipe3D);
+  return true;
+}
+
 //! Create the correct data object.
 void rt3DPointBufferRenderObject::setupDataObject() {
   m_dataObj = new rt3DPointBufferDataObject();

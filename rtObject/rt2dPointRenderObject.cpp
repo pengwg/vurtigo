@@ -19,6 +19,17 @@ void rt2DPointRenderObject::update() {
   resetUpdateTime();
 }
 
+//! Add this object to the given renderer.
+bool rt2DPointRenderObject::addToRenderer(vtkRenderer* ren) {
+
+}
+
+//! Remove this object from the given renderer.
+bool rt2DPointRenderObject::removeFromRenderer(vtkRenderer* ren) {
+
+}
+
+
 //! Create the correct data object.
 void rt2DPointRenderObject::setupDataObject() {
   m_dataObj = new rt2DPointDataObject();

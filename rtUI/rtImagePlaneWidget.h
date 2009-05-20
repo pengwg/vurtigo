@@ -4,6 +4,7 @@
 #include "vtkImagePlaneWidget.h"
 #include "vtkPropAssembly.h"
 #include "vtkAbstractPropPicker.h"
+#include "vtkActor.h"
 
 class rtImagePlaneWidget : public vtkImagePlaneWidget {
 
@@ -27,6 +28,10 @@ class rtImagePlaneWidget : public vtkImagePlaneWidget {
 
   vtkPropAssembly* getPropsInAssembly() { return m_propAssembly; }
   void fillWidgetActors(vtkPropAssembly* pa);
+
+  vtkActor* getMarginActor() { return this->MarginActor; }
+  vtkActor* getPlaneOutlineActor() { return this->PlaneOutlineActor; }
+  vtkActor* getTexturePlaneActor() { return this->TexturePlaneActor; }
 
   void SetEnabled(int enabling);
   void SetPicker(vtkAbstractPropPicker* picker);

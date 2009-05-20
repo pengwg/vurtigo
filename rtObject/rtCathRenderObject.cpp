@@ -55,6 +55,15 @@ void rtCathRenderObject::update() {
 
   int numLoc = dObj->getNumLocations();
 
+  // Check if there are no locations.
+  if (numLoc == 0) {
+    // Empty Catheter. Just skip the rendering by turning off all visibility.
+    if(m_splineActor) m_splineActor->VisibilityOff();
+    if(m_sphereActor) m_sphereActor->VisibilityOff();
+    if(m_coneActor) m_coneActor->VisibilityOff();
+    return;
+  }
+
   if (m_sphereList.size()!=numLoc) {
     // Number of locations has changed. So delete the old list and add a new one.
     while (!m_sphereList.empty()) {
@@ -69,12 +78,7 @@ void rtCathRenderObject::update() {
     }
   }
 
-  if (numLoc == 0) {
-    // Empty Catheter. Just skip the rendering by turning off all visibility.
-    m_splineActor->VisibilityOff();
-    m_sphereActor->VisibilityOff();
-    m_coneActor->VisibilityOff();
-  } else if (numLoc == 1) {
+  if (numLoc == 1) {
     // Just one location. Render just a ball and no spline or anything else.
     int loc;
     double coords[3];
@@ -156,6 +160,38 @@ void rtCathRenderObject::update() {
     m_coneActor->VisibilityOn();
   }
 
+}
+
+//! Add this object to the given renderer.
+bool rtCathRenderObject::addToRenderer(vtkRenderer* ren) {
+  if (!ren) return false;
+  setVisible3D(true);
+  if (!ren->HasViewProp(m_sphereActor)) {
+    ren->AddViewProp(m_sphereActor);
+  }
+  if (!ren->HasViewProp(m_splineActor)) {
+    ren->AddViewProp(m_splineActor);
+  }
+  if (!ren->HasViewProp(m_coneActor)) {
+    ren->AddViewProp(m_coneActor);
+  }
+  return true;
+}
+
+//! Remove this object from the given renderer.
+bool rtCathRenderObject::removeFromRenderer(vtkRenderer* ren) {
+  if (!ren) return false;
+  setVisible3D(false);
+  if (ren->HasViewProp(m_sphereActor)) {
+    ren->RemoveViewProp(m_sphereActor);
+  }
+  if (ren->HasViewProp(m_splineActor)) {
+    ren->RemoveViewProp(m_splineActor);
+  }
+  if (ren->HasViewProp(m_coneActor)) {
+    ren->RemoveViewProp(m_coneActor);
+  }
+  return true;
 }
 
 //! Create the correct data object.

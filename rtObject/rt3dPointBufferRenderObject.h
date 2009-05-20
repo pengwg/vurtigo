@@ -46,6 +46,11 @@ class rt3DPointBufferRenderObject : public rtRenderObject {
 
   void update();
 
+  //! Add this object to the given renderer.
+  virtual bool addToRenderer(vtkRenderer* ren);
+
+  //! Remove this object from the given renderer.
+  virtual bool removeFromRenderer(vtkRenderer* ren);
  protected:
   void setupDataObject();
   void setupPipeline();

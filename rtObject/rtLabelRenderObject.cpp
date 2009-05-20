@@ -26,11 +26,28 @@ void rtLabelRenderObject::update() {
   m_textActor2D->SetInput(dObj->getText().toStdString().c_str());
   m_textActor2D->SetTextProperty(dObj->getTextProperty());
 
-  if (m_mainWin && m_pipe3D->GetNumberOfConsumers() > 0) {
+  if (m_mainWin && m_textActor2D->GetNumberOfConsumers() > 0) {
     m_mainWin->setRenderFlag3D(true);
   }
 }
 
+//! Add this object to the given renderer.
+bool rtLabelRenderObject::addToRenderer(vtkRenderer* ren) {
+  if (!ren) return false;
+  setVisible3D(true);
+  if (ren->HasViewProp(m_textActor2D)) return false;
+  ren->AddViewProp(m_textActor2D);
+  return true;
+}
+
+//! Remove this object from the given renderer.
+bool rtLabelRenderObject::removeFromRenderer(vtkRenderer* ren) {
+  if (!ren) return false;
+  setVisible3D(false);
+  if (!ren->HasViewProp(m_textActor2D)) return false;
+  ren->RemoveViewProp(m_textActor2D);
+  return true;
+}
 
 void rtLabelRenderObject::setupDataObject() {
   m_dataObj = new rtLabelDataObject();

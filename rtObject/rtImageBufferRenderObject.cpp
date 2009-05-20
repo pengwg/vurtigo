@@ -19,6 +19,16 @@ void rtImageBufferRenderObject::update() {
   resetUpdateTime();
 }
 
+//! Add this object to the given renderer.
+bool rtImageBufferRenderObject::addToRenderer(vtkRenderer* ren) {
+
+}
+
+//! Remove this object from the given renderer.
+bool rtImageBufferRenderObject::removeFromRenderer(vtkRenderer* ren) {
+
+}
+
 //! Create the correct data object.
 void rtImageBufferRenderObject::setupDataObject() {
   m_dataObj = new rtImageBufferDataObject();

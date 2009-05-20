@@ -19,6 +19,16 @@ void rtNoneRenderObject::update() {
   resetUpdateTime();
 }
 
+//! Add this object to the given renderer.
+bool rtNoneRenderObject::addToRenderer(vtkRenderer* ren) {
+  return false;
+}
+
+//! Remove this object from the given renderer.
+bool rtNoneRenderObject::removeFromRenderer(vtkRenderer* ren) {
+  return false;
+}
+
 //! Create the correct data object.
 void rtNoneRenderObject::setupDataObject() {
   m_dataObj = new rtNoneDataObject();

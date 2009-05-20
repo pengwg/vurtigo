@@ -19,6 +19,16 @@ void rtColorFuncRenderObject::update() {
   resetUpdateTime();
 }
 
+//! Add this object to the given renderer.
+bool rtColorFuncRenderObject::addToRenderer(vtkRenderer* ren) {
+
+}
+
+//! Remove this object from the given renderer.
+bool rtColorFuncRenderObject::removeFromRenderer(vtkRenderer* ren) {
+
+}
+
 //! Create the correct data object.
 void rtColorFuncRenderObject::setupDataObject() {
   m_dataObj = new rtColorFuncDataObject();

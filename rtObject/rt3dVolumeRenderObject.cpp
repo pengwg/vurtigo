@@ -82,23 +82,7 @@ void rt3DVolumeRenderObject::update() {
 
   }
 
-  if ( dObj->getAxial3D() ) {
-    m_planes[0]->On();
-  } else {
-    m_planes[0]->Off();
-  }
-
-  if ( dObj->getSagittal3D() ) {
-    m_planes[1]->On();
-  } else {
-    m_planes[1]->Off();
-  }
-
-  if ( dObj->getCoronal3D() ) {
-    m_planes[2]->On();
-  } else {
-    m_planes[2]->Off();
-  }
+  update3PlaneStatus();
 
   if (dObj->getRenderRayTraceVolume()) {
     m_volumeActor->SetVisibility(1);
@@ -109,8 +93,84 @@ void rt3DVolumeRenderObject::update() {
     m_volumeActor->SetVisibility(0);
   }
 
-  if (m_mainWin && m_pipe3D->GetNumberOfConsumers() > 0) {
+  if ( m_mainWin ) {
     m_mainWin->setRenderFlag3D(true);
+  }
+}
+
+
+//! Add this object to the given renderer.
+bool rt3DVolumeRenderObject::addToRenderer(vtkRenderer* ren) {
+  if (!ren) return false;
+  setVisible3D(true);
+  if (!ren->HasViewProp(m_volumeActor)) {
+    ren->AddViewProp(m_volumeActor);
+  }
+  if (!ren->HasViewProp(m_outlineActor)) {
+    ren->AddViewProp(m_outlineActor);
+  }
+  for (int ix1=0; ix1<3; ix1++) {
+    if (!ren->HasViewProp( m_planes[ix1]->getMarginActor() ) ) {
+      ren->AddViewProp( m_planes[ix1]->getMarginActor() );
+    }
+    if (!ren->HasViewProp( m_planes[ix1]->getPlaneOutlineActor() ) ) {
+      ren->AddViewProp( m_planes[ix1]->getPlaneOutlineActor() );
+    }
+    if (!ren->HasViewProp( m_planes[ix1]->getTexturePlaneActor() ) ) {
+      ren->AddViewProp( m_planes[ix1]->getTexturePlaneActor() );
+    }
+
+  }
+  update3PlaneStatus();
+  return true;
+}
+
+//! Remove this object from the given renderer.
+bool rt3DVolumeRenderObject::removeFromRenderer(vtkRenderer* ren) {
+  if (!ren) return false;
+  setVisible3D(false);
+  if (ren->HasViewProp(m_volumeActor)) {
+    ren->RemoveViewProp(m_volumeActor);
+  }
+  if (ren->HasViewProp(m_outlineActor)) {
+    ren->RemoveViewProp(m_outlineActor);
+  }
+  for (int ix1=0; ix1<3; ix1++) {
+    if (ren->HasViewProp( m_planes[ix1]->getMarginActor() ) ) {
+      ren->RemoveViewProp( m_planes[ix1]->getMarginActor() );
+    }
+    if (ren->HasViewProp( m_planes[ix1]->getPlaneOutlineActor() ) ) {
+      ren->RemoveViewProp( m_planes[ix1]->getPlaneOutlineActor() );
+    }
+    if (ren->HasViewProp( m_planes[ix1]->getTexturePlaneActor() ) ) {
+      ren->RemoveViewProp( m_planes[ix1]->getTexturePlaneActor() );
+    }
+  }
+  update3PlaneStatus();
+  return true;
+}
+
+void rt3DVolumeRenderObject::update3PlaneStatus() {
+  rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
+
+  if (!dObj) return;
+
+  if ( dObj->getAxial3D() && getVisible3D() ) {
+    m_planes[0]->On();
+  } else {
+    m_planes[0]->Off();
+  }
+
+  if ( dObj->getSagittal3D() && getVisible3D() ) {
+    m_planes[1]->On();
+  } else {
+    m_planes[1]->Off();
+  }
+
+  if ( dObj->getCoronal3D() && getVisible3D() ) {
+    m_planes[2]->On();
+  } else {
+    m_planes[2]->Off();
   }
 }
 
@@ -191,8 +251,6 @@ void rt3DVolumeRenderObject::setupPipeline() {
     m_imgMap[ix1]->RenderToRectangleOn();
 
     m_actor2D[ix1]->SetMapper(m_imgMap[ix1]);
-    //m_actor2D[ix1]->SetPosition(0, 0);
-    //m_actor2D[ix1]->SetPosition2(1, 1);
   }
   m_pipe2D.insert("Axial", m_actor2D[0]);
   m_pipe2D.insert("Sagittal", m_actor2D[1]);

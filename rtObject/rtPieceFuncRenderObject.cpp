@@ -19,6 +19,20 @@ void rtPieceFuncRenderObject::update() {
   resetUpdateTime();
 }
 
+//! Add this object to the given renderer.
+bool rtPieceFuncRenderObject::addToRenderer(vtkRenderer* ren) {
+  if (!ren) return false;
+
+  return true;
+}
+
+//! Remove this object from the given renderer.
+bool rtPieceFuncRenderObject::removeFromRenderer(vtkRenderer* ren) {
+  if (!ren) return false;
+
+  return true;
+}
+
 //! Create the correct data object.
 void rtPieceFuncRenderObject::setupDataObject() {
   m_dataObj = new rtPieceFuncDataObject();

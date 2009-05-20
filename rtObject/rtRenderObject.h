@@ -10,6 +10,7 @@
 
 #include <vtkProp.h>
 #include <vtkPropAssembly.h>
+#include <vtkRenderer.h>
 
 #include "objTypes.h"
 class rtDataObject;
@@ -47,6 +48,12 @@ Q_OBJECT
 
   //! Apply changes from the modified data object.
   virtual void update() = 0;
+
+  //! Add this object to the given renderer.
+  virtual bool addToRenderer(vtkRenderer* ren) = 0;
+
+  //! Remove this object from the given renderer.
+  virtual bool removeFromRenderer(vtkRenderer* ren) = 0;
 
   void resetUpdateTime();
   bool updateNeeded();

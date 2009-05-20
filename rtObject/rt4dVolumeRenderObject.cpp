@@ -19,6 +19,20 @@ void rt4DVolumeRenderObject::update() {
   resetUpdateTime();
 }
 
+//! Add this object to the given renderer.
+bool rt4DVolumeRenderObject::addToRenderer(vtkRenderer* ren) {
+  if (!ren) return false;
+  setVisible3D(true);
+
+}
+
+//! Remove this object from the given renderer.
+bool rt4DVolumeRenderObject::removeFromRenderer(vtkRenderer* ren) {
+  if (!ren) return false;
+  setVisible3D(false);
+
+}
+
 //! Create the correct data object.
 void rt4DVolumeRenderObject::setupDataObject() {
   m_dataObj = new rt4DVolumeDataObject();
