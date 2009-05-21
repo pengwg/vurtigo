@@ -111,7 +111,7 @@ class DataInterface {
   virtual void point3DSelected(double px, double py, double pz, int intensity) = 0;
 
  protected:
-  DataInterface() { m_updateTime=-1; m_lastUpdate=QDateTime::currentDateTime(); }
+  DataInterface() { m_updateTime=-1; m_lastUpdate=QDateTime::currentDateTime(); m_mainWidget = NULL; }
 
   QWidget* m_mainWidget;
   int m_uniqueID;

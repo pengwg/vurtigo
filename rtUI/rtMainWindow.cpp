@@ -67,6 +67,8 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   scrollAreaWidget->setLayout(&m_scrollArea2DImagesLayout);
 
+  pluginBrowseFrame->setLayout(&m_pluginWidgetLayout);
+
   viewChangedMixed();
   populateObjectTypeNames();
   connectSignals();
@@ -254,12 +256,32 @@ void rtMainWindow::removeRenderItem(vtkProp* prop) {
 
 //! Called when the user clicks on a different plugin in the viewer.
 /*!
-  @todo Implement this function to add plugin options to the bottom of the GUI.
+  When a new plugin is selected in the list this function is called.
+  @param current The pointer to the element selected or NULL is if none was selected.
+  @param previous Pointer to the last selected element.
  */
 void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous) {
+  int id;
+  bool convOK;
+  QWidget* plugWidget;
+
+  // Empty the layout.
+  while (m_pluginWidgetLayout.count() > 0) {
+    m_pluginWidgetLayout.takeAt(0);
+  }
+
+  // Check if there is a new item to use.
   if (!current) return;
 
-  std::cout << "Plugin selection changed." << std::endl;
+  // First column contains the unique ID
+  id = current->text(0).toInt(&convOK, 10);
+
+  if (!convOK) return;
+
+  plugWidget = rtPluginLoader::instance().getPluginWithID(id)->getWidget();
+  if (plugWidget) {
+    m_pluginWidgetLayout.addWidget(plugWidget);
+  }
 }
 
 //! Try to render the 3D window.

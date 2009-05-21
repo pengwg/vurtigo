@@ -108,6 +108,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   //! Max Number of 2D Widgets
   int m_max2DWidgets;
 
+  //! Layout for the plugin widget.
+  QHBoxLayout m_pluginWidgetLayout;
+
   void connectSignals();
   void setupObjectTree();
   void populateObjectTypeNames();
