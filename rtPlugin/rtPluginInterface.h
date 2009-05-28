@@ -93,7 +93,7 @@ class DataInterface {
   void tryUpdate() {
     if (getUpdateTime() >= 0) {
       QDateTime time( m_lastUpdate );
-      time.addMSecs(getUpdateTime());
+      time = time.addMSecs(getUpdateTime());
       if (QDateTime::currentDateTime() > time) {
         update();
         m_lastUpdate = QDateTime::currentDateTime();
