@@ -1,0 +1,17 @@
+# List of source files.
+set(SRC_FILES
+  GeomServerPlugin.cpp
+  sender.cpp
+  geom_client.cpp
+  genericMode.cpp
+  readOnlyMode.cpp
+)
+
+# MOC files are the ones the use Q_OBJECT
+set (MOC_FILES
+  GeomServerPlugin.h
+)
+
+qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES} )
+add_library(GeomServer SHARED ${SRC_FILES} ${MOC_FILES_OUT})
+target_link_libraries(GeomServer ${QT_LIBRARIES} rtObject rtPlugin)
