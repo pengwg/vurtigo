@@ -49,6 +49,9 @@ bool GeomServerPlugin::init() {
   mode = new ReadOnlyMode();
 
   connectAndMessage(sender);
+
+  mode->init(sender, &args);
+  setUpdateTime(UPDATE_TIME);
   return true;
 }
 
@@ -64,6 +67,7 @@ void GeomServerPlugin::cleanup() {
 //TODO: What triggers retrieveInfo()? in update()? set m_updatetime too? (update) (yes, set update time)
 void GeomServerPlugin::retrieveInfo() {
   //get info
+  mode->runMode();
 
   //TODO: Guess there is only one obj right? (no, map it)
   //if (!objExists()) addObjectOfType();
@@ -71,7 +75,8 @@ void GeomServerPlugin::retrieveInfo() {
 }
 
 void GeomServerPlugin::update() {
-    retrieveInfo();
+    std::cout << "Updating" << std::endl; //for testing
+//    retrieveInfo();
 }
 
 void GeomServerPlugin::point3DSelected(double px, double py, double pz, int intensity) {

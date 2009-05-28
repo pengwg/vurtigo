@@ -5,6 +5,8 @@
 #include "genericMode.h"
 #include "sender.h"
 
+#define UPDATE_TIME 1000
+
 class GeomServerPlugin : public QObject, public DataInterface {
 
   Q_OBJECT
