@@ -36,6 +36,10 @@ bool GeometrySender::connect(char* hostname, int port, bool swap){
   return m_clientID > 0;
 }
 
+bool GeometrySender::isConnected(){
+  return m_clientID > 0;
+}
+
 void GeometrySender::disconnect() {
   m_clientID = 0;
   if (m_geomClient) m_geomClient->disconnect();

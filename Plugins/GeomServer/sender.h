@@ -18,6 +18,7 @@ class GeometrySender {
 
 	bool connect(char*, int, bool);
 	void disconnect();        
+        bool isConnected();
 
         bool initializeCath(int cathMode, int numCoils);
         bool sendNextCath(CATHDATA cDat);

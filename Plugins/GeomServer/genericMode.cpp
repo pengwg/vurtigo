@@ -64,7 +64,7 @@ void GenericMode::print() {
 void GenericMode::getAllGeom() {
   IMAGEDATA* currImg;
   CATHDATA* currCath;
-  COILDATA* coilDat;
+  COILDATA coilDat;
   float *rotation, *translation;
   float* volTrans;
 
@@ -93,14 +93,14 @@ void GenericMode::getAllGeom() {
   currImg->imgSize = m_sender->getImgSize();
   currImg->numChannels = m_sender->getNumChan();
 
-  for (ix1=0; ix1<ROT_MATRIX_SIZE; ix1++) {
+  for (ix1=0; ix1<ROT_MATRIX_SIZE && rotation; ix1++) {
     currImg->rotMatrix[ix1] = rotation[ix1];
   }
 
-  for (ix1=0; ix1<TRANS_MATRIX_SIZE; ix1++) {
+  for (ix1=0; ix1<TRANS_MATRIX_SIZE && translation; ix1++) {
     currImg->transMatrix[ix1] = translation[ix1];
   }
-  
+
   // The volume translation.
   volTrans = m_sender->getVolTranslation();
 
@@ -114,15 +114,15 @@ void GenericMode::getAllGeom() {
     currCath->numCoils = m_sender->getNumCathCoils();
     currCath->coils.clear();
     for (ix1=0; ix1<currCath->numCoils; ix1++) {
-      coilDat->locID = m_sender->getCathLocID(ix1);
-      coilDat->SNR = m_sender->getCathSNR(ix1);
+      coilDat.locID = m_sender->getCathLocID(ix1);
+      coilDat.SNR = m_sender->getCathSNR(ix1);
       coords = m_sender->getCathCoords(ix1);
       angles = m_sender->getCathAngles(ix1);
 
-      memcpy(coilDat->coords, coords, COORDS_SIZE*sizeof(float));
-      memcpy(coilDat->angles, angles, ANGLES_SIZE*sizeof(float));
+      memcpy(coilDat.coords, coords, COORDS_SIZE*sizeof(float));
+      memcpy(coilDat.angles, angles, ANGLES_SIZE*sizeof(float));
 
-      currCath->coils.push_back(*coilDat);      
+      currCath->coils.push_back(coilDat);
     }
   }
 }

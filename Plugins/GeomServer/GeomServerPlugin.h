@@ -4,8 +4,9 @@
 #include "rtPluginInterface.h"
 #include "genericMode.h"
 #include "sender.h"
+#include "Converter.h"
 
-#define UPDATE_TIME 1000
+#define UPDATE_TIME 5000
 
 class GeomServerPlugin : public QObject, public DataInterface {
 
@@ -21,13 +22,15 @@ class GeomServerPlugin : public QObject, public DataInterface {
 
  private:
   GeometrySender * sender;
-  struct arguments args;
+  arguments args;
   GenericMode * mode;
+  Converter * converter;
 
   //! Sets default arguments for args
   void setDefaults();
   //! Connect and print appropriate message to console
   bool connectAndMessage(GeometrySender * sender);
+
   //! Read the information
   void retrieveInfo();
 };

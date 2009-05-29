@@ -22,6 +22,16 @@ class QMutex;
 class GeomClient {
 
   public:
+
+  enum SocketError{
+    NoError = 0, 
+    ConnectionRefusedError, 
+    RemoteHostClosedError,
+    HostNotFoundError, 
+    OtherError
+  };
+
+
     GeomClient();
     ~GeomClient();
 
@@ -47,7 +57,10 @@ class GeomClient {
     void setNumCathCoils(int clientID, int cathCoils);
     void setCathMode(int clientID, int mode);
     void setVolumeTranslation(int clientID, float* trans);
-    
+
+    void setErrorState(SocketError es) { m_eState = es; }
+    void clearErrorState() { m_eState = NoError; }
+
     // Functions for querying geometry information
     int getLastClientWrite();
     float* getRotation();
@@ -66,11 +79,16 @@ class GeomClient {
     int getNumCathCoils();
     int getCathMode();
     float* getVolumeTranslation();
-    
+
+    SocketError getErrorState() { return m_eState; }
+
   private:
     QDataStream* m_geomXfer;    // Recon server for images
     QTcpSocket* m_geomSocket;   // Connection to the image recon server
     QMutex* m_commLock;         // A lock to prevent a client from calling one function before another has finished.
+
+    //! The socket error state. Value of zero if there is no error. 
+    SocketError m_eState;
 
     int m_coilID;
 

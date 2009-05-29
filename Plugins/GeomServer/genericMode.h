@@ -7,12 +7,12 @@
 
 //** Defines the superclass for all modes. This class cannot and should not be instantiated directly. 
 class GenericMode{
- private:
+ public:
+  virtual ~GenericMode();
 
  protected:
   // This class cannot be created directly. 
   GenericMode();
-  virtual ~GenericMode();
 
   // Variables that are common to all modes. 
   GeometrySender* m_sender; //! Object that communicates with the Geometry Server. 
@@ -34,6 +34,10 @@ class GenericMode{
   // Print the data. 
   void print();
   void getAllGeom();
+
+  std::vector<CATHDATA> & getCath() {
+    return m_cathDataArray;
+  }
 };
 
 

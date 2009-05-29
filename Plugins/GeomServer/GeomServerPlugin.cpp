@@ -1,14 +1,16 @@
+/*
+  - Cleanup
+  - Convert <<-ing a QString
+*/
 #include "GeomServerPlugin.h"
 #include <iostream>
+
 #include "readOnlyMode.h"
+#include "rtObjectManager.h"
 
 using namespace std;
 
-//TODO: No constructor? (use init and cleanup)
-//TODO: How to generate doxygen docs (make doc)
-
 void GeomServerPlugin::objectModified(int objID) {
-  //TODO: objectModified()?
 }
 
 void GeomServerPlugin::setDefaults() {
@@ -32,6 +34,7 @@ bool GeomServerPlugin::connectAndMessage(GeometrySender * sender) {
   if (!sender->connect(args.hostname,args.port,args.swap)) {
     char * server = "Geometry Server";
     cerr << "Error connecting to " << server <<". Check that " << server << " is running on port " << args.port << " on host: " << args.hostname << endl;
+    sender->disconnect();
     return false;
   } else {
     cout << "Connection with: " << args.hostname << ":" << args.port << " established." << endl;
@@ -47,6 +50,7 @@ bool GeomServerPlugin::init() {
   setDefaults();
   sender = new GeometrySender();
   mode = new ReadOnlyMode();
+  converter = new Converter();
 
   connectAndMessage(sender);
 
@@ -57,26 +61,23 @@ bool GeomServerPlugin::init() {
 
 void GeomServerPlugin::cleanup() {
   delete sender;
-//  delete mode;
+  delete mode;
+  delete converter;
   std::cout << "Server out " << std::endl; //for testing
 }
 
-//TODO: guess i take the GeometrySender (sender.cpp/.h in tester) code. how do i compile with geom_client.h? (hard code for now...)
-//TODO: what does the server store exactly? (just one stream of "video"?) (multiple planes, catheters. use: setPlaneID)
-
-//TODO: What triggers retrieveInfo()? in update()? set m_updatetime too? (update) (yes, set update time)
 void GeomServerPlugin::retrieveInfo() {
-  //get info
-  mode->runMode();
-
-  //TODO: Guess there is only one obj right? (no, map it)
-  //if (!objExists()) addObjectOfType();
-  //update object
+  if (sender->isConnected()) {
+    converter->setLocalCathAll(*mode);
+  }
+  else if (connectAndMessage(sender)) {
+    converter->setLocalCathAll(*mode);
+  }
 }
 
 void GeomServerPlugin::update() {
     std::cout << "Updating" << std::endl; //for testing
-//    retrieveInfo();
+    retrieveInfo();
 }
 
 void GeomServerPlugin::point3DSelected(double px, double py, double pz, int intensity) {

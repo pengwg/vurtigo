@@ -35,6 +35,7 @@ GeomClient::GeomClient ()
 : m_geomXfer(0), m_image(0) {
     m_geomSocket = new QTcpSocket();
     m_commLock = new QMutex();
+    m_eState = NoError;
 }
 
 // Destructor
@@ -79,7 +80,6 @@ GeomClient::~GeomClient () {
 // and uses (1) or doesn't use (0) network byte swapping based on
 // the value of the swap parameter
   int GeomClient::connect(const char *hostname, int port, bool swap) {
-  (void)swap;
   qint32 message_size=0;
 
   // Lock.
@@ -94,6 +94,7 @@ GeomClient::~GeomClient () {
   if (!m_geomSocket->waitForConnected(2000)) {
     cout << "Socket Failed to Connect. " << endl;
     cout << m_geomSocket->error() << endl;
+    m_commLock->unlock();
     return -1;
   }
   
@@ -899,7 +900,6 @@ int GeomClient::getCathLocationID(int coil_ID) {
   (*m_geomXfer) >> locationID;
   m_geomSocket->flush();
   m_commLock->unlock();
-
   return (int)locationID;
 }
 
