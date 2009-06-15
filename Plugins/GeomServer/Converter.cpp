@@ -4,10 +4,9 @@
 
 #include "rtBaseHandle.h"
 
-#include "readOnlyMode.h"
-
 #define REMOTE_CATH_ID 1 //only one Cathater for now, thus a hardcorded id
 #define NULL_ID -1 //id returned if not found
+#define CATH_OBJ_NAME "GeomCath" //name of new cath objects
 
 //#ifndef DEBUG_CONVERTER
 //#define DEBUG_CONVERTER
@@ -117,7 +116,7 @@ int Converter::getRemoteCoilId(int localCathId, int localCoilId) {
 
 //gets the local cath does the internal casting
 rtCathDataObject * Converter::getLocalCath(int remoteId) {
-  Node * node = getRTObjNode(remoteId, localCathMap, remoteCathMap, rtConstants::OT_Cath, "Cath");
+  Node * node = getRTObjNode(remoteId, localCathMap, remoteCathMap, rtConstants::OT_Cath, CATH_OBJ_NAME);
   rtDataObject * obj = NULL;
   if (node != NULL)
     obj = rtBaseHandle::instance().getObjectWithID(node->currId);
@@ -207,11 +206,11 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
   return success;
 }
 
-bool Converter::setLocalCathAll(GenericMode & mode) {
-  mode.runMode();
+bool Converter::setLocalCathAll(SenderSimp & sender) {
+  sender.runReadMode();
 
   //get all caths
-  vector<CATHDATA> & remoteCaths = mode.getCath();
+  vector<CATHDATA> & remoteCaths = sender.getCaths();
   rtCathDataObject * localCath;
 
   //for all remote caths

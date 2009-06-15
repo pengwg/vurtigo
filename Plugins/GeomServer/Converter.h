@@ -1,6 +1,6 @@
-#ifndef CONVERTER_H
-#define CONVERTER_H
-#include "GenericMode.h"
+#ifndef PLUGIN_CONVERTER_H
+#define PLUGIN_CONVERTER_H
+#include "SenderSimp.h"
 
 #include <map>
 #include "arguments.h"
@@ -46,7 +46,7 @@ public:
   void printAllLocalCath();
 
   bool setLocalCath(CATHDATA & remote, rtCathDataObject * local);
-  bool setLocalCathAll(GenericMode & mode);
+  bool setLocalCathAll(SenderSimp & sender);
 
   bool setImage(IMAGEDATA & remote, rtImageBufferDataObject * local);
 };

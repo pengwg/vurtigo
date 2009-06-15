@@ -7,11 +7,11 @@ class ReadOnlyMode : public GenericMode {
  public:
   ReadOnlyMode();
   virtual ~ReadOnlyMode();
-  
+
   // Init
   bool init(GeometrySender* geom, struct arguments* args);
-  
-  // Start the mode running. 
+
+  // Start the mode running.
   void runMode();
  private:
   bool m_prompt;

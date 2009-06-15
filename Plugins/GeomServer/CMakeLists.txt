@@ -6,11 +6,14 @@ set(SRC_FILES
   genericMode.cpp
   readOnlyMode.cpp
   Converter.cpp
+  GeomServerUI.cpp
+  SenderSimp.cpp
 )
 
 # MOC files are the ones the use Q_OBJECT
 set (MOC_FILES
   GeomServerPlugin.h
+  GeomServerUI.h
 )
 
 qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES} )

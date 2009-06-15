@@ -77,6 +77,7 @@ set (UI_FILES
   rtUI/axesProperties.ui
   rtUI/volume3DOptions.ui
   rtUI/options2DView.ui
+  Plugins/GeomServer/GeomServer.ui
 )
 
 qt4_wrap_ui(UI_FILES_OUT ${UI_FILES})
