@@ -1,10 +1,11 @@
 # List of source files.
 set(SRC_FILES
-  GeomServerPlugin.cpp
   sender.cpp
   geom_client.cpp
   genericMode.cpp
   readOnlyMode.cpp
+  writeOnlyMode.cpp
+  GeomServerPlugin.cpp
   Converter.cpp
   GeomServerUI.cpp
   SenderSimp.cpp

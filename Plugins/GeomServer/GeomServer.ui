@@ -67,7 +67,7 @@
          <string>Connect On Startup</string>
         </property>
         <property name="checked">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -75,43 +75,68 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="actionsGroupBox">
+    <widget class="QGroupBox" name="sendFileGroupBox">
      <property name="title">
-      <string>Actions</string>
+      <string>Send File</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="3">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
        <layout class="QGridLayout" name="sendFileGridLayout">
         <item row="0" column="1">
-         <widget class="QLineEdit" name="sendFileLineEdit"/>
+         <widget class="QLineEdit" name="fileDirLineEdit"/>
         </item>
         <item row="0" column="2">
-         <widget class="QToolButton" name="sendFileToolButton">
+         <widget class="QToolButton" name="fileDirToolButton">
           <property name="text">
            <string>...</string>
           </property>
          </widget>
         </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="fileDirLabel">
+          <property name="text">
+           <string>File Directory:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="fileTypeLabel">
+          <property name="text">
+           <string>Text File Type:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <layout class="QGridLayout" name="fileTypeRadioGridLayout">
+          <item row="0" column="0">
+           <widget class="QRadioButton" name="fileTypeCathRadio">
+            <property name="text">
+             <string>Cathater</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QRadioButton" name="fileTypeImageRadio">
+            <property name="text">
+             <string>Image</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
        </layout>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="sendFileLabel">
-        <property name="text">
-         <string>Send File:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <layout class="QGridLayout" name="sendButtonGridLayout">
-        <item row="0" column="1">
-         <widget class="QPushButton" name="sendButton">
+      <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="2">
+         <widget class="QPushButton" name="sendFileButton">
           <property name="text">
            <string>Send</string>
           </property>
          </widget>
         </item>
         <item row="0" column="0">
-         <spacer name="sendButtonSpacer">
+         <spacer name="sendFileButtonSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>

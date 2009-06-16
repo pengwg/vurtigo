@@ -1,14 +1,17 @@
 #include "GeomServerUI.h"
 #include <QFileDialog>
+#include <iostream>
 #include <sstream>
 
 #include "arguments.h"
 
+using namespace std;
+
 void GeomServerUI::setupSlots() {
   connect(connectButton, SIGNAL(clicked()), this, SLOT(serverConnect()));
   connect(disconnectButton, SIGNAL(clicked()), this, SLOT(serverDisconnect()));
-  connect(sendFileToolButton, SIGNAL(clicked()), this, SLOT(selectSendFile()));
-  connect(connectButton, SIGNAL(clicked()), this, SLOT(sendFile()));
+  connect(fileDirToolButton, SIGNAL(clicked()), this, SLOT(selectSendFile()));
+  connect(sendFileButton, SIGNAL(clicked()), this, SLOT(sendFile()));
 }
 
 void GeomServerUI::setupDefaults() {
@@ -54,9 +57,15 @@ void GeomServerUI::serverDisconnect() {
 
 void GeomServerUI::selectSendFile() {
   const char * message = "Select file to send";
-  sendFileLineEdit->insert(QFileDialog::getOpenFileName(this, message, ".", OPEN_FILE_TYPES));
+  fileDirLineEdit->insert(QFileDialog::getOpenFileName(this, message, ".", OPEN_FILE_TYPES));
 }
 
 void GeomServerUI::sendFile() {
-
+  QString fileDir = fileDirLineEdit->text();
+  SenderSimp::TxtFileType fileType = SenderSimp::tft_None;
+  if (fileTypeCathRadio->isChecked()) {
+    fileType = SenderSimp::tft_Cath;
+  }
+  
+  sender.sendFile(fileDir, fileType);
 }

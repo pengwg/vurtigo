@@ -1,5 +1,7 @@
 #include "SenderSimp.h"
 #include <iostream>
+#include "readOnlyMode.h"
+#include "writeOnlyMode.h"
 
 using namespace std;
 
@@ -23,6 +25,8 @@ void SenderSimp::setSenderDefaults() {
 SenderSimp::SenderSimp() {
   sender = new GeometrySender();
   readMode = new ReadOnlyMode();
+  writeMode = new WriteOnlyMode();
+  tempConnect = false;
 
   setSenderDefaults();
   readMode->init(sender, &args);
@@ -31,6 +35,7 @@ SenderSimp::SenderSimp() {
 SenderSimp::~SenderSimp() {
   delete sender;
   delete readMode;
+  delete writeMode;
 }
 
 bool SenderSimp::connectAndMessage() {
@@ -50,7 +55,7 @@ bool SenderSimp::connectAndMessage() {
 }
 
 bool SenderSimp::isConnected() {
-  return sender->isConnected();
+  return sender->isConnected() && !tempConnect;
 }
 
 void SenderSimp::disconnect() {
@@ -64,7 +69,7 @@ void SenderSimp::disconnect() {
 }
 
 void SenderSimp::runReadMode() {
-  readMode->runMode();
+    readMode->runMode();
 }
 
 arguments * SenderSimp::getArgs() {
@@ -75,17 +80,32 @@ vector<CATHDATA> & SenderSimp::getCaths() {
   return readMode->getCaths();
 }
 
-//TODO: Assume GUI triggers this function? (yes, signals and slots QT)
-bool sendInfo(/*info parm*/) {
-  //change param to sendable obj
+bool SenderSimp::setFileType(QString & fileDir, TxtFileType fileType) {
+  if (fileDir.endsWith(TXT_EXT)) {
+    if (fileType == tft_Cath) {
+      args.cathFile = fileDir.toAscii().data();
+      return true;
+    }
+  }
+  cout << "Send file type not supported. Check text file type?" << endl;
+  return false;
+}
 
-  //TODO: Assume send a rtObjectType::OT_Cath or ImageData?? (yes these two)
-  //return true or false
+bool SenderSimp::sendFile(QString & fileDir, TxtFileType fileType) {
+  if (setFileType(fileDir, fileType)) {
+    if (!sender->isConnected()) {
+      tempConnect = true;
+      connectAndMessage();
+    }
 
-//  if (sender->isConnected()) {
-//    converter->setLocalCathAll(*mode);
-//  }
-//  else if (connectAndMessage(sender)) {
-//    converter->setLocalCathAll(*mode);
-//  }
+    writeMode->init(sender, &args);
+    writeMode->runMode();
+
+    if (tempConnect) {
+      disconnect();
+      tempConnect = false;
+    }
+    return true;
+  }
+  return false;
 }

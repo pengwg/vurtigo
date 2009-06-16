@@ -4,8 +4,6 @@
 #include "ui_GeomServer.h"
 #include "SenderSimp.h"
 
-#define OPEN_FILE_TYPES "*.dcm *.cat, *.txt"
-
 class GeomServerUI : public QWidget, private Ui::MainUI {
   Q_OBJECT
 
