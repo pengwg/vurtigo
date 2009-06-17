@@ -16,10 +16,6 @@ bool GeomServerPlugin::init() {
 }
 
 void GeomServerPlugin::cleanup() {
-  //GUI objects
-//  delete m_mainWidget;
-
-  //other objects
   delete converter;
   delete sender;
 }
@@ -32,9 +28,13 @@ void GeomServerPlugin::point3DSelected(double px, double py, double pz, int inte
 
 }
 
+//! Get info from the server if connected
 void GeomServerPlugin::retrieveInfo() {
   if (sender->isConnected()) {
+    sender->runReadMode();
     converter->setLocalCathAll(*sender);
+    converter->setLocalImageAll(*sender);
+    converter->printHeaderFooter(&Converter::printAll);
   }
 }
 

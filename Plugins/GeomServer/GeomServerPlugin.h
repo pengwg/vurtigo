@@ -5,8 +5,13 @@
 #include "Converter.h"
 #include "SenderSimp.h"
 
-#define UPDATE_TIME 5000
+//Time in milliseconds the the plug calls update()
+#define UPDATE_TIME 10000
 
+//! Plugin object for GeomServer
+/*!
+  Workflow from the plugin side and management of high level objects is done here.
+ */
 class GeomServerPlugin : public QObject, public DataInterface {
 
   Q_OBJECT
@@ -20,7 +25,9 @@ class GeomServerPlugin : public QObject, public DataInterface {
   void point3DSelected(double px, double py, double pz, int intensity);
 
  private:
+   //! Maps the ids locally on and the server
    Converter * converter;
+   //! Wrapper to simply sending information
    SenderSimp * sender;
 
     //! Read the information

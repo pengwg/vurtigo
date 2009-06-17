@@ -11,9 +11,6 @@ using namespace std;
 //#include "dcdatset.h"
 //#include "dctagkey.h"
 
-
-
-
 WriteOnlyMode::WriteOnlyMode() {
 //  m_ddata.transform = vtkMatrix4x4::New();
 }
@@ -24,12 +21,6 @@ WriteOnlyMode::~WriteOnlyMode() {
 
 bool WriteOnlyMode::init(GeometrySender* geom, struct arguments* args) {
   m_sender = geom;
-
-  // Setup the parameters. 
-  m_numIter = args->iterations;
-  m_outputImg = args->outputImages;
-  m_sleep = args->sleep;
-  m_prompt = args->userPrompt;
  
   // Arrays can be set up when the files are read. 
   m_planeID = 0;
@@ -40,43 +31,25 @@ bool WriteOnlyMode::init(GeometrySender* geom, struct arguments* args) {
 
   // Set the default to send nothing. 
   m_useCathInfo = false;
-  m_useVolTransFile = false;
   m_useDICOMFile = false;
-  m_useSetAllFile = false;
-  m_useExTransFile = false;
 
 
   m_numCathPoints = 0;
-  m_numVolTransPoints = 0;
   m_numDCMPoints = 0;
-  m_numSetAllPoints = 0;
-  m_numExTransPoints = 0;
 
   args->cathFile = "dataFiles/cathMoving.txt";
 
   if (args->cathFile != NULL) {
     m_useCathInfo = setCatheterFile(args->cathFile) && (m_numCathPoints>0) && m_sender->initializeCath(m_cathDataArray[0].cathMode, m_cathDataArray[0].numCoils);
   }
-//  if (args->volFile != NULL) {
-//    m_useVolTransFile = setVolTransFile(args->volFile) && (m_numVolTransPoints>0);
-//  }
 //  if(args->dicomFile != NULL) {
 //    m_useDICOMFile = setDICOMFile(args->dicomFile) && (m_numDCMPoints>0);
 //  }
-//  if(args->setAllFile !=NULL && !m_useDICOMFile) {
-//    m_useSetAllFile = setSetAllFile(args->setAllFile) && (m_numSetAllPoints>0);
-//  }
-//  if (args->transFile != NULL && !m_useDICOMFile && !m_useSetAllFile) {
-//    m_useExTransFile = setExtraTransFile(args->transFile) && (m_numExTransPoints>0);
-//  }
+     m_useDICOMFile = args->dicomFile != NULL;
 
 
   if (m_useCathInfo) cout << "Use Catheter with: " << m_numCathPoints << " time points." << endl;
-  if (m_useVolTransFile) cout << "Use Volume Translation with: " << m_numVolTransPoints << " time points." << endl;
   if (m_useDICOMFile) cout << "Use DICOM with: " << m_numDCMPoints << " time points." << endl;
-  if (m_useSetAllFile) cout << "Use SetAll with: " << m_numSetAllPoints << " time points." << endl;
-  if (m_useExTransFile) cout << "Use Extra Translation with: " << m_numExTransPoints << " time points." << endl;
-
 
   return true;
 }
@@ -86,41 +59,38 @@ void WriteOnlyMode::runMode() {
   float temp[3];
 
   cout << "STARTED SENDING: " << endl;
-  for (ix1=0; ix1<m_numIter; ix1++) {
     if (m_useCathInfo) {
       // There exists cath info to be sent. 
       m_sender->sendNextCath(m_cathDataArray[ix1%m_numCathPoints]);   
     }
 
-//    if (m_useVolTransFile) {
-//      temp[0] = m_volTransPoints[ix1%m_numVolTransPoints].x;
-//      temp[1] = m_volTransPoints[ix1%m_numVolTransPoints].y;
-//      temp[2] = m_volTransPoints[ix1%m_numVolTransPoints].z;
-//      m_sender->setVolTranslation(temp);
-//    }
-//
-//    // Only one of these options can be used at a time.
+    if (m_useDICOMFile) {
+      IMAGEDATA image;
+      image.trig = 0;
+      image.resp = 0;
+      image.numChannels = 1;
+      image.imgSize = 256;
+      image.img = (unsigned char *)"img";
+      image.FOV = 28;
+
+      float temp1[] = {-0.99, 0.01, -0.11, 0.11, 0.13, -0.99, 0.00, -0.99, -0.13};
+      for (int a = 0; a < 9; a++)
+          image.rotMatrix[a] = temp1[a];
+
+      float temp2[] = {-9.34, 23.66, -17.52};
+      for (int a = 0; a < 3; a++) {
+          image.transMatrix[a] = temp2[a];
+      }
+
+      m_numDCMPoints = 1;
+      m_imgDataArray.clear();
+      m_imgDataArray.push_back(image);
+      m_sender->sendImgData(&m_imgDataArray[ix1%m_numDCMPoints], m_planeID);
+    }
+
 //    if (m_useDICOMFile) {
 //      m_sender->sendImgData(&m_imgDataArray[ix1%m_numDCMPoints], m_planeID);
-//    } else if (m_useSetAllFile){
-//      m_sender->sendImgData(&m_imgDataArray[ix1%m_numSetAllPoints], m_planeID);
-//    } else if (m_useExTransFile) {
-//      temp[0] = m_exTransPoints[ix1%m_numExTransPoints].x;
-//      temp[1] = m_exTransPoints[ix1%m_numExTransPoints].y;
-//      temp[2] = m_exTransPoints[ix1%m_numExTransPoints].z;
-//      m_sender->setTranslation(temp);
 //    }
-
-    // Use either the prompt or the timer.
-    if (m_prompt) {
-      string input;
-      cout << "Hit [Enter] for next iteration ";
-      getline(cin, input);
-    } else {
-      usleep(m_sleep * 10000);
-      cout << "." << flush;
-    }
-  }
   cout << endl;
 }
 
@@ -187,119 +157,6 @@ bool WriteOnlyMode::setCatheterFile(string cathFile)
 
 }
 
-////! Read the file that sets a number of volume translations.
-//bool WriteOnlyMode::setVolTransFile(std::string volFile) {
-//  ifstream file;
-//  Point3D temp;
-//  int ix1;
-//
-//  file.open(volFile.c_str(), ios::in);
-//
-//  if (!file) {
-//    cerr << "Volume translation file: " << volFile << " could not be opened." << endl;
-//    m_numVolTransPoints = 0;
-//    return false;
-//  }
-//
-//  file >> m_numVolTransPoints;
-//  m_volTransPoints.clear();
-//  for (ix1=0; ix1< m_numVolTransPoints; ix1++) {
-//    file >> temp.x >> temp.y >> temp.z;
-//    m_volTransPoints.push_back(temp);
-//  }
-//
-//  file.close();
-//
-//  return true;
-//}
-//
-////! Read the file that sets the extra translation to give to the matrix.
-//bool WriteOnlyMode::setExtraTransFile(std::string exFile) {
-//  ifstream file;
-//  Point3D temp;
-//  int ix1;
-//
-//
-//  file.open(exFile.c_str(), ios::in);
-//
-//  if (!file) {
-//    cerr << "Volume translation file: " << exFile << " could not be opened." << endl;
-//    m_numExTransPoints = 0;
-//    return false;
-//  }
-//
-//  file >> m_numExTransPoints;
-//  m_exTransPoints.clear();
-//  for (ix1=0; ix1< m_numExTransPoints; ix1++) {
-//    file >> temp.x >> temp.y >> temp.z;
-//    m_exTransPoints.push_back(temp);
-//  }
-//
-//  file.close();
-//
-//  return true;
-//}
-//
-//
-////! Init the data for the SET_ALL command.
-//bool WriteOnlyMode::setSetAllFile(std::string setAllFile) {
-//  int ix1;
-//  ifstream file;
-//  int totalSize;
-//  int temp;
-//
-//
-//  IMAGEDATA imgDat;
-//
-//  // Init with no image.
-//  imgDat.img = 0;
-//
-//  file.open(setAllFile.c_str(), ios::in);
-//  if (!file) {
-//    cerr << "Could not open file to use on setAll command " << setAllFile << ". Continuing without SetAll." << endl;
-//    return false;
-//  }
-//
-//  file >> imgDat.trig;
-//  file >> imgDat.resp;
-//
-//  // Get the 3 by 3 rotation matrix.
-//  for (ix1=0; ix1<9; ix1++) {
-//    file >> imgDat.rotMatrix[ix1];
-//  }
-//
-//  // Get the 3 by 1 translation vector.
-//  for (ix1=0; ix1<3; ix1++) {
-//    file >> imgDat.transMatrix[ix1];
-//  }
-//
-//  file >> imgDat.FOV;
-//  file >> imgDat.imgSize;
-//  file >> imgDat.numChannels;
-//
-//  totalSize = imgDat.imgSize*imgDat.imgSize*imgDat.numChannels;
-//  if (totalSize <= 0 || totalSize > 2048*2048*16) {
-//    cerr << "Image Size from input file is corrupt " << totalSize << ". Continuing without SetAll." << endl;
-//    return false;
-//  }
-//
-//
-//  if (!imgDat.img) imgDat.img = new unsigned char[totalSize];
-//  for (ix1=0; ix1<totalSize; ix1++){
-//    file >> temp;
-//    imgDat.img[ix1] = (unsigned char)temp;
-//  }
-//
-//  // So far we only have one such point.
-//  m_numSetAllPoints = 1;
-//  m_imgDataArray.clear();
-//  m_imgDataArray.push_back(imgDat);
-//
-//  return true;
-//}
-//
-//
-//
 ////! Read a DICOM file for image data.
 //bool WriteOnlyMode::setDICOMFile(std::string setDICOMFile) {
 //  DcmFileFormat dcmFile;

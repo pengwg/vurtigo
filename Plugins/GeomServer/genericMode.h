@@ -18,7 +18,6 @@ class GenericMode{
   int m_lastClientIndex; //! The index of the last client that used this data.
   std::vector<IMAGEDATA> m_imgDataArray; //! All data related to the image.
   std::vector<CATHDATA> m_cathDataArray; //! All data related to the catheter
-  float m_volTransData[TRANS_MATRIX_SIZE]; //! The volume translation coords.
   int m_planeID;
  public:
 
@@ -37,6 +36,10 @@ class GenericMode{
 
   std::vector<CATHDATA> & getCaths() {
     return m_cathDataArray;
+  }
+
+  std::vector<IMAGEDATA> & getImages() {
+    return m_imgDataArray;
   }
 };
 

@@ -8,12 +8,6 @@ GenericMode::GenericMode():m_sender(0), m_lastClientIndex(0) {
 
   m_imgDataArray.clear();
   m_cathDataArray.clear();
-
-  // Set the translation to zero. 
-  for (ix1=0;  ix1<TRANS_MATRIX_SIZE; ix1++) {
-    m_volTransData[ix1] = 0;
-  }
-
 }
 
 GenericMode::~GenericMode() {
@@ -54,9 +48,6 @@ void GenericMode::print() {
       } 
     }
   }
-
-
-  cout << "Volume translaton: [" << m_volTransData[0] << " " << m_volTransData[1] <<  " " <<  m_volTransData[2] << " ]" << endl;
   cout << "-------------------------------- END PRINT" << endl;
 }
 
@@ -66,7 +57,6 @@ void GenericMode::getAllGeom() {
   CATHDATA* currCath;
   COILDATA coilDat;
   float *rotation, *translation;
-  float* volTrans;
 
   // Catheter data temp arrays
   float *coords;
@@ -100,14 +90,7 @@ void GenericMode::getAllGeom() {
   for (ix1=0; ix1<TRANS_MATRIX_SIZE && translation; ix1++) {
     currImg->transMatrix[ix1] = translation[ix1];
   }
-
-  // The volume translation.
-  volTrans = m_sender->getVolTranslation();
-
-  for (ix1=0; ix1<TRANS_MATRIX_SIZE; ix1++) {
-    m_volTransData[ix1] = volTrans[ix1];
-  }
-
+  
   // Get catheter information.
   currCath->cathMode = m_sender->getCathModeAsInt();
   if (NO_CATHETERS != static_cast<CatheterMode>(currCath->cathMode)) {

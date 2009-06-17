@@ -14,10 +14,6 @@ class ReadOnlyMode : public GenericMode {
   // Start the mode running.
   void runMode();
  private:
-  bool m_prompt;
-  bool m_outputImg;
-  int m_numIter;
-  int m_sleep;
   int m_numPlanes;
 };
 

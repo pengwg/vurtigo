@@ -11,17 +11,8 @@ struct arguments
   char* hostname;
   int port;
   bool swap;
-  int iterations;
-  int sleep;
-  bool outputImages;
   char* cathFile;
-  bool interactive;
-  char* transFile;
-  char* volFile;
-  bool userPrompt;
-  char* setAllFile;
   char* dicomFile;
-  char* movieFile;
 };
 
 struct IMAGEDATA {
@@ -47,13 +38,6 @@ struct CATHDATA {
   int cathMode;
   int numCoils;
   std::vector<COILDATA> coils;
-};
-
-
-struct Point3D {
-  float x;
-  float y;
-  float z;
 };
 
 #endif

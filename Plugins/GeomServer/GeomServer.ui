@@ -99,31 +99,6 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="fileTypeLabel">
-          <property name="text">
-           <string>Text File Type:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <layout class="QGridLayout" name="fileTypeRadioGridLayout">
-          <item row="0" column="0">
-           <widget class="QRadioButton" name="fileTypeCathRadio">
-            <property name="text">
-             <string>Cathater</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QRadioButton" name="fileTypeImageRadio">
-            <property name="text">
-             <string>Image</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
        </layout>
       </item>
       <item>

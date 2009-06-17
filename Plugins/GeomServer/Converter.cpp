@@ -1,21 +1,35 @@
 #include "Converter.h"
+
 #include <iostream>
 #include <vector>
 
 #include "rtBaseHandle.h"
 
-#define REMOTE_CATH_ID 1 //only one Cathater for now, thus a hardcorded id
-#define NULL_ID -1 //id returned if not found
-#define CATH_OBJ_NAME "GeomCath" //name of new cath objects
+#define CONVERTER_MAX_IMAGE_SIZE 1024 * 1024 * 4
 
-//#ifndef DEBUG_CONVERTER
-//#define DEBUG_CONVERTER
+//For debugging purposes
+//#ifndef CONVERTER_DEBUG
+//#define CONVERTER_DEBUG
 //#endif
 
 using namespace std;
 
-void Converter::printAllLocalCath() {
+//! Prints a header and footer before and after the function is called
+void Converter::printHeaderFooter(ConverterFunction function) {
   cout << "-------------------------------- VURTIGO START PRINT" << endl;
+  //call the function on this instance
+  (this->*function)();
+  cout << "-------------------------------- VURTIGO END PRINT" << endl;
+}
+
+//! Prints all information
+void Converter::printAll() {
+  printAllLocalImages();
+  printAllLocalCath();
+}
+
+//! Prints all local Cathater information
+void Converter::printAllLocalCath() {
   cout << "Number of Cathaters: " << remoteCathMap->size() << endl;
 
   int cathCounter = 0;
@@ -37,70 +51,100 @@ void Converter::printAllLocalCath() {
       cout << "Angles: [" << currCoil.angles[0] << ", " << currCoil.angles[1] << "]" << endl;
     }
   }
+}
 
-  cout << "-------------------------------- VURTIGO END PRINT" << endl;
+//! Prints all local image information
+void Converter::printAllLocalImages() {
+  cout << "Number of Images: " << remoteImageMap->size() << endl;
+
+  int imageCounter = 0;
+  rt2DSliceDataObject * currImage;
+  for (IdMap::iterator imageIt = remoteImageMap->begin(); imageIt != remoteImageMap->end(); imageIt++) {
+    cout << "Image Number: " << imageCounter++ << endl;
+
+    //cast check
+    currImage = (rt2DSliceDataObject *) rtBaseHandle::instance().getObjectWithID(imageIt->first);
+    cout << "Raw Data: "; currImage->getRawData()->Print(cout); cout << endl;
+    cout << "Transform: "; currImage->getTransform()->Print(cout); cout << endl;
+  }
 }
 
 Converter::Converter() {
   localCathMap = new NodeMap();
   remoteCathMap = new NodeMap();
+  localImageMap = new IdMap();
+  remoteImageMap = new IdMap();
 }
 
 Converter::~Converter() {
   delete localCathMap;
   delete remoteCathMap;
+  delete localImageMap;
+  delete remoteImageMap;
 }
 
-Converter::Node * Converter::getRTObjNode(int id, NodeMap * localMap, NodeMap * remoteMap, rtConstants::rtObjectType objType, char * name) {
-#ifdef DEBUG_CONVERTER
-  cout << "Converter::getRTObjNode()" << endl;
+
+//! Returns a local object node, and will create a new one in the local and remote maps if the local object node doesn't exist and the parameters are availible
+/*!
+  @param id remote id of object in "localMap"
+  @param localMap map to  search in
+  @param remoteMap map to add new local object node, must not be NULL to be valid
+  @param objType object type for new local object node, must not be UNDEFINED_RT_OBJECT_TYPE to be valid
+  @param name name for new local object node, must not be NULL to be valid
+  @return the local object node for the id and localMap, or the new obect node, or NULL
+ */
+Converter::Node * Converter::getLocalObjNode(int id, NodeMap * localMap, NodeMap * remoteMap, rtConstants::rtObjectType objType, char * name) {
+#ifdef CONVERTER_DEBUG
+  cout << "Converter::getLocalObjNode()" << endl;
 #endif
   Node * node = getNode(id, localMap);
-  if (node == NULL && objType != rtConstants::OT_None && name != "") {
+  if (node == NULL && remoteMap != NULL && objType != UNDEFINED_RT_OBJECT_TYPE && name != NULL) {
+      //if parameters are there and the object doesn't exist, add new object
       rtDataObject * obj = rtBaseHandle::instance().getObjectWithID(rtBaseHandle::instance().requestNewObject(objType, name));
       node = new Node(id);
       remoteMap->insert(NodePair(obj->getId(), node));
       node = new Node(obj->getId());
       localMap->insert(NodePair(id, node));
   }
-  #ifdef DEBUG_CONVERTER
-    cout << "Converter::getRTObjNode() out" << endl;
+  #ifdef CONVERTER_DEBUG
+    cout << "Converter::getLocalObjNode() out" << endl;
   #endif
   return node;
 }
 
-//given the parameters, it searches in the node map with the id  and is able to add new objects int eh core if the
-//last two paramters are specified
+//! Given the parameters, it searches in the node map with the id. Returns NULL if not found.
 Converter::Node * Converter::getNode(int id, NodeMap * nodeMap) {
   NodeMap::iterator foundNode = nodeMap->find(id);
   if (foundNode != nodeMap->end()) {
-#ifdef DEBUG_CONVERTER
+#ifdef CONVERTER_DEBUG
         cout << "Converter::getNode() - found" << endl;
 #endif
       return foundNode->second;
   }
-#ifdef DEBUG_CONVERTER
+#ifdef CONVERTER_DEBUG
       cout << "Converter::getNode() - not found" << endl;
 #endif
   return NULL;
 }
 
+//! Return the remote cathater id, given the local id. Returns NULL_ID if not found
 int Converter::getRemoteCathId(int localId) {
   Node * node = getNode(localId, remoteCathMap);
   if (node != NULL) {
-    #ifdef DEBUG_CONVERTER
+    #ifdef CONVERTER_DEBUG
       cout << "Converter::getRemoteCathId() - found" << endl;
     #endif
     return node->currId;
   }
   else {
-    #ifdef DEBUG_CONVERTER
+    #ifdef CONVERTER_DEBUG
       cout << "Converter::getRemoteCathId() - not found" << endl;
     #endif
     return NULL_ID;
   }
 }
 
+//! Given a local cathater id and local coil id, it returns the local coil id. Returns NULL_ID if not found
 int Converter::getRemoteCoilId(int localCathId, int localCoilId) {
   //find the node for the remote cath
   Node * node = getNode(localCathId, remoteCathMap);
@@ -114,9 +158,9 @@ int Converter::getRemoteCoilId(int localCathId, int localCoilId) {
   return NULL_ID;
 }
 
-//gets the local cath does the internal casting
+//! Returns the local cathater object, geven a remote id. Returns NULL of not found.
 rtCathDataObject * Converter::getLocalCath(int remoteId) {
-  Node * node = getRTObjNode(remoteId, localCathMap, remoteCathMap, rtConstants::OT_Cath, CATH_OBJ_NAME);
+  Node * node = getLocalObjNode(remoteId, localCathMap, remoteCathMap, rtConstants::OT_Cath, CATH_OBJ_NAME);
   rtDataObject * obj = NULL;
   if (node != NULL)
     obj = rtBaseHandle::instance().getObjectWithID(node->currId);
@@ -125,15 +169,19 @@ rtCathDataObject * Converter::getLocalCath(int remoteId) {
   return (rtCathDataObject *) obj;
 }
 
+//! Given a remote coil id and a local catherater object, this method searchs for he local coil id.
+/*!
+  If it doesn't exist it uses the remote coil local to add a new one or returns NULL for failure.
+*/
 int Converter::getLocalCoilId(int remoteCoilId, rtCathDataObject * localCath, int remoteCoilLoc) {
-#ifdef DEBUG_CONVERTER
+#ifdef CONVERTER_DEBUG
   cout << "Converter::getLocalCoilId()" << endl;
 #endif
   int remoteCathId = getRemoteCathId(localCath->getId());
 
   //remote cath not found
   if (remoteCathId == NULL_ID) {
-    #ifdef DEBUG_CONVERTER
+    #ifdef CONVERTER_DEBUG
       cout << "Converter::getLocalCoilId() not remote cath, return null id: " << NULL_ID << endl;
     #endif
     return NULL_ID;
@@ -142,7 +190,7 @@ int Converter::getLocalCoilId(int remoteCoilId, rtCathDataObject * localCath, in
   //get node for the local cath to get the corresponding local coil map
   Node * localCathNode = getNode(remoteCathId, localCathMap);
   if (localCathNode == NULL) {
-    cout << "Converter::getLocalCoilId() internal bug localCathMap and remoteCathMap don't match, return null id " << NULL_ID << endl;
+    cerr << "Converter::getLocalCoilId() internal bug localCathMap and remoteCathMap don't match, return null id " << NULL_ID << endl;
     return NULL_ID;
   }
 
@@ -150,7 +198,7 @@ int Converter::getLocalCoilId(int remoteCoilId, rtCathDataObject * localCath, in
   NodeMap::iterator localCoilNode = localCathNode->nodeMap->find(remoteCoilId);
   if (localCoilNode != localCathNode->nodeMap->end()) {
     //found
-    #ifdef DEBUG_CONVERTER
+    #ifdef CONVERTER_DEBUG
       cout << "Converter::getLocalCoilId() return found coil: " << localCoilNode->first << endl;
     #endif
     return localCoilNode->first;
@@ -163,19 +211,20 @@ int Converter::getLocalCoilId(int remoteCoilId, rtCathDataObject * localCath, in
     //add to remote Cath Map
     getNode(localCath->getId(), remoteCathMap)->nodeMap->insert(NodePair(localCoilId, new Node(remoteCoilId)));
 
-    #ifdef DEBUG_CONVERTER
+    #ifdef CONVERTER_DEBUG
       cout << "Converter::getLocalCoilId() return new coil: " << localCoilId << endl;
     #endif
     return localCoilId;
   }
-  #ifdef DEBUG_CONVERTER
+  #ifdef CONVERTER_DEBUG
     cout << "Converter::getLocalCoilId() return null coil: " << NULL_ID << endl;
   #endif
   return NULL_ID;
 }
 
+//! Sets the value of the local cathater object, given a remote cathater object. Returns true of successful.
 bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
-  #ifdef DEBUG_CONVERTER
+  #ifdef CONVERTER_DEBUG
     cout << "Converter::setLocalCath()" << endl;
   #endif
   int localCoilId;
@@ -185,7 +234,7 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
 
   int coilIndex = 0;
   for (vector<COILDATA>::iterator currCoil = remote.coils.begin(); currCoil != remote.coils.end(); currCoil++) {
-    #ifdef DEBUG_CONVERTER
+    #ifdef CONVERTER_DEBUG
       cout << "loop iteration: " << coilIndex << endl;
     #endif
     //get the local coil id to search with
@@ -195,30 +244,97 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
     if (localCoilId == NULL_ID) continue;
 
     //set the local values
-    success = success & local->setCoilAngles(localCoilId, currCoil->angles[0], currCoil->angles[1]);
-    success = success & local->setCoilCoords(localCoilId, currCoil->coords[0], currCoil->coords[1], currCoil->coords[2]);
-    success = success & local->setCoilSNR(localCoilId, currCoil->SNR);
+    success = success && local->setCoilAngles(localCoilId, currCoil->angles[0], currCoil->angles[1]);
+    success = success && local->setCoilCoords(localCoilId, currCoil->coords[0], currCoil->coords[1], currCoil->coords[2]);
+    success = success && local->setCoilSNR(localCoilId, currCoil->SNR);
     coilIndex++;
   }
-  #ifdef DEBUG_CONVERTER
+  #ifdef CONVERTER_DEBUG
     cout << "Converter::setLocalCath() return " << success << endl;
   #endif
+
+  //if not successful, do not call local->Modified, and return
+  if (!success)
+      return success;
+
+  local->Modified();
   return success;
 }
 
+//! Sets the value of all the local cathaters. Returns true of successful.
 bool Converter::setLocalCathAll(SenderSimp & sender) {
-  sender.runReadMode();
-
   //get all caths
   vector<CATHDATA> & remoteCaths = sender.getCaths();
   rtCathDataObject * localCath;
 
+  bool success = true;
   //for all remote caths
+
+  int cathIndex = 0;
   for (vector<CATHDATA>::iterator it = remoteCaths.begin(); it != remoteCaths.end(); it++) {
-    localCath = getLocalCath(REMOTE_CATH_ID);
-    setLocalCath(*it, localCath);
+    localCath = getLocalCath(cathIndex);
+    success = success && setLocalCath(*it, localCath);
+    cathIndex++;
+  }
+  return success;
+}
+
+//! Retruns a local image object with the matching remoteId, if one doesn't exist. One is a local image object is created.
+rt2DSliceDataObject * Converter::getLocalImage(int remoteId, int fileSize) {
+  IdMap::iterator foundId = localImageMap->find(remoteId);
+
+  rtDataObject * obj = NULL;
+  if (foundId != localImageMap->end()) {
+    obj = rtBaseHandle::instance().getObjectWithID(foundId->second);
+  }
+  else if (fileSize <= CONVERTER_MAX_IMAGE_SIZE && fileSize > 0) {
+    int localId = rtBaseHandle::instance().requestNewObject(rtConstants::OT_2DObject, IMAGE_OBJ_NAME);
+    localImageMap->insert(IdPair(remoteId, localId));
+    remoteImageMap->insert(IdPair(localId, remoteId));
+    obj = rtBaseHandle::instance().getObjectWithID(localId);
+  }
+  return (rt2DSliceDataObject *) obj;
+}
+
+//! Sets the value of the local image object, given a remote image object. Returns true of successful.
+bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
+  bool success = true;
+  int fileSize = remote.imgSize * remote.imgSize * remote.numChannels;
+  vector<unsigned char>* localImage = new vector<unsigned char>();
+
+  for (int a = 0; a < fileSize; a++) {
+    localImage->push_back(remote.img[a]);
   }
 
-  printAllLocalCath();
+  success = success && local->setImageParameters(remote.FOV, remote.imgSize, remote.numChannels, localImage);
+  success = success && local->setTransform(remote.rotMatrix, remote.transMatrix);
+
+  //if not successful, do not call local->Modified, and return
+  if (!success)
+      return success;
+
+  local->Modified();
+  return success;
+}
+
+//! Sets the value of all the local cathaters. Returns true of successful.
+bool Converter::setLocalImageAll(SenderSimp & sender) {
+  vector<IMAGEDATA> & remoteImages = sender.getImages();
+
+  rt2DSliceDataObject * localImage;
+  bool success = true;
+
+  int imageIndex = 0;
+  for (vector<IMAGEDATA>::iterator it = remoteImages.begin(); it != remoteImages.end(); it++) {
+    localImage = getLocalImage(imageIndex, (*it).imgSize * (*it).imgSize * (*it).numChannels);
+
+    //if image is invalid, continue
+    if (localImage == NULL) continue;
+
+    success = success && setLocalImage(*it, localImage);
+    imageIndex++;
+  }
+
+  return success;
 }
 

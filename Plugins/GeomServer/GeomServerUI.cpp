@@ -7,6 +7,7 @@
 
 using namespace std;
 
+//! Setup slots for UI actions
 void GeomServerUI::setupSlots() {
   connect(connectButton, SIGNAL(clicked()), this, SLOT(serverConnect()));
   connect(disconnectButton, SIGNAL(clicked()), this, SLOT(serverDisconnect()));
@@ -14,6 +15,7 @@ void GeomServerUI::setupSlots() {
   connect(sendFileButton, SIGNAL(clicked()), this, SLOT(sendFile()));
 }
 
+//! Set defaults of the UI state
 void GeomServerUI::setupDefaults() {
   arguments * args = sender.getArgs();
   std::stringstream sstream;
@@ -23,6 +25,7 @@ void GeomServerUI::setupDefaults() {
   portLineEdit->insert(sstream.str().c_str());
 }
 
+//! Actions on startup
 void GeomServerUI::init() {
   if (connStartCheckBox->isChecked())
       serverConnect();
@@ -38,6 +41,7 @@ GeomServerUI::GeomServerUI(SenderSimp & sender) : sender(sender) {
 GeomServerUI::~GeomServerUI() {
 }
 
+//! Connect to server
 void GeomServerUI::serverConnect() {
   bool ok;
   arguments * args = sender.getArgs();
@@ -51,21 +55,32 @@ void GeomServerUI::serverConnect() {
   sender.connectAndMessage();
 }
 
+//! Disonnect from server
 void GeomServerUI::serverDisconnect() {
   sender.disconnect();
 }
 
+
+//! Uses dialog box to put the file directory to the file directory label
 void GeomServerUI::selectSendFile() {
   const char * message = "Select file to send";
   fileDirLineEdit->insert(QFileDialog::getOpenFileName(this, message, ".", OPEN_FILE_TYPES));
 }
 
+//! For text files, they may have internal file types. This function returns the file type relating to the text file from user input
+SenderSimp::TxtFileType GeomServerUI::checkboxTxtFileType() {
+  SenderSimp::TxtFileType fileType = SenderSimp::tft_None;
+
+//  if (fileTypeCathRadio->isChecked()) {
+//    fileType = SenderSimp::tft_Cath;
+//  }
+
+  return fileType;
+}
+
+//! Sends file to server
 void GeomServerUI::sendFile() {
   QString fileDir = fileDirLineEdit->text();
-  SenderSimp::TxtFileType fileType = SenderSimp::tft_None;
-  if (fileTypeCathRadio->isChecked()) {
-    fileType = SenderSimp::tft_Cath;
-  }
   
-  sender.sendFile(fileDir, fileType);
+  sender.sendFile(fileDir, checkboxTxtFileType());
 }
