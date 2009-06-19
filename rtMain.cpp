@@ -9,6 +9,7 @@
 #include "rt3dPointBufferDataObject.h"
 #include "rtCathDataObject.h"
 #include "rt3dVolumeDataObject.h"
+#include "rt2dSliceDataObject.h"
 
 #include "vtkImageSinusoidSource.h"
 
@@ -143,6 +144,23 @@ void loadTestData() {
 
   sinSrc2->Delete();
 
+  vtkImageSinusoidSource* sinSrc3 = vtkImageSinusoidSource::New();
+  sinSrc3->SetWholeExtent(1,256, 1, 256, 1, 1);
+  sinSrc3->SetDirection(1, 2, 3);
+  sinSrc3->SetPeriod(30);
+  sinSrc3->SetPhase(1);
+  sinSrc3->SetAmplitude(10);
+  sinSrc3->Update();
+
+  rtRenderObject* test2DPlane = rtObjectManager::instance().addObjectOfType(rtConstants::OT_2DObject, "2D Image 256 by 256" );
+  rt2DSliceDataObject* slice = static_cast<rt2DSliceDataObject*>( test2DPlane->getDataObject() );
+  slice->getTransform()->Translate(20, 200, 2);
+  slice->getTransform()->RotateX(25);
+  slice->getTransform()->RotateY(25);
+  slice->getTransform()->RotateZ(25);
+  slice->copyImageData2D(sinSrc3->GetOutput());
+
+  sinSrc3->Delete();
 
 }
 

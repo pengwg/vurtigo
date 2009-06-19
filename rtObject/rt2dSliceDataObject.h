@@ -8,9 +8,11 @@
 #include "vtkImageReslice.h"
 #include "vtkImageShiftScale.h"
 
+#include <vector>
+
 //! A Single 2D Slice
 /*!
-  @todo Implement this class
+  The data object for a single 2D slice.
   */
 class rt2DSliceDataObject : public rtDataObject
 {
@@ -23,12 +25,14 @@ public:
   void apply();
   void update();
 
-
   bool isDataValid() { return m_imgDataValid; }
   bool copyImageData2D(vtkImageData* img);
   vtkImageData* getRawData() { return m_imgData; }
-  vtkImageData* getTransformedData() { return m_imgReslice->GetOutput(); }
+  vtkImageData* getUCharData() { return m_imgUCharCast->GetOutput(); }
   vtkTransform* getTransform() { return m_trans; }
+
+  bool setImageParameters(int FOV, int imgSize, int numChan, std::vector<unsigned char>* imgPtr);
+  bool setTransform(float rotMatrix[9], float transMatrix[3]);
 
  protected:
   // Functions
@@ -37,8 +41,11 @@ public:
   
   vtkImageData* m_imgData;
   vtkImageShiftScale * m_imgUCharCast;
-  vtkImageReslice* m_imgReslice;
   vtkTransform* m_trans;
+
+  int m_FOV;
+  int m_imgSize;
+  int m_numChan;
 
   bool m_imgDataValid;
 };

@@ -16,6 +16,7 @@
 #include <vtkImageMapper.h>
 #include <vtkImageReslice.h>
 
+#include <vtkSmartPointer.h>
 
 //! The 3D Volume render object
 /*!
@@ -40,14 +41,14 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   void setupPipeline();
   void update3PlaneStatus();
 
-  vtkImageReslice* m_transFilter;
+  vtkSmartPointer<vtkImageReslice> m_transFilter;
 
-  vtkVolumeRayCastMapper* m_rayMapper;
-  vtkVolume* m_volumeActor;
+  vtkSmartPointer<vtkVolumeRayCastMapper> m_rayMapper;
+  vtkSmartPointer<vtkVolume> m_volumeActor;
 
-  vtkOutlineFilter *m_outline;
-  vtkPolyDataMapper *m_outlineMapper;
-  vtkActor* m_outlineActor;
+  vtkSmartPointer<vtkOutlineFilter> m_outline;
+  vtkSmartPointer<vtkPolyDataMapper> m_outlineMapper;
+  vtkSmartPointer<vtkActor> m_outlineActor;
 
   // The 2D planes
   rtImagePlaneWidget *m_planes[3];
