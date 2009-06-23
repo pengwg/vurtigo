@@ -22,10 +22,6 @@ class customQVTKWidget : public QVTKWidget {
   virtual void mouseReleaseEvent(QMouseEvent* event);
   virtual void mouseDoubleClickEvent(QMouseEvent* event);
 
-  vtkPropPicker* m_objectPicker;
-  vtkProp* m_currProp;
-  rtRenderObject* m_currRenObj;
-
   bool m_forceSquare;
 };
 

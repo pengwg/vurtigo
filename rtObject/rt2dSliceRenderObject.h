@@ -15,7 +15,7 @@
 
 //! A Single 2D Slice
 /*!
-  @todo Complete this class
+  Render a single 2D slice in a specified orientation.
   */
 class rt2DSliceRenderObject : public rtRenderObject {
 
@@ -44,10 +44,10 @@ class rt2DSliceRenderObject : public rtRenderObject {
   vtkSmartPointer<vtkLookupTable> m_lookupTable;
 
   // Objects for the frame outline pipeline.
-  vtkPolyData* m_outlinePolyData;
-  vtkPolyDataMapper* m_outlineMapper;
-  vtkActor* m_outlineActor;
-  vtkProperty* m_outlineProperty;
+  vtkSmartPointer<vtkPolyData> m_outlinePolyData;
+  vtkSmartPointer<vtkPolyDataMapper> m_outlineMapper;
+  vtkSmartPointer<vtkActor> m_outlineActor;
+  vtkSmartPointer<vtkProperty> m_outlineProperty;
 
  private:
 

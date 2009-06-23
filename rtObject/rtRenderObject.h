@@ -75,7 +75,7 @@ Q_OBJECT
   rtDataObject* m_dataObj;
   vtkPropAssembly* m_pipe3D;
 
-  //! There are more than multiple possible 2D views so a Hash is needed
+  //! There are multiple possible 2D views so a Hash is needed
   /*!
     The hash is indexed by the name of the 2D view.
     */

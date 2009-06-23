@@ -14,7 +14,8 @@
 #include "vtkAppendPolyData.h"
 #include "vtkSphereSource.h"
 
-#include "vtkConeSource.h"
+#include <vtkConeSource.h>
+#include <vtkSmartPointer.h>
 
 #include <QList>
 
@@ -42,24 +43,24 @@ class rtCathRenderObject : public rtRenderObject {
 
   // Spline Pipeline
   int m_numSplinePoints;
-  vtkActor* m_splineActor;
-  vtkPolyDataMapper* m_splineMapper;
-  vtkTubeFilter* m_splineFilter;
-  vtkPolyData* m_splineLineData;
-  vtkCellArray* m_splineCellArray;
-  vtkPoints* m_splinePoints;
-  vtkKochanekSpline* m_spline[3];
+  vtkSmartPointer<vtkActor> m_splineActor;
+  vtkSmartPointer<vtkPolyDataMapper> m_splineMapper;
+  vtkSmartPointer<vtkTubeFilter> m_splineFilter;
+  vtkSmartPointer<vtkPolyData> m_splineLineData;
+  vtkSmartPointer<vtkCellArray> m_splineCellArray;
+  vtkSmartPointer<vtkPoints> m_splinePoints;
+  vtkSmartPointer<vtkKochanekSpline> m_spline[3];
 
   // Spheres Pipeline
   QList<vtkSphereSource*> m_sphereList;
-  vtkAppendPolyData* m_sphereAppend;
-  vtkPolyDataMapper* m_sphereMapper;
-  vtkActor* m_sphereActor;
+  vtkSmartPointer<vtkAppendPolyData> m_sphereAppend;
+  vtkSmartPointer<vtkPolyDataMapper> m_sphereMapper;
+  vtkSmartPointer<vtkActor> m_sphereActor;
 
   // Cath Tip Pipeline
-  vtkConeSource* m_coneSource;
-  vtkPolyDataMapper* m_coneMapper;
-  vtkActor* m_coneActor;
+  vtkSmartPointer<vtkConeSource> m_coneSource;
+  vtkSmartPointer<vtkPolyDataMapper> m_coneMapper;
+  vtkSmartPointer<vtkActor> m_coneActor;
 
  private:
 

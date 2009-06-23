@@ -110,6 +110,9 @@ bool rt2DSliceDataObject::setImageParameters(int FOV, int imgSize, int numChan, 
     }
   }
 
+  m_imgDataValid = true;
+  Modified();
+
   return true;
 }
 
