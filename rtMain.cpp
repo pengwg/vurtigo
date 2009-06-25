@@ -10,6 +10,7 @@
 #include "rtCathDataObject.h"
 #include "rt3dVolumeDataObject.h"
 #include "rt2dSliceDataObject.h"
+#include "rtMatrixDataObject.h"
 
 #include "vtkImageSinusoidSource.h"
 
@@ -161,6 +162,14 @@ void loadTestData() {
   slice->copyImageData2D(sinSrc3->GetOutput());
 
   sinSrc3->Delete();
+
+  rtRenderObject* matrixTest = rtObjectManager::instance().addObjectOfType(rtConstants::OT_vtkMatrix4x4, "Oblique Matrix" );
+  rtMatrixDataObject* mat = static_cast<rtMatrixDataObject*>( matrixTest->getDataObject() );
+
+  mat->getTransform()->RotateX(25);
+  mat->getTransform()->RotateY(25);
+  mat->getTransform()->RotateZ(25);
+  mat->Modified();
 
 }
 

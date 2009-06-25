@@ -11,9 +11,8 @@
 #include "vtkPoints.h"
 #include "vtkKochanekSpline.h"
 
-#include "vtkAppendPolyData.h"
-#include "vtkSphereSource.h"
-
+#include <vtkAppendPolyData.h>
+#include <vtkSphereSource.h>
 #include <vtkConeSource.h>
 #include <vtkSmartPointer.h>
 

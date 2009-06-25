@@ -4,7 +4,7 @@
 rtMatrixDataObject::rtMatrixDataObject() {
   setObjectType(rtConstants::OT_vtkMatrix4x4);
 
-  m_currMatrix= vtkMatrix4x4::New();
+  m_currTransform = vtkTransform::New();
 
   setupGUI();
 }
@@ -13,7 +13,7 @@ rtMatrixDataObject::rtMatrixDataObject() {
 rtMatrixDataObject::~rtMatrixDataObject() {
   cleanupGUI();
 
-  if (m_currMatrix) m_currMatrix->Delete();
+  if (m_currTransform) m_currTransform->Delete();
 }
 
 

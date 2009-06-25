@@ -3,9 +3,15 @@
 
 #include "rtRenderObject.h"
 
+#include <vtkPlaneSource.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkSmartPointer.h>
+#include <vtkActor.h>
+#include <vtkProperty.h>
+
 //! Matrix Object
 /*!
-  @todo Implement this object
+  Renders a plane to represent the rotation of the matrix.
   */
 class rtMatrixRenderObject : public rtRenderObject {
 
@@ -25,6 +31,10 @@ class rtMatrixRenderObject : public rtRenderObject {
   void setupDataObject();
   void setupPipeline();
 
+  vtkSmartPointer<vtkPlaneSource> m_planeSource;
+  vtkSmartPointer<vtkPolyDataMapper> m_mapper;
+  vtkSmartPointer<vtkActor> m_actor;
+  vtkSmartPointer<vtkProperty> m_property;
  private:
 
 };

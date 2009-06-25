@@ -3,11 +3,13 @@
 
 #include "rtDataObject.h"
 
-#include "vtkMatrix4x4.h"
+#include <vtkMatrix4x4.h>
+#include <vtkTransform.h>
+#include <vtkSmartPointer.h>
 
 //! Matrix Object
 /*!
-  @todo Implement this object
+  A simple vtkTransform object that can be used to rotate/translate graphics objects.
   */
 class rtMatrixDataObject : public rtDataObject
 {
@@ -20,12 +22,18 @@ public:
   void apply();
   void update();
 
+  //! Return the transform as a matrix object.
+  vtkMatrix4x4* getMatrix() { return m_currTransform->GetMatrix(); }
+
+  //! Return the transform for use in VTK.
+  vtkTransform* getTransform() { return m_currTransform; }
+
  protected:
   // Functions
   void setupGUI();
   void cleanupGUI();
 
-  vtkMatrix4x4 *m_currMatrix;
+  vtkSmartPointer<vtkTransform> m_currTransform;
   
 };
 
