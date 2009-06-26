@@ -21,6 +21,7 @@ bool ReadOnlyMode::init(GeometrySender* geom, struct arguments* args) {
   m_planeID = 0;
   m_numPlanes = 2;
   m_imgDataArray.clear();
+  imgData.img = NULL;
   for (ix1=0; ix1<m_numPlanes; ix1++) {
     m_imgDataArray.push_back(imgData);
   }
@@ -40,6 +41,7 @@ void ReadOnlyMode::runMode() {
     // Read all the relevant planes
     for (ix2=0; ix2<m_numPlanes; ix2++) {
       m_planeID = ix2;
+      m_sender->setPlaneID(m_planeID);
       getAllGeom();
     }
 }

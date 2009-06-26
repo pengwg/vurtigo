@@ -270,24 +270,27 @@ bool Converter::setLocalCathAll(SenderSimp & sender) {
   bool success = true;
   //for all remote caths
 
-  int cathIndex = 0;
-  for (vector<CATHDATA>::iterator it = remoteCaths.begin(); it != remoteCaths.end(); it++) {
-    localCath = getLocalCath(cathIndex);
-    success = success && setLocalCath(*it, localCath);
-    cathIndex++;
+  //Solution for how the Geometry Client works to determine no Caths
+  if (remoteCaths.at(0).cathMode != NO_CATHETERS) {
+    int cathIndex = 0;
+    for (vector<CATHDATA>::iterator it = remoteCaths.begin(); it != remoteCaths.end(); it++) {
+      localCath = getLocalCath(cathIndex);
+      success = success && setLocalCath(*it, localCath);
+      cathIndex++;
+    }
   }
   return success;
 }
 
 //! Retruns a local image object with the matching remoteId, if one doesn't exist. One is a local image object is created.
-rt2DSliceDataObject * Converter::getLocalImage(int remoteId, int fileSize) {
+rt2DSliceDataObject * Converter::getLocalImage(int remoteId, int imageSize) {
   IdMap::iterator foundId = localImageMap->find(remoteId);
 
   rtDataObject * obj = NULL;
   if (foundId != localImageMap->end()) {
     obj = rtBaseHandle::instance().getObjectWithID(foundId->second);
   }
-  else if (fileSize <= CONVERTER_MAX_IMAGE_SIZE && fileSize > 0) {
+  else if (imageSize <= CONVERTER_MAX_IMAGE_SIZE && imageSize > 0) {
     int localId = rtBaseHandle::instance().requestNewObject(rtConstants::OT_2DObject, IMAGE_OBJ_NAME);
     localImageMap->insert(IdPair(remoteId, localId));
     remoteImageMap->insert(IdPair(localId, remoteId));
@@ -299,13 +302,13 @@ rt2DSliceDataObject * Converter::getLocalImage(int remoteId, int fileSize) {
 //! Sets the value of the local image object, given a remote image object. Returns true of successful.
 bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
   bool success = true;
-  int fileSize = remote.imgSize * remote.imgSize * remote.numChannels;
+  int imageSize = remote.imgSize * remote.imgSize * remote.numChannels;
   vector<unsigned char>* localImage = new vector<unsigned char>();
 
-  for (int a = 0; a < fileSize; a++) {
+  for (int a = 0; a < imageSize; a++) {
     localImage->push_back(remote.img[a]);
   }
-
+  
   success = success && local->setImageParameters(remote.FOV, remote.imgSize, remote.numChannels, localImage);
   success = success && local->setTransform(remote.rotMatrix, remote.transMatrix);
 

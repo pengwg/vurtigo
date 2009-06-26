@@ -12,6 +12,7 @@ class GenericMode{
  protected:
   // This class cannot be created directly.
   GenericMode();
+  virtual ~GenericMode();
 
   // Variables that are common to all modes.
   GeometrySender* m_sender; //! Object that communicates with the Geometry Server.
@@ -32,7 +33,6 @@ class GenericMode{
   // Print the data.
   void print();
   void getAllGeom();
-  virtual ~GenericMode();
 
   std::vector<CATHDATA> & getCaths() {
     return m_cathDataArray;

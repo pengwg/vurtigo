@@ -78,7 +78,7 @@ class Converter {
   int getRemoteCathId(int localId);
   int getRemoteCoilId(int localCathId, int localCoilId);
 
-  rt2DSliceDataObject * getLocalImage(int remoteId, int fileSize);
+  rt2DSliceDataObject * getLocalImage(int remoteId, int imageSize);
 public:
   Converter();
   ~Converter();

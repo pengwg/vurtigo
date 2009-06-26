@@ -57,6 +57,7 @@ void GenericMode::getAllGeom() {
   CATHDATA* currCath;
   COILDATA coilDat;
   float *rotation, *translation;
+  unsigned char * image;
 
   // Catheter data temp arrays
   float *coords;
@@ -82,6 +83,16 @@ void GenericMode::getAllGeom() {
   translation = m_sender->getImgTranslation();
   currImg->imgSize = m_sender->getImgSize();
   currImg->numChannels = m_sender->getNumChan();
+  image =  m_sender->getImage();
+
+  if (currImg->img != NULL)
+    delete currImg->img;
+
+  int imageSize = currImg->imgSize * currImg->imgSize * currImg->numChannels;
+  currImg->img = new unsigned char[imageSize];
+  for (ix1=0; ix1<imageSize && image; ix1++) {
+    currImg->img[ix1] = image[ix1];
+  }
 
   for (ix1=0; ix1<ROT_MATRIX_SIZE && rotation; ix1++) {
     currImg->rotMatrix[ix1] = rotation[ix1];

@@ -26,8 +26,8 @@ SenderSimp::SenderSimp() {
 
 SenderSimp::~SenderSimp() {
   delete sender;
-  delete readMode;
-  delete writeMode;
+  delete (ReadOnlyMode *) readMode;
+  delete (WriteOnlyMode *) writeMode;
 }
 
 //! Connect and print appropriate message to console
