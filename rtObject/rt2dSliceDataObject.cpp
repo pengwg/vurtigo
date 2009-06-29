@@ -103,9 +103,7 @@ bool rt2DSliceDataObject::setImageParameters(int FOV, int imgSize, int numChan, 
   for (int ix1=0; ix1<imgSize; ix1++) {
     for (int ix2=0; ix2<imgSize; ix2++) {
       for (int ix3=0; ix3<numChan; ix3++) {
-        //std::cout << (*imgVectorPtr)[pos] <<
         m_imgData->SetScalarComponentFromFloat(ix1, ix2, 0, ix3, (float)(*imgVectorPtr)[pos]);
-        std::cout << (int)(*imgVectorPtr)[pos] << " " << m_imgData->GetScalarComponentAsFloat(ix1, ix2, 0, ix3) << std::endl;
         pos++;
       }
     }
@@ -120,12 +118,18 @@ bool rt2DSliceDataObject::setImageParameters(int FOV, int imgSize, int numChan, 
 
 //! Set the trasformation matrix
 bool rt2DSliceDataObject::setTransform(float rotMatrix[9], float transMatrix[3]) {
-  m_trans->Identity();
-  m_trans->Translate(transMatrix);
+  vtkMatrix4x4* mat = vtkMatrix4x4::New();
+
   for (int ix1=0; ix1<3; ix1++) {
     for (int ix2=0; ix2<3; ix2++) {
-      m_trans->GetMatrix()->SetElement(ix1, ix2, rotMatrix[ix1*3+ix2]);
+      mat->SetElement(ix1, ix2, rotMatrix[ix1*3+ix2]);
     }
   }
+
+  m_trans->Identity();
+  m_trans->SetMatrix(mat);
+  m_trans->Translate(transMatrix);
+
+  if(mat) mat->Delete();
   return true;
 }

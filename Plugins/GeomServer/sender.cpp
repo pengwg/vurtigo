@@ -131,47 +131,9 @@ bool GeometrySender::getVolTranslation(float*& trans)
   return true;
 }
 
-
-bool GeometrySender::xRotation(float angle)
-{
-  (void)angle;
-  cout << "Not yet implemented" << endl;
-  return true;
-}
-
-bool GeometrySender::yRotation(float angle)
-{
-  (void)angle;
-  cout << "Not yet implemented" << endl;
-  return true;
-}
-
-bool GeometrySender::zRotation(float angle)
-{
-  (void)angle;
-  cout << "Not yet implemented" << endl;
-  return true;
-}
-
 bool GeometrySender::setRotation(float* rotation)
 {
   m_geomClient->setRotation(m_clientID, rotation);
-  return true;
-}
-
-bool GeometrySender::setAxial()
-{
-  cout << "Not yet implemented" << endl;
-  return true;
-}
-
-bool GeometrySender::setSagittal() {
-  cout << "Not yet implemented" << endl;
-  return true;
-}
-
-bool GeometrySender::setCoronal() {
-  cout << "Not yet implemented" << endl;
   return true;
 }
 

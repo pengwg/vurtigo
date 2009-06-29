@@ -34,7 +34,9 @@ void GeomServerPlugin::retrieveInfo() {
     sender->runReadMode();
     converter->setLocalCathAll(*sender);
     converter->setLocalImageAll(*sender);
-    converter->printHeaderFooter(&Converter::printAll);
+
+    // Print local values.
+    // converter->printHeaderFooter(&Converter::printAll);
   }
 }
 

@@ -76,13 +76,17 @@ void GenericMode::getAllGeom() {
   
   currImg = &m_imgDataArray[m_planeID];
 
+  currImg->imgSize = m_sender->getImgSize();
+  currImg->numChannels = m_sender->getNumChan();
+
+  // Check the image size and the number of channels to see if this makes sense.
+  if (currImg->imgSize <= 0 || currImg->imgSize >= 2048 || currImg->numChannels <= 0 || currImg->numChannels >= 16) return;
+
   currImg->trig = m_sender->getTrig();
   currImg->resp = m_sender->getResp();
   currImg->FOV = m_sender->getFOV();
   rotation = m_sender->getImgRotation();
   translation = m_sender->getImgTranslation();
-  currImg->imgSize = m_sender->getImgSize();
-  currImg->numChannels = m_sender->getNumChan();
   image =  m_sender->getImage();
 
   if (currImg->img != NULL)

@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QMutex>
 #include <QSemaphore>
+#include <QThread>
 
 class rtDataObject;
 
@@ -51,6 +52,8 @@ class rtBaseHandle : public QObject {
   int m_newObjectID;
   QMutex m_newObjectLock;
   QSemaphore m_newObjectWait;
+
+  QThread* m_masterThreadPointer;
 
  private:
   //! Private constructor

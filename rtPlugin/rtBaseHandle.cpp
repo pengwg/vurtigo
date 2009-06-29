@@ -4,17 +4,22 @@
 #include "rtRenderObject.h"
 #include "rtPluginLoader.h"
 
+#include <QCoreApplication>
+
 rtBaseHandle::rtBaseHandle() {
   connectSignals();
 
   // A newly requested object has its ID placed here.
   m_newObjectID = -1;
+
+  m_masterThreadPointer = QThread::currentThread();
 }
 
 rtBaseHandle::~rtBaseHandle() {
 
 }
 
+//! Connect the signals to the slots.
 void rtBaseHandle::connectSignals() {
   qRegisterMetaType<rtConstants::rtObjectType>("rtConstants::rtObjectType");
 
@@ -35,13 +40,29 @@ Only one thread may request the creation (or removal) of an object at a time.
  */
 int rtBaseHandle::requestNewObject(rtConstants::rtObjectType objType, QString name) {
   int result;
-  m_newObjectLock.lock();
-  // Send the request.
-  emit requestNewObjectSignal(objType, name);
-  // Wait for it
-  m_newObjectWait.acquire();
-  // Copy the result
-  result = m_newObjectID;
+
+  if (QThread::currentThread() == m_masterThreadPointer) {
+    // Master Thread.  No need to use Queued signals and slots.
+    // If the lock is busy process some events... This makes waiting more useful.
+    while (!m_newObjectLock.tryLock()) QCoreApplication::processEvents();
+
+    rtRenderObject* temp;
+    temp = rtObjectManager::instance().addObjectOfType(objType, name);
+    if (temp) {
+      result = temp->getDataObject()->getId();
+    }
+
+  } else {
+    // Not in the master thread so we need to pass a message to the master.
+    // These threads we lock completely.
+    m_newObjectLock.lock();
+    // Send the request.
+    emit requestNewObjectSignal(objType, name);
+    // Wait for it
+    m_newObjectWait.acquire();
+    // Copy the result
+    result = m_newObjectID;
+  }
   m_newObjectLock.unlock();
   return result;
 }

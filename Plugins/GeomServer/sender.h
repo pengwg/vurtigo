@@ -64,13 +64,7 @@ class GeometrySender {
 	bool setFov(int fov);
 	bool setTranslation(float* trans);	
 	bool setVolTranslation(float* trans);
-	bool xRotation(float angle);
-	bool yRotation(float angle);
-	bool zRotation(float angle);
 	bool setRotation(float* rotation);
-	bool setAxial();
-	bool setSagittal();
-	bool setCoronal();
 	void setTrigDelay(int);
 	void setRespPhase(int);
 

@@ -6,7 +6,7 @@
 #include "SenderSimp.h"
 
 //Time in milliseconds the the plug calls update()
-#define UPDATE_TIME 10000
+#define UPDATE_TIME 100
 
 //! Plugin object for GeomServer
 /*!

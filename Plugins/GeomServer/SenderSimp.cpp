@@ -67,7 +67,7 @@ void SenderSimp::disconnect() {
 //! Reads the information
 void SenderSimp::runReadMode() {
     readMode->runMode();
-    readMode->print();
+    //readMode->print();
 }
 
 //! Returns the config information
