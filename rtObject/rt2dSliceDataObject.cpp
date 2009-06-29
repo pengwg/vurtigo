@@ -90,7 +90,6 @@ bool rt2DSliceDataObject::setImageParameters(int FOV, int imgSize, int numChan, 
 
     m_imgData->Initialize();
     m_imgData->SetScalarTypeToUnsignedChar();
-    m_imgData->SetSpacing(imgSize, imgSize, imgSize);
     m_imgData->SetSpacing(spacing, spacing, 1.0);
     m_imgData->SetOrigin(0.0,0.0,0.0);
     m_imgData->SetDimensions(imgSize,imgSize,1);
@@ -104,7 +103,9 @@ bool rt2DSliceDataObject::setImageParameters(int FOV, int imgSize, int numChan, 
   for (int ix1=0; ix1<imgSize; ix1++) {
     for (int ix2=0; ix2<imgSize; ix2++) {
       for (int ix3=0; ix3<numChan; ix3++) {
-        m_imgData->SetScalarComponentFromFloat(ix1, ix2, 0, ix3, (*imgVectorPtr)[pos]);
+        //std::cout << (*imgVectorPtr)[pos] <<
+        m_imgData->SetScalarComponentFromFloat(ix1, ix2, 0, ix3, (float)(*imgVectorPtr)[pos]);
+        std::cout << (int)(*imgVectorPtr)[pos] << " " << m_imgData->GetScalarComponentAsFloat(ix1, ix2, 0, ix3) << std::endl;
         pos++;
       }
     }

@@ -6,6 +6,7 @@ set ( SRC_FILES
 
 set (MOC_FILES
   rtPluginInterface.h
+  rtBaseHandle.h
 )
 
 qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES})

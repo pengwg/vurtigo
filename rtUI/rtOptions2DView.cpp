@@ -171,6 +171,9 @@ void rtOptions2DView::comboIndexChanged(int index) {
   QString name;
   QString comboText;
 
+  // No selection.
+  if (index == -1) return;
+
   comboText = combo2DObjects->currentText();
   splitter = comboText.split(" ");
 

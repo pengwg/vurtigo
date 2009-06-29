@@ -5,39 +5,73 @@
 #include "rtPluginLoader.h"
 
 rtBaseHandle::rtBaseHandle() {
+  connectSignals();
 
+  // A newly requested object has its ID placed here.
+  m_newObjectID = -1;
 }
 
 rtBaseHandle::~rtBaseHandle() {
 
 }
 
+void rtBaseHandle::connectSignals() {
+  qRegisterMetaType<rtConstants::rtObjectType>("rtConstants::rtObjectType");
+
+  connect(this, SIGNAL(requestNewObjectSignal(rtConstants::rtObjectType,QString)), this, SLOT(requestNewObjectSlot(rtConstants::rtObjectType,QString)), Qt::QueuedConnection);
+
+
+}
+
+
 //! Ask the base to create a new object of a particular type. 
 /*!
-  Plugins cannot create objects or datasets directly. Only the object manager can create objects. This function is a request from the plugin to the data manager for the creation of a new object of a particular type. The data manager will create the object and then return the ID to the plugin. The plugin can then modify the object with that ID. 
+  Plugins cannot create objects or datasets directly. Only the object manager can create objects. This function is a request from the plugin to the data manager for the creation of a new object of a particular type.
+The data manager will create the object and then return the ID to the plugin. The plugin can then modify the object with that ID. This is a blocking call as the base needs to allocate objects with a different thread.
+Only one thread may request the creation (or removal) of an object at a time.
   @param objType The type of object to be created.
   @param name The name that will be displayed in the object list. 
   @return The ID of the newly created object. Will return -1 if the new object could not be created. 
  */
 int rtBaseHandle::requestNewObject(rtConstants::rtObjectType objType, QString name) {
+  int result;
+  m_newObjectLock.lock();
+  // Send the request.
+  emit requestNewObjectSignal(objType, name);
+  // Wait for it
+  m_newObjectWait.acquire();
+  // Copy the result
+  result = m_newObjectID;
+  m_newObjectLock.unlock();
+  return result;
+}
+
+//! This runs in the main execution thread.
+void rtBaseHandle::requestNewObjectSlot(rtConstants::rtObjectType objType, QString name) {
   rtRenderObject* temp;
   int result=-1;
-
   temp = rtObjectManager::instance().addObjectOfType(objType, name);
   if (temp) {
     result = temp->getDataObject()->getId();
   }
-  return result;
+  m_newObjectID = result;
+  m_newObjectWait.release();
 }
+
 
 //! Remove an object with a specified ID.
 /*!
   Request that the base remove an object. Plugins can remove those objects that are not read-only. 
+  Only one thread may request to create or remove an object at a time.
   @param ID The ID of the object to be removed. 
   @return True if an object with that ID was removed. False otherwise. 
  */
 bool rtBaseHandle::removeObject(int ID) {
-  return rtObjectManager::instance().removeObject(ID);
+  bool res;
+  m_newObjectLock.lock();
+  res = rtObjectManager::instance().removeObject(ID);
+  m_newObjectLock.unlock();
+  return res;
 }
 
 //! Get a list of IDs for all the objects of a particular type.
@@ -111,4 +145,19 @@ bool rtBaseHandle::watchClick(int pluginID, bool watch) {
     res = rtPluginLoader::instance().removeFromClickWatch(pluginID);
   }
   return res;
+}
+
+//! Force the GUI to do a render update.
+/*!
+  Renderable objects will not get updated by the base unless they are being rendered.
+  This is desired behaviour since it is usually wasteful to update an object that is not being rendered. However in some cases it may be needed to force an update.
+  Plugin developers should use caution when calling this function since it may cause Vurtigo to slow down if abused.
+  @param objID The ID of the object to be updated.
+  */
+void rtBaseHandle::forceRenderUpdate(int objID) {
+  rtRenderObject* temp=NULL;
+  temp = rtObjectManager::instance().getObjectWithID(objID);
+  if (temp) {
+    temp->update();
+  }
 }

@@ -4,6 +4,9 @@
 #include "objTypes.h"
 #include <QList>
 #include <QString>
+#include <QObject>
+#include <QMutex>
+#include <QSemaphore>
 
 class rtDataObject;
 
@@ -13,7 +16,10 @@ class rtDataObject;
   It is higly reccomnded that the plugins SHOULD NOT use the other singleton classes (ex. rtObjectManager or rtPluginLoader) directly. There are plugin-specific safety features set in the rtBaseHandle class that protect the functioning of the base. If the other classes are used directly then these features are bypassed and as a result the plugin can cause bugs in the base. 
   This class is also a singleton meaning that there will only be one instance of it for the whole program. Plugins should get access to this via the instance() function.
  */
-class rtBaseHandle {
+class rtBaseHandle : public QObject {
+
+ Q_OBJECT
+
  public:
   //! Destructor
   ~rtBaseHandle();
@@ -31,6 +37,20 @@ class rtBaseHandle {
   rtDataObject* const getObjectWithID(int ID);
   const rtDataObject* const getROObjectWithID(int ID);
   bool watchClick(int pluginID, bool watch);
+
+  void forceRenderUpdate(int objID);
+
+ public slots:
+  void requestNewObjectSlot(rtConstants::rtObjectType, QString);
+ signals:
+  void requestNewObjectSignal(rtConstants::rtObjectType, QString);
+
+ protected:
+  void connectSignals();
+
+  int m_newObjectID;
+  QMutex m_newObjectLock;
+  QSemaphore m_newObjectWait;
 
  private:
   //! Private constructor
