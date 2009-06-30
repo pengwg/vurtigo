@@ -9,8 +9,6 @@ class rtLabelRenderObject : public rtRenderObject {
   rtLabelRenderObject();
   ~rtLabelRenderObject();
 
-  void update();
-
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren);
 
@@ -19,6 +17,8 @@ class rtLabelRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+  void update();
+
  private:
   vtkTextActor *m_textActor2D;
 };

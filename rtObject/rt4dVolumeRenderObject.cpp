@@ -15,8 +15,6 @@ rt4DVolumeRenderObject::~rt4DVolumeRenderObject() {
 
 //! Take info from the data object. 
 void rt4DVolumeRenderObject::update() {
-  if (!updateNeeded()) return;
-  resetUpdateTime();
 }
 
 //! Add this object to the given renderer.

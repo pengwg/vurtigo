@@ -19,8 +19,6 @@ rtMatrixRenderObject::~rtMatrixRenderObject() {
 
 //! Take info from the data object. 
 void rtMatrixRenderObject::update() {
-  if (!updateNeeded()) return;
-  resetUpdateTime();
 
   rtMatrixDataObject* dObj = static_cast<rtMatrixDataObject*>(m_dataObj);
   if (!dObj) return;

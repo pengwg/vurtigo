@@ -15,8 +15,6 @@ rtPolyRenderObject::~rtPolyRenderObject() {
 
 //! Take info from the data object. 
 void rtPolyRenderObject::update() {
-  if (!updateNeeded()) return;
-  resetUpdateTime();
 }
 
 //! Add this object to the given renderer.

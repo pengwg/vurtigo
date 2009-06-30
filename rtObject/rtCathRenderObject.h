@@ -29,8 +29,6 @@ class rtCathRenderObject : public rtRenderObject {
   rtCathRenderObject();
   ~rtCathRenderObject();
 
-  void update();
-
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren);
 
@@ -39,6 +37,8 @@ class rtCathRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+
+  void update();
 
   // Spline Pipeline
   int m_numSplinePoints;

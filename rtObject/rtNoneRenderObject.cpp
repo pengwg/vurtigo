@@ -15,8 +15,6 @@ rtNoneRenderObject::~rtNoneRenderObject() {
 
 //! Take info from the data object. 
 void rtNoneRenderObject::update() {
-  if (!updateNeeded()) return;
-  resetUpdateTime();
 }
 
 //! Add this object to the given renderer.

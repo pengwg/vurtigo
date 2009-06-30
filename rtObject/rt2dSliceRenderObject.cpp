@@ -32,9 +32,6 @@ rt2DSliceRenderObject::~rt2DSliceRenderObject() {
 
 //! Take info from the data object.
 void rt2DSliceRenderObject::update() {
-  if (!updateNeeded()) return;
-  resetUpdateTime();
-
   rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
   if ( !dObj->isDataValid() ) return;
 
@@ -91,7 +88,7 @@ bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren) {
 
   // Update the object.
   dObj->Modified();
-  this->update();
+  this->tryUpdate();
 
   if(!ren->HasViewProp(m_textureActor)) {
     ren->AddViewProp(m_textureActor);

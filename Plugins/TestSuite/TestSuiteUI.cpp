@@ -13,7 +13,11 @@ TestSuiteUI::TestSuiteUI()
 }
 
 TestSuiteUI::~TestSuiteUI() {
-  if (m_basicTest) delete m_basicTest;
+  if (m_basicTest) {
+    m_basicTest->exit();
+    m_basicTest->wait(1000);
+    delete m_basicTest;
+  }
 }
 
 

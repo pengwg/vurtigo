@@ -11,7 +11,6 @@ class rtNoneRenderObject : public rtRenderObject {
   rtNoneRenderObject();
   ~rtNoneRenderObject();
 
-  void update();
 
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren);
@@ -21,6 +20,7 @@ class rtNoneRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+  void update();
 
  private:
 

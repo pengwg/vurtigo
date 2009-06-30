@@ -179,6 +179,6 @@ void rtBaseHandle::forceRenderUpdate(int objID) {
   rtRenderObject* temp=NULL;
   temp = rtObjectManager::instance().getObjectWithID(objID);
   if (temp) {
-    temp->update();
+    temp->tryUpdate();
   }
 }

@@ -20,8 +20,6 @@ class rtMatrixRenderObject : public rtRenderObject {
   rtMatrixRenderObject();
   ~rtMatrixRenderObject();
 
-  void update();
-
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren);
 
@@ -30,6 +28,8 @@ class rtMatrixRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+
+  void update();
 
   vtkSmartPointer<vtkPlaneSource> m_planeSource;
   vtkSmartPointer<vtkPolyDataMapper> m_mapper;

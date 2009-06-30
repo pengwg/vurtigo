@@ -210,7 +210,7 @@ void rtOptions2DView::comboIndexChanged(int index) {
     std::cout << "No view with the name of: " << name.toStdString() << std::endl;
     return;
   }
-  m_currRenObj->update();
+  m_currRenObj->tryUpdate();
   m_currProp = m_currRenObj->get2DViewWithName(name);
 
 

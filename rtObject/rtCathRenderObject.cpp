@@ -44,9 +44,6 @@ rtCathRenderObject::~rtCathRenderObject() {
   This function is called when there is new info available in the Data part of the object and the pipeline needs to be re-done to reflect those changes.
   */
 void rtCathRenderObject::update() {
-  if (!updateNeeded()) return;
-  resetUpdateTime();
-
   rtCathDataObject* dObj = static_cast<rtCathDataObject*>(m_dataObj);
   if (!dObj) return;
 

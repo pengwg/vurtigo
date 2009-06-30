@@ -14,7 +14,6 @@ class rtPieceFuncRenderObject : public rtRenderObject {
   rtPieceFuncRenderObject();
   ~rtPieceFuncRenderObject();
 
-  void update();
 
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren);
@@ -25,6 +24,8 @@ class rtPieceFuncRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+
+  void update();
 
  private:
 

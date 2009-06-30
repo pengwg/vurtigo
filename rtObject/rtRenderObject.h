@@ -46,14 +46,13 @@ Q_OBJECT
   void setVisible3D(bool v);
   bool getVisible3D(){ return m_visible3D; }
 
-  //! Apply changes from the modified data object.
-  virtual void update() = 0;
-
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren) = 0;
 
   //! Remove this object from the given renderer.
   virtual bool removeFromRenderer(vtkRenderer* ren) = 0;
+
+  bool tryUpdate();
 
   void resetUpdateTime();
   bool updateNeeded();
@@ -71,6 +70,9 @@ Q_OBJECT
   rtRenderObject();
 
   void setObjectType(rtConstants::rtObjectType objType);
+
+  //! Apply changes from the modified data object.
+  virtual void update() = 0;
 
   rtDataObject* m_dataObj;
   vtkPropAssembly* m_pipe3D;

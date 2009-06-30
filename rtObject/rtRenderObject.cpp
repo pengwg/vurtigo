@@ -56,6 +56,25 @@ void rtRenderObject::setObjectType(rtConstants::rtObjectType objType) {
   m_objType = objType;
 }
 
+//! Try to perform an update for the object
+/*!
+ This is a thread-safe version of the update() calls.
+ @see update()
+ @return True if the update was performed.
+*/
+bool rtRenderObject::tryUpdate() {
+  bool res=false;
+  if (updateNeeded() && m_dataObj) {
+    if(m_dataObj->tryLock()) {
+      res = true;
+      update();
+      resetUpdateTime();
+      m_dataObj->unlock();
+    }
+  }
+  return res;
+}
+
 void rtRenderObject::updateTreeItem() {
   if (m_treeItem) {
     m_treeItem->setText(0, m_dataObj->getObjName());
@@ -74,7 +93,7 @@ void rtRenderObject::updateTreeItem() {
 void rtRenderObject::setVisible3D(bool v) {
   m_visible3D = v;
   if (v) {
-    update();
+    tryUpdate();
     rtTimeManager::instance().addToWatchList(this);
   } else {
     rtTimeManager::instance().removeFromWatchList(this);

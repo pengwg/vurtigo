@@ -15,8 +15,6 @@ rtColorFuncRenderObject::~rtColorFuncRenderObject() {
 
 //! Take info from the data object. 
 void rtColorFuncRenderObject::update() {
-  if (!updateNeeded()) return;
-  resetUpdateTime();
 }
 
 //! Add this object to the given renderer.

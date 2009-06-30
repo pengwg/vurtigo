@@ -29,8 +29,6 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   rt3DVolumeRenderObject();
   ~rt3DVolumeRenderObject();
 
-  void update();
-
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren);
 
@@ -40,6 +38,8 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   void setupDataObject();
   void setupPipeline();
   void update3PlaneStatus();
+
+  void update();
 
   vtkSmartPointer<vtkImageReslice> m_transFilter;
 

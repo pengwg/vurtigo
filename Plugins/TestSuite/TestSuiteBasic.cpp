@@ -11,6 +11,8 @@
 #include "vtkImageSinusoidSource.h"
 
 TestSuiteBasic::TestSuiteBasic() {
+  m_imgChange.setInterval(20);
+  connect(&m_imgChange, SIGNAL(timeout()), this, SLOT(changeImage()));
 }
 
 void TestSuiteBasic::run() {
@@ -53,6 +55,7 @@ void TestSuiteBasic::run() {
       p[3].pSize = 0.25;
       p[3].pProp->SetColor(0, 0, 1);
 
+      ptObj->lock();
       for (int ix1=0; ix1<4; ix1++) {
         ptObj->addPoint(p[ix1]);
       }
@@ -70,6 +73,8 @@ void TestSuiteBasic::run() {
         }
       }
       ptObj->Modified();
+      ptObj->unlock();
+
       // Have to force an update for the 3D checkbox to appear.
       rtBaseHandle::instance().forceRenderUpdate(m_3DPoints);
     }
@@ -82,10 +87,12 @@ void TestSuiteBasic::run() {
       emit sendOutput("Could Not Get 1 Coil Catheter Object! FAIL!");
     } else {
       emit sendOutput("Setting Cath Data...");
+      ptObj->lock();
       int c1 = ptObj->addCoil(0);
       ptObj->setCoilCoords(c1, 1.5, 1.5, 1.5);
       ptObj->setCoilSNR(c1, 50);
       ptObj->Modified();
+      ptObj->unlock();
     }
   }
 
@@ -95,6 +102,7 @@ void TestSuiteBasic::run() {
       emit sendOutput("Could Not Get 2 Coil Catheter Object! FAIL!");
     } else {
       emit sendOutput("Setting Cath Data...");
+      ptObj->lock();
       int c1 = ptObj->addCoil(0);
       int c2 = ptObj->addCoil(1);
       ptObj->setCoilCoords(c1, 1.5, 1.5, 1.5);
@@ -102,6 +110,7 @@ void TestSuiteBasic::run() {
       ptObj->setCoilCoords(c2, 3.5, 2.5, 1.5);
       ptObj->setCoilSNR(c2, 25);
       ptObj->Modified();
+      ptObj->unlock();
     }
   }
 
@@ -111,6 +120,7 @@ void TestSuiteBasic::run() {
       emit sendOutput("Could Not Get 5 Coil Catheter Object! FAIL!");
     } else {
       emit sendOutput("Setting Cath Data...");
+      ptObj->lock();
       int c1 = ptObj->addCoil(0);
       int c2 = ptObj->addCoil(0);
       int c3 = ptObj->addCoil(1);
@@ -127,6 +137,7 @@ void TestSuiteBasic::run() {
       ptObj->setCoilCoords(c5, 6.5, 1.5, 2.5);
       ptObj->setCoilSNR(c5, 40);
       ptObj->Modified();
+      ptObj->unlock();
     }
   }
 
@@ -145,9 +156,13 @@ void TestSuiteBasic::run() {
       sinSrc->SetAmplitude(10);
       sinSrc->Update();
 
+      ptObj->lock();
       ptObj->copyNewImageData(sinSrc->GetOutput());
       ptObj->translateData(200, 20, 2);
       ptObj->getTransform()->RotateX(25); // Rotate around X 25 degrees
+      ptObj->Modified();
+      ptObj->unlock();
+
       sinSrc->Delete();
     }
   }
@@ -160,14 +175,18 @@ void TestSuiteBasic::run() {
       emit sendOutput("Load Very Large Volume Data...");
       vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
 
-      sinSrc->SetWholeExtent(1, 450, 1, 450, 1, 450);
+      sinSrc->SetWholeExtent(1, 425, 1, 425, 1, 425);
       sinSrc->SetDirection(1, 2, 3);
       sinSrc->SetPeriod(50);
       sinSrc->SetPhase(1);
       sinSrc->SetAmplitude(10);
       sinSrc->Update();
 
+      ptObj->lock();
       ptObj->copyNewImageData(sinSrc->GetOutput());
+      ptObj->Modified();
+      ptObj->unlock();
+
       sinSrc->Delete();
     }
   }
@@ -187,11 +206,15 @@ void TestSuiteBasic::run() {
       sinSrc->SetAmplitude(10);
       sinSrc->Update();
 
+      ptObj->lock();
       ptObj->getTransform()->Translate(20, 200, 2);
       ptObj->getTransform()->RotateX(25);
       ptObj->getTransform()->RotateY(25);
       ptObj->getTransform()->RotateZ(25);
       ptObj->copyImageData2D(sinSrc->GetOutput());
+      ptObj->Modified();
+      ptObj->unlock();
+
       sinSrc->Delete();
     }
   }
@@ -202,12 +225,21 @@ void TestSuiteBasic::run() {
       emit sendOutput("Could Not Get Matrix Object! FAIL!");
     } else {
       emit sendOutput("Load Matrix Orientation...");
+
+      ptObj->lock();
       ptObj->getTransform()->RotateX(25);
       ptObj->getTransform()->RotateY(25);
       ptObj->getTransform()->RotateZ(25);
       ptObj->Modified();
+      ptObj->unlock();
+
     }
   }
+
+  m_imgChange.start();
+  // Start the event loop.
+  exec();
+  m_imgChange.stop();
 
   emit sendOutput("-------- End Basic Test ---------");
 }
@@ -225,11 +257,11 @@ void TestSuiteBasic::basicTestCreateObjects() {
   testObject(m_cath[1], "Test Two Coil Two Loc");
   testObject(m_cath[2], "Test Five Coil Four Loc");
   m_smallVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 128x128x128");
-  m_hugeVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 450x450x450");
+  m_hugeVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 425x425x425");
   m_2DPlane = rtBaseHandle::instance().requestNewObject(rtConstants::OT_2DObject, "Test Image 256x256");
   m_matrix = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkMatrix4x4, "Test Matrix");
   testObject(m_smallVol, "Test Volume 128x128x128");
-  testObject(m_hugeVol, "Test Volume 512x512x512");
+  testObject(m_hugeVol, "Test Volume 425x425x425");
   testObject(m_2DPlane, "Test Image 256x256");
   testObject(m_matrix, "Test Matrix");
 }
@@ -243,3 +275,29 @@ void TestSuiteBasic::testObject(int id, QString name) {
   }
 }
 
+void TestSuiteBasic::changeImage() {
+  if (m_2DPlane >= 0) {
+    rt2DSliceDataObject* ptObj = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(m_2DPlane));
+    if (!ptObj) {
+      emit sendOutput("Could Not Get 2D Plane Object! FAIL!");
+    } else {
+      emit sendOutput("Change 2D Plane Info...");
+      vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
+
+      sinSrc->SetWholeExtent(1,256, 1, 256, 1, 1);
+      sinSrc->SetDirection(1, 2, 3);
+      sinSrc->SetPeriod(30);
+      sinSrc->SetPhase(1);
+      sinSrc->SetAmplitude(10);
+      sinSrc->Update();
+
+      ptObj->lock();
+      ptObj->getTransform()->RotateX(2);
+      ptObj->copyImageData2D(sinSrc->GetOutput());
+      ptObj->Modified();
+      ptObj->unlock();
+
+      sinSrc->Delete();
+    }
+  }
+}

@@ -15,8 +15,6 @@ rtImageBufferRenderObject::~rtImageBufferRenderObject() {
 
 //! Take info from the data object. 
 void rtImageBufferRenderObject::update() {
-  if (!updateNeeded()) return;
-  resetUpdateTime();
 }
 
 //! Add this object to the given renderer.

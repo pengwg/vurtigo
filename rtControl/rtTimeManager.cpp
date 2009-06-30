@@ -125,10 +125,15 @@ void rtTimeManager::removeFromWatchList(rtRenderObject* obj) {
 //! Try to update every object on the watch list.
 void rtTimeManager::checkWatchList() {
   int ix1;
-
+  bool renderNew=false;
   for (ix1=0; ix1<m_watchList.size(); ix1++) {
-    m_watchList.at(ix1)->update();
+    renderNew = renderNew || m_watchList.at(ix1)->tryUpdate();
   }
+
+  if (renderNew && m_mainWin) {
+    m_mainWin->setRenderFlag3D(true);
+  }
+
 }
 
 void rtTimeManager::planeUpdate() {

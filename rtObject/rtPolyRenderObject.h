@@ -14,8 +14,6 @@ class rtPolyRenderObject : public rtRenderObject {
   rtPolyRenderObject();
   ~rtPolyRenderObject();
 
-  void update();
-
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren);
 
@@ -25,6 +23,8 @@ class rtPolyRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+
+  void update();
 
  private:
 

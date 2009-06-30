@@ -14,8 +14,6 @@ class rt4DVolumeRenderObject : public rtRenderObject {
   rt4DVolumeRenderObject();
   ~rt4DVolumeRenderObject();
 
-  void update();
-
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren);
 
@@ -24,6 +22,8 @@ class rt4DVolumeRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+
+  void update();
 
  private:
 

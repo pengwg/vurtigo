@@ -39,47 +39,41 @@ rt3DVolumeRenderObject::~rt3DVolumeRenderObject() {
 
 //! Take info from the data object. 
 void rt3DVolumeRenderObject::update() {
-  if (!updateNeeded()) return;
-  resetUpdateTime();
-
   rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
+  if (!dObj || !dObj->isDataValid()) return;
 
-  if (dObj->isDataValid()) {
+  m_transFilter->SetResliceAxes( dObj->getTransform()->GetMatrix() );
+  m_transFilter->Update();
 
-    m_transFilter->SetResliceAxes( dObj->getTransform()->GetMatrix() );
-    m_transFilter->Update();
+  m_planes[0]->SetInput( m_transFilter->GetOutput() );
+  m_planes[1]->SetInput( m_transFilter->GetOutput() );
+  m_planes[2]->SetInput( m_transFilter->GetOutput() );
 
-    m_planes[0]->SetInput( m_transFilter->GetOutput() );
-    m_planes[1]->SetInput( m_transFilter->GetOutput() );
-    m_planes[2]->SetInput( m_transFilter->GetOutput() );
+  m_planes[0]->SetPlaneOrientationToZAxes();
+  m_planes[1]->SetPlaneOrientationToXAxes();
+  m_planes[2]->SetPlaneOrientationToYAxes();
 
-    m_planes[0]->SetPlaneOrientationToZAxes();
-    m_planes[1]->SetPlaneOrientationToXAxes();
-    m_planes[2]->SetPlaneOrientationToYAxes();
+  double range[2];
+  int dims[3];
+  for (int ix1=0; ix1<3; ix1++) {
+    m_imgCast[ix1]->Update();
+    m_imgCast[ix1]->GetOutput()->GetScalarRange(range);
+    m_imgCast[ix1]->GetOutput()->GetDimensions(dims);
 
-    double range[2];
-    int dims[3];
-    for (int ix1=0; ix1<3; ix1++) {
-      m_imgCast[ix1]->Update();
-      m_imgCast[ix1]->GetOutput()->GetScalarRange(range);
-      m_imgCast[ix1]->GetOutput()->GetDimensions(dims);
+    m_imgMap[ix1]->SetColorWindow( range[1]-range[0] );
+    m_imgMap[ix1]->SetColorLevel( (range[0]+range[1])/2.0f );
 
-      m_imgMap[ix1]->SetColorWindow( range[1]-range[0] );
-      m_imgMap[ix1]->SetColorLevel( (range[0]+range[1])/2.0f );
+    m_actor2D[ix1]->SetPosition(0, 0);
+    m_actor2D[ix1]->SetPosition2(1, 1);
 
-      m_actor2D[ix1]->SetPosition(0, 0);
-      m_actor2D[ix1]->SetPosition2(1, 1);
-
-      // Fix the extents
-      int extents[4];
-      extents[0] = 0;
-      extents[1] = dims[0];
-      extents[2] = 0;
-      extents[3] = dims[1];
-      m_imgMap[ix1]->UseCustomExtentsOn();
-      m_imgMap[ix1]->SetCustomDisplayExtents(extents);
-    }
-
+    // Fix the extents
+    int extents[4];
+    extents[0] = 0;
+    extents[1] = dims[0];
+    extents[2] = 0;
+    extents[3] = dims[1];
+    m_imgMap[ix1]->UseCustomExtentsOn();
+    m_imgMap[ix1]->SetCustomDisplayExtents(extents);
   }
 
   update3PlaneStatus();
@@ -101,7 +95,8 @@ void rt3DVolumeRenderObject::update() {
 
 //! Add this object to the given renderer.
 bool rt3DVolumeRenderObject::addToRenderer(vtkRenderer* ren) {
-  if (!ren) return false;
+  rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
+  if (!ren || !dObj || !dObj->isDataValid()) return false;
   setVisible3D(true);
   if (!ren->HasViewProp(m_volumeActor)) {
     ren->AddViewProp(m_volumeActor);
@@ -257,5 +252,5 @@ void rt3DVolumeRenderObject::setupPipeline() {
   m_pipe2D.insert("Coronal", m_actor2D[2]);
 
   // Update the volume
-  update();
+  tryUpdate();
 }

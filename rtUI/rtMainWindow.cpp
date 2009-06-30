@@ -309,7 +309,7 @@ void rtMainWindow::update2DViews() {
     if (renObj) {
       // Check if we need to update this
       if (renObj->updateNeeded()) {
-        renObj->update();
+        renObj->tryUpdate();
         m_view2DHash.value(keyL[ix1])->renderOn();
       }
       // Render it! (Force a render)

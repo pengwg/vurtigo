@@ -44,8 +44,6 @@ class rt3DPointBufferRenderObject : public rtRenderObject {
   rt3DPointBufferRenderObject();
   ~rt3DPointBufferRenderObject();
 
-  void update();
-
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren);
 
@@ -54,6 +52,8 @@ class rt3DPointBufferRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+
+  void update();
 
  private:
   QList<SinglePointPipeline*> m_pipeList;

@@ -24,8 +24,6 @@ class rt2DSliceRenderObject : public rtRenderObject {
   rt2DSliceRenderObject();
   ~rt2DSliceRenderObject();
 
-  void update();
-
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren);
 
@@ -34,6 +32,8 @@ class rt2DSliceRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+
+  void update();
 
   // Objects for the texture pipeline.
   vtkSmartPointer<vtkPlaneSource> m_texturePlane;

@@ -14,8 +14,6 @@ class rt2DPointRenderObject : public rtRenderObject {
   rt2DPointRenderObject();
   ~rt2DPointRenderObject();
 
-  void update();
-
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren);
 
@@ -24,6 +22,8 @@ class rt2DPointRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+
+  void update();
 
  private:
 

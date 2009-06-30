@@ -14,8 +14,6 @@ class rtColorFuncRenderObject : public rtRenderObject {
   rtColorFuncRenderObject();
   ~rtColorFuncRenderObject();
 
-  void update();
-
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren);
 
@@ -24,6 +22,8 @@ class rtColorFuncRenderObject : public rtRenderObject {
  protected:
   void setupDataObject();
   void setupPipeline();
+
+  void update();
 
  private:
 

@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QDateTime>
+#include <QMutex>
 #include "objTypes.h"
 
 class rtDataObject : public QObject {
@@ -37,12 +38,16 @@ Q_OBJECT
   //! Update the GUI with the modified data object info.
   virtual void update() = 0;
 
+  void lock() { m_objectLock.lock(); }
+  bool tryLock() { return m_objectLock.tryLock(); }
+  bool tryLock(int timeout) { return m_objectLock.tryLock(timeout); }
+  void unlock() { m_objectLock.unlock(); }
+
  public slots:
   //! The apply button has been pressed. 
   virtual void apply() = 0;
 
   void Modified();
-
 
  protected:
   rtDataObject();
@@ -51,6 +56,8 @@ Q_OBJECT
   virtual void setupGUI() = 0;
   //! Cleanup the GUI
   virtual void cleanupGUI() = 0;
+
+  QMutex  m_objectLock;
 
  private:
   //! The object ID

@@ -2,6 +2,7 @@
 #define TESTSUITEBASIC_H
 
 #include <QThread>
+#include <QTimer>
 
 class TestSuiteBasic : public QThread
 {
@@ -11,12 +12,19 @@ public:
   TestSuiteBasic();
 
   void run();
+
+public slots:
+  void changeImage();
 signals:
   void sendOutput( QString );
 
 protected:
   void basicTestCreateObjects();
   void testObject(int, QString);
+
+
+  QTimer m_imgChange;
+
 
   // Object IDs
   int m_label;

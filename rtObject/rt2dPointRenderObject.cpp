@@ -15,8 +15,6 @@ rt2DPointRenderObject::~rt2DPointRenderObject() {
 
 //! Take info from the data object. 
 void rt2DPointRenderObject::update() {
-  if (!updateNeeded()) return;
-  resetUpdateTime();
 }
 
 //! Add this object to the given renderer.

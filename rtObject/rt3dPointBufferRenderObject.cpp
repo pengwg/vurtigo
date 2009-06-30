@@ -19,9 +19,6 @@ rt3DPointBufferRenderObject::~rt3DPointBufferRenderObject() {
 
 //! Take info from the data object. 
 void rt3DPointBufferRenderObject::update() {
-  if (!updateNeeded()) return;
-  resetUpdateTime();
-
   rt3DPointBufferDataObject *dObj = dynamic_cast<rt3DPointBufferDataObject*>(m_dataObj);
   SinglePointPipeline *tempPipe;
 
