@@ -111,8 +111,8 @@ void rtCathRenderObject::update() {
     dObj->getSNRAtLocation(loc, SNR);
 
     m_coneSource->SetCenter(coords);
-    m_coneSource->SetRadius(20.0f/SNR);
-    m_coneSource->SetHeight(20.0f/SNR);
+    m_coneSource->SetRadius(150.0f/SNR);
+    m_coneSource->SetHeight(150.0f/SNR);
     m_coneSource->SetResolution(150);
 
     loc = dObj->getLocationList().value(1);

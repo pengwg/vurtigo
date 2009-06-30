@@ -11,6 +11,20 @@ rt2DPointDataObject::~rt2DPointDataObject() {
   cleanupGUI();
 }
 
+void rt2DPointDataObject::addPoint(SimplePoint2D sp) {
+  m_pointList.append(sp);
+  Modified();
+}
+
+void rt2DPointDataObject::removePoint(SimplePoint2D sp) {
+  int i;
+
+  if (m_pointList.contains(sp)) {
+    i = m_pointList.indexOf(sp);
+    m_pointList.removeAt(i);
+    Modified();
+  }
+}
 
 //! Take the info from the GUI
 void rt2DPointDataObject::apply() {

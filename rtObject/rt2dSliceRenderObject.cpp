@@ -40,6 +40,10 @@ void rt2DSliceRenderObject::update() {
 
   m_imgMapToColors->SetInput(dObj->getUCharData());
 
+  double scaleRange[2];
+  dObj->getUCharData()->GetScalarRange(scaleRange);
+  m_lookupTable->SetRange(scaleRange[0], scaleRange[1]);
+
   double orig[3], pt1[3], pt2[3], opp[3];
   double bounds[6];
   double xsize, ysize, zsize;
