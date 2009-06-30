@@ -231,8 +231,9 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
 
   bool success = true;
   //for all remote coils
-
   int coilIndex = 0;
+  
+  local->lock();
   for (vector<COILDATA>::iterator currCoil = remote.coils.begin(); currCoil != remote.coils.end(); currCoil++) {
     #ifdef CONVERTER_DEBUG
       cout << "loop iteration: " << coilIndex << endl;
@@ -252,7 +253,7 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
   #ifdef CONVERTER_DEBUG
     cout << "Converter::setLocalCath() return " << success << endl;
   #endif
-
+  local->unlock();
   //if not successful, do not call local->Modified, and return
   if (!success)
       return success;
@@ -263,6 +264,9 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
 
 //! Sets the value of all the local cathaters. Returns true of successful.
 bool Converter::setLocalCathAll(SenderSimp & sender) {
+#ifdef CONVERTER_DEBUG
+  cout << "Converter::setLocalCathAll()" << endl;
+#endif
   //get all caths
   vector<CATHDATA> & remoteCaths = sender.getCaths();
   rtCathDataObject * localCath;
@@ -279,6 +283,10 @@ bool Converter::setLocalCathAll(SenderSimp & sender) {
       cathIndex++;
     }
   }
+
+#ifdef CONVERTER_DEBUG
+  cout << "Converter::setLocalCathAll() return " << success << endl;
+#endif
   return success;
 }
 
@@ -309,9 +317,11 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
     localImage->push_back(remote.img[a]);
   }
   
+  local->lock();
   success = success && local->setImageParameters(remote.FOV, remote.imgSize, remote.numChannels, localImage);
   success = success && local->setTransform(remote.rotMatrix, remote.transMatrix);
 
+  local->unlock();
   //if not successful, do not call local->Modified, and return
   if (!success)
       return success;
@@ -322,6 +332,9 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
 
 //! Sets the value of all the local cathaters. Returns true of successful.
 bool Converter::setLocalImageAll(SenderSimp & sender) {
+#ifdef CONVERTER_DEBUG
+  cout << "Converter::setLocalImageAll()" << endl;
+#endif
   vector<IMAGEDATA> & remoteImages = sender.getImages();
 
   rt2DSliceDataObject * localImage;
@@ -337,7 +350,9 @@ bool Converter::setLocalImageAll(SenderSimp & sender) {
     success = success && setLocalImage(*it, localImage);
     imageIndex++;
   }
-
+#ifdef CONVERTER_DEBUG
+  cout << "Converter::setLocalImageAll() return " << success << endl;
+#endif
   return success;
 }
 

@@ -9,12 +9,15 @@ set(SRC_FILES
   Converter.cpp
   GeomServerUI.cpp
   SenderSimp.cpp
+  SenderThread.cpp
 )
 
 # MOC files are the ones the use Q_OBJECT
 set (MOC_FILES
   GeomServerPlugin.h
   GeomServerUI.h
+  SenderThread.h
+  SenderSimp.h
 )
 
 qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES} )

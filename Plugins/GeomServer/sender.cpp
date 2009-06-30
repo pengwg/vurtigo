@@ -22,7 +22,6 @@ GeometrySender::~GeometrySender()
 }
 
 bool GeometrySender::connect(char* hostname, int port, bool swap){
-	
   if (m_clientID > 0) {
     // Already connected. 
     cout << "Client: Already connected with ID: " << m_clientID << endl;

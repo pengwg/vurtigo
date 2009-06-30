@@ -8,7 +8,7 @@
 
 struct arguments
 {
-  char* hostname;
+  char * hostname;
   int port;
   bool swap;
   char* cathFile;

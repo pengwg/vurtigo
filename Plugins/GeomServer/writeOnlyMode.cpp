@@ -37,8 +37,6 @@ bool WriteOnlyMode::init(GeometrySender* geom, struct arguments* args) {
   m_numCathPoints = 0;
   m_numDCMPoints = 0;
 
-  args->cathFile = "dataFiles/cathMoving.txt";
-
   if (args->cathFile != NULL) {
     m_useCathInfo = setCatheterFile(args->cathFile) && (m_numCathPoints>0) && m_sender->initializeCath(m_cathDataArray[0].cathMode, m_cathDataArray[0].numCoils);
   }
@@ -58,13 +56,14 @@ void WriteOnlyMode::runMode() {
   int ix1;
   float temp[3];
 
-  cout << "STARTED SENDING: " << endl;
     if (m_useCathInfo) {
+      cout << "Sending cathater file." << endl;
       // There exists cath info to be sent. 
       m_sender->sendNextCath(m_cathDataArray[ix1%m_numCathPoints]);   
     }
 
     if (m_useDICOMFile) {
+      cout << "Sending DICOM file." << endl;
       IMAGEDATA image;
       image.trig = 0;
       image.resp = 0;
@@ -91,7 +90,7 @@ void WriteOnlyMode::runMode() {
 //    if (m_useDICOMFile) {
 //      m_sender->sendImgData(&m_imgDataArray[ix1%m_numDCMPoints], m_planeID);
 //    }
-  cout << endl;
+    cout << "Send finished." << endl;
 }
 
 

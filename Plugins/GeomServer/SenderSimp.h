@@ -3,6 +3,7 @@
 #include "sender.h"
 #include "genericMode.h"
 #include <QString>
+#include <QObject>
 
 //Definitions for filetypes
 #define DICOM_EXT ".dcm"
@@ -13,9 +14,11 @@
 /*!
   Uses GeometrySender and GenericMode from geometryTester and simplifies it
   */
-class SenderSimp {
+class SenderSimp : public QObject {
+  Q_OBJECT
+
   //! Sends info, needed by Generic Mode
-  GeometrySender * sender;
+  GeometrySender sender;
   //! Config information for connecting
   arguments args;
   //! For reading information
@@ -32,17 +35,20 @@ class SenderSimp {
     enum TxtFileType { tft_None };
     SenderSimp();
     ~SenderSimp();
-
-    bool connectAndMessage();
     bool isConnected();
-    void disconnect();
-
-    void runReadMode();
-    bool sendFile(QString & fileDir, TxtFileType fileType = tft_None);
 
     arguments * getArgs();
     std::vector<CATHDATA> & getCaths();
     std::vector<IMAGEDATA> & getImages();
+    static void copyString(char ** const dest, const char * const src);
+
+  public slots:
+    bool connectAndMessage();
+    void disconnect();
+
+    void print();
+    void runReadMode();
+    bool sendFile(QString fileDir, SenderSimp::TxtFileType fileType = tft_None);
 
   private:
     bool setFileType(QString & fileDir, TxtFileType fileType = tft_None);

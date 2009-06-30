@@ -2,8 +2,8 @@
 #include <QFileDialog>
 #include <iostream>
 #include <sstream>
-
 #include "arguments.h"
+#include "SenderSimp.h"
 
 using namespace std;
 
@@ -17,12 +17,14 @@ void GeomServerUI::setupSlots() {
 
 //! Set defaults of the UI state
 void GeomServerUI::setupDefaults() {
-  arguments * args = sender.getArgs();
+  arguments * args = senderThread.getArgs();
   std::stringstream sstream;
 
   hostLineEdit->insert(args->hostname);
   sstream << args->port;
   portLineEdit->insert(sstream.str().c_str());
+
+//  connStartCheckBox->setChecked(true);
 }
 
 //! Actions on startup
@@ -31,7 +33,7 @@ void GeomServerUI::init() {
       serverConnect();
 }
 
-GeomServerUI::GeomServerUI(SenderSimp & sender) : sender(sender) {
+GeomServerUI::GeomServerUI(SenderThread & senderThread) : senderThread(senderThread) {
   setupUi(this);
   setupDefaults();
   setupSlots();
@@ -44,20 +46,20 @@ GeomServerUI::~GeomServerUI() {
 //! Connect to server
 void GeomServerUI::serverConnect() {
   bool ok;
-  arguments * args = sender.getArgs();
+  arguments * args = senderThread.getArgs();
 
-  args->hostname = hostLineEdit->text().toAscii().data();
-
+  SenderSimp::copyString(&args->hostname, hostLineEdit->text().toAscii().data());
+  
   portLineEdit->text().toInt(&ok);
   if (ok)
       args->port = portLineEdit->text().toInt();
 
-  sender.connectAndMessage();
+  senderThread.serverConnect();
 }
 
 //! Disonnect from server
 void GeomServerUI::serverDisconnect() {
-  sender.disconnect();
+  senderThread.serverDisconnect();
 }
 
 
@@ -72,7 +74,7 @@ SenderSimp::TxtFileType GeomServerUI::checkboxTxtFileType() {
   SenderSimp::TxtFileType fileType = SenderSimp::tft_None;
 
 //  if (fileTypeCathRadio->isChecked()) {
-//    fileType = SenderSimp::tft_Cath;
+//    fileType = SenderThread::tft_Cath;
 //  }
 
   return fileType;
@@ -81,6 +83,5 @@ SenderSimp::TxtFileType GeomServerUI::checkboxTxtFileType() {
 //! Sends file to server
 void GeomServerUI::sendFile() {
   QString fileDir = fileDirLineEdit->text();
-  
-  sender.sendFile(fileDir, checkboxTxtFileType());
+  senderThread.sendFile(fileDir, checkboxTxtFileType());
 }

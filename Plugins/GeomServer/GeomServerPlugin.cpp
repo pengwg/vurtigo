@@ -6,38 +6,22 @@ void GeomServerPlugin::objectModified(int objID) {
 }
 
 bool GeomServerPlugin::init() {
-  converter = new Converter();
-  sender = new SenderSimp();
-
-  m_mainWidget = new GeomServerUI(*sender);
+  senderThread.start();
+  m_mainWidget = new GeomServerUI(senderThread);
 
   setUpdateTime(UPDATE_TIME);
   return true;
 }
 
 void GeomServerPlugin::cleanup() {
-  delete converter;
-  delete sender;
 }
 
 void GeomServerPlugin::update() {
-    retrieveInfo();
+   senderThread.readAndSetData();
 }
 
 void GeomServerPlugin::point3DSelected(double px, double py, double pz, int intensity) {
 
-}
-
-//! Get info from the server if connected
-void GeomServerPlugin::retrieveInfo() {
-  if (sender->isConnected()) {
-    sender->runReadMode();
-    converter->setLocalCathAll(*sender);
-    converter->setLocalImageAll(*sender);
-
-    // Print local values.
-    // converter->printHeaderFooter(&Converter::printAll);
-  }
 }
 
 // This last line will export the plugin.

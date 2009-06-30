@@ -609,7 +609,7 @@ int GeomClient::getFOV() {
 
 //Query the current plane ID
 int GeomClient::getPlaneID() {
-  qint32 planeID;
+  qint32 planeID = -1;
 
   m_commLock->lock();
   // First ask the server for the FOV
@@ -625,7 +625,7 @@ int GeomClient::getPlaneID() {
     QCoreApplication::processEvents();
 #endif
   }
- 
+
   // Get the FOV
   (*m_geomXfer) >> planeID;
   m_geomSocket->flush();

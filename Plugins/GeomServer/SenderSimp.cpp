@@ -7,25 +7,29 @@ using namespace std;
 
 //! Sets default arguments for args
 void SenderSimp::setSenderDefaults() {
-  args.hostname = (char*)"panoptes";
+  char const * const hostname = "panoptes";
+  args.hostname = NULL;
+  SenderSimp::copyString(&args.hostname, hostname);
   args.port = 1777;
   args.swap = false;
-  args.cathFile = NULL;
-  args.dicomFile = NULL;
+  args.cathFile = new char[1];
+  args.dicomFile = new char[1];
 }
 
 SenderSimp::SenderSimp() {
-  sender = new GeometrySender();
   readMode = new ReadOnlyMode();
   writeMode = new WriteOnlyMode();
   tempConnect = false;
 
   setSenderDefaults();
-  readMode->init(sender, &args);
+  readMode->init(&sender, &args);
 }
 
 SenderSimp::~SenderSimp() {
-  delete sender;
+  delete [] args.hostname;
+  delete [] args.cathFile;
+  delete [] args.dicomFile;
+
   delete (ReadOnlyMode *) readMode;
   delete (WriteOnlyMode *) writeMode;
 }
@@ -36,10 +40,10 @@ bool SenderSimp::connectAndMessage() {
     cout << "Already connected." << endl;
     return true;
   }
-  else if (!sender->connect(args.hostname,args.port,args.swap)) {
+  else if (!sender.connect(args.hostname,args.port,args.swap)) {
     char * server = "Geometry Server";
     cerr << "Error connecting to " << server <<". Check that " << server << " is running on port " << args.port << " on host: " << args.hostname << endl;
-    sender->disconnect();
+    sender.disconnect();
     return false;
   } else {
     cout << "Connection with: " << args.hostname << ":" << args.port << " established." << endl;
@@ -50,13 +54,13 @@ bool SenderSimp::connectAndMessage() {
 
 //! Returns true if the sender is connected permanently (not temporarily)
 bool SenderSimp::isConnected() {
-  return sender->isConnected() && !tempConnect;
+  return sender.isConnected() && !tempConnect;
 }
 
 //! Disconnects from the server
 void SenderSimp::disconnect() {
-  if (sender->isConnected()) {
-    sender->disconnect();
+  if (sender.isConnected()) {
+    sender.disconnect();
     cout << "Disconnected." << endl;
   }
   else {
@@ -67,7 +71,11 @@ void SenderSimp::disconnect() {
 //! Reads the information
 void SenderSimp::runReadMode() {
     readMode->runMode();
-    //readMode->print();
+}
+
+//! Prints the information read
+void SenderSimp::print() {
+    readMode->print();
 }
 
 //! Returns the config information
@@ -93,14 +101,14 @@ bool SenderSimp::setFileType(QString & fileDir, TxtFileType fileType) {
   if (fileDir.endsWith(TXT_EXT)) {
 //Sample code for working with different text fle type
 //    if (fileType == tft_Cath) {
-//      args.cathFile = fileDir.toAscii().data();
+//      copyString(&args.cathFile, fileDir.toAscii().data());
 //      return true;
 //    }
-    args.cathFile = fileDir.toAscii().data();
+    SenderSimp::copyString(&args.cathFile, fileDir.toAscii().data());
     return true;
   }
   else if (fileDir.endsWith(DICOM_EXT)) {
-    args.dicomFile = fileDir.toAscii().data();
+    SenderSimp::copyString(&args.dicomFile, fileDir.toAscii().data());
     return true;
   }
   cout << "Send file type not supported. Check text file type?" << endl;
@@ -114,14 +122,14 @@ bool SenderSimp::setFileType(QString & fileDir, TxtFileType fileType) {
   @param fileType file type of text file (not needed)
   @return true, if the file directory and file type is proper
  */
-bool SenderSimp::sendFile(QString & fileDir, TxtFileType fileType) {
+bool SenderSimp::sendFile(QString fileDir, TxtFileType fileType) {
   if (setFileType(fileDir, fileType)) {
-    if (!sender->isConnected()) {
+    if (!sender.isConnected()) {
       tempConnect = true;
       connectAndMessage();
     }
 
-    writeMode->init(sender, &args);
+    writeMode->init(&sender, &args);
     writeMode->runMode();
 
     if (tempConnect) {
@@ -131,4 +139,13 @@ bool SenderSimp::sendFile(QString & fileDir, TxtFileType fileType) {
     return true;
   }
   return false;
+}
+
+//! Copys a string from src to dest
+void SenderSimp::copyString(char ** const dest, const char * const src) {
+  string srcCopy(src);
+  if (*dest != NULL)
+    delete [] *dest;
+  *dest = new char[srcCopy.size()];
+  strcpy(*dest, src);
 }

@@ -2,11 +2,12 @@
 #define GEOM_SERVER_PLUGIN_H
 
 #include "rtPluginInterface.h"
-#include "Converter.h"
+#include "SenderThread.h"
 #include "SenderSimp.h"
+#include "Converter.h"
 
-//Time in milliseconds the the plug calls update()
-#define UPDATE_TIME 100
+//Time in milliseconds the plugin calls update()
+#define UPDATE_TIME 10
 
 //! Plugin object for GeomServer
 /*!
@@ -23,15 +24,9 @@ class GeomServerPlugin : public QObject, public DataInterface {
   void cleanup();
   void update();
   void point3DSelected(double px, double py, double pz, int intensity);
-
  private:
-   //! Maps the ids locally on and the server
-   Converter * converter;
-   //! Wrapper to simply sending information
-   SenderSimp * sender;
-
-    //! Read the information
-    void retrieveInfo();
+  //! Thread for GeomServerPlugin::readAndSetData()
+  SenderThread senderThread;
 };
 
 #endif

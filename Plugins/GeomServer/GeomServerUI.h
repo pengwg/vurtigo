@@ -2,7 +2,7 @@
 #define GEOM_SERVER_UI_H
 
 #include "ui_GeomServer.h"
-#include "SenderSimp.h"
+#include "SenderThread.h"
 
 //! User interface for the GeomServer plugin
 /*!
@@ -12,7 +12,7 @@ class GeomServerUI : public QWidget, private Ui::MainUI {
   Q_OBJECT
 
   //! Wrapper for sending information
-  SenderSimp & sender;
+  SenderThread & senderThread;
 
   void setupSlots();
   void setupDefaults();
@@ -20,7 +20,7 @@ class GeomServerUI : public QWidget, private Ui::MainUI {
   SenderSimp::TxtFileType checkboxTxtFileType();
 
   public:
-    GeomServerUI(SenderSimp & sender);
+    GeomServerUI(SenderThread & senderThread);
     ~GeomServerUI();
 
   public slots:

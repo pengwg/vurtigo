@@ -73,9 +73,7 @@ void GenericMode::getAllGeom() {
 
   // The gometry plane.
   m_planeID = m_sender->getPlaneID();
-  
   currImg = &m_imgDataArray[m_planeID];
-
   currImg->imgSize = m_sender->getImgSize();
   currImg->numChannels = m_sender->getNumChan();
 
