@@ -78,6 +78,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   QHBoxLayout *m_render3DLayout;
   QHBoxLayout *m_objectBrowseLayout;
   QWidget* m_currentObjectWidget;
+  QWidget* m_currentPluginWidget;
 
   QHBoxLayout m_only3DLayout;
   QHBoxLayout m_only2DLayout;

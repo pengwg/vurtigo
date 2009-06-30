@@ -17,6 +17,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_cellPicker = vtkCellPicker::New();
 
   m_currentObjectWidget = NULL;
+  m_currentPluginWidget = NULL;
   m_renderFlag3D = false;
 
   m_render3DVTKWidget = new customQVTKWidget(this->frame3DRender);
@@ -266,8 +267,10 @@ void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem 
   QWidget* plugWidget;
 
   // Empty the layout.
-  while (m_pluginWidgetLayout.count() > 0) {
-    m_pluginWidgetLayout.takeAt(0);
+  if (m_currentPluginWidget) {
+    m_pluginWidgetLayout.removeWidget(m_currentPluginWidget);
+    m_currentPluginWidget->setParent(NULL);
+    m_currentPluginWidget = NULL;
   }
 
   // Check if there is a new item to use.
@@ -279,6 +282,7 @@ void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem 
   if (!convOK) return;
 
   plugWidget = rtPluginLoader::instance().getPluginWithID(id)->getWidget();
+  m_currentPluginWidget = plugWidget;
   if (plugWidget) {
     m_pluginWidgetLayout.addWidget(plugWidget);
   }
