@@ -24,7 +24,7 @@ protected:
 
 
   QTimer m_imgChange;
-
+  int m_imgPeriod;
 
   // Object IDs
   int m_label;

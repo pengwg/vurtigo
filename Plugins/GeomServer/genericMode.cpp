@@ -80,32 +80,32 @@ void GenericMode::getAllGeom() {
   currImg->numChannels = m_sender->getNumChan();
 
   // Check the image size and the number of channels to see if this makes sense.
-  if (currImg->imgSize <= 0 || currImg->imgSize >= 2048 || currImg->numChannels <= 0 || currImg->numChannels >= 16) return;
+  if (currImg->imgSize > 0 && currImg->imgSize <= 2048 && currImg->numChannels > 0 && currImg->numChannels <= 16) {
 
-  currImg->trig = m_sender->getTrig();
-  currImg->resp = m_sender->getResp();
-  currImg->FOV = m_sender->getFOV();
-  rotation = m_sender->getImgRotation();
-  translation = m_sender->getImgTranslation();
-  image =  m_sender->getImage();
+    currImg->trig = m_sender->getTrig();
+    currImg->resp = m_sender->getResp();
+    currImg->FOV = m_sender->getFOV();
+    rotation = m_sender->getImgRotation();
+    translation = m_sender->getImgTranslation();
+    image =  m_sender->getImage();
 
-  if (currImg->img != NULL)
-    delete currImg->img;
+    if (currImg->img != NULL)
+      delete currImg->img;
 
-  int imageSize = currImg->imgSize * currImg->imgSize * currImg->numChannels;
-  currImg->img = new unsigned char[imageSize];
-  for (ix1=0; ix1<imageSize && image; ix1++) {
-    currImg->img[ix1] = image[ix1];
+    int imageSize = currImg->imgSize * currImg->imgSize * currImg->numChannels;
+    currImg->img = new unsigned char[imageSize];
+    for (ix1=0; ix1<imageSize && image; ix1++) {
+      currImg->img[ix1] = image[ix1];
+    }
+
+    for (ix1=0; ix1<ROT_MATRIX_SIZE && rotation; ix1++) {
+      currImg->rotMatrix[ix1] = rotation[ix1];
+    }
+
+    for (ix1=0; ix1<TRANS_MATRIX_SIZE && translation; ix1++) {
+      currImg->transMatrix[ix1] = translation[ix1];
+    }
   }
-
-  for (ix1=0; ix1<ROT_MATRIX_SIZE && rotation; ix1++) {
-    currImg->rotMatrix[ix1] = rotation[ix1];
-  }
-
-  for (ix1=0; ix1<TRANS_MATRIX_SIZE && translation; ix1++) {
-    currImg->transMatrix[ix1] = translation[ix1];
-  }
-  
   // Get catheter information.
   currCath->cathMode = m_sender->getCathModeAsInt();
   if (NO_CATHETERS != static_cast<CatheterMode>(currCath->cathMode)) {

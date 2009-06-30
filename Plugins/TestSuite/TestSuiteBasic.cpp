@@ -11,6 +11,7 @@
 #include "vtkImageSinusoidSource.h"
 
 TestSuiteBasic::TestSuiteBasic() {
+  m_imgPeriod = 30;
   m_imgChange.setInterval(20);
   connect(&m_imgChange, SIGNAL(timeout()), this, SLOT(changeImage()));
 }
@@ -286,10 +287,13 @@ void TestSuiteBasic::changeImage() {
 
       sinSrc->SetWholeExtent(1,256, 1, 256, 1, 1);
       sinSrc->SetDirection(1, 2, 3);
-      sinSrc->SetPeriod(30);
+      sinSrc->SetPeriod(m_imgPeriod);
       sinSrc->SetPhase(1);
       sinSrc->SetAmplitude(10);
       sinSrc->Update();
+
+      m_imgPeriod = m_imgPeriod + 1;
+      if (m_imgPeriod > 100) m_imgPeriod = 10;
 
       ptObj->lock();
       ptObj->getTransform()->RotateX(2);
