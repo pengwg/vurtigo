@@ -251,7 +251,7 @@ rtRenderObject* rtObjectManager::getObjectWith3DProp(vtkProp* prop) {
 
   while (i.hasNext()) {
     i.next();
-    if (i.value()->get3DPipeline() == prop) {
+    if ( i.value()->get3DPipeline()->contains(prop) ) {
       res = i.value();
       break;
     }

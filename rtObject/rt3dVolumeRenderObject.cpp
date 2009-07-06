@@ -208,8 +208,8 @@ void rt3DVolumeRenderObject::setupPipeline() {
 
   //m_outlineMapper->GlobalImmediateModeRenderingOn();
 
-  m_pipe3D->AddPart(m_volumeActor);
-  m_pipe3D->AddPart(m_outlineActor);
+  m_pipe3D.push_back(m_volumeActor);
+  m_pipe3D.push_back(m_outlineActor);
 
   // Add the cut-planes
   m_planes[0]->SetInteractor( rtObjectManager::instance().getMainWinHandle()->getInteractor() );
@@ -217,21 +217,21 @@ void rt3DVolumeRenderObject::setupPipeline() {
   m_planes[0]->GetPlaneProperty()->SetColor(1,0,0);
   m_planes[0]->SetResliceInterpolateToNearestNeighbour();
   m_planes[0]->SetPicker( rtObjectManager::instance().getMainWinHandle()->getGlobalCellPicker() );
-  m_planes[0]->fillWidgetActors(m_pipe3D);
+  m_planes[0]->fillWidgetActors(&m_pipe3D);
 
   m_planes[1]->SetInteractor( rtObjectManager::instance().getMainWinHandle()->getInteractor() );
   m_planes[1]->RestrictPlaneToVolumeOn();
   m_planes[1]->GetPlaneProperty()->SetColor(1,1,0);
   m_planes[1]->SetResliceInterpolateToNearestNeighbour();
   m_planes[1]->SetPicker( rtObjectManager::instance().getMainWinHandle()->getGlobalCellPicker() );
-  m_planes[1]->fillWidgetActors(m_pipe3D);
+  m_planes[1]->fillWidgetActors(&m_pipe3D);
 
   m_planes[2]->SetInteractor( rtObjectManager::instance().getMainWinHandle()->getInteractor() );
   m_planes[2]->RestrictPlaneToVolumeOn();
   m_planes[2]->GetPlaneProperty()->SetColor(1,0,1);
   m_planes[2]->SetResliceInterpolateToNearestNeighbour();
   m_planes[2]->SetPicker( rtObjectManager::instance().getMainWinHandle()->getGlobalCellPicker() );
-  m_planes[2]->fillWidgetActors(m_pipe3D);
+  m_planes[2]->fillWidgetActors(&m_pipe3D);
 
   // Do the 2D planes as well.
   for (int ix1=0; ix1<3; ix1++) {

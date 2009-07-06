@@ -10,21 +10,18 @@ rtRenderObject::rtRenderObject() {
   m_mainWin = NULL;
   m_visible3D = false;
 
-  m_pipe3D = vtkPropAssembly::New();
-
   // Clear the list first.
+  m_pipe3D.clear();
   m_pipe2D.clear();
 }
 
 rtRenderObject::~rtRenderObject() {
   if (m_treeItem) delete m_treeItem;
-
-  m_pipe3D->Delete();
 }
 
 //! Get a version of the 3D pipeline that cannot be modified
-vtkPropAssembly* rtRenderObject::get3DPipeline() {
-  return m_pipe3D;
+QList<vtkProp*>* rtRenderObject::get3DPipeline() {
+  return &m_pipe3D;
 }
 
 //! Get a version of the 2D pipeline that cannot be modified.
@@ -81,7 +78,9 @@ void rtRenderObject::updateTreeItem() {
     m_treeItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     m_treeItem->setText(1, QString::number(m_dataObj->getId()));
     m_treeItem->setTextAlignment(1, Qt::AlignHCenter);
-    if (m_pipe3D && m_pipe3D->GetNumberOfPaths() > 0) {
+
+    // Only show the 3D checkbox if there are 3D type of items.
+    if (m_pipe3D.count() > 0) {
       m_treeItem->setText(2, "3D");
       m_treeItem->setCheckState(2,Qt::Unchecked); 
     } else {

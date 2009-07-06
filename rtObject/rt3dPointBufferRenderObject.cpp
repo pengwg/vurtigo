@@ -21,11 +21,15 @@ rt3DPointBufferRenderObject::~rt3DPointBufferRenderObject() {
 void rt3DPointBufferRenderObject::update() {
   rt3DPointBufferDataObject *dObj = dynamic_cast<rt3DPointBufferDataObject*>(m_dataObj);
   SinglePointPipeline *tempPipe;
+  bool visible = false;
+
+  if (getVisible3D()) visible = true;
 
   // Clean the previous list.
   while(!m_pipeList.empty()) {
     tempPipe = m_pipeList.takeFirst();
-    m_pipe3D->RemovePart(tempPipe->actor);
+    m_pipe3D.removeAll(tempPipe->actor);
+    if (visible) rtObjectManager::instance().getMainWinHandle()->removeRenderItem(tempPipe->actor);
     delete tempPipe;
   }
 
@@ -40,8 +44,8 @@ void rt3DPointBufferRenderObject::update() {
     tempPipe->actor->SetProperty(pointList->at(ix1).pProp);
 
     m_pipeList.append(tempPipe);
-    m_pipe3D->AddPart(tempPipe->actor);
-    if (m_visible3D) {
+    m_pipe3D.push_back(tempPipe->actor);
+    if (visible) {
       rtObjectManager::instance().getMainWinHandle()->addRenderItem(tempPipe->actor);
     }
   }
@@ -54,8 +58,11 @@ void rt3DPointBufferRenderObject::update() {
 bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren) {
   if (!ren) return false;
   setVisible3D(true);
-  if (ren->HasViewProp(m_pipe3D)) return false;
-  ren->AddViewProp(m_pipe3D);
+  for (int ix1=0; ix1<m_pipe3D.count(); ix1++) {
+    if (!ren->HasViewProp(m_pipe3D.at(ix1))) {
+      ren->AddViewProp(m_pipe3D.at(ix1));
+    }
+  }
   return true;
 }
 
@@ -63,8 +70,9 @@ bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren) {
 bool rt3DPointBufferRenderObject::removeFromRenderer(vtkRenderer* ren) {
   if (!ren) return false;
   setVisible3D(false);
-  if (!ren->HasViewProp(m_pipe3D)) return false;
-  ren->RemoveViewProp(m_pipe3D);
+  for (int ix1=0; ix1<m_pipe3D.count(); ix1++) {
+    if (ren->HasViewProp(m_pipe3D.at(ix1))) ren->RemoveViewProp(m_pipe3D.at(ix1));
+  }
   return true;
 }
 

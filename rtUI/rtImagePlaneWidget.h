@@ -1,8 +1,10 @@
 #ifndef RT_IMAGE_PLANE_WIDGET
 #define RT_IMAGE_PLANE_WIDGET
 
+#include <QList>
+
 #include "vtkImagePlaneWidget.h"
-#include "vtkPropAssembly.h"
+#include "vtkProp.h"
 #include "vtkAbstractPropPicker.h"
 #include "vtkActor.h"
 
@@ -26,8 +28,8 @@ class rtImagePlaneWidget : public vtkImagePlaneWidget {
   void SetPlaneOrientationToZAxes()
     { this->SetPlaneOrientation(2); }
 
-  vtkPropAssembly* getPropsInAssembly() { return m_propAssembly; }
-  void fillWidgetActors(vtkPropAssembly* pa);
+  QList<vtkProp*>* getPropsInAssembly() { return m_propAssembly; }
+  void fillWidgetActors(QList<vtkProp*>* propList);
 
   vtkActor* getMarginActor() { return this->MarginActor; }
   vtkActor* getPlaneOutlineActor() { return this->PlaneOutlineActor; }
@@ -37,7 +39,7 @@ class rtImagePlaneWidget : public vtkImagePlaneWidget {
   void SetPicker(vtkAbstractPropPicker* picker);
 
   protected:
-    vtkPropAssembly *m_propAssembly;
+    QList<vtkProp*>* m_propAssembly;
 };
 
 #endif

@@ -15,15 +15,14 @@ rtImagePlaneWidget::rtImagePlaneWidget() {
 }
 
 rtImagePlaneWidget::~rtImagePlaneWidget() {
-  m_propAssembly->Delete();
 }
 
 
-void rtImagePlaneWidget::fillWidgetActors(vtkPropAssembly* pa) {
-  m_propAssembly = pa;
-  m_propAssembly->AddPart( (vtkProp*)this->MarginActor );
-  m_propAssembly->AddPart( (vtkProp*)this->PlaneOutlineActor );
-  m_propAssembly->AddPart( (vtkProp*)this->TexturePlaneActor );
+void rtImagePlaneWidget::fillWidgetActors(QList<vtkProp*>* propList) {
+  m_propAssembly = propList;
+  m_propAssembly->push_back( (vtkProp*)this->MarginActor );
+  m_propAssembly->push_back( (vtkProp*)this->PlaneOutlineActor );
+  m_propAssembly->push_back( (vtkProp*)this->TexturePlaneActor );
 }
 
 

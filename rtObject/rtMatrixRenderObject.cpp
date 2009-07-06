@@ -81,5 +81,5 @@ void rtMatrixRenderObject::setupPipeline() {
   m_actor->SetMapper(m_mapper);
   m_actor->SetProperty(m_property);
 
-  m_pipe3D->AddPart( m_actor );
+  m_pipe3D.push_back( m_actor );
 }

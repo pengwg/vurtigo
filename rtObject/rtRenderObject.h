@@ -11,6 +11,7 @@
 #include <vtkProp.h>
 #include <vtkPropAssembly.h>
 #include <vtkRenderer.h>
+#include <vtkSmartPointer.h>
 
 #include "objTypes.h"
 class rtDataObject;
@@ -24,7 +25,7 @@ Q_OBJECT
   //! Destructor
   ~rtRenderObject();
 
-  virtual vtkPropAssembly* get3DPipeline();
+  virtual QList<vtkProp*>* get3DPipeline();
   virtual QHash<QString, vtkProp*>* get2DPipeline();
   rtDataObject* getDataObject();
   QString getName();
@@ -75,7 +76,7 @@ Q_OBJECT
   virtual void update() = 0;
 
   rtDataObject* m_dataObj;
-  vtkPropAssembly* m_pipe3D;
+  QList<vtkProp*> m_pipe3D;
 
   //! There are multiple possible 2D views so a Hash is needed
   /*!

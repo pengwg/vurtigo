@@ -108,9 +108,9 @@ void rtCathRenderObject::update() {
     dObj->getSNRAtLocation(loc, SNR);
 
     m_coneSource->SetCenter(coords);
-    m_coneSource->SetRadius(150.0f/SNR);
-    m_coneSource->SetHeight(150.0f/SNR);
-    m_coneSource->SetResolution(150);
+    m_coneSource->SetRadius(15.0f/SNR);
+    m_coneSource->SetHeight(30.0f/SNR);
+    m_coneSource->SetResolution(80);
 
     loc = dObj->getLocationList().value(1);
     dObj->getPositionAtLocation(loc, direc);
@@ -250,9 +250,9 @@ void rtCathRenderObject::setupPipeline() {
   m_coneActor->SetProperty( dObj->getTipProperty() );
 
   // Add the actors to the render list.
-  m_pipe3D->AddPart(m_splineActor);
-  m_pipe3D->AddPart(m_sphereActor);
-  m_pipe3D->AddPart(m_coneActor);
+  m_pipe3D.push_back(m_splineActor);
+  m_pipe3D.push_back(m_sphereActor);
+  m_pipe3D.push_back(m_coneActor);
 
   // But set their visibility to off
   m_splineActor->VisibilityOff();

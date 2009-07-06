@@ -34,6 +34,7 @@ protected:
   int m_hugeVol;
   int m_2DPlane;
   int m_matrix;
+  int m_polyObj;
 };
 
 #endif // TESTSUITEBASIC_H

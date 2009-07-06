@@ -3,9 +3,13 @@
 
 #include "rtRenderObject.h"
 
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
+#include <vtkSmartPointer.h>
+
 //! The render object for polygonal data.
 /*!
-  @todo Implement this class.
+  Renders custom poly data.
   */
 class rtPolyRenderObject : public rtRenderObject {
 
@@ -25,6 +29,9 @@ class rtPolyRenderObject : public rtRenderObject {
   void setupPipeline();
 
   void update();
+
+  vtkSmartPointer<vtkPolyDataMapper> m_mapper;
+  vtkSmartPointer<vtkActor> m_actor;
 
  private:
 

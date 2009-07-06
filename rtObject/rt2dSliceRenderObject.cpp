@@ -180,6 +180,6 @@ void rt2DSliceRenderObject::setupPipeline() {
   m_outlineActor->SetMapper(m_outlineMapper);
   m_outlineActor->SetProperty(m_outlineProperty);
 
-  m_pipe3D->AddPart( m_textureActor );
-  m_pipe3D->AddPart( m_outlineActor );
+  m_pipe3D.push_back( m_textureActor );
+  m_pipe3D.push_back( m_outlineActor );
 }

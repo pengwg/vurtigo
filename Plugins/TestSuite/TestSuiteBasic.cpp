@@ -7,8 +7,11 @@
 #include "rt3dVolumeDataObject.h"
 #include "rt2dSliceDataObject.h"
 #include "rtMatrixDataObject.h"
+#include "rtPolyDataObject.h"
 
 #include "vtkImageSinusoidSource.h"
+
+#include <QList>
 
 TestSuiteBasic::TestSuiteBasic() {
   m_imgPeriod = 30;
@@ -237,6 +240,86 @@ void TestSuiteBasic::run() {
     }
   }
 
+  if (m_polyObj>=0) {
+    rtPolyDataObject* ptObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_polyObj));
+    if (!ptObj) {
+      emit sendOutput("Could Not Get Poly Object! FAIL!");
+    } else {
+      emit sendOutput("Load Poly Object Surfaces...");
+      rtPolyDataObject::PolyPoint tempPt;
+      rtPolyDataObject::PolyPointLink tempLink;
+      QList<rtPolyDataObject::PolyPoint> ptList;
+      QList<rtPolyDataObject::PolyPointLink> linkList;
+
+      tempPt.ptList[0] = 0.0;
+      tempPt.ptList[1] = 0.0;
+      tempPt.ptList[2] = 0.0;
+      tempPt.color[0] = 255;
+      tempPt.color[1] = 0;
+      tempPt.color[2] = 0;
+      ptList.push_back(tempPt);
+
+      tempPt.ptList[0] = 10.0;
+      tempPt.ptList[1] = 0.0;
+      tempPt.ptList[2] = 0.0;
+      tempPt.color[0] = 0;
+      tempPt.color[1] = 255;
+      tempPt.color[2] = 0;
+      ptList.push_back(tempPt);
+
+      tempPt.ptList[0] = 0.0;
+      tempPt.ptList[1] = 10.0;
+      tempPt.ptList[2] = 0.0;
+      tempPt.color[0] = 0;
+      tempPt.color[1] = 0;
+      tempPt.color[2] = 255;
+      ptList.push_back(tempPt);
+
+      tempPt.ptList[0] = 15.0;
+      tempPt.ptList[1] = 15.0;
+      tempPt.ptList[2] = -10.0;
+      tempPt.color[0] = 255;
+      tempPt.color[1] = 0;
+      tempPt.color[2] = 0;
+      ptList.push_back(tempPt);
+
+      tempPt.ptList[0] = 0.0;
+      tempPt.ptList[1] = 0.0;
+      tempPt.ptList[2] = -10.0;
+      tempPt.color[0] = 128;
+      tempPt.color[1] = 128;
+      tempPt.color[2] = 128;
+      ptList.push_back(tempPt);
+
+      tempLink.threeVertex[0] = 0;
+      tempLink.threeVertex[1] = 1;
+      tempLink.threeVertex[2] = 2;
+      linkList.push_back(tempLink);
+
+      tempLink.threeVertex[0] = 3;
+      tempLink.threeVertex[1] = 1;
+      tempLink.threeVertex[2] = 2;
+      linkList.push_back(tempLink);
+
+      tempLink.threeVertex[0] = 1;
+      tempLink.threeVertex[1] = 0;
+      tempLink.threeVertex[2] = 4;
+      linkList.push_back(tempLink);
+
+      tempLink.threeVertex[0] = 2;
+      tempLink.threeVertex[1] = 0;
+      tempLink.threeVertex[2] = 4;
+      linkList.push_back(tempLink);
+
+      ptObj->lock();
+      emit sendOutput("Load Poly Object Geometry...");
+      ptObj->setNewGeometry(&ptList, &linkList);
+      emit sendOutput("Done Loading Poly Object Geometry...");
+      ptObj->Modified();
+      ptObj->unlock();
+    }
+  }
+
   m_imgChange.start();
   // Start the event loop.
   exec();
@@ -265,6 +348,8 @@ void TestSuiteBasic::basicTestCreateObjects() {
   testObject(m_hugeVol, "Test Volume 425x425x425");
   testObject(m_2DPlane, "Test Image 256x256");
   testObject(m_matrix, "Test Matrix");
+  m_polyObj = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, "Poly Surface Object");
+  testObject(m_polyObj, "Poly Surface Object");
 }
 
 //! Check to see if an object has an ID that is valid.

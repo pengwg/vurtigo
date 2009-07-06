@@ -58,7 +58,7 @@ void rtLabelRenderObject::setupPipeline() {
   m_textActor2D->SetTextProperty(dObj->getTextProperty());
 
   // This should work the same way in both the 3D and 2D render windows. 
-  m_pipe3D->AddPart(m_textActor2D);
+  m_pipe3D.push_back(m_textActor2D);
 
   m_pipe2D.insert("Label", m_textActor2D);
 }
