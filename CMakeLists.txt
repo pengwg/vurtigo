@@ -1,11 +1,11 @@
 cmake_minimum_required (VERSION 2.6)
 project (Vurtigo)
 
-# The version number. 0.1
-set (rtViewer_VERSION_MAJOR 0)
-set (rtViewer_VERSION_MINOR 1)
+# The version number.
+set (Vurtigo_VERSION_MAJOR 0)
+set (Vurtigo_VERSION_MINOR 2)
 
-message(STATUS "Begin Install for Vurtigo: " ${rtViewer_VERSION_MAJOR} "." ${rtViewer_VERSION_MINOR})
+message(STATUS "Begin Install for Vurtigo: " ${Vurtigo_VERSION_MAJOR} "." ${Vurtigo_VERSION_MINOR})
 
 ####################
 # Determine the OS
@@ -68,6 +68,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+file(WRITE ${CMAKE_BINARY_DIR}/version.h "#define VURTIGO_MAJOR_VERSION " ${Vurtigo_VERSION_MAJOR} "\n" )
+file(APPEND ${CMAKE_BINARY_DIR}/version.h "#define VURTIGO_MINOR_VERSION " ${Vurtigo_VERSION_MINOR} "\n" )
+
 include_directories(rtUI rtObject rtControl rtPlugin ${CMAKE_BINARY_DIR})
 
 set (UI_FILES 
@@ -77,6 +80,7 @@ set (UI_FILES
   rtUI/axesProperties.ui
   rtUI/volume3DOptions.ui
   rtUI/options2DView.ui
+  rtUI/rtAboutDialog.ui
   Plugins/GeomServer/GeomServer.ui
 )
 

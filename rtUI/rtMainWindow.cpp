@@ -11,6 +11,8 @@
 #include "rtPluginLoader.h"
 #include "vtkPropAssembly.h"
 
+#include "version.h"
+
 rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupUi(this);
 
@@ -336,6 +338,10 @@ void rtMainWindow::connectSignals() {
   connect(action2D_Only, SIGNAL(triggered()), this, SLOT(viewChanged2DOnly()));
   connect(actionCoordinate_Axes, SIGNAL(triggered()), this, SLOT(showAxesOptions()));
 
+  // Help Menu
+  connect(actionContents, SIGNAL(triggered()), this, SLOT(viewContents()));
+  connect(actionAbout, SIGNAL(triggered()), this, SLOT(viewAbout()));
+
   // Object Tree
   connect(objectTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(currItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
   connect(objectTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemChanged(QTreeWidgetItem*,int)));
@@ -418,6 +424,27 @@ void rtMainWindow::showAxesOptions() {
     setViewType( m_axesProperties->getViewType() );
     setCoordType( m_axesProperties->getCoordType() );
   }
+}
+
+void rtMainWindow::viewContents() {
+
+}
+
+
+void rtMainWindow::viewAbout() {
+  Ui::rtAboutDialog setup;
+  QDialog aboutD;
+  QString ver;
+
+  ver.append("Version: ");
+  ver.append(QString::number(VURTIGO_MAJOR_VERSION));
+  ver.append(".");
+  ver.append(QString::number(VURTIGO_MINOR_VERSION));
+
+  setup.setupUi(&aboutD);
+  setup.versionLabel->setText( ver );
+  aboutD.exec();
+
 }
 
 //! Load a plugin based on an XML file the user chooses. 

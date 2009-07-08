@@ -6,6 +6,7 @@
 #include <QHash>
 
 #include "ui_rtMainWindow.h"
+#include "ui_rtAboutDialog.h"
 #include "customQVTKWidget.h"
 
 #include <vtkRenderWindowInteractor.h>
@@ -66,6 +67,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void loadPluginFile();
 
   void showAxesOptions();
+
+  void viewContents();
+  void viewAbout();
 
   void pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
 
