@@ -187,6 +187,26 @@ void rt3DVolumeDataObject::scaleData(double x, double y, double z) {
   m_dataTransform->Scale(x,y,z);
 }
 
+//! Set the direction cosines for X and Y. The Z will be calculated from there. This function must be called FIRST.
+void rt3DVolumeDataObject::setDirectionCosinesXY(float* dirCos) {
+  vtkMatrix4x4* mat = vtkMatrix4x4::New();
+
+  mat->Identity();
+  mat->SetElement(0, 0, dirCos[0]);
+  mat->SetElement(0, 1, dirCos[1]);
+  mat->SetElement(0, 2, dirCos[2]);
+  mat->SetElement(1, 0, dirCos[3]);
+  mat->SetElement(1, 1, dirCos[4]);
+  mat->SetElement(1, 2, dirCos[5]);
+  mat->SetElement(2, 0, dirCos[1]*dirCos[5]-dirCos[2]*dirCos[4]);
+  mat->SetElement(2, 1, dirCos[2]*dirCos[3]-dirCos[0]*dirCos[5]);
+  mat->SetElement(2, 2, dirCos[0]*dirCos[4]-dirCos[1]*dirCos[3]);
+
+  m_dataTransform->SetMatrix(mat);
+
+  mat->Delete();
+}
+
 //! Flip the direction of the X-axis
 void rt3DVolumeDataObject::flipX() {
   m_dataTransform->Scale(-1,1,1);

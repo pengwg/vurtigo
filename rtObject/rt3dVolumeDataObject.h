@@ -57,6 +57,7 @@ public:
 
   void translateData(double x, double y, double z);
   void scaleData(double x, double y, double z);
+  void setDirectionCosinesXY(float* dirCos);
   void flipX();
   void flipY();
   void flipZ();

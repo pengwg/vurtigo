@@ -17,7 +17,8 @@ bool PluginConfigHandler::startDocument() {
 
 bool PluginConfigHandler::startElement(const QString & namespaceURI, const QString & localName, const QString & qName, const QXmlAttributes & atts) {
   if (localName == "plugin") {
-  } else if (localName == "name") {
+  } else if (localName == "PluginList") {
+  }else if (localName == "name") {
     currentInfo.title = atts.value("title");
     currentInfo.version = atts.value("version");
   } else if (localName == "lib") {
@@ -30,7 +31,6 @@ bool PluginConfigHandler::startElement(const QString & namespaceURI, const QStri
 }
 
 bool PluginConfigHandler::endElement(const QString & namespaceURI, const QString & localName, const QString & qName) {
-
   if (localName == "plugin") {
     pluginInfo.append(currentInfo);
   }
