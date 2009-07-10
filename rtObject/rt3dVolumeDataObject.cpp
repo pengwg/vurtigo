@@ -3,6 +3,9 @@
 #include "rtRenderObject.h"
 #include "objTypes.h"
 
+#include "rtColorFuncDataObject.h"
+#include "rtColorFuncRenderObject.h"
+
 //! Constructor
 rt3DVolumeDataObject::rt3DVolumeDataObject() {
   setObjectType(rtConstants::OT_3DObject);
@@ -13,9 +16,13 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   m_imgUShortCast = vtkImageShiftScale::New();
   m_imgData = vtkImageData::New();
   m_dataTransform = vtkTransform::New();
-  m_pieceFunc = vtkPiecewiseFunction::New();
-  m_colorTransFunc = vtkColorTransferFunction::New();
+  m_pieceFuncDefault = vtkPiecewiseFunction::New();
+  m_colorTransFuncDefault = vtkColorTransferFunction::New();
   m_volumeProperty = vtkVolumeProperty::New();
+
+  // The the functions as default for now.
+  m_pieceFunc = m_pieceFuncDefault;
+  m_colorTransFunc = m_colorTransFuncDefault;
 
   m_volumeProperty->SetScalarOpacity(m_pieceFunc);
   m_volumeProperty->SetColor(m_colorTransFunc);
@@ -36,8 +43,8 @@ rt3DVolumeDataObject::~rt3DVolumeDataObject() {
   m_imgUShortCast->Delete();
   m_imgData->Delete();
   m_dataTransform->Delete();
-  m_pieceFunc->Delete();
-  m_colorTransFunc->Delete();
+  m_pieceFuncDefault->Delete();
+  m_colorTransFuncDefault->Delete();
   m_volumeProperty->Delete();
 
   m_compositeFunc->Delete();
@@ -113,12 +120,12 @@ vtkTransform* rt3DVolumeDataObject::getTransform() {
   return m_dataTransform;
 }
 
-//! Get the piecewise function
+//! Get the current piecewise function
 vtkPiecewiseFunction* rt3DVolumeDataObject::getPieceFunc() {
   return m_pieceFunc;
 }
 
-//! Get the color transfer function
+//! Get the current color transfer function
 vtkColorTransferFunction* rt3DVolumeDataObject::getColorTransFunc() {
   return m_colorTransFunc;
 }
@@ -167,13 +174,17 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
 
   //std::cout << "Range: " << rangeP[0] << " " << rangeP[1] << std::endl;
 
-  m_pieceFunc->RemoveAllPoints();
-  m_pieceFunc->AddPoint(rangeP[0], 0.0);
-  m_pieceFunc->AddPoint(rangeP[1], 1.0);
+  m_pieceFuncDefault->RemoveAllPoints();
+  m_pieceFuncDefault->AddPoint(rangeP[0], 0.0);
+  m_pieceFuncDefault->AddPoint(rangeP[1], 1.0);
 
-  m_colorTransFunc->RemoveAllPoints();
-  m_colorTransFunc->AddRGBPoint(rangeP[0], 0.0, 0.0, 0.0);
-  m_colorTransFunc->AddRGBPoint(rangeP[1], 255.0, 15.0, 15.0);
+  m_colorTransFuncDefault->RemoveAllPoints();
+  m_colorTransFuncDefault->AddRGBPoint(rangeP[0], 0.0, 0.0, 0.0);
+  m_colorTransFuncDefault->AddRGBPoint(rangeP[1], 1.0, 0.5, 0.5);
+
+  m_volumeProperty->SetScalarOpacity(m_pieceFunc);
+  m_volumeProperty->SetColor(m_colorTransFunc);
+
   m_imgDataValid = true;
   Modified();
 
@@ -246,6 +257,10 @@ void rt3DVolumeDataObject::setupGUI() {
   connect(&rtObjectManager::instance(), SIGNAL(objectCreated(int)), this, SLOT(newObjectCreated(int)));
   connect(&rtObjectManager::instance(), SIGNAL(objectCreated(int)), this, SLOT(oldObjectRemoved(int)));
 
+  // The combo boxes for the CTF and PWF.
+  connect(m_optionsWidget.comboCTFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(colorTransferChanged(QString)));
+  connect(m_optionsWidget.comboPieceFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(piecewiseChanged(QString)));
+
   m_optionsWidget.comboPieceFunc->clear();
   m_optionsWidget.comboPieceFunc->addItem("Default");
   QList<int> pieceFuncs = rtObjectManager::instance().getObjectsOfType(rtConstants::OT_vtkPiecewiseFunction);
@@ -268,8 +283,21 @@ void rt3DVolumeDataObject::newObjectCreated(int id) {
   if (temp) {
     if (temp->getObjectType()==rtConstants::OT_vtkPiecewiseFunction) {
       // New Piecewise Function.
+      // Do the reset... It may be faster to just add the object but this is more robust.
+      m_optionsWidget.comboPieceFunc->clear();
+      m_optionsWidget.comboPieceFunc->addItem("Default");
+      QList<int> pieceFuncs = rtObjectManager::instance().getObjectsOfType(rtConstants::OT_vtkPiecewiseFunction);
+      for (int ix1=0; ix1<pieceFuncs.count() ; ix1++) {
+        m_optionsWidget.comboPieceFunc->addItem(QString::number(pieceFuncs.at(ix1)));
+      }
     } else if (temp->getObjectType()==rtConstants::OT_vtkColorTransferFunction) {
       // New Color Function.
+      m_optionsWidget.comboCTFunc->clear();
+      m_optionsWidget.comboCTFunc->addItem("Default");
+      QList<int> colorFuncs = rtObjectManager::instance().getObjectsOfType(rtConstants::OT_vtkColorTransferFunction);
+      for (int ix1=0; ix1<colorFuncs.count() ; ix1++) {
+        m_optionsWidget.comboCTFunc->addItem(QString::number(colorFuncs.at(ix1)));
+      }
     }
 
   }
@@ -278,6 +306,48 @@ void rt3DVolumeDataObject::newObjectCreated(int id) {
 void rt3DVolumeDataObject::oldObjectRemoved(int id) {
 
 }
+
+//! A new color transfer function was chosen through the GUI
+void rt3DVolumeDataObject::colorTransferChanged(QString id) {
+  bool ok;
+  int idInt;
+
+  if (id == "Default") {
+    // Setup the default CTF.
+    m_colorTransFunc = m_colorTransFuncDefault;
+  } else {
+
+    idInt = id.toInt(&ok);
+    if (ok) {
+      rtColorFuncDataObject* func = static_cast<rtColorFuncDataObject*>(rtObjectManager::instance().getObjectWithID(idInt)->getDataObject());
+      m_colorTransFunc = func->getColorFunction();
+    }
+  }
+
+  m_volumeProperty->SetColor(m_colorTransFunc);
+  Modified();
+}
+
+//! A new piecewise function was chosen through the GUI
+void rt3DVolumeDataObject::piecewiseChanged(QString id) {
+  bool ok;
+  int idInt;
+
+  if (id == "Default") {
+    // Setup the default CTF.
+    m_pieceFunc = m_pieceFuncDefault;
+  } else {
+
+    idInt = id.toInt(&ok);
+    if (ok) {
+      rtColorFuncDataObject* func = static_cast<rtColorFuncDataObject*>(rtObjectManager::instance().getObjectWithID(idInt)->getDataObject());
+      m_colorTransFunc = func->getColorFunction();
+    }
+  }
+  m_volumeProperty->SetScalarOpacity(m_pieceFunc);
+  Modified();
+}
+
 
 //! Clean the GUI widgets.
 void rt3DVolumeDataObject::cleanupGUI() {

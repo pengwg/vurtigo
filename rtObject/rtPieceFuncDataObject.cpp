@@ -3,12 +3,14 @@
 //! Constructor
 rtPieceFuncDataObject::rtPieceFuncDataObject() {
   setObjectType(rtConstants::OT_vtkPiecewiseFunction);
+  m_pieceFunc = vtkPiecewiseFunction::New();
   setupGUI();
 }
 
 //! Destructor
 rtPieceFuncDataObject::~rtPieceFuncDataObject() {
   cleanupGUI();
+  m_pieceFunc->Delete();
 }
 
 //! Copy a new piecewise function into this object.

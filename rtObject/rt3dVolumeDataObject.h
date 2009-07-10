@@ -71,6 +71,9 @@ public:
   void newObjectCreated(int id);
   void oldObjectRemoved(int id);
 
+  void colorTransferChanged(QString id);
+  void piecewiseChanged(QString id);
+
  protected:
   // Functions
   void setupGUI();
@@ -82,6 +85,9 @@ public:
   vtkColorTransferFunction* m_colorTransFunc;
   vtkVolumeProperty* m_volumeProperty;
   vtkImageShiftScale * m_imgUShortCast;
+
+  vtkPiecewiseFunction* m_pieceFuncDefault;
+  vtkColorTransferFunction* m_colorTransFuncDefault;
 
   bool m_imgDataValid;
 

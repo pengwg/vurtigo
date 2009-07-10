@@ -3,12 +3,14 @@
 //! Constructor
 rtColorFuncDataObject::rtColorFuncDataObject() {
   setObjectType(rtConstants::OT_vtkColorTransferFunction);
+  m_ctf = vtkColorTransferFunction::New();
   setupGUI();
 }
 
 //! Destructor
 rtColorFuncDataObject::~rtColorFuncDataObject() {
   cleanupGUI();
+  m_ctf->Delete();
 }
 
 //! Set a new color funciton.

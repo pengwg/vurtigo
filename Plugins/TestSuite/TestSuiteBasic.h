@@ -35,6 +35,8 @@ protected:
   int m_2DPlane;
   int m_matrix;
   int m_polyObj;
+  int m_ctf, m_ctfGreen;
+  int m_piece;
 };
 
 #endif // TESTSUITEBASIC_H

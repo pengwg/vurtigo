@@ -8,8 +8,11 @@
 #include "rt2dSliceDataObject.h"
 #include "rtMatrixDataObject.h"
 #include "rtPolyDataObject.h"
+#include "rtColorFuncDataObject.h"
+#include "rtPieceFuncDataObject.h"
 
 #include "vtkImageSinusoidSource.h"
+#include "vtkColorTransferFunction.h"
 
 #include <QList>
 
@@ -320,6 +323,72 @@ void TestSuiteBasic::run() {
     }
   }
 
+
+  if (m_ctf>=0) {
+    rtColorFuncDataObject* ptObj = static_cast<rtColorFuncDataObject*>(rtBaseHandle::instance().getObjectWithID(m_ctf));
+    if (!ptObj) {
+      emit sendOutput("Could Not Get Color Transfer Function! FAIL!");
+    } else {
+      emit sendOutput("Load Color Function Points...");
+      vtkColorTransferFunction* temp = vtkColorTransferFunction::New();
+      temp->SetColorSpaceToRGB();
+      temp->RemoveAllPoints();
+      temp->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
+      temp->AddRGBPoint(255.0, 1.0, 1.0, 1.0);
+
+      // Send the color function to the object.
+      ptObj->lock();
+      ptObj->setColorFunction(temp);
+      ptObj->Modified();
+      ptObj->unlock();
+
+      temp->Delete();
+    }
+  }
+
+  if (m_ctfGreen>=0) {
+    rtColorFuncDataObject* ptObj = static_cast<rtColorFuncDataObject*>(rtBaseHandle::instance().getObjectWithID(m_ctfGreen));
+    if (!ptObj) {
+      emit sendOutput("Could Not Get Color Transfer Function! FAIL!");
+    } else {
+      emit sendOutput("Load Color Function Points...");
+      vtkColorTransferFunction* temp = vtkColorTransferFunction::New();
+      temp->SetColorSpaceToRGB();
+      temp->RemoveAllPoints();
+      temp->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
+      temp->AddRGBPoint(255.0, 0.1, 1.0, 0.1);
+
+      // Send the color function to the object.
+      ptObj->lock();
+      ptObj->setColorFunction(temp);
+      ptObj->Modified();
+      ptObj->unlock();
+
+      temp->Delete();
+    }
+  }
+
+  if (m_piece>=0) {
+    rtPieceFuncDataObject* ptObj = static_cast<rtPieceFuncDataObject*>(rtBaseHandle::instance().getObjectWithID(m_piece));
+    if (!ptObj) {
+      emit sendOutput("Could Not Get Color Transfer Function! FAIL!");
+    } else {
+      emit sendOutput("Load Color Function Points...");
+      vtkPiecewiseFunction* temp = vtkPiecewiseFunction::New();
+      temp->RemoveAllPoints();
+      temp->AddPoint(0.0, 0.0);
+      temp->AddPoint(255.0, 1.0);
+
+      // Send the color function to the object.
+      ptObj->lock();
+      ptObj->setPiecewiseFunction(temp);
+      ptObj->Modified();
+      ptObj->unlock();
+
+      temp->Delete();
+    }
+  }
+
   m_imgChange.start();
   // Start the event loop.
   exec();
@@ -328,7 +397,7 @@ void TestSuiteBasic::run() {
   emit sendOutput("-------- End Basic Test ---------");
 }
 
-
+//! Ask the base to create a number of objects of different types. The objects will be used later for testing.
 void TestSuiteBasic::basicTestCreateObjects() {
   m_label = rtBaseHandle::instance().requestNewObject(rtConstants::OT_TextLabel, "Test Label");
   testObject(m_label, "Test Label");
@@ -340,16 +409,34 @@ void TestSuiteBasic::basicTestCreateObjects() {
   testObject(m_cath[0], "Test One Coil One Loc");
   testObject(m_cath[1], "Test Two Coil Two Loc");
   testObject(m_cath[2], "Test Five Coil Four Loc");
+
+  // Two test volumes
   m_smallVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 128x128x128");
   m_hugeVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 425x425x425");
-  m_2DPlane = rtBaseHandle::instance().requestNewObject(rtConstants::OT_2DObject, "Test Image 256x256");
-  m_matrix = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkMatrix4x4, "Test Matrix");
   testObject(m_smallVol, "Test Volume 128x128x128");
   testObject(m_hugeVol, "Test Volume 425x425x425");
+
+  // Test image
+  m_2DPlane = rtBaseHandle::instance().requestNewObject(rtConstants::OT_2DObject, "Test Image 256x256");
   testObject(m_2DPlane, "Test Image 256x256");
+
+  // Test matrix
+  m_matrix = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkMatrix4x4, "Test Matrix");
   testObject(m_matrix, "Test Matrix");
+
+  // Poly Data Object
   m_polyObj = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, "Poly Surface Object");
   testObject(m_polyObj, "Poly Surface Object");
+
+  // Color transfer function
+  m_ctf = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkColorTransferFunction, "Basic Grey");
+  m_ctfGreen = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkColorTransferFunction, "Greenish");
+  testObject(m_ctf, "Basic Grey");
+  testObject(m_ctfGreen, "Greenish");
+
+  // Piecewise function
+  m_piece = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPiecewiseFunction, "Standard Scale");
+  testObject(m_piece, "Standard Scale");
 }
 
 //! Check to see if an object has an ID that is valid.
