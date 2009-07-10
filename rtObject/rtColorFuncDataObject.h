@@ -3,10 +3,12 @@
 
 #include "rtDataObject.h"
 
+#include <vtkSmartPointer.h>
+#include <vtkColorTransferFunction.h>
 
 //! The data portion of the color function
 /*!
-  @todo Implement this class
+  Holds the points that determine how scalars will be colored.
   */
 class rtColorFuncDataObject : public rtDataObject
 {
@@ -19,11 +21,16 @@ public:
   void apply();
   void update();
 
+  //! Get the value of the current color function.
+  vtkColorTransferFunction* getColorFunction() { return m_ctf; }
+  bool setColorFunction(vtkColorTransferFunction* ctf);
+
  protected:
   // Functions
   void setupGUI();
   void cleanupGUI();
   
+  vtkSmartPointer<vtkColorTransferFunction> m_ctf;
 };
 
 #endif 

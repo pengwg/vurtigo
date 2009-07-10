@@ -15,7 +15,9 @@ class rtDataObject;
 /*!
   This should be the only class that can create or delete rtRenderObject instances. As a result it can keep track of all such instances and hand them out to other classes when requested. 
 */
-class rtObjectManager {
+class rtObjectManager : public QObject {
+  Q_OBJECT
+
  public:
   ~rtObjectManager();
 
@@ -55,6 +57,10 @@ class rtObjectManager {
     However, since one object may have multiple 2D renderable objects the ids in this Hash are not unique.
     */
   QMultiHash<int, QString> m_list2DHash;
+
+ signals:
+  void objectCreated(int objID);
+  void objectRemoved(int objID);
 
  private:
   //! Maximum number of objects.

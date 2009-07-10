@@ -5,7 +5,7 @@
 
 //! The renderer for the piecewise function.
 /*!
-  @todo Implement this class
+  The piecewise function is not rendered. It is used as a parameter to renderable objects.
   */
 class rtPieceFuncRenderObject : public rtRenderObject {
 

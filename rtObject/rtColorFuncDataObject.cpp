@@ -11,6 +11,12 @@ rtColorFuncDataObject::~rtColorFuncDataObject() {
   cleanupGUI();
 }
 
+//! Set a new color funciton.
+bool rtColorFuncDataObject::setColorFunction(vtkColorTransferFunction* ctf) {
+  if (!ctf) return false;
+  m_ctf->DeepCopy(ctf);
+  return true;
+}
 
 //! Take the info from the GUI
 void rtColorFuncDataObject::apply() {

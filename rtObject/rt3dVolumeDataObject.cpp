@@ -1,5 +1,7 @@
 #include "rt3dVolumeDataObject.h"
-
+#include "rtObjectManager.h"
+#include "rtRenderObject.h"
+#include "objTypes.h"
 
 //! Constructor
 rt3DVolumeDataObject::rt3DVolumeDataObject() {
@@ -227,9 +229,6 @@ void rt3DVolumeDataObject::flipZ() {
 void rt3DVolumeDataObject::setupGUI() {
   m_optionsWidget.setupUi(getBaseWidget());
 
-  m_optionsWidget.comboPieceFunc->addItem("Default");
-  m_optionsWidget.comboCTFunc->addItem("Default");
-
   // Global ray cast volume switch
   connect(m_optionsWidget.groupRayCastVolume, SIGNAL(toggled(bool)), this, SLOT(Modified()));
 
@@ -242,6 +241,41 @@ void rt3DVolumeDataObject::setupGUI() {
   connect(m_optionsWidget.checkAxial3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
   connect(m_optionsWidget.checkSagittal3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
   connect(m_optionsWidget.checkCoronal3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+
+  // Watch for new objects to update the lists.
+  connect(&rtObjectManager::instance(), SIGNAL(objectCreated(int)), this, SLOT(newObjectCreated(int)));
+  connect(&rtObjectManager::instance(), SIGNAL(objectCreated(int)), this, SLOT(oldObjectRemoved(int)));
+
+  m_optionsWidget.comboPieceFunc->clear();
+  m_optionsWidget.comboPieceFunc->addItem("Default");
+  QList<int> pieceFuncs = rtObjectManager::instance().getObjectsOfType(rtConstants::OT_vtkPiecewiseFunction);
+  for (int ix1=0; ix1<pieceFuncs.count() ; ix1++) {
+    m_optionsWidget.comboPieceFunc->addItem(QString::number(pieceFuncs.at(ix1)));
+  }
+
+  m_optionsWidget.comboCTFunc->clear();
+  m_optionsWidget.comboCTFunc->addItem("Default");
+  QList<int> colorFuncs = rtObjectManager::instance().getObjectsOfType(rtConstants::OT_vtkColorTransferFunction);
+  for (int ix1=0; ix1<colorFuncs.count() ; ix1++) {
+    m_optionsWidget.comboCTFunc->addItem(QString::number(colorFuncs.at(ix1)));
+  }
+
+}
+
+//! Slot is called when Vurtigo creates a new object.
+void rt3DVolumeDataObject::newObjectCreated(int id) {
+  rtRenderObject * temp = rtObjectManager::instance().getObjectWithID(id);
+  if (temp) {
+    if (temp->getObjectType()==rtConstants::OT_vtkPiecewiseFunction) {
+      // New Piecewise Function.
+    } else if (temp->getObjectType()==rtConstants::OT_vtkColorTransferFunction) {
+      // New Color Function.
+    }
+
+  }
+}
+
+void rt3DVolumeDataObject::oldObjectRemoved(int id) {
 
 }
 

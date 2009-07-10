@@ -142,6 +142,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
       m_mainWinHandle->update2DWindowLists(&m_list2DHash);
     }
 
+    emit objectCreated(nextID);
   }
   
   return temp;
@@ -178,6 +179,7 @@ bool rtObjectManager::removeObject(int objID) {
       m_mainWinHandle->update2DWindowLists(&m_list2DHash);
     }
     delete temp;
+    emit objectRemoved(objID);
     return true;
   }
   return false;
@@ -200,6 +202,7 @@ bool rtObjectManager::removeReadOnly(int objID) {
       m_mainWinHandle->update2DWindowLists(&m_list2DHash);
     }
     delete temp;
+    emit objectRemoved(objID);
     return true;
   }
   return false;

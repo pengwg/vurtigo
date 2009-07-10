@@ -5,7 +5,7 @@
 
 //! Class that implements the rendering of the color function
 /*!
-  @todo Implement this class
+  Color Transfer Functions are not rendered. They are used as parameters for renderable objects.
   */
 class rtColorFuncRenderObject : public rtRenderObject {
 

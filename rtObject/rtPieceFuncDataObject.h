@@ -3,9 +3,12 @@
 
 #include "rtDataObject.h"
 
+#include <vtkSmartPointer.h>
+#include <vtkPiecewiseFunction.h>
+
 //! Data Object from Piecewise Function
 /*!
-  @todo Implement this class
+  The Piecewise Function data defines the opacity of different scalar values.
   */
 class rtPieceFuncDataObject : public rtDataObject
 {
@@ -18,11 +21,16 @@ public:
   void apply();
   void update();
 
+  //! Get the value of the current piecewise function.
+  vtkPiecewiseFunction* getPiecewiseFunction() { return m_pieceFunc; }
+  bool setPiecewiseFunction(vtkPiecewiseFunction* piece);
+
  protected:
   // Functions
   void setupGUI();
   void cleanupGUI();
   
+  vtkSmartPointer<vtkPiecewiseFunction> m_pieceFunc;
 };
 
 #endif 

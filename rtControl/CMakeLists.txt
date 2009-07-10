@@ -5,6 +5,7 @@ set ( SRC_FILES
 
 set (MOC_FILES
   rtTimeManager.h
+  rtObjectManager.h
 )
 
 qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES})

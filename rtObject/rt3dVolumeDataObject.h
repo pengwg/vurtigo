@@ -68,6 +68,9 @@ public:
  public slots:
   void surfaceFunctionChanged();
 
+  void newObjectCreated(int id);
+  void oldObjectRemoved(int id);
+
  protected:
   // Functions
   void setupGUI();
