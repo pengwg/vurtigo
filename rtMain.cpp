@@ -33,10 +33,6 @@ int main(int argc, char *argv[])
       rtObjectManager::instance().setMainWinHandle(&mainWin);
       rtBaseHandle::instance(); // Important to create the object in THIS THREAD.
 
-      int widID[2];
-      widID[0] = mainWin.createNew2DWidget();
-      widID[1] = mainWin.createNew2DWidget();
-
       mainWin.show();
       exitCode = app.exec();
     }

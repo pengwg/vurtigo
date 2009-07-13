@@ -342,6 +342,11 @@ void rtMainWindow::connectSignals() {
   connect(actionContents, SIGNAL(triggered()), this, SLOT(viewContents()));
   connect(actionAbout, SIGNAL(triggered()), this, SLOT(viewAbout()));
 
+  // 2D View controls
+  connect(add2DFrameBtn, SIGNAL(clicked()), this, SLOT(add2DFrame()));
+  connect(remove2DFrameBtn, SIGNAL(clicked()), this, SLOT(remove2DFrame()));
+  connect(removeAll2DFrameBtn, SIGNAL(clicked()), this, SLOT(removeAll2DFrame()));
+
   // Object Tree
   connect(objectTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(currItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
   connect(objectTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemChanged(QTreeWidgetItem*,int)));
@@ -390,7 +395,7 @@ void rtMainWindow::populateObjectTypeNames() {
 void rtMainWindow::viewChangedMixed() {
   stackedWidget->setCurrentIndex(0);
   mainUDSplitter->insertWidget(0, frame3DRender);
-  mainUDSplitter->insertWidget(1, scrollArea2DImages);
+  mainUDSplitter->insertWidget(1, lowerFrame);
 }
 
 //! Make only the 3D render window visible.
@@ -402,7 +407,7 @@ void rtMainWindow::viewChanged3DOnly() {
 //! Make only the 2D window visible
 void rtMainWindow::viewChanged2DOnly() {
   stackedWidget->setCurrentIndex(2);
-  m_only2DLayout.addWidget(scrollArea2DImages);
+  m_only2DLayout.addWidget(lowerFrame);
 }
 
 //! Update  the lists for all the 2D windows.
@@ -510,6 +515,7 @@ int rtMainWindow::createNew2DWidget() {
       view->setContainer(scrollAreaWidget);
       m_scrollArea2DImagesLayout.addWidget(view);
       m_view2DHash.insert(currID, view);
+      view->setStringList(rtObjectManager::instance().get2DObjectNameHash());
       break;
     }
   }
@@ -536,7 +542,7 @@ bool rtMainWindow::remove2DWidget(int id) {
   @return The handle to the desired widget or NULL if no widget with that ID exists.
   */
 rtOptions2DView* rtMainWindow::get2DWidget(int id) {
-  if (!m_view2DHash.contains(id)) return false;
+  if (!m_view2DHash.contains(id)) return NULL;
   return m_view2DHash[id];
 }
 
@@ -547,6 +553,45 @@ void rtMainWindow::view2DHashCleanup() {
   keyList = m_view2DHash.keys();
   while (!keyList.empty()) {
     remove2DWidget(keyList.takeFirst());
+  }
+
+}
+
+//! Called when the add button is pressed
+void rtMainWindow::add2DFrame() {
+  int res;
+  res = createNew2DWidget();
+
+  if (res == -1) {
+    std::cout << "Error: Could not create new 2D widget" << std::endl;
+  }
+
+}
+
+//! Called when the remove button is pressed.
+/*!
+  This function will try to remove all of the selected widgets.
+  */
+void rtMainWindow::remove2DFrame() {
+  QList<int> keyList;
+
+  keyList = m_view2DHash.keys();
+
+  for (int ix1=0; ix1<keyList.count(); ix1++) {
+    if(get2DWidget(keyList.at(ix1)) && get2DWidget(keyList.at(ix1))->isSelected()) {
+      remove2DWidget(keyList.at(ix1));
+    }
+  }
+}
+
+//! Called when the remove all button is pressed.
+void rtMainWindow::removeAll2DFrame() {
+  QList<int> keyList;
+
+  keyList = m_view2DHash.keys();
+
+  for (int ix1=0; ix1<keyList.count(); ix1++) {
+    remove2DWidget(keyList.at(ix1));
   }
 
 }

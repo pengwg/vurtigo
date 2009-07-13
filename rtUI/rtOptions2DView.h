@@ -38,6 +38,9 @@ public:
   inline vtkProp* getCurrProp() { return m_currProp; }
   inline rtRenderObject* getCurrRenObj() { return m_currRenObj; }
 
+  inline bool isSelected() { return m_selected; }
+  inline void setSelected(bool sel) { m_selected = sel; }
+
   void tryRender();
 
 public slots:

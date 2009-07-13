@@ -71,9 +71,11 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void viewContents();
   void viewAbout();
 
+  void add2DFrame();
+  void remove2DFrame();
+  void removeAll2DFrame();
+
   void pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
-
-
 
   void update2DWindowLists(QMultiHash<int, QString>* hash);
 
