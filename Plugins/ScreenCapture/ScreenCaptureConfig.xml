@@ -1,0 +1,4 @@
+<plugin>
+  <name title="Screen Capture" version="1.0"/>
+  <lib libname="ScreenCapture" libpath="/home/spintilie/Code/Vurtigo-build/bin/"/>
+</plugin>
