@@ -3,8 +3,16 @@
 #include "rtObjectManager.h"
 #include "rtRenderObject.h"
 #include "rtPluginLoader.h"
+#include "rtMainWindow.h"
 
 #include <QCoreApplication>
+
+
+#include <vtkSmartPointer.h>
+#include <vtkWindowToImageFilter.h>
+#include <vtkJPEGWriter.h>
+#include <vtkBMPWriter.h>
+#include <vtkImageData.h>
 
 rtBaseHandle::rtBaseHandle() {
   connectSignals();
@@ -13,10 +21,11 @@ rtBaseHandle::rtBaseHandle() {
   m_newObjectID = -1;
 
   m_masterThreadPointer = QThread::currentThread();
+  m_screen = vtkImageData::New();
 }
 
 rtBaseHandle::~rtBaseHandle() {
-
+  m_screen->Delete();
 }
 
 //! Connect the signals to the slots.
@@ -166,6 +175,41 @@ bool rtBaseHandle::watchClick(int pluginID, bool watch) {
     res = rtPluginLoader::instance().removeFromClickWatch(pluginID);
   }
   return res;
+}
+
+//! Request a new screenshot. NOT THREAD SAFE!
+/*!
+  This function needs to access the graphics directly so it has to be executed in the same thread as the rendering pipeline. NOT THREAD SAFE!
+  */
+vtkImageData* rtBaseHandle::grabScreenshot() {
+  vtkRenderWindow* temp;
+
+  temp = rtObjectManager::instance().getMainWinHandle()->getRenderWindow();
+
+  vtkWindowToImageFilter* filter = vtkWindowToImageFilter::New();
+  filter->SetInput(temp);
+  filter->SetInputBufferTypeToRGB();
+  filter->Modified();
+  filter->Update();
+
+  m_screen->DeepCopy(filter->GetOutput());
+
+  filter->Delete();
+  return m_screen;
+}
+
+
+  //! Get a pointer to the Vurtigo Render Window. NOT THREAD SAFE!
+/*!
+  This function returns a pointer to a modifyable render window. NOT THREAD SAFE!
+The user should be careful when using this pointer as changes to the render window object may have unexpected results.
+The use of the vtkRenderWindow object in a thread other than the main Vurtigo rendering thread is not cosidered safe.
+  */
+vtkRenderWindow* rtBaseHandle::getRenderWindow() {
+  vtkRenderWindow* temp;
+
+  temp = rtObjectManager::instance().getMainWinHandle()->getRenderWindow();
+  return temp;
 }
 
 //! Force the GUI to do a render update.

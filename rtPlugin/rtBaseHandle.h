@@ -11,11 +11,15 @@
 
 class rtDataObject;
 
+#include "vtkRenderWindow.h"
+#include "vtkImageData.h"
+
 //! The handle that the Plugin can use. [Singleton]
 /*!
   Plugins may need to ask the base for instances of object or they may need to register for callbacks. This base handle is the way plugins should access the base. The functions here are specifically designed for the plugins to use.
   It is higly reccomnded that the plugins SHOULD NOT use the other singleton classes (ex. rtObjectManager or rtPluginLoader) directly. There are plugin-specific safety features set in the rtBaseHandle class that protect the functioning of the base. If the other classes are used directly then these features are bypassed and as a result the plugin can cause bugs in the base. 
   This class is also a singleton meaning that there will only be one instance of it for the whole program. Plugins should get access to this via the instance() function.
+  Functions in this class are usually thread safe. Those functions that are not thread safe are specified in the docs for that function.
  */
 class rtBaseHandle : public QObject {
 
@@ -38,6 +42,8 @@ class rtBaseHandle : public QObject {
   rtDataObject* const getObjectWithID(int ID);
   const rtDataObject* const getROObjectWithID(int ID);
   bool watchClick(int pluginID, bool watch);
+  vtkImageData* grabScreenshot();
+  vtkRenderWindow* getRenderWindow();
 
   void forceRenderUpdate(int objID);
 
@@ -54,6 +60,8 @@ class rtBaseHandle : public QObject {
   QSemaphore m_newObjectWait;
 
   QThread* m_masterThreadPointer;
+
+  vtkImageData* m_screen;
 
  private:
   //! Private constructor
