@@ -21,6 +21,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_currentObjectWidget = NULL;
   m_currentPluginWidget = NULL;
   m_renderFlag3D = false;
+  m_renderLock.release(); // Must start with one resource.
 
   m_render3DVTKWidget = new customQVTKWidget(this->frame3DRender);
   m_render3DVTKWidget->setMinimumSize(300,300);
@@ -274,6 +275,7 @@ void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem 
   if (m_currentPluginWidget) {
     m_pluginWidgetLayout.removeWidget(m_currentPluginWidget);
     m_currentPluginWidget->setParent(NULL);
+    m_currentPluginWidget->hide();
     m_currentPluginWidget = NULL;
   }
 
@@ -289,6 +291,7 @@ void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem 
   m_currentPluginWidget = plugWidget;
   if (plugWidget) {
     m_pluginWidgetLayout.addWidget(plugWidget);
+    plugWidget->show();
   }
 }
 
@@ -297,9 +300,10 @@ void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem 
   This function will only render if the render flag has been set to true. Once the function runs it will reset the flag back to false.
  */
 void rtMainWindow::tryRender3D() {
-  if (m_renderFlag3D) {
+  if (m_renderFlag3D && m_renderLock.tryAcquire()) {
     m_renWin3D->Render();
     m_renderFlag3D = false;
+    m_renderLock.release();
   }
 }
 

@@ -4,6 +4,7 @@
 #include <QHBoxLayout>
 #include <QBoxLayout>
 #include <QHash>
+#include <QSemaphore>
 
 #include "ui_rtMainWindow.h"
 #include "ui_rtAboutDialog.h"
@@ -101,6 +102,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   rtAxesProperties* m_axesProperties;
 
   bool m_renderFlag3D;
+  QSemaphore m_renderLock;
 
   //! Hash of tree root objects.
   QHash<rtConstants::rtObjectType, QTreeWidgetItem *> m_topItems;

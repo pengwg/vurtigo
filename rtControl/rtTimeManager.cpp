@@ -126,8 +126,9 @@ void rtTimeManager::removeFromWatchList(rtRenderObject* obj) {
 void rtTimeManager::checkWatchList() {
   int ix1;
   bool renderNew=false;
+
   for (ix1=0; ix1<m_watchList.size(); ix1++) {
-    renderNew = renderNew || m_watchList.at(ix1)->tryUpdate();
+    renderNew = m_watchList.at(ix1)->tryUpdate() || renderNew;
   }
 
   if (renderNew && m_mainWin) {
