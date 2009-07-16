@@ -14,6 +14,11 @@ bool GeomServerPlugin::init() {
 }
 
 void GeomServerPlugin::cleanup() {
+  // No more updates
+  setUpdateTime(-1);
+  (static_cast<GeomServerUI*>(m_mainWidget))->serverDisconnect();
+  senderThread.quit();
+  senderThread.wait();
 }
 
 void GeomServerPlugin::update() {

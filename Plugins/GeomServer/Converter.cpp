@@ -93,7 +93,7 @@ Converter::~Converter() {
   @param name name for new local object node, must not be NULL to be valid
   @return the local object node for the id and localMap, or the new obect node, or NULL
  */
-Converter::Node * Converter::getLocalObjNode(int id, NodeMap * localMap, NodeMap * remoteMap, rtConstants::rtObjectType objType, char * name) {
+Converter::Node * Converter::getLocalObjNode(int id, NodeMap * localMap, NodeMap * remoteMap, rtConstants::rtObjectType objType, const char * name) {
 #ifdef CONVERTER_DEBUG
   cout << "Converter::getLocalObjNode()" << endl;
 #endif
@@ -318,7 +318,8 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
   }
   
   local->lock();
-  success = success && local->setImageParameters(remote.FOV, remote.imgSize, remote.numChannels, localImage);
+  // Translate the FOV into milimeters
+  success = success && local->setImageParameters(remote.FOV*10, remote.imgSize, remote.numChannels, localImage);
   success = success && local->setTransform(remote.rotMatrix, remote.transMatrix);
 
   local->unlock();

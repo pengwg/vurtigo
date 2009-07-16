@@ -70,7 +70,7 @@ class Converter {
   //! //local Image Id -> remote Image Id
   IdMap * remoteImageMap;
 
-  Converter::Node * getLocalObjNode(int id, NodeMap * nodeMap, NodeMap * remoteMap = NULL, rtConstants::rtObjectType objType = UNDEFINED_RT_OBJECT_TYPE, char * name = NULL);
+  Converter::Node * getLocalObjNode(int id, NodeMap * nodeMap, NodeMap * remoteMap = NULL, rtConstants::rtObjectType objType = UNDEFINED_RT_OBJECT_TYPE, const char * name = NULL);
   Converter::Node * getNode(int id, NodeMap * nodeMap);
   rtCathDataObject * getLocalCath(int remoteId);
   int getLocalCoilId(int remoteCoilId, rtCathDataObject * localCath, int remoteCoilLoc = UNDEFINED_REMOTE_COIL_LOC);

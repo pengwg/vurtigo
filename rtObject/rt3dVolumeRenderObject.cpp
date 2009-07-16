@@ -42,7 +42,7 @@ void rt3DVolumeRenderObject::update() {
   rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
   if (!dObj || !dObj->isDataValid()) return;
 
-  m_transFilter->SetResliceAxes( dObj->getTransform()->GetMatrix() );
+  m_transFilter->SetResliceAxes( dObj->getTransform()->GetLinearInverse()->GetMatrix() );
   m_transFilter->Update();
 
   m_planes[0]->SetInput( m_transFilter->GetOutput() );

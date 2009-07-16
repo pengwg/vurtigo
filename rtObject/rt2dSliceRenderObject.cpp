@@ -33,8 +33,9 @@ rt2DSliceRenderObject::~rt2DSliceRenderObject() {
 //! Take info from the data object.
 void rt2DSliceRenderObject::update() {
   rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
-  if ( !dObj->isDataValid() ) return;
+  if ( !dObj->isDataValid() || !dObj->getUCharData()) return;
 
+  dObj->getUCharData()->Update();
   m_imgMapToColors->SetInput(dObj->getUCharData());
 
   double scaleRange[2];
