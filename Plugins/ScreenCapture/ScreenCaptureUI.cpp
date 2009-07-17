@@ -17,6 +17,7 @@ ScreenCaptureUI::ScreenCaptureUI() {
 
   connectSignals();
 
+  // JPEG Init
   // Quality at 80%.
   jpgQualitySlider->setValue(80);
   jpegQualityChanged(80);
@@ -32,7 +33,33 @@ ScreenCaptureUI::ScreenCaptureUI() {
   jpgPauseBtn->setEnabled(false);
   jpgStopBtn->setEnabled(false);
 
-  moreImagesTaken(m_captureThread.getJpgWriter()->getNumImages());
+  jpegMoreImagesTaken(m_captureThread.getJpgWriter()->getNumImages());
+
+  // BMP Init
+  // Set Interval to 50 ms.
+  bmpIntervalSlider->setValue(50);
+  bmpIntervalChanged(50);
+  m_captureThread.getBmpWriter()->setInterval(50);
+
+  // Only the start button shoud be usable at the time of init.
+  bmpStartBtn->setEnabled(true);
+  bmpPauseBtn->setEnabled(false);
+  bmpStopBtn->setEnabled(false);
+
+  bmpMoreImagesTaken(m_captureThread.getBmpWriter()->getNumImages());
+
+  // AVI Init
+  // Set Interval to 50 ms.
+  aviIntervalSlider->setValue(50);
+  aviIntervalChanged(50);
+  m_captureThread.getAviWriter()->setInterval(50);
+
+  // Only the start button shoud be usable at the time of init.
+  aviStartBtn->setEnabled(true);
+  aviPauseBtn->setEnabled(false);
+  aviStopBtn->setEnabled(false);
+
+  aviMoreImagesTaken(m_captureThread.getAviWriter()->getNumImages());
 }
 
 ScreenCaptureUI::~ScreenCaptureUI() {
@@ -61,7 +88,34 @@ void ScreenCaptureUI::connectSignals() {
   connect(jpgStopBtn, SIGNAL(clicked()), m_captureThread.getJpgWriter(), SLOT(endSeries()));
   connect(jpgStopBtn, SIGNAL(clicked()), this, SLOT(jpegStop()));
 
-  connect(m_captureThread.getJpgWriter(), SIGNAL(newSeriesImage(int)), this, SLOT(moreImagesTaken(int)));
+  connect(m_captureThread.getJpgWriter(), SIGNAL(newSeriesImage(int)), this, SLOT(jpegMoreImagesTaken(int)));
+
+  // Connect signals and slots for the bmp writer.
+  connect(bmpScreenCapBtn, SIGNAL(clicked()), m_captureThread.getBmpWriter(), SLOT(screenshot()), Qt::QueuedConnection);
+  connect(bmpIntervalSlider, SIGNAL(valueChanged(int)), m_captureThread.getBmpWriter(), SLOT(setInterval(int)));
+  connect(bmpIntervalSlider, SIGNAL(valueChanged(int)), this, SLOT(bmpIntervalChanged(int)));
+
+  connect(bmpStartBtn, SIGNAL(clicked()), m_captureThread.getBmpWriter(), SLOT(startSeries()));
+  connect(bmpStartBtn, SIGNAL(clicked()), this, SLOT(bmpStart()));
+  connect(bmpPauseBtn, SIGNAL(toggled(bool)), m_captureThread.getBmpWriter(), SLOT(pauseSeries(bool)));
+  connect(bmpPauseBtn, SIGNAL(toggled(bool)), this, SLOT(bmpPause(bool)));
+  connect(bmpStopBtn, SIGNAL(clicked()), m_captureThread.getBmpWriter(), SLOT(endSeries()));
+  connect(bmpStopBtn, SIGNAL(clicked()), this, SLOT(bmpStop()));
+
+  connect(m_captureThread.getBmpWriter(), SIGNAL(newSeriesImage(int)), this, SLOT(bmpMoreImagesTaken(int)));
+
+  // Connect signals and slots for the avi writer.
+  connect(aviIntervalSlider, SIGNAL(valueChanged(int)), m_captureThread.getAviWriter(), SLOT(setInterval(int)));
+  connect(aviIntervalSlider, SIGNAL(valueChanged(int)), this, SLOT(aviIntervalChanged(int)));
+
+  connect(aviStartBtn, SIGNAL(clicked()), m_captureThread.getAviWriter(), SLOT(startSeries()));
+  connect(aviStartBtn, SIGNAL(clicked()), this, SLOT(aviStart()));
+  connect(aviPauseBtn, SIGNAL(toggled(bool)), m_captureThread.getAviWriter(), SLOT(pauseSeries(bool)));
+  connect(aviPauseBtn, SIGNAL(toggled(bool)), this, SLOT(aviPause(bool)));
+  connect(aviStopBtn, SIGNAL(clicked()), m_captureThread.getAviWriter(), SLOT(endSeries()));
+  connect(aviStopBtn, SIGNAL(clicked()), this, SLOT(aviStop()));
+
+  connect(m_captureThread.getAviWriter(), SIGNAL(newSeriesImage(int)), this, SLOT(aviMoreImagesTaken(int)));
 
 }
 
@@ -124,6 +178,86 @@ void ScreenCaptureUI::jpegStop() {
   jpgStartBtn->setChecked(false);
 }
 
-void ScreenCaptureUI::moreImagesTaken(int num) {
+void ScreenCaptureUI::jpegMoreImagesTaken(int num) {
   jpgImgsTaken->setText(QString::number(num));
+}
+
+
+//////
+// BMP
+//////
+
+//! Setup the GUI for the start for BMP.
+void ScreenCaptureUI::bmpStart() {
+  bmpStartBtn->setEnabled(false);
+  bmpIntervalSlider->setEnabled(false);
+  bmpScreenCapBtn->setEnabled(false);
+  fileNameEdit->setEnabled(false);
+  fileNameBtn->setEnabled(false);
+
+  bmpPauseBtn->setEnabled(true);
+  bmpPauseBtn->setChecked(false);
+  bmpStopBtn->setEnabled(true);
+}
+
+void ScreenCaptureUI::bmpPause(bool state) {
+}
+
+void ScreenCaptureUI::bmpStop() {
+  bmpStartBtn->setEnabled(true);
+  bmpIntervalSlider->setEnabled(true);
+  bmpScreenCapBtn->setEnabled(true);
+  fileNameEdit->setEnabled(true);
+  fileNameBtn->setEnabled(true);
+
+  bmpPauseBtn->setEnabled(false);
+  bmpStopBtn->setEnabled(false);
+  bmpPauseBtn->setChecked(false);
+  bmpStartBtn->setChecked(false);
+}
+void ScreenCaptureUI::bmpIntervalChanged(int val) {
+  bmpIntervalLabel->setText(QString::number(val)+"  msec.");
+}
+
+void ScreenCaptureUI::bmpMoreImagesTaken(int num) {
+  bmpImgsTaken->setText(QString::number(num));
+}
+
+//////
+// AVI
+//////
+
+//! Setup the GUI for the start for AVI.
+void ScreenCaptureUI::aviStart() {
+  aviStartBtn->setEnabled(false);
+  aviIntervalSlider->setEnabled(false);
+  fileNameEdit->setEnabled(false);
+  fileNameBtn->setEnabled(false);
+
+  aviPauseBtn->setEnabled(true);
+  aviPauseBtn->setChecked(false);
+  aviStopBtn->setEnabled(true);
+}
+
+void ScreenCaptureUI::aviPause(bool state) {
+}
+
+void ScreenCaptureUI::aviStop() {
+  aviStartBtn->setEnabled(true);
+  aviIntervalSlider->setEnabled(true);
+  fileNameEdit->setEnabled(true);
+  fileNameBtn->setEnabled(true);
+
+  aviPauseBtn->setEnabled(false);
+  aviStopBtn->setEnabled(false);
+  aviPauseBtn->setChecked(false);
+  aviStartBtn->setChecked(false);
+}
+
+void ScreenCaptureUI::aviIntervalChanged(int val) {
+  aviIntervalLabel->setText(QString::number(val)+"  msec.");
+}
+
+void ScreenCaptureUI::aviMoreImagesTaken(int num) {
+  aviImgsTaken->setText(QString::number(num));
 }

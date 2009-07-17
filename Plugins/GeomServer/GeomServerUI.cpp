@@ -23,14 +23,10 @@ void GeomServerUI::setupDefaults() {
   hostLineEdit->insert(args->hostname);
   sstream << args->port;
   portLineEdit->insert(sstream.str().c_str());
-
-//  connStartCheckBox->setChecked(true);
 }
 
 //! Actions on startup
 void GeomServerUI::init() {
-  if (connStartCheckBox->isChecked())
-      serverConnect();
 }
 
 GeomServerUI::GeomServerUI(SenderThread & senderThread) : senderThread(senderThread) {

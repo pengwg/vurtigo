@@ -5,6 +5,8 @@ set(SRC_FILES
   ScreenCaptureUI.cpp
   ScreenCaptureThread.cpp
   JpgWriter.cpp
+  BmpWriter.cpp
+  AviWriter.cpp
 )
 
 # MOC files are the ones the use Q_OBJECT
@@ -13,6 +15,8 @@ set (MOC_FILES
   ScreenCaptureUI.h
   ScreenCaptureThread.h
   JpgWriter.h
+  BmpWriter.h
+  AviWriter.h
 )
 set (UI_FILES_SCREEN
   ScreenCapture.ui

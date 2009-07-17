@@ -24,12 +24,28 @@ public:
 public slots:
   void newFile();
   void fileChooser();
+
+  // JPEG slots
   void jpegQualityChanged(int);
   void jpegIntervalChanged(int);
   void jpegStart();
   void jpegPause(bool);
   void jpegStop();
-  void moreImagesTaken(int);
+  void jpegMoreImagesTaken(int);
+
+  // BMP slots
+  void bmpIntervalChanged(int);
+  void bmpStart();
+  void bmpPause(bool);
+  void bmpStop();
+  void bmpMoreImagesTaken(int);
+
+  // AVI slots
+  void aviIntervalChanged(int);
+  void aviStart();
+  void aviPause(bool);
+  void aviStop();
+  void aviMoreImagesTaken(int);
 
 protected:
   void connectSignals();
