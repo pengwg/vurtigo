@@ -242,7 +242,7 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   @todo Actually re-center on the object.
   */
 void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
-    rtRenderObject *temp;
+  rtRenderObject *temp;
 
   if (!item) return;
 
@@ -253,6 +253,10 @@ void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
 
   // Get the object
   temp = rtObjectManager::instance().getObjectWithID(item->text(1).toInt());
+  if (!temp->getVisible3D()) {
+    // Not visible so we have nothing to center on...
+    return;
+  }
   double loc[6];
   if (temp->getObjectLocation(loc)) {
     // Location is valid
