@@ -29,7 +29,7 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>40</x>
@@ -61,6 +61,44 @@
       <item>
        <property name="text">
         <string>Surface</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>80</y>
+     <width>174</width>
+     <height>29</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Interpolation:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="interpolateComboBox">
+      <item>
+       <property name="text">
+        <string>Flat</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Gouraud</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Phong</string>
        </property>
       </item>
      </widget>

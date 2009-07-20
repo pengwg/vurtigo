@@ -9,6 +9,11 @@ rtCathDataObject::rtCathDataObject() {
   // More than enough coils
   m_max_coils = 128;
 
+  // Set the default point size.
+  m_pointSize = 10;
+  m_cathGuiSetup.pointSizeSlider->setValue(m_pointSize);
+  pointSizeChanged(m_pointSize);
+
   m_eType = ET_MEAN;
 
   m_splineProperty = vtkProperty::New();
@@ -245,31 +250,16 @@ bool rtCathDataObject::getSNRAtLocation(int loc, double &SNR) {
 void rtCathDataObject::setupGUI() {
   QWidget* wid = getBaseWidget();
 
-  m_masterLayout = new QGridLayout();
-  wid->setLayout(m_masterLayout);
+  m_cathGuiSetup.setupUi(wid);
+  connect(m_cathGuiSetup.splinePropButton, SIGNAL(pressed()), this, SLOT(splinePropertyDialog()));
+  connect(m_cathGuiSetup.pointPropButton, SIGNAL(pressed()), this, SLOT(pointPropertyDialog()));
+  connect(m_cathGuiSetup.tipPropButton, SIGNAL(pressed()), this, SLOT(tipPropertyDialog()));
 
-  m_splinePropLabel.setText("Spline Options: ");
-  m_splinePropButton.setText("Property");
-  m_masterLayout->addWidget(&m_splinePropLabel, 0, 0);
-  m_masterLayout->addWidget(&m_splinePropButton, 0, 1);
-  connect(&m_splinePropButton, SIGNAL(pressed()), this, SLOT(splinePropertyDialog()));
-
-  m_pointPropLabel.setText("Sphere Options: ");
-  m_pointPropButton.setText("Property");
-  m_masterLayout->addWidget(&m_pointPropLabel, 1, 0);
-  m_masterLayout->addWidget(&m_pointPropButton, 1, 1);
-  connect(&m_pointPropButton, SIGNAL(pressed()), this, SLOT(pointPropertyDialog()));
-
-  m_tipPropLabel.setText("Cath Tip Options: ");
-  m_tipPropButton.setText("Property");
-  m_masterLayout->addWidget(&m_tipPropLabel, 2, 0);
-  m_masterLayout->addWidget(&m_tipPropButton, 2, 1);
-  connect(&m_tipPropButton, SIGNAL(pressed()), this, SLOT(tipPropertyDialog()));
+  connect(m_cathGuiSetup.pointSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(pointSizeChanged(int)));
 }
 
 //! Clean the GUI widgets.
 void rtCathDataObject::cleanupGUI() {
-  if (m_masterLayout) delete m_masterLayout;
 }
 
 //! Return the next unused coil ID
@@ -303,3 +293,9 @@ void rtCathDataObject::tipPropertyDialog() {
   if (tipDlg.isChanged()) Modified();
 }
 
+//! Called when the slider changes and the point sizes are changed.
+void rtCathDataObject::pointSizeChanged(int size) {
+  m_cathGuiSetup.pointSizeLabel->setText(QString::number(size) + " X.");
+  m_pointSize = size;
+  Modified();
+}

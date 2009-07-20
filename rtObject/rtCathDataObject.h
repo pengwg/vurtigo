@@ -2,6 +2,7 @@
 #define RT_CATH_DATA_OBJECT_H
 
 #include "rtDataObject.h"
+#include "ui_cathOptions.h"
 
 #include <QHash>
 #include <QMultiMap>
@@ -65,10 +66,14 @@ public:
   EstimationType getEstimationType() { return m_eType; }
   void setEstimationType(EstimationType et) { m_eType = et; }
 
+  int getPointSize() { return m_pointSize; }
+
  public slots:
   void splinePropertyDialog();
   void pointPropertyDialog();
   void tipPropertyDialog();
+
+  void pointSizeChanged(int size);
 
  protected:
   // Functions
@@ -90,20 +95,14 @@ public:
   //! The metod to use to determine the catheter location when multiple coils exist with the same location ID.
   EstimationType m_eType;
 
+  //! Maximum number of catheter coils
   int m_max_coils;
 
-  ////////////
-  // GUI Elements
-  /////////////
+  //! Size multiplier for each of the points.
+  int m_pointSize;
 
-  //! The master grid layout
-  QGridLayout* m_masterLayout;
-  QLabel m_splinePropLabel;
-  QPushButton m_splinePropButton;
-  QLabel m_pointPropLabel;
-  QPushButton m_pointPropButton;
-  QLabel m_tipPropLabel;
-  QPushButton m_tipPropButton;
+  //! The objects that sets the widgets for the cath options.
+  Ui::cathOptions m_cathGuiSetup;
 };
 
 #endif 

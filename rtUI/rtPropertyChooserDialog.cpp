@@ -13,6 +13,7 @@ rtPropertyChooserDialog::rtPropertyChooserDialog(vtkProperty* initial, QWidget *
     m_prop = initial;
 
     representComboBox->setCurrentIndex(m_prop->GetRepresentation());
+    interpolateComboBox->setCurrentIndex(m_prop->GetInterpolation());
 
   } else {
     std::cout << "Error: rtPropertyChooserDialog.cpp: Initial Property was NULL!" << std::endl;
@@ -30,4 +31,5 @@ void rtPropertyChooserDialog::settingsChanged() {
   m_changed=true;
 
   m_prop->SetRepresentation( representComboBox->currentIndex() );
+  m_prop->SetInterpolation( interpolateComboBox->currentIndex() );
 }

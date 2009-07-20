@@ -88,7 +88,7 @@ void rtCathRenderObject::update() {
     // The the first and only sphere.
     temp = m_sphereList.value(0);
     temp->SetCenter(coords);
-    temp->SetRadius(10.0f/SNR);
+    temp->SetRadius(((double)dObj->getPointSize())/SNR);
     temp->SetThetaResolution(50);
     temp->SetPhiResolution(50);
 
@@ -128,7 +128,7 @@ void rtCathRenderObject::update() {
 
       temp = m_sphereList.value(ix1);
       temp->SetCenter(coords);
-      temp->SetRadius(10.0f/SNR);
+      temp->SetRadius(((double)dObj->getPointSize())/SNR);
       temp->SetThetaResolution(50);
       temp->SetPhiResolution(50);
 

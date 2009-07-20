@@ -81,6 +81,7 @@ set (UI_FILES
   rtUI/volume3DOptions.ui
   rtUI/options2DView.ui
   rtUI/rtAboutDialog.ui
+  rtUI/cathOptions.ui
   Plugins/GeomServer/GeomServer.ui
 )
 
