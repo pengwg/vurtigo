@@ -108,7 +108,7 @@ void rtCathRenderObject::update() {
     dObj->getSNRAtLocation(loc, SNR);
 
     m_coneSource->SetCenter(coords);
-    m_coneSource->SetRadius(15.0f/SNR);
+    m_coneSource->SetRadius(25.0f/SNR);
     m_coneSource->SetHeight(30.0f/SNR);
     m_coneSource->SetResolution(80);
 
@@ -259,4 +259,13 @@ void rtCathRenderObject::setupPipeline() {
   m_sphereActor->VisibilityOff();
   m_coneActor->VisibilityOff();
 
+}
+
+//! The position of the catheter tip is returned.
+bool rtCathRenderObject::getObjectLocation(double loc[6]) {
+  if (!m_sphereActor) return false;
+
+  m_sphereActor->GetBounds(loc);
+
+  return true;
 }

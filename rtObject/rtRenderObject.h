@@ -63,6 +63,9 @@ Q_OBJECT
   virtual bool mouseReleaseEvent(QMouseEvent* event) { return false; }
   virtual bool mouseDoubleClickEvent(QMouseEvent* event) { return false; }
 
+  //! Get the location of an object in the 3D space.
+  virtual bool getObjectLocation(double loc[6]) = 0;
+
  protected:
   //! The rtRenderObject constructor.
   /*!

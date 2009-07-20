@@ -83,3 +83,12 @@ void rtMatrixRenderObject::setupPipeline() {
 
   m_pipe3D.push_back( m_actor );
 }
+
+//! The bounds for the plane in 3D space.
+bool rtMatrixRenderObject::getObjectLocation(double loc[6]) {
+  if (!m_actor) return false;
+
+  m_actor->GetBounds(loc);
+
+  return true;
+}

@@ -255,3 +255,13 @@ void rt3DVolumeRenderObject::setupPipeline() {
   // Update the volume
   tryUpdate();
 }
+
+
+//! The position of the center of the plane is given
+bool rt3DVolumeRenderObject::getObjectLocation(double loc[6]) {
+  if (!m_volumeActor) return false;
+
+  m_volumeActor->GetBounds(loc);
+
+  return true;
+}

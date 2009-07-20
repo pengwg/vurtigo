@@ -34,6 +34,8 @@ class rtCathRenderObject : public rtRenderObject {
 
   //! Remove this object from the given renderer.
   virtual bool removeFromRenderer(vtkRenderer* ren);
+  virtual bool getObjectLocation(double loc[6]);
+
  protected:
   void setupDataObject();
   void setupPipeline();

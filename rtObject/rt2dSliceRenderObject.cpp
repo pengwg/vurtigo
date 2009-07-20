@@ -184,3 +184,12 @@ void rt2DSliceRenderObject::setupPipeline() {
   m_pipe3D.push_back( m_textureActor );
   m_pipe3D.push_back( m_outlineActor );
 }
+
+//! The position of the center of the plane is given
+bool rt2DSliceRenderObject::getObjectLocation(double loc[6]) {
+  if (!m_outlineActor) return false;
+
+  m_outlineActor->GetBounds(loc);
+
+  return true;
+}

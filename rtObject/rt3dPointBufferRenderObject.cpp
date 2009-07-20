@@ -86,3 +86,45 @@ void rt3DPointBufferRenderObject::setupDataObject() {
 void rt3DPointBufferRenderObject::setupPipeline() {
   //Nothing to do here since the list is empty to start with. 
 }
+
+
+//! The position of the center of the cluster of points
+bool rt3DPointBufferRenderObject::getObjectLocation(double loc[6]) {
+  rt3DPointBufferDataObject *dObj = dynamic_cast<rt3DPointBufferDataObject*>(m_dataObj);
+  if (!dObj) return false;
+
+  QList<rt3DPointBufferDataObject::SimplePoint>* ptList = dObj->getPointList();
+  if (!ptList) return false;
+  if (ptList->count() <= 0) return false;
+
+  // Just use the first point as the default.
+  int ptSize = ptList->at(0).pSize;
+  loc[0] = ptList->at(0).px - ptSize; loc[1] = ptList->at(0).px + ptSize; // x
+  loc[2] = ptList->at(0).py - ptSize; loc[3] = ptList->at(0).py + ptSize; // y
+  loc[4] = ptList->at(0).pz - ptSize; loc[5] = ptList->at(0).pz + ptSize; // z
+
+  for (int ix1=1; ix1<ptList->count(); ix1++) {
+    // X
+    if ( (ptList->at(ix1).px - ptSize) < loc[0]) {
+      loc[0] = ptList->at(ix1).px - ptSize;
+    } else if ( (ptList->at(ix1).px + ptSize) > loc[1]) {
+      loc[1] = ptList->at(ix1).px + ptSize;
+    }
+
+    // Y
+    if ( (ptList->at(ix1).py - ptSize) < loc[2]) {
+      loc[2] = ptList->at(ix1).py - ptSize;
+    } else if ( (ptList->at(ix1).py + ptSize) > loc[3]) {
+      loc[3] = ptList->at(ix1).py + ptSize;
+    }
+
+    // Z
+    if ( (ptList->at(ix1).pz - ptSize) < loc[4]) {
+      loc[4] = ptList->at(ix1).pz - ptSize;
+    } else if ( (ptList->at(ix1).pz + ptSize) > loc[5]) {
+      loc[5] = ptList->at(ix1).pz + ptSize;
+    }
+  }
+
+  return true;
+}

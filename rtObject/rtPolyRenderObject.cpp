@@ -25,6 +25,7 @@ void rtPolyRenderObject::update() {
   m_mapper->SetLookupTable(dObj->getColorTable());
   m_actor->SetProperty(dObj->getProperty());
   m_mapper->SetInput(dObj->getPolyData());
+
 }
 
 //! Add this object to the given renderer.
@@ -72,3 +73,14 @@ void rtPolyRenderObject::setupPipeline() {
 
   m_pipe3D.push_back(m_actor);
 }
+
+
+bool rtPolyRenderObject::getObjectLocation(double loc[6]) {
+  if (!m_actor) return false;
+
+  m_actor->GetBounds(loc);
+
+  return true;
+}
+
+

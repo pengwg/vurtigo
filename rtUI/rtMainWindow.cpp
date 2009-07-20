@@ -10,6 +10,7 @@
 #include "rtDataObject.h"
 #include "rtPluginLoader.h"
 #include "vtkPropAssembly.h"
+#include "vtkCamera.h"
 
 #include "version.h"
 
@@ -236,6 +237,31 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   }
 }
 
+//! User has double clicked on an item so we need to re-center on it.
+/*!
+  @todo Actually re-center on the object.
+  */
+void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
+    rtRenderObject *temp;
+
+  if (!item) return;
+
+  // Check for a heading.
+  if (item->columnCount() == 1) {
+    return;
+  }
+
+  // Get the object
+  temp = rtObjectManager::instance().getObjectWithID(item->text(1).toInt());
+  double loc[6];
+  if (temp->getObjectLocation(loc)) {
+    // Location is valid
+    m_renderer3D->ResetCamera(loc);
+    m_renderFlag3D = true;
+  }
+
+}
+
 //! Render items can be added directly.
 /*!
   Note that this function does not keep track of the objects it adds.
@@ -356,7 +382,7 @@ void rtMainWindow::connectSignals() {
   // Object Tree
   connect(objectTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(currItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
   connect(objectTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemChanged(QTreeWidgetItem*,int)));
-  
+  connect(objectTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)), this, SLOT(centerOnObject(QTreeWidgetItem*,int)));
 
   // Plugin Tree
   connect(pluginTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(pluginItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));

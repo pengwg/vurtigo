@@ -62,6 +62,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
   void itemChanged(QTreeWidgetItem * current, int column);
+  void centerOnObject(QTreeWidgetItem *item, int column);
   void viewChangedMixed();
   void viewChanged3DOnly();
   void viewChanged2DOnly();

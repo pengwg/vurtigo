@@ -40,3 +40,15 @@ void rt4DVolumeRenderObject::setupDataObject() {
 //! Create the part of the pipeline that is done first. 
 void rt4DVolumeRenderObject::setupPipeline() {
 }
+
+//! When this object is implemented it will have a valid location. For now it does not.
+bool rt4DVolumeRenderObject::getObjectLocation(double loc[6]) {
+  loc[0] = 0.0;
+  loc[1] = 0.0;
+  loc[2] = 0.0;
+  loc[3] = 0.0;
+  loc[4] = 0.0;
+  loc[5] = 0.0;
+
+  return false;
+}

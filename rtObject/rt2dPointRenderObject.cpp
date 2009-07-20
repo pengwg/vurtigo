@@ -37,3 +37,15 @@ void rt2DPointRenderObject::setupDataObject() {
 //! Create the part of the pipeline that is done first. 
 void rt2DPointRenderObject::setupPipeline() {
 }
+
+//! 2D points do not have locations in 3D space.
+bool rt2DPointRenderObject::getObjectLocation(double loc[6]) {
+  loc[0] = 0.0;
+  loc[1] = 0.0;
+  loc[2] = 0.0;
+  loc[3] = 0.0;
+  loc[4] = 0.0;
+  loc[5] = 0.0;
+
+  return false;
+}

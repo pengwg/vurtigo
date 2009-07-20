@@ -36,3 +36,15 @@ void rtImageBufferRenderObject::setupDataObject() {
 //! Create the part of the pipeline that is done first. 
 void rtImageBufferRenderObject::setupPipeline() {
 }
+
+//! When this object is implemented it will have a valid location. For now it does not.
+bool rtImageBufferRenderObject::getObjectLocation(double loc[6]) {
+  loc[0] = 0.0;
+  loc[1] = 0.0;
+  loc[2] = 0.0;
+  loc[3] = 0.0;
+  loc[4] = 0.0;
+  loc[5] = 0.0;
+
+  return false;
+}

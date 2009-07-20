@@ -63,3 +63,14 @@ void rtLabelRenderObject::setupPipeline() {
   m_pipe2D.insert("Label", m_textActor2D);
 }
 
+//! This object has no valid 3D location.
+bool rtLabelRenderObject::getObjectLocation(double loc[6]) {
+  loc[0] = 0.0;
+  loc[1] = 0.0;
+  loc[2] = 0.0;
+  loc[3] = 0.0;
+  loc[4] = 0.0;
+  loc[5] = 0.0;
+
+  return false;
+}

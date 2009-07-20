@@ -36,3 +36,15 @@ void rtColorFuncRenderObject::setupDataObject() {
 //! Create the part of the pipeline that is done first. 
 void rtColorFuncRenderObject::setupPipeline() {
 }
+
+//! This object does not have a valid 3D location.
+bool rtColorFuncRenderObject::getObjectLocation(double loc[6]) {
+  loc[0] = 0.0;
+  loc[1] = 0.0;
+  loc[2] = 0.0;
+  loc[3] = 0.0;
+  loc[4] = 0.0;
+  loc[5] = 0.0;
+
+  return false;
+}

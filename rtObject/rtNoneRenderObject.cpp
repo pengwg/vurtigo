@@ -36,3 +36,15 @@ void rtNoneRenderObject::setupDataObject() {
 //! Create the part of the pipeline that is done first. 
 void rtNoneRenderObject::setupPipeline() {
 }
+
+//! This object has no valid 3D location.
+bool rtNoneRenderObject::getObjectLocation(double loc[6]) {
+  loc[0] = 0.0;
+  loc[1] = 0.0;
+  loc[2] = 0.0;
+  loc[3] = 0.0;
+  loc[4] = 0.0;
+  loc[5] = 0.0;
+
+  return false;
+}
