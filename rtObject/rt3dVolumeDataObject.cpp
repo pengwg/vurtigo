@@ -33,6 +33,9 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   m_isosurfaceFunc = vtkVolumeRayCastIsosurfaceFunction::New();
   m_MIPFunc = vtkVolumeRayCastMIPFunction::New();
 
+  // Setup the interpolation
+  m_interpolationType = 1; // Linear interp
+
   setupGUI();
 }
 
@@ -240,6 +243,9 @@ void rt3DVolumeDataObject::flipZ() {
 void rt3DVolumeDataObject::setupGUI() {
   m_optionsWidget.setupUi(getBaseWidget());
 
+  // Interpolation Type.
+  connect(m_optionsWidget.interpolateComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(interpolationChanged(int)));
+
   // Global ray cast volume switch
   connect(m_optionsWidget.groupRayCastVolume, SIGNAL(toggled(bool)), this, SLOT(Modified()));
 
@@ -274,6 +280,8 @@ void rt3DVolumeDataObject::setupGUI() {
   for (int ix1=0; ix1<colorFuncs.count() ; ix1++) {
     m_optionsWidget.comboCTFunc->addItem(QString::number(colorFuncs.at(ix1)));
   }
+
+  m_optionsWidget.interpolateComboBox->setCurrentIndex(m_interpolationType);
 
 }
 
@@ -353,3 +361,10 @@ void rt3DVolumeDataObject::piecewiseChanged(QString id) {
 void rt3DVolumeDataObject::cleanupGUI() {
 
 }
+
+//! Change how the interpolation is done.
+void rt3DVolumeDataObject::interpolationChanged(int interp) {
+  m_interpolationType = interp;
+  Modified();
+}
+

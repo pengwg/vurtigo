@@ -62,6 +62,8 @@ public:
   void flipY();
   void flipZ();
 
+  int getInterpolation() { return m_interpolationType; }
+
   void apply();
   void update();
 
@@ -73,6 +75,8 @@ public:
 
   void colorTransferChanged(QString id);
   void piecewiseChanged(QString id);
+
+  void interpolationChanged(int interp);
 
  protected:
   // Functions
@@ -90,6 +94,11 @@ public:
   vtkColorTransferFunction* m_colorTransFuncDefault;
 
   bool m_imgDataValid;
+
+  //! The type of interpolation that will be used by the cut planes and the volume reslice.
+  /*! The three types possible are: Nearest Neighbour = 0, Linear = 1, Cubic = 2
+    */
+  int m_interpolationType;
 
   // Ray Cast Functions
   RayCastFunction m_rayCastFunction;

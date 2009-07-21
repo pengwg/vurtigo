@@ -42,7 +42,13 @@ void rt3DVolumeRenderObject::update() {
   rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
   if (!dObj || !dObj->isDataValid()) return;
 
-  m_transFilter->SetInterpolationModeToCubic();
+  if (dObj->getInterpolation() == 0) {
+    m_transFilter->SetInterpolationModeToNearestNeighbor();
+  } else if (dObj->getInterpolation() == 1) {
+    m_transFilter->SetInterpolationModeToLinear();
+  } else if (dObj->getInterpolation() == 2) {
+    m_transFilter->SetInterpolationModeToCubic();
+  }
   m_transFilter->SetResliceAxes( dObj->getTransform()->GetLinearInverse()->GetMatrix() );
   m_transFilter->Update();
 
@@ -57,6 +63,15 @@ void rt3DVolumeRenderObject::update() {
   double range[2];
   int dims[3];
   for (int ix1=0; ix1<3; ix1++) {
+
+    if (dObj->getInterpolation() == 0) {
+      m_planes[ix1]->SetResliceInterpolateToNearestNeighbour();
+    } else if (dObj->getInterpolation() == 1) {
+      m_planes[ix1]->SetResliceInterpolateToLinear();
+    } else if (dObj->getInterpolation() == 2) {
+      m_planes[ix1]->SetResliceInterpolateToCubic();
+    }
+
     m_imgCast[ix1]->Update();
     m_imgCast[ix1]->GetOutput()->GetScalarRange(range);
     m_imgCast[ix1]->GetOutput()->GetDimensions(dims);
@@ -216,21 +231,18 @@ void rt3DVolumeRenderObject::setupPipeline() {
   m_planes[0]->SetInteractor( rtObjectManager::instance().getMainWinHandle()->getInteractor() );
   m_planes[0]->RestrictPlaneToVolumeOn();
   m_planes[0]->GetPlaneProperty()->SetColor(1,0,0);
-  m_planes[0]->SetResliceInterpolateToCubic();
   m_planes[0]->SetPicker( rtObjectManager::instance().getMainWinHandle()->getGlobalCellPicker() );
   m_planes[0]->fillWidgetActors(&m_pipe3D);
 
   m_planes[1]->SetInteractor( rtObjectManager::instance().getMainWinHandle()->getInteractor() );
   m_planes[1]->RestrictPlaneToVolumeOn();
   m_planes[1]->GetPlaneProperty()->SetColor(1,1,0);
-  m_planes[1]->SetResliceInterpolateToCubic();
   m_planes[1]->SetPicker( rtObjectManager::instance().getMainWinHandle()->getGlobalCellPicker() );
   m_planes[1]->fillWidgetActors(&m_pipe3D);
 
   m_planes[2]->SetInteractor( rtObjectManager::instance().getMainWinHandle()->getInteractor() );
   m_planes[2]->RestrictPlaneToVolumeOn();
   m_planes[2]->GetPlaneProperty()->SetColor(1,0,1);
-  m_planes[2]->SetResliceInterpolateToCubic();
   m_planes[2]->SetPicker( rtObjectManager::instance().getMainWinHandle()->getGlobalCellPicker() );
   m_planes[2]->fillWidgetActors(&m_pipe3D);
 
