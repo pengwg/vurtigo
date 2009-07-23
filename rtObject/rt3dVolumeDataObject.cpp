@@ -209,33 +209,40 @@ void rt3DVolumeDataObject::setDirectionCosinesXY(float* dirCos) {
 
   mat->Identity();
   mat->SetElement(0, 0, dirCos[0]);
-  mat->SetElement(0, 1, dirCos[1]);
-  mat->SetElement(0, 2, dirCos[2]);
-  mat->SetElement(1, 0, dirCos[3]);
+  mat->SetElement(1, 0, dirCos[1]);
+  mat->SetElement(2, 0, dirCos[2]);
+  mat->SetElement(0, 1, dirCos[3]);
   mat->SetElement(1, 1, dirCos[4]);
-  mat->SetElement(1, 2, dirCos[5]);
-  mat->SetElement(2, 0, dirCos[1]*dirCos[5]-dirCos[2]*dirCos[4]);
-  mat->SetElement(2, 1, dirCos[2]*dirCos[3]-dirCos[0]*dirCos[5]);
-  mat->SetElement(2, 2, dirCos[0]*dirCos[4]-dirCos[1]*dirCos[3]);
+  mat->SetElement(2, 1, dirCos[5]);
 
+    // Find the third vector by doing the cross product of the first two. (USE the flipped data!!)
+  mat->SetElement(0, 2, mat->GetElement(1,0)*mat->GetElement(2,1) - mat->GetElement(2,0)*mat->GetElement(1,1));
+  mat->SetElement(1, 2, mat->GetElement(2,0)*mat->GetElement(0,1) - mat->GetElement(0,0)*mat->GetElement(2,1));
+  mat->SetElement(2, 2, mat->GetElement(0,0)*mat->GetElement(1,1) - mat->GetElement(1,0)*mat->GetElement(0,1));
+
+  //mat->Print(std::cout);
+  mat->Invert();
+  //mat->Print(std::cout);
   m_dataTransform->SetMatrix(mat);
-
   mat->Delete();
 }
 
 //! Flip the direction of the X-axis
 void rt3DVolumeDataObject::flipX() {
   m_dataTransform->Scale(-1,1,1);
+  Modified();
 }
 
 //! Flip the direction of the Y-axis
 void rt3DVolumeDataObject::flipY() {
   m_dataTransform->Scale(1,-1,1);
+  Modified();
 }
 
 //! Flip the direction of the Z-axis
 void rt3DVolumeDataObject::flipZ() {
   m_dataTransform->Scale(1,1,-1);
+  Modified();
 }
 
 
@@ -266,6 +273,11 @@ void rt3DVolumeDataObject::setupGUI() {
   // The combo boxes for the CTF and PWF.
   connect(m_optionsWidget.comboCTFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(colorTransferChanged(QString)));
   connect(m_optionsWidget.comboPieceFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(piecewiseChanged(QString)));
+
+  // The flip axis signals.
+  connect(m_optionsWidget.flipXCheck, SIGNAL(stateChanged(int)), this, SLOT(flipX()));
+  connect(m_optionsWidget.flipYCheck, SIGNAL(stateChanged(int)), this, SLOT(flipY()));
+  connect(m_optionsWidget.flipZCheck, SIGNAL(stateChanged(int)), this, SLOT(flipZ()));
 
   m_optionsWidget.comboPieceFunc->clear();
   m_optionsWidget.comboPieceFunc->addItem("Default");

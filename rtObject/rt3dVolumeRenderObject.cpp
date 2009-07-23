@@ -42,6 +42,21 @@ void rt3DVolumeRenderObject::update() {
   rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
   if (!dObj || !dObj->isDataValid()) return;
 
+  int slicePos[3];
+  // Save the positions.
+  for (int ix1=0; ix1<3; ix1++) {
+    if (m_planes[ix1]->GetPlaneOrientation() >= 0 && m_planes[ix1]->GetPlaneOrientation() <= 2) {
+      slicePos[ix1] = m_planes[ix1]->GetSliceIndex();
+    } else {
+      // Reset the slice.
+      slicePos[ix1] = 0;
+    }
+  }
+
+  double bounds[6];
+  //dObj->getUShortData()->Print(std::cout);
+  dObj->getUShortData()->GetBounds(bounds);
+
   if (dObj->getInterpolation() == 0) {
     m_transFilter->SetInterpolationModeToNearestNeighbor();
   } else if (dObj->getInterpolation() == 1) {
@@ -49,16 +64,27 @@ void rt3DVolumeRenderObject::update() {
   } else if (dObj->getInterpolation() == 2) {
     m_transFilter->SetInterpolationModeToCubic();
   }
-  m_transFilter->SetResliceAxes( dObj->getTransform()->GetLinearInverse()->GetMatrix() );
+  m_transFilter->SetResliceAxes( dObj->getTransform()->GetMatrix() );
+  //m_transFilter->SetResliceAxesOrigin( (bounds[0]+bounds[1])/2.0f, (bounds[2]+bounds[3])/2.0f, (bounds[4]+bounds[5])/2.0f );
   m_transFilter->Update();
 
-  m_planes[0]->SetInput( m_transFilter->GetOutput() );
-  m_planes[1]->SetInput( m_transFilter->GetOutput() );
-  m_planes[2]->SetInput( m_transFilter->GetOutput() );
+  for (int ix1=0; ix1<3; ix1++) {
+    m_planes[ix1]->SetInput( m_transFilter->GetOutput() );
+
+  }
+
+  m_planes[0]->SetPlaneOrientationToXAxes();
+  m_planes[1]->SetPlaneOrientationToYAxes();
+  m_planes[2]->SetPlaneOrientationToZAxes();
 
   m_planes[0]->SetPlaneOrientationToZAxes();
   m_planes[1]->SetPlaneOrientationToXAxes();
   m_planes[2]->SetPlaneOrientationToYAxes();
+
+  // Restore the slice position
+  for (int ix1=0; ix1<3; ix1++) {
+    m_planes[ix1]->SetSliceIndex(slicePos[ix1]);
+  }
 
   double range[2];
   int dims[3];
@@ -90,6 +116,8 @@ void rt3DVolumeRenderObject::update() {
     extents[3] = dims[1];
     m_imgMap[ix1]->UseCustomExtentsOn();
     m_imgMap[ix1]->SetCustomDisplayExtents(extents);
+
+    m_planes[ix1]->UpdatePlacement();
   }
 
   update3PlaneStatus();

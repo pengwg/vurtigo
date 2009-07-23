@@ -58,9 +58,6 @@ public:
   void translateData(double x, double y, double z);
   void scaleData(double x, double y, double z);
   void setDirectionCosinesXY(float* dirCos);
-  void flipX();
-  void flipY();
-  void flipZ();
 
   int getInterpolation() { return m_interpolationType; }
 
@@ -77,6 +74,10 @@ public:
   void piecewiseChanged(QString id);
 
   void interpolationChanged(int interp);
+
+  void flipX();
+  void flipY();
+  void flipZ();
 
  protected:
   // Functions
