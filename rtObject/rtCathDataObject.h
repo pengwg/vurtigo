@@ -2,6 +2,8 @@
 #define RT_CATH_DATA_OBJECT_H
 
 #include "rtDataObject.h"
+#include "rtPropertyChooserDialog.h"
+
 #include "ui_cathOptions.h"
 
 #include <QHash>
@@ -91,6 +93,10 @@ public:
   vtkProperty* m_splineProperty;
   vtkProperty* m_pointProperty;
   vtkProperty* m_tipProperty;
+
+  rtPropertyChooserDialog* m_splinePropertyDlg;
+  rtPropertyChooserDialog* m_pointPropertyDlg;
+  rtPropertyChooserDialog* m_tipPropertyDlg;
 
   //! The metod to use to determine the catheter location when multiple coils exist with the same location ID.
   EstimationType m_eType;

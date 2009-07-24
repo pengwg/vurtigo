@@ -1,9 +1,20 @@
 #include "rtCathDataObject.h"
-#include "rtPropertyChooserDialog.h"
+
 
 //! Constructor
 rtCathDataObject::rtCathDataObject() {
   setObjectType(rtConstants::OT_Cath);
+
+  // Allocate new objects
+  m_splineProperty = vtkProperty::New();
+  m_pointProperty = vtkProperty::New();
+  m_tipProperty = vtkProperty::New();
+
+  m_splinePropertyDlg = new rtPropertyChooserDialog(m_splineProperty);
+  m_pointPropertyDlg = new rtPropertyChooserDialog(m_pointProperty);
+  m_tipPropertyDlg = new rtPropertyChooserDialog(m_tipProperty);
+
+  // Build the GUI
   setupGUI();
 
   // More than enough coils
@@ -15,11 +26,6 @@ rtCathDataObject::rtCathDataObject() {
   pointSizeChanged(m_pointSize);
 
   m_eType = ET_MEAN;
-
-  m_splineProperty = vtkProperty::New();
-  m_pointProperty = vtkProperty::New();
-  m_tipProperty = vtkProperty::New();
-
 }
 
 //! Destructor
@@ -29,6 +35,10 @@ rtCathDataObject::~rtCathDataObject() {
   m_splineProperty->Delete();
   m_pointProperty->Delete();
   m_tipProperty->Delete();
+
+  delete m_splinePropertyDlg;
+  delete m_pointPropertyDlg;
+  delete m_tipPropertyDlg;
 }
 
 
@@ -256,6 +266,10 @@ void rtCathDataObject::setupGUI() {
   connect(m_cathGuiSetup.tipPropButton, SIGNAL(pressed()), this, SLOT(tipPropertyDialog()));
 
   connect(m_cathGuiSetup.pointSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(pointSizeChanged(int)));
+
+  connect(m_splinePropertyDlg, SIGNAL(propertyChanged()), this, SLOT(Modified()));
+  connect(m_pointPropertyDlg, SIGNAL(propertyChanged()), this, SLOT(Modified()));
+  connect(m_tipPropertyDlg, SIGNAL(propertyChanged()), this, SLOT(Modified()));
 }
 
 //! Clean the GUI widgets.
@@ -273,24 +287,18 @@ int rtCathDataObject::getNewCoilID() {
 
 //! Called when the spline properties are requested.
 void rtCathDataObject::splinePropertyDialog() {
-  rtPropertyChooserDialog splineDlg(m_splineProperty);
-  splineDlg.exec();
-  if (splineDlg.isChanged()) Modified();
+  m_splinePropertyDlg->show();
 }
 
 //! Called when the point properties are requested.
 void rtCathDataObject::pointPropertyDialog() {
-  rtPropertyChooserDialog pointDlg(m_pointProperty);
-  pointDlg.exec();
-  if (pointDlg.isChanged()) Modified();
+  m_pointPropertyDlg->show();
 }
 
 
 //! Called when the tip properties are requested.
 void rtCathDataObject::tipPropertyDialog() {
-  rtPropertyChooserDialog tipDlg(m_tipProperty);
-  tipDlg.exec();
-  if (tipDlg.isChanged()) Modified();
+  m_tipPropertyDlg->show();
 }
 
 //! Called when the slider changes and the point sizes are changed.

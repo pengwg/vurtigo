@@ -3,6 +3,7 @@
 
 #include "ui_propertyChooserDialog.h"
 #include "vtkProperty.h"
+#include <QAbstractButton>
 
 class rtPropertyChooserDialog : public QDialog, private Ui::propertyChooserDialog {
 
@@ -15,6 +16,27 @@ Q_OBJECT
     bool isChanged() { return m_changed; }
  public slots:
   void settingsChanged();
+  void buttonClicked(QAbstractButton*);
+
+  void changeRenderMode();
+
+  void changeSurfaceColor();
+  void changeEdgeVisibility(bool);
+  void changeEdgeColor();
+
+  void changeSurfaceSpinBox();
+  void changeEdgeSpinBox();
+
+  void changeOpacity(int);
+  void changeAmbient(int);
+  void changeDiffuse(int);
+  void changeSpecular(int);
+  void changeSpecularPower(int);
+
+
+
+signals:
+  void propertyChanged();
 
   protected:
     vtkProperty* m_prop;
