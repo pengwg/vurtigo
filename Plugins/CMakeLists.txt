@@ -1,5 +1,25 @@
+
+set(VURTIGO_PLUGIN_GEOM_SERVER ON CACHE BOOL "Compile the Geom Server Plugin")
+if (VURTIGO_PLUGIN_GEOM_SERVER)
 add_subdirectory(GeomServer)
+endif(VURTIGO_PLUGIN_GEOM_SERVER)
+
+set(VURTIGO_PLUGIN_HELLO_WORLD ON CACHE BOOL "Compile the Hello World Plugin")
+if (VURTIGO_PLUGIN_HELLO_WORLD)
 add_subdirectory(HelloWorld)
+endif (VURTIGO_PLUGIN_HELLO_WORLD)
+
+set(VURTIGO_PLUGIN_TEST_SUITE ON CACHE BOOL "Compile the Test Suite Plugin")
+if (VURTIGO_PLUGIN_TEST_SUITE)
 add_subdirectory(TestSuite)
+endif (VURTIGO_PLUGIN_TEST_SUITE)
+
+set(VURTIGO_PLUGIN_DICOM_READER ON CACHE BOOL "Compile the DICOM Reader Plugin")
+if (VURTIGO_PLUGIN_DICOM_READER)
 add_subdirectory(DICOMReader)
+endif (VURTIGO_PLUGIN_DICOM_READER)
+
+set(VURTIGO_PLUGIN_SCREEN_CAPTURE ON CACHE BOOL "Compile the Screen Capture Plugin")
+if (VURTIGO_PLUGIN_SCREEN_CAPTURE)
 add_subdirectory(ScreenCapture)
+endif (VURTIGO_PLUGIN_SCREEN_CAPTURE)
