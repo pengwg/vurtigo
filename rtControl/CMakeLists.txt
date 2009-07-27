@@ -1,14 +1,12 @@
-set ( SRC_FILES
-  rtObjectManager.cpp
-  rtTimeManager.cpp
+set ( RTCONTROL_SRC_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtObjectManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtTimeManager.cpp
+  CACHE INTERNAL "Vurtigo rtControl Source Files"
 )
 
-set (MOC_FILES
-  rtTimeManager.h
-  rtObjectManager.h
+set (RTCONTROL_MOC_FILES
+  ${CMAKE_HOME_DIRECTORY}/include/rtTimeManager.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtObjectManager.h
+  CACHE INTERNAL "rtControl Files to be processed by Qt first"
 )
 
-qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES})
-
-add_library(rtControl ${SRC_FILES} ${MOC_FILES_OUT} )
-target_link_libraries(rtControl ${QT_LIBRARIES} rtUI rtObject vtkCommon vtkRendering)

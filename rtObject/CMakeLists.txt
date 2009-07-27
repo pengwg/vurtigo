@@ -1,57 +1,52 @@
 
-set ( SRC_FILES
-  rtDataObject.cpp
-  rtRenderObject.cpp
+set ( RTOBJECT_SRC_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtLabelDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtLabelRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt3dPointBufferDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt3dPointBufferRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtNoneDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtNoneRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtCathDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtCathRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt3dVolumeDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt3dVolumeRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt4dVolumeDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt4dVolumeRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt2dSliceDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt2dSliceRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtMatrixDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtMatrixRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtPolyDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtPolyRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtPieceFuncDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtPieceFuncRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtColorFuncDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtColorFuncRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtImageBufferDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtImageBufferRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt2dPointDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt2dPointRenderObject.cpp
+  CACHE INTERNAL "Vurtigo rtObject Source Files"
 )
 
-set (OBJ_SRC_FILES
-  rtLabelDataObject.cpp
-  rtLabelRenderObject.cpp
-  rt3dPointBufferDataObject.cpp
-  rt3dPointBufferRenderObject.cpp
-  rtNoneDataObject.cpp
-  rtNoneRenderObject.cpp
-  rtCathDataObject.cpp
-  rtCathRenderObject.cpp
-  rt3dVolumeDataObject.cpp
-  rt3dVolumeRenderObject.cpp
-  rt4dVolumeDataObject.cpp
-  rt4dVolumeRenderObject.cpp
-  rt2dSliceDataObject.cpp
-  rt2dSliceRenderObject.cpp
-  rtMatrixDataObject.cpp
-  rtMatrixRenderObject.cpp
-  rtPolyDataObject.cpp
-  rtPolyRenderObject.cpp
-  rtPieceFuncDataObject.cpp
-  rtPieceFuncRenderObject.cpp
-  rtColorFuncDataObject.cpp
-  rtColorFuncRenderObject.cpp
-  rtImageBufferDataObject.cpp
-  rtImageBufferRenderObject.cpp
-  rt2dPointDataObject.cpp
-  rt2dPointRenderObject.cpp
+set (RTOBJECT_MOC_FILES
+  ${CMAKE_HOME_DIRECTORY}/include/rtDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtRenderObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtLabelDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rt3dPointBufferDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtNoneDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtCathDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rt3dVolumeDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rt4dVolumeDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rt2dSliceDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtMatrixDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtPolyDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtPieceFuncDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtColorFuncDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtImageBufferDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rt2dPointDataObject.h
+  CACHE INTERNAL "rtObject Files to be processed by Qt first"
 )
 
-set (MOC_FILES
-  rtDataObject.h
-  rtRenderObject.h
-  rtLabelDataObject.h
-  rt3dPointBufferDataObject.h
-  rtNoneDataObject.h
-  rtCathDataObject.h
-  rt3dVolumeDataObject.h
-  rt4dVolumeDataObject.h
-  rt2dSliceDataObject.h
-  rtMatrixDataObject.h
-  rtPolyDataObject.h
-  rtPieceFuncDataObject.h
-  rtColorFuncDataObject.h
-  rtImageBufferDataObject.h
-  rt2dPointDataObject.h
-)
-
-qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES})
-
-add_library(rtObject ${SRC_FILES} ${OBJ_SRC_FILES} ${MOC_FILES_OUT})
-target_link_libraries(rtObject ${QT_LIBRARIES} rtUI vtkCommon vtkRendering vtkVolumeRendering)

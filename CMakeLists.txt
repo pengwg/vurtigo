@@ -71,7 +71,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 file(WRITE ${CMAKE_BINARY_DIR}/version.h "#define VURTIGO_MAJOR_VERSION " ${Vurtigo_VERSION_MAJOR} "\n" )
 file(APPEND ${CMAKE_BINARY_DIR}/version.h "#define VURTIGO_MINOR_VERSION " ${Vurtigo_VERSION_MINOR} "\n" )
 
-include_directories(rtUI rtObject rtControl rtPlugin ${CMAKE_BINARY_DIR})
+include_directories(include ${CMAKE_BINARY_DIR})
+
+
 
 set (UI_FILES 
   rtUI/rtMainWindow.ui
@@ -85,6 +87,7 @@ set (UI_FILES
   Plugins/GeomServer/GeomServer.ui
 )
 
+
 qt4_wrap_ui(UI_FILES_OUT ${UI_FILES})
 message(STATUS "UI Files: " ${UI_FILES_OUT})
 add_custom_target(UIFirst DEPENDS ${UI_FILES_OUT})
@@ -94,16 +97,28 @@ add_subdirectory(rtObject)
 add_subdirectory(rtControl)
 add_subdirectory(rtPlugin)
 
-add_dependencies(rtObject UIFirst)
-add_dependencies(rtUI UIFirst)
-add_dependencies(rtControl UIFirst)
+qt4_wrap_cpp(MOC_FILES_OUT ${RTOBJECT_MOC_FILES} ${RTCONTROL_MOC_FILES} ${RTUI_MOC_FILES} ${RTPLUGIN_MOC_FILES})
 
-set (SRC_FILES
+#message(STATUS "Moc Files: " ${MOC_FILES})
+
+set (MAIN_SRC_FILES
   rtMain.cpp
 )
 
-add_executable(vurtigo ${SRC_FILES})
-target_link_libraries(vurtigo rtObject rtUI rtControl QVTK)
+add_library(VurtigoBase SHARED ${RTOBJECT_SRC_FILES} ${RTCONTROL_SRC_FILES} ${RTUI_SRC_FILES} ${RTPLUGIN_SRC_FILES} ${MOC_FILES_OUT})
+target_link_libraries(VurtigoBase
+  ${QT_LIBRARIES}
+  vtkFiltering
+  vtkCommon 
+  vtkRendering 
+  vtkVolumeRendering
+  QVTK
+)
+
+add_executable(vurtigo ${MAIN_SRC_FILES})
+target_link_libraries(vurtigo VurtigoBase)
+
+add_dependencies(VurtigoBase UIFirst)
 
 # After building the base we can now add the plugins.
 add_subdirectory(Plugins)

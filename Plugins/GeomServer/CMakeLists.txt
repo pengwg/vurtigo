@@ -1,5 +1,5 @@
 # List of source files.
-set(SRC_FILES
+set(GEOM_SRC_FILES
   sender.cpp
   geom_client.cpp
   genericMode.cpp
@@ -13,13 +13,13 @@ set(SRC_FILES
 )
 
 # MOC files are the ones the use Q_OBJECT
-set (MOC_FILES
+set (GEOM_MOC_FILES
   GeomServerPlugin.h
   GeomServerUI.h
   SenderThread.h
   SenderSimp.h
 )
 
-qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES} )
-add_library(GeomServer SHARED ${SRC_FILES} ${MOC_FILES_OUT})
-target_link_libraries(GeomServer ${QT_LIBRARIES} rtObject rtPlugin QVTK)
+qt4_wrap_cpp(GEOM_MOC_FILES_OUT ${GEOM_MOC_FILES} )
+add_library(GeomServer SHARED ${GEOM_SRC_FILES} ${GEOM_MOC_FILES_OUT})
+target_link_libraries(GeomServer ${QT_LIBRARIES} VurtigoBase QVTK)

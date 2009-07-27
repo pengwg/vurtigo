@@ -1,24 +1,20 @@
-
-set (MOC_FILES
-  rtMainWindow.h
-  rtTextPropertyDialog.h
-  rtPropertyChooserDialog.h
-  rtAxesProperties.h
-  rtOptions2DView.h
-)
-
-set (SRC_FILES
-  rtMainWindow.cpp
-  rtTextPropertyDialog.cpp
-  rtPropertyChooserDialog.cpp
-  rtAxesProperties.cpp
-  rtImagePlaneWidget.cpp
-  customQVTKWidget.cpp
-  rtOptions2DView.cpp
+set (RTUI_SRC_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtMainWindow.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtTextPropertyDialog.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtPropertyChooserDialog.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtAxesProperties.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtImagePlaneWidget.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/customQVTKWidget.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtOptions2DView.cpp
+  CACHE INTERNAL "Vurtigo rtUI Source Files"
 )
 
 
-qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES})
-
-add_library(rtUI ${SRC_FILES} ${MOC_FILES_OUT})
-target_link_libraries(rtUI ${QT_LIBRARIES} vtkFiltering vtkCommon rtControl rtPlugin)
+set (RTUI_MOC_FILES
+  ${CMAKE_HOME_DIRECTORY}/include/rtMainWindow.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtTextPropertyDialog.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtPropertyChooserDialog.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtAxesProperties.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtOptions2DView.h
+  CACHE INTERNAL "rtUI Files to be processed by Qt first"
+)

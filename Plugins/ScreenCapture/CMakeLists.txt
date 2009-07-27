@@ -1,6 +1,6 @@
 
 # List of source files.
-set(SRC_FILES
+set(SCREEN_CAP_SRC_FILES
   ScreenCapturePlugin.cpp
   ScreenCaptureUI.cpp
   ScreenCaptureThread.cpp
@@ -10,7 +10,7 @@ set(SRC_FILES
 )
 
 # MOC files are the ones the use Q_OBJECT
-set (MOC_FILES
+set (SCREEN_CAP_MOC_FILES
   ScreenCapturePlugin.h
   ScreenCaptureUI.h
   ScreenCaptureThread.h
@@ -23,9 +23,9 @@ set (UI_FILES_SCREEN
 )
 
 qt4_wrap_ui(UI_SCREEN_OUT ${UI_FILES_SCREEN})
-qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES} )
+qt4_wrap_cpp(SCREEN_CAP_MOC_FILES_OUT ${SCREEN_CAP_MOC_FILES} )
 
 include_directories( ${CMAKE_BINARY_DIR}/Plugins/ScreenCapture )
 
-add_library(ScreenCapture SHARED ${SRC_FILES} ${UI_SCREEN_OUT} ${MOC_FILES_OUT})
-target_link_libraries(ScreenCapture ${QT_LIBRARIES} rtObject rtPlugin)
+add_library(ScreenCapture SHARED ${SCREEN_CAP_SRC_FILES} ${UI_SCREEN_OUT} ${SCREEN_CAP_MOC_FILES_OUT})
+target_link_libraries(ScreenCapture ${QT_LIBRARIES} VurtigoBase)
