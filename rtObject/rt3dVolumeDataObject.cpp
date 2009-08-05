@@ -194,6 +194,16 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
   return true;
 }
 
+
+bool rt3DVolumeDataObject::copyNewTransform(vtkTransform* temp) {
+  if (!temp) return false;
+
+  m_dataTransform->SetMatrix(temp->GetMatrix());
+
+  return true;
+}
+
+
 //! Translate the data object
 void rt3DVolumeDataObject::translateData(double x, double y, double z) {
   m_dataTransform->Translate(x,y,z);

@@ -15,6 +15,7 @@
 #include <vtkActor2D.h>
 #include <vtkImageMapper.h>
 #include <vtkImageReslice.h>
+#include <vtkImageChangeInformation.h>
 
 #include <vtkSmartPointer.h>
 

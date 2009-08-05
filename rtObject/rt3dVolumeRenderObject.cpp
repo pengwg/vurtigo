@@ -53,10 +53,6 @@ void rt3DVolumeRenderObject::update() {
     }
   }
 
-  double bounds[6];
-  //dObj->getUShortData()->Print(std::cout);
-  dObj->getUShortData()->GetBounds(bounds);
-
   if (dObj->getInterpolation() == 0) {
     m_transFilter->SetInterpolationModeToNearestNeighbor();
   } else if (dObj->getInterpolation() == 1) {
@@ -65,7 +61,6 @@ void rt3DVolumeRenderObject::update() {
     m_transFilter->SetInterpolationModeToCubic();
   }
   m_transFilter->SetResliceAxes( dObj->getTransform()->GetMatrix() );
-  //m_transFilter->SetResliceAxesOrigin( (bounds[0]+bounds[1])/2.0f, (bounds[2]+bounds[3])/2.0f, (bounds[4]+bounds[5])/2.0f );
   m_transFilter->Update();
 
   for (int ix1=0; ix1<3; ix1++) {

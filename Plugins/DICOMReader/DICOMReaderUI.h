@@ -5,8 +5,9 @@
 #include <QString>
 #include <ui_DICOMReader.h>
 
-#include <vtkDICOMImageReader.h>
 #include <vtkSmartPointer.h>
+
+#include "DICOMFileReader.h"
 
 class DICOMReaderUI : public QWidget, public Ui::DICOMReader
 {
@@ -25,7 +26,8 @@ protected:
   void connectSignals();
 
   QString m_lastDir;
-  vtkSmartPointer<vtkDICOMImageReader> m_imageReader;
+
+  DICOMFileReader m_customReader;
 
   //! The ID of the newest volume
   int m_vol;

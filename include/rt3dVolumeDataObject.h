@@ -45,6 +45,7 @@ public:
   vtkVolumeRayCastFunction* getRayCastFunction();
 
   bool copyNewImageData(vtkImageData* temp);
+  bool copyNewTransform(vtkTransform* temp);
 
   //! Check if the volume should be rendered.
   bool getRenderRayTraceVolume() { return m_optionsWidget.groupRayCastVolume->isChecked(); }
