@@ -7,7 +7,7 @@ using namespace std;
 
 //! Sets default arguments for args
 void SenderSimp::setSenderDefaults() {
-  char const * const hostname = "panoptes";
+  char const * const hostname = "localhost";
   args.hostname = NULL;
   SenderSimp::copyString(&args.hostname, hostname);
   args.port = 1777;

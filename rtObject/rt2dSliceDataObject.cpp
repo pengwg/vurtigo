@@ -60,7 +60,6 @@ bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
   m_imgData->GetScalarRange(rangeI);
 
   m_imgUCharCast->SetShift(-rangeI[0]);
-  m_imgUCharCast->Update();
 
   m_imgDataValid = true;
   Modified();
@@ -94,7 +93,7 @@ bool rt2DSliceDataObject::setImageParameters(int FOV, int imgSize, int numChan, 
     m_imgData->SetOrigin(0.0,0.0,0.0);
     m_imgData->SetDimensions(imgSize,imgSize,1);
     m_imgData->SetNumberOfScalarComponents(numChan);
-    m_imgData->SetWholeExtent(0,FOV,0,FOV,0,1);
+    m_imgData->SetWholeExtent(-FOV/2.0f,FOV/2.0f,-FOV/2.0f,FOV/2.0f,0,1);
     m_imgData->AllocateScalars();
   }
 
@@ -132,5 +131,14 @@ bool rt2DSliceDataObject::setTransform(float rotMatrix[9], float transMatrix[3])
   m_trans->Translate(transMatrix);
 
   if(mat) mat->Delete();
+  return true;
+}
+
+//! Set the transformation in the form of a vtkMatrix4x4
+bool rt2DSliceDataObject::setVtkMatrix(vtkMatrix4x4* m) {
+  if (!m) return false;
+
+  m_trans->Identity();
+  m_trans->SetMatrix(m);
   return true;
 }

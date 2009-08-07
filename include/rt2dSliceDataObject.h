@@ -7,6 +7,7 @@
 #include "vtkTransform.h"
 #include "vtkImageReslice.h"
 #include "vtkImageShiftScale.h"
+#include "vtkMatrix4x4.h"
 
 #include <vector>
 
@@ -33,6 +34,7 @@ public:
 
   bool setImageParameters(int FOV, int imgSize, int numChan, std::vector<unsigned char>* imgPtr);
   bool setTransform(float rotMatrix[9], float transMatrix[3]);
+  bool setVtkMatrix(vtkMatrix4x4* m);
 
  protected:
   // Functions

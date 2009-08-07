@@ -5,6 +5,11 @@
 
 #include "rtBaseHandle.h"
 
+#include "vtkImageData.h"
+#include "vtkImageFlip.h"
+#include "vtkImageChangeInformation.h"
+#include "vtkMatrix4x4.h"
+
 #define CONVERTER_MAX_IMAGE_SIZE 1024 * 1024 * 4
 
 //For debugging purposes
@@ -309,25 +314,81 @@ rt2DSliceDataObject * Converter::getLocalImage(int remoteId, int imageSize) {
 
 //! Sets the value of the local image object, given a remote image object. Returns true of successful.
 bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
-  bool success = true;
-  int imageSize = remote.imgSize * remote.imgSize * remote.numChannels;
-  vector<unsigned char>* localImage = new vector<unsigned char>();
+  if (remote.FOV <= 0 || remote.imgSize <= 0 || remote.numChannels <= 0) return false;
 
-  for (int a = 0; a < imageSize; a++) {
-    localImage->push_back(remote.img[a]);
+  bool success = true;
+
+
+
+  vtkImageData *img = vtkImageData::New();
+
+  double spacing = ((double)remote.FOV*10)/((double)remote.imgSize);
+
+  img->Initialize();
+  img->SetScalarTypeToUnsignedChar();
+  img->SetSpacing(spacing, spacing, 1.0);
+  img->SetOrigin(0.0,0.0,0.0);
+  img->SetDimensions(remote.imgSize,remote.imgSize,1);
+  img->SetNumberOfScalarComponents(remote.numChannels);
+  img->SetWholeExtent(0, remote.FOV*10, 0, remote.FOV*10,0,1);
+  img->AllocateScalars();
+
+  vtkImageChangeInformation *imgChangeInfo = vtkImageChangeInformation::New();
+
+  // Copy the data
+  int pos = 0;
+  unsigned char* temp;
+  for (int ix1 = 0; ix1 < remote.imgSize; ix1++) {
+    for (int ix2 = 0; ix2 < remote.imgSize; ix2++) {
+      for (int ix3 = 0; ix3 < remote.numChannels; ix3++) {
+        temp = static_cast<unsigned char*>(img->GetScalarPointer( remote.imgSize-ix2-1,remote.imgSize-ix1-1, ix3));
+        *temp = remote.img[pos];
+        pos++;
+        if (ix1<20 && ix2<10) *temp = 255;
+      }
+    }
   }
-  
+  img->Update();
+
+  imgChangeInfo->SetInput(img);
+  imgChangeInfo->Update();
+
+  vtkMatrix4x4 *matrix = vtkMatrix4x4::New();
+
+  for (int ix1=0; ix1<9; ix1++) {
+    matrix->SetElement(ix1/3, ix1%3, remote.rotMatrix[ix1]);
+
+  }
+
+  double ptIn[4], ptOut[4];
+  ptIn[0] = (((double)remote.FOV*10)/2.0f);
+  ptIn[1] = (((double)remote.FOV*10)/2.0f);
+  ptIn[2] = 0.0f;
+  ptIn[3] = 1.0f;
+
+  matrix->MultiplyPoint(ptIn, ptOut);
+
+  for (int ix1=0; ix1<9; ix1++) {
+    if (ix1/3>0)  matrix->SetElement(ix1/3, ix1%3, -remote.rotMatrix[ix1]);
+  }
+
+  matrix->SetElement(0, 3, -ptOut[0]+remote.transMatrix[0]);
+  matrix->SetElement(1, 3, ptOut[1]-remote.transMatrix[1]);
+  matrix->SetElement(2, 3, ptOut[2]-remote.transMatrix[2]);
+
   local->lock();
   // Translate the FOV into milimeters
-  success = success && local->setImageParameters(remote.FOV*10, remote.imgSize, remote.numChannels, localImage);
-  success = success && local->setTransform(remote.rotMatrix, remote.transMatrix);
-
+  success = success && local->copyImageData2D(imgChangeInfo->GetOutput());
+  success = success && local->setVtkMatrix(matrix);
   local->unlock();
-  //if not successful, do not call local->Modified, and return
-  if (!success)
-      return success;
 
-  local->Modified();
+  //if successful, call local->Modified
+  if (success) local->Modified();
+
+  img->Delete();
+  imgChangeInfo->Delete();
+  matrix->Delete();
+
   return success;
 }
 
