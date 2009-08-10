@@ -161,6 +161,14 @@ bool DICOMFileReader::readFile(QString fName) {
 bool DICOMFileReader::createVolume(QList<DICOMImageData>* imgData) {
   if (!imgData) return false;
 
+  int locIdx = 0; // Default is HFS.
+  // Set up the patient position.
+  for (int ix1=0; ix1<NUM_ENTRIES; ix1++) {
+    if ( m_ddata.patientPosition == ENTRY_STRINGS[ix1].c_str() ) {
+      locIdx = ix1;
+    }
+  }
+
   if (imgData->count() <= 0) {
     return false;
   } else if (imgData->count() == 1) {
@@ -180,25 +188,25 @@ bool DICOMFileReader::createVolume(QList<DICOMImageData>* imgData) {
     double xd, yd, zd;
     double zspacing = 0.0;
 
-    xd = imgData->at(0).imgPosition[0]-imgData->at(1).imgPosition[0];
-    yd = imgData->at(0).imgPosition[1]-imgData->at(1).imgPosition[1];
-    zd = imgData->at(0).imgPosition[2]-imgData->at(1).imgPosition[2];
+    xd = ENTRY_FLIPS[locIdx][0]*(imgData->at(0).imgPosition[0]-imgData->at(1).imgPosition[0]);
+    yd = ENTRY_FLIPS[locIdx][1]*(imgData->at(0).imgPosition[1]-imgData->at(1).imgPosition[1]);
+    zd = ENTRY_FLIPS[locIdx][2]*(imgData->at(0).imgPosition[2]-imgData->at(1).imgPosition[2]);
 
     double pos[3];
-    pos[0] = imgData->at(0).imgPosition[0];
-    pos[1] = imgData->at(0).imgPosition[1];
-    pos[2] = imgData->at(0).imgPosition[2];
-
     double rowOrient[3];
     double colOrient[3];
 
-    rowOrient[0] = imgData->at(0).imgOrient[0];
-    rowOrient[1] = imgData->at(0).imgOrient[1];
-    rowOrient[2] = imgData->at(0).imgOrient[2];
+    pos[0] = ENTRY_FLIPS[locIdx][0]*imgData->at(0).imgPosition[0];
+    pos[1] = ENTRY_FLIPS[locIdx][1]*imgData->at(0).imgPosition[1];
+    pos[2] = ENTRY_FLIPS[locIdx][2]*imgData->at(0).imgPosition[2];
 
-    colOrient[0] = imgData->at(0).imgOrient[3];
-    colOrient[1] = imgData->at(0).imgOrient[4];
-    colOrient[2] = imgData->at(0).imgOrient[5];
+    rowOrient[0] = ENTRY_FLIPS[locIdx][0]*imgData->at(0).imgOrient[0];
+    rowOrient[1] = ENTRY_FLIPS[locIdx][1]*imgData->at(0).imgOrient[1];
+    rowOrient[2] = ENTRY_FLIPS[locIdx][2]*imgData->at(0).imgOrient[2];
+
+    colOrient[0] = ENTRY_FLIPS[locIdx][0]*imgData->at(0).imgOrient[3];
+    colOrient[1] = ENTRY_FLIPS[locIdx][1]*imgData->at(0).imgOrient[4];
+    colOrient[2] = ENTRY_FLIPS[locIdx][2]*imgData->at(0).imgOrient[5];
 
     // Calculate the z vector
     double zVec[3];

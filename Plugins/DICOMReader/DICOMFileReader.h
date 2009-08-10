@@ -15,6 +15,15 @@
 #include "cfunix.h"
 #include "ofstring.h"
 
+  const int NUM_ENTRIES = 4;
+  const std::string ENTRY_STRINGS[NUM_ENTRIES] = {"HFS", "FFS","HFP","FFP"};
+  const int ENTRY_FLIPS[NUM_ENTRIES][3] = {
+    {1,1,1}, /* Head First Supine to RCS*/
+    {-1,1,-1}, /* Feet First Supine to RCS */
+    {-1,-1,1}, /* Head First Prone to RCS */
+    {1,-1,-1} /* Feet First Prone to RCS */
+  };
+
 class DICOMFileReader
 {
 public:
