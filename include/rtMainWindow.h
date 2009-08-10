@@ -68,6 +68,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void viewChanged2DOnly();
   void loadPluginFile();
 
+  void addNewObject();
+  void removeSelectedObject();
+
   void showAxesOptions();
 
   void viewContents();

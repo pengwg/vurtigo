@@ -20,6 +20,14 @@ set (GEOM_MOC_FILES
   SenderSimp.h
 )
 
+set (UI_FILES_GEOM
+  GeomServer.ui
+)
+
+qt4_wrap_ui(UI_GEOM_OUT ${UI_FILES_GEOM})
+
+include_directories( ${CMAKE_BINARY_DIR}/Plugins/GeomServer )
+
 qt4_wrap_cpp(GEOM_MOC_FILES_OUT ${GEOM_MOC_FILES} )
-add_library(GeomServer SHARED ${GEOM_SRC_FILES} ${GEOM_MOC_FILES_OUT})
+add_library(GeomServer SHARED ${GEOM_SRC_FILES} ${UI_GEOM_OUT} ${GEOM_MOC_FILES_OUT})
 target_link_libraries(GeomServer ${QT_LIBRARIES} VurtigoBase QVTK)

@@ -258,7 +258,16 @@
     <addaction name="menuLayout"/>
     <addaction name="actionCoordinate_Axes"/>
    </widget>
+   <widget class="QMenu" name="menuObjects">
+    <property name="title">
+     <string>Objects</string>
+    </property>
+    <addaction name="actionNewObject"/>
+    <addaction name="separator"/>
+    <addaction name="actionDeleteSelected"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuObjects"/>
    <addaction name="menuView"/>
    <addaction name="menuHelp"/>
   </widget>
@@ -315,6 +324,16 @@
   <action name="actionAbout">
    <property name="text">
     <string>About...</string>
+   </property>
+  </action>
+  <action name="actionNewObject">
+   <property name="text">
+    <string>New Object...</string>
+   </property>
+  </action>
+  <action name="actionDeleteSelected">
+   <property name="text">
+    <string>Delete Selected</string>
    </property>
   </action>
  </widget>

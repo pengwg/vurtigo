@@ -9,6 +9,9 @@
 #include "rtRenderObject.h"
 #include "rtDataObject.h"
 #include "rtPluginLoader.h"
+
+#include "ui_newObjectDialog.h"
+
 #include "vtkPropAssembly.h"
 #include "vtkCamera.h"
 
@@ -368,6 +371,10 @@ void rtMainWindow::connectSignals() {
   connect(actionPlugin_File, SIGNAL(triggered()), this, SLOT(loadPluginFile()));
   connect(actionQuit, SIGNAL(triggered()), qApp, SLOT(quit()));
 
+  // Object Menu
+  connect( actionNewObject, SIGNAL(triggered()), this, SLOT(addNewObject()) );
+  connect( actionDeleteSelected, SIGNAL(triggered()), this, SLOT(removeSelectedObject()) );
+
   // View Menu
   connect(actionMixed, SIGNAL(triggered()), this, SLOT(viewChangedMixed()));
   connect(action3D_Only, SIGNAL(triggered()), this, SLOT(viewChanged3DOnly()));
@@ -500,6 +507,46 @@ void rtMainWindow::loadPluginFile() {
     std::cout << "Failed to load plugins from: " << fName.toStdString() << std::endl;
   }
 }
+
+//! Add an object of a particular type.
+void rtMainWindow::addNewObject() {
+  QDialog *objDlg = new QDialog(this);
+  Ui::newObjectDialog setupDlg;
+  QString name;
+
+  setupDlg.setupUi(objDlg);
+  if(objDlg->exec() == QDialog::Accepted) {
+    name = setupDlg.objNameLineEdit->text();
+    if (name.length() <= 0) name = "Not Named";
+    if (setupDlg.objTypeCombo->currentText() == "Piecewise Function") {
+      rtObjectManager::instance().addObjectOfType(rtConstants::OT_vtkPiecewiseFunction, name);
+    } else if (setupDlg.objTypeCombo->currentText() == "Color Transfer Function") {
+      rtObjectManager::instance().addObjectOfType(rtConstants::OT_vtkColorTransferFunction, name);
+    }
+  }
+}
+
+//! Remove the currently selected item.
+void rtMainWindow::removeSelectedObject() {
+  QTreeWidgetItem* current;
+  rtRenderObject* temp;
+
+  current = objectTree->currentItem();
+
+  if (!current) return;
+
+  // Check for a heading.
+  if (current->columnCount() == 1) {
+    return;
+  }
+
+  // Get the object
+  temp = rtObjectManager::instance().getObjectWithID(current->text(1).toInt());
+  temp->removeFromRenderer(m_renderer3D);
+  m_renderFlag3D = true;
+  rtObjectManager::instance().removeObject(current->text(1).toInt());
+}
+
 
 //! Set the view type for the coordinate axes
 void rtMainWindow::setViewType(rtAxesProperties::ViewType vt) {
