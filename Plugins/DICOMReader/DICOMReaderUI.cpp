@@ -37,6 +37,7 @@ void DICOMReaderUI::newDirectory() {
     bool ok = m_customReader.setDirectory(m_lastDir);
     infoBrowser->clear();
     if (ok) {
+      infoBrowser->append(m_customReader.getComments());
       createVolumeButton->setEnabled(true);
       nameLineEdit->setEnabled(true);
     } else {

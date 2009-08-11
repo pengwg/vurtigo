@@ -62,7 +62,7 @@ bool DICOMFileReader::setDirectory(QString dirPath) {
 
   while (!m_imgData.isEmpty()) {
     // Cleanup the old image data.
-    unsigned short* tmp = m_imgData.takeFirst().shortData;
+    short* tmp = m_imgData.takeFirst().shortData;
     if (tmp)
       delete [] tmp;
   }
@@ -93,6 +93,8 @@ bool DICOMFileReader::readFile(QString fName) {
 
   const unsigned short* temp;
 
+  m_comments = "";
+
   // Load the DICOM file.
   status = dcmFile.loadFile(fName.toStdString().c_str());
 
@@ -105,10 +107,10 @@ bool DICOMFileReader::readFile(QString fName) {
   datSet = dcmFile.getDataset();
 
   if (datSet->findAndGetOFString(DCM_PatientsName, m_ddata.patientsName).good()) {
-    //std::cout << "Patient's Name: " << m_ddata.patientsName << std::endl;
+    m_comments.append("Patient's Name: " + QString(m_ddata.patientsName.c_str()) + "\n");
   }
   if (datSet->findAndGetOFString(DCM_StudyDate, m_ddata.studyDate).good()) {
-    //std::cout << "Study Date: " << m_ddata.studyDate << std::endl;
+    m_comments.append("Study Date: " + QString(m_ddata.studyDate.c_str()) + "\n");
   }
   if (datSet->findAndGetOFString(DCM_StudyTime, m_ddata.studyTime).good()) {
     //std::cout << "Study Time: " << m_ddata.studyTime << std::endl;
@@ -117,12 +119,17 @@ bool DICOMFileReader::readFile(QString fName) {
     //std::cout << "Patient Position: " << m_ddata.patientPosition << std::endl;
   }
   if (datSet->findAndGetUint16(DCM_Rows, m_ddata.numRows).good()) {
-    //std::cout << "Number of Rows: " << m_ddata.numRows << std::endl;
+    m_comments.append("Number of Rows: " + QString::number(m_ddata.numRows) + "\n");
   }
   if (datSet->findAndGetUint16(DCM_Columns, m_ddata.numCols).good()) {
-    //std::cout << "Number of Columns: " << m_ddata.numCols << std::endl;
+    m_comments.append("Number of Columns: " + QString::number(m_ddata.numCols) + "\n");
   }
-
+  if (datSet->findAndGetUint16(DCM_BitsStored, m_ddata.bitsPerPixel).good()) {
+    //std::cout << "Bits Per Pixel: " << m_ddata.bitsPerPixel << std::endl;
+  }
+  if (datSet->findAndGetUint16(DCM_PixelRepresentation, m_ddata.sine).good()) {
+    // std::cout << "Pixels are signed: " << m_ddata.sine << std::endl;
+  }
   if (datSet->findAndGetUint32(DCM_PixelDataGroupLength, m_ddata.pixelGroupLen).good()) {
     //std::cout << "Pixel Group Length: " << m_ddata.pixelGroupLen << std::endl;
   }
@@ -135,15 +142,12 @@ bool DICOMFileReader::readFile(QString fName) {
     return false;
   }
 
-  m_ddata.shortData = new unsigned short[m_ddata.numElements];
+  m_ddata.shortData = new short[m_ddata.numElements];
   memcpy(m_ddata.shortData, temp, sizeof(short)*m_ddata.numElements);
 
   int ix1;
   for (ix1=0; ix1<2; ix1++) datSet->findAndGetFloat64(DCM_PixelSpacing, m_ddata.pixSpace[ix1], ix1);
-  for (ix1=0; ix1<3; ix1++) {
-    datSet->findAndGetFloat64(DCM_ImagePositionPatient, m_ddata.imgPosition[ix1], ix1);
-    //std::cout << "Pos: " << ix1 << " : " << m_ddata.imgPosition[ix1] << std::endl;
-  }
+  for (ix1=0; ix1<3; ix1++) datSet->findAndGetFloat64(DCM_ImagePositionPatient, m_ddata.imgPosition[ix1], ix1);
   for (ix1=0; ix1<6; ix1++) datSet->findAndGetFloat64(DCM_ImageOrientationPatient, m_ddata.imgOrient[ix1], ix1);
 
   // Find the FOV.
@@ -173,14 +177,15 @@ bool DICOMFileReader::createVolume(QList<DICOMImageData>* imgData) {
     return false;
   } else if (imgData->count() == 1) {
     // Just One Slice
-    m_vtkImgData->SetScalarTypeToUnsignedShort();
+    m_vtkImgData->SetScalarTypeToShort();
     m_vtkImgData->SetDimensions(imgData->at(0).numRows, imgData->at(0).numCols, 1);
     m_vtkImgData->AllocateScalars();
 
+    // TODO this single slice option.
   } else if (imgData->count() > 1) {
 
     // Multiple Slices
-    m_vtkImgData->SetScalarTypeToUnsignedShort();
+    m_vtkImgData->SetScalarTypeToShort();
     m_vtkImgData->SetDimensions(imgData->at(0).numRows, imgData->at(0).numCols, imgData->count());
     m_vtkImgData->AllocateScalars();
 
@@ -227,13 +232,12 @@ bool DICOMFileReader::createVolume(QList<DICOMImageData>* imgData) {
     }
     m_vtkImgData->SetSpacing(m_ddata.pixSpace[0], -m_ddata.pixSpace[1], negZed*zspacing);
 
-
-    unsigned short* temp;
+    short* temp;
     // Copy and the data
     for (int ix1=0; ix1<imgData->count(); ix1++) {
       for (int row=0; row<imgData->at(0).numRows; row++) {
         for (int col=0; col<imgData->at(0).numCols; col++) {
-          temp = (unsigned short*)m_vtkImgData->GetScalarPointer(col, row, ix1);
+          temp = (short*)m_vtkImgData->GetScalarPointer(col, row, ix1);
           *temp =  imgData->at(ix1).shortData[row*imgData->at(0).numCols+col];
         }
       }

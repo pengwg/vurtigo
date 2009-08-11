@@ -85,6 +85,10 @@ set (UI_FILES
   rtUI/rtAboutDialog.ui
   rtUI/cathOptions.ui
   rtUI/newObjectDialog.ui
+  rtUI/VtkRangeDialog.ui
+  rtUI/VtkClampingWidget.ui
+  rtUI/ProfileWidget.ui
+  rtUI/VtkRangeWidget.ui
 )
 
 

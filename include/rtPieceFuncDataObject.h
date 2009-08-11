@@ -2,6 +2,7 @@
 #define RT_PIECE_FUNC_DATA_OBJECT_H
 
 #include "rtDataObject.h"
+#include "VtkPiecewiseGraph.h"
 
 #include <vtkSmartPointer.h>
 #include <vtkPiecewiseFunction.h>
@@ -22,7 +23,11 @@ public:
   void update();
 
   //! Get the value of the current piecewise function.
-  vtkPiecewiseFunction* getPiecewiseFunction() { return m_pieceFunc; }
+  vtkPiecewiseFunction* getPiecewiseFunction() {
+    m_pieceFunc = m_graph->getPiecewiseFunction();
+    return m_pieceFunc;
+  }
+
   bool setPiecewiseFunction(vtkPiecewiseFunction* piece);
 
  protected:
@@ -31,6 +36,9 @@ public:
   void cleanupGUI();
   
   vtkSmartPointer<vtkPiecewiseFunction> m_pieceFunc;
+
+  VtkPiecewiseGraph* m_graph;
+  QBoxLayout *m_mainLayout;
 };
 
 #endif 

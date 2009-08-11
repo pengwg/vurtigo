@@ -276,7 +276,7 @@ void rt3DVolumeRenderObject::setupPipeline() {
     m_actor2D[ix1] = vtkActor2D::New();
 
     m_imgCast[ix1]->SetInput(m_planes[ix1]->GetResliceOutput());
-    m_imgCast[ix1]->SetOutputScalarTypeToUnsignedChar();
+    m_imgCast[ix1]->SetOutputScalarTypeToUnsignedShort();
 
     m_imgMap[ix1]->SetInputConnection(m_imgCast[ix1]->GetOutputPort());
     m_imgMap[ix1]->RenderToRectangleOn();

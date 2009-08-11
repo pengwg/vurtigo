@@ -5,6 +5,7 @@
 
 #include "rtColorFuncDataObject.h"
 #include "rtColorFuncRenderObject.h"
+#include "rtPieceFuncDataObject.h"
 
 //! Constructor
 rt3DVolumeDataObject::rt3DVolumeDataObject() {
@@ -364,14 +365,14 @@ void rt3DVolumeDataObject::piecewiseChanged(QString id) {
   int idInt;
 
   if (id == "Default") {
-    // Setup the default CTF.
+    // Setup the default PWF.
     m_pieceFunc = m_pieceFuncDefault;
   } else {
 
     idInt = id.toInt(&ok);
     if (ok) {
-      rtColorFuncDataObject* func = static_cast<rtColorFuncDataObject*>(rtObjectManager::instance().getObjectWithID(idInt)->getDataObject());
-      m_colorTransFunc = func->getColorFunction();
+      rtPieceFuncDataObject* func = static_cast<rtPieceFuncDataObject*>(rtObjectManager::instance().getObjectWithID(idInt)->getDataObject());
+      m_pieceFunc = func->getPiecewiseFunction();
     }
   }
   m_volumeProperty->SetScalarOpacity(m_pieceFunc);
