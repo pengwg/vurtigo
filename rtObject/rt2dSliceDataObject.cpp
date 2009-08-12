@@ -35,11 +35,19 @@ void rt2DSliceDataObject::apply() {
 
 //! Send the info to the GUI
 void rt2DSliceDataObject::update() {
+  if(!m_trans) return;
 
+  double translate[3];
+  m_trans->GetPosition(translate);
+  m_optionsWidget.xDoubleSpinBox->setValue(translate[0]);
+  m_optionsWidget.yDoubleSpinBox->setValue(translate[1]);
+  m_optionsWidget.zDoubleSpinBox->setValue(translate[2]);
 }
 
 //! Set the GUI widgets.
 void rt2DSliceDataObject::setupGUI() {
+  m_optionsWidget.setupUi(getBaseWidget());
+
 
 }
 
@@ -67,54 +75,6 @@ bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
   return true;
 }
 
-//! Set the parameters and the image.
-/*!
-  If the parameters change this operation becomes more expensive.
-  @param FOV Field of view.
-  @param imgSize The size of one side of the square image in pixels.
-  @param numChan The number of channels.
-  @param imgVectorPtr A pointer to a vector containing all of the image information. The vector is copied so it can safely be deleted once this function returns.
-  */
-bool rt2DSliceDataObject::setImageParameters(int FOV, int imgSize, int numChan, std::vector<unsigned char>* imgVectorPtr) {
-  if ( !imgVectorPtr ) return false;
-  if ( FOV<=0 || imgSize<=0 || numChan<=0 ) return false;
-  if ( imgSize*imgSize*numChan != imgVectorPtr->size() ) return false;
-
-  double spacing;
-  spacing = (double)((double)FOV/(double)imgSize);
-
-  if (m_FOV != FOV || m_imgSize!=imgSize || m_numChan!=numChan) {
-
-    m_FOV = FOV; m_imgSize = imgSize; m_numChan = numChan;
-
-    m_imgData->Initialize();
-    m_imgData->SetScalarTypeToUnsignedChar();
-    m_imgData->SetSpacing(spacing, spacing, 1.0);
-    m_imgData->SetOrigin(0.0,0.0,0.0);
-    m_imgData->SetDimensions(imgSize,imgSize,1);
-    m_imgData->SetNumberOfScalarComponents(numChan);
-    m_imgData->SetWholeExtent(-FOV/2.0f,FOV/2.0f,-FOV/2.0f,FOV/2.0f,0,1);
-    m_imgData->AllocateScalars();
-  }
-
-  // Copy the data...
-  int pos = 0;
-  for (int ix1=0; ix1<imgSize; ix1++) {
-    for (int ix2=0; ix2<imgSize; ix2++) {
-      for (int ix3=0; ix3<numChan; ix3++) {
-        m_imgData->SetScalarComponentFromFloat(ix1, ix2, 0, ix3, (float)(*imgVectorPtr)[pos]);
-        pos++;
-      }
-    }
-  }
-
-  m_imgData->Modified();
-
-  m_imgDataValid = true;
-
-  return true;
-}
-
 
 //! Set the trasformation matrix
 bool rt2DSliceDataObject::setTransform(float rotMatrix[9], float transMatrix[3]) {
@@ -131,6 +91,8 @@ bool rt2DSliceDataObject::setTransform(float rotMatrix[9], float transMatrix[3])
   m_trans->Translate(transMatrix);
 
   if(mat) mat->Delete();
+  Modified();
+  update();
   return true;
 }
 
@@ -140,5 +102,7 @@ bool rt2DSliceDataObject::setVtkMatrix(vtkMatrix4x4* m) {
 
   m_trans->Identity();
   m_trans->SetMatrix(m);
+  Modified();
+  update();
   return true;
 }

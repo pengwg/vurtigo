@@ -89,6 +89,7 @@ set (UI_FILES
   rtUI/VtkClampingWidget.ui
   rtUI/ProfileWidget.ui
   rtUI/VtkRangeWidget.ui
+  rtUI/slice2DOptions.ui
 )
 
 

@@ -467,12 +467,21 @@ void TestSuiteBasic::changeImage() {
       m_imgPeriod = m_imgPeriod + 1;
       if (m_imgPeriod > 100) m_imgPeriod = 10;
 
+      vtkTransform *temp;
+      vtkMatrix4x4 *matCopy;
+      vtkTransform *tempCopy = vtkTransform::New();
+
       ptObj->lock();
-      ptObj->getTransform()->RotateX(2);
+      temp = ptObj->getTransform();
+      matCopy = temp->GetMatrix();
+      tempCopy->SetMatrix(matCopy);
+      tempCopy->RotateX(2);
+      ptObj->setVtkMatrix(tempCopy->GetMatrix());
       ptObj->copyImageData2D(sinSrc->GetOutput());
       ptObj->Modified();
       ptObj->unlock();
 
+      tempCopy->Delete();
       sinSrc->Delete();
     }
   }

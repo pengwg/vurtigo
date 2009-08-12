@@ -9,6 +9,8 @@
 #include "vtkImageShiftScale.h"
 #include "vtkMatrix4x4.h"
 
+#include "ui_slice2DOptions.h"
+
 #include <vector>
 
 //! A Single 2D Slice
@@ -32,7 +34,6 @@ public:
   vtkImageData* getUCharData() { return m_imgUCharCast->GetOutput(); }
   vtkTransform* getTransform() { return m_trans; }
 
-  bool setImageParameters(int FOV, int imgSize, int numChan, std::vector<unsigned char>* imgPtr);
   bool setTransform(float rotMatrix[9], float transMatrix[3]);
   bool setVtkMatrix(vtkMatrix4x4* m);
 
@@ -50,6 +51,8 @@ public:
   int m_numChan;
 
   bool m_imgDataValid;
+
+  Ui::slice2DOptions m_optionsWidget;
 };
 
 #endif 
