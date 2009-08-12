@@ -251,7 +251,7 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
 
     //set the local values
     success = success && local->setCoilAngles(localCoilId, currCoil->angles[0], currCoil->angles[1]);
-    success = success && local->setCoilCoords(localCoilId, currCoil->coords[0], currCoil->coords[1], currCoil->coords[2]);
+    success = success && local->setCoilCoords(localCoilId, currCoil->coords[0], currCoil->coords[1], -currCoil->coords[2]);
     success = success && local->setCoilSNR(localCoilId, currCoil->SNR);
     coilIndex++;
   }
@@ -344,7 +344,7 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
         temp = static_cast<unsigned char*>(img->GetScalarPointer( remote.imgSize-ix2-1,remote.imgSize-ix1-1, ix3));
         *temp = remote.img[pos];
         pos++;
-        if (ix1<20 && ix2<10) *temp = 255;
+        //if (ix1<20 && ix2<10) *temp = 255;
       }
     }
   }
