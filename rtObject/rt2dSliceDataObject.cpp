@@ -70,8 +70,6 @@ bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
   m_imgUCharCast->SetShift(-rangeI[0]);
 
   m_imgDataValid = true;
-  Modified();
-
   return true;
 }
 
@@ -91,8 +89,6 @@ bool rt2DSliceDataObject::setTransform(float rotMatrix[9], float transMatrix[3])
   m_trans->Translate(transMatrix);
 
   if(mat) mat->Delete();
-  Modified();
-  //update();
   return true;
 }
 
@@ -102,7 +98,5 @@ bool rt2DSliceDataObject::setVtkMatrix(vtkMatrix4x4* m) {
 
   m_trans->Identity();
   m_trans->SetMatrix(m);
-  Modified();
-  //update();
   return true;
 }

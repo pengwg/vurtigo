@@ -51,7 +51,7 @@
     <widget class="QComboBox" name="coordComboBox">
      <item>
       <property name="text">
-       <string>Patient</string>
+       <string>Head First Supine</string>
       </property>
      </item>
      <item>

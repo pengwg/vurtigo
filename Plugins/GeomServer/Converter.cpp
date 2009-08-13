@@ -339,12 +339,11 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
   int pos = 0;
   unsigned char* temp;
   for (int ix1 = 0; ix1 < remote.imgSize; ix1++) {
-    for (int ix2 = 0; ix2 < remote.imgSize; ix2++) {
+    for (int ix2 = 0; ix2 < remote.imgSize; ix2++) {  
+      temp = static_cast<unsigned char*>(img->GetScalarPointer( remote.imgSize-ix2-1,remote.imgSize-ix1-1, 0));
       for (int ix3 = 0; ix3 < remote.numChannels; ix3++) {
-        temp = static_cast<unsigned char*>(img->GetScalarPointer( remote.imgSize-ix2-1,remote.imgSize-ix1-1, ix3));
-        *temp = remote.img[pos];
+        *(temp+ix3) = remote.img[pos];
         pos++;
-        //if (ix1<20 && ix2<10) *temp = 255;
       }
     }
   }
