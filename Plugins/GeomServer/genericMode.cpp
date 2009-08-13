@@ -4,7 +4,7 @@
 
 using namespace std;
 
-GenericMode::GenericMode():m_sender(0), m_lastClientIndex(0) {
+GenericMode::GenericMode():m_sender(0) {
   int ix1=0; 
 
   m_imgDataArray.clear();
@@ -18,7 +18,6 @@ void GenericMode::print() {
   int ix1;
 
   cout << "-------------------------------- START PRINT" << endl;
-  cout << "Last client index: " << m_lastClientIndex << endl;
 
   cout << "PlaneID: " << m_planeID << endl;
 
@@ -52,28 +51,16 @@ void GenericMode::print() {
   cout << "-------------------------------- END PRINT" << endl;
 }
 
-
-void GenericMode::getAllGeom() {
+bool GenericMode::receivePlane(int id) {
   IMAGEDATA* currImg;
-  CATHDATA* currCath;
-  COILDATA coilDat;
   float *rotation, *translation;
   unsigned char * image;
-
-  // Catheter data temp arrays
-  float *coords;
-  int *angles;
-
   int ix1;
-
-  // Always use the first catheter. 
-  currCath = &m_cathDataArray[0];
-
-  // The last client to write.
-  m_lastClientIndex = m_sender->getLastClientWrite();
+  bool res = false;
 
   // The gometry plane.
-  m_planeID = m_sender->getPlaneID();
+  m_planeID = id;
+  m_sender->setPlaneID(m_planeID=id);
   currImg = &m_imgDataArray[m_planeID];
   currImg->imgSize = m_sender->getImgSize();
   currImg->numChannels = m_sender->getNumChan();
@@ -104,13 +91,27 @@ void GenericMode::getAllGeom() {
     for (ix1=0; ix1<TRANS_MATRIX_SIZE && translation; ix1++) {
       currImg->transMatrix[ix1] = translation[ix1];
     }
+    res=true;
   }
+  return res;
+}
+
+bool GenericMode::receiveCatheter() {
+  CATHDATA* currCath;
+  COILDATA coilDat;
+  float *coords;
+  int *angles;
+  bool res = false;
+
+    // Always use the first catheter.
+  currCath = &m_cathDataArray[0];
+
   // Get catheter information.
   currCath->cathMode = m_sender->getCathModeAsInt();
   if (NO_CATHETERS != static_cast<CatheterMode>(currCath->cathMode)) {
     currCath->numCoils = m_sender->getNumCathCoils();
     currCath->coils.clear();
-    for (ix1=0; ix1<currCath->numCoils; ix1++) {
+    for (int ix1=0; ix1<currCath->numCoils; ix1++) {
       coilDat.locID = m_sender->getCathLocID(ix1);
       coilDat.SNR = m_sender->getCathSNR(ix1);
       coords = m_sender->getCathCoords(ix1);
@@ -121,5 +122,10 @@ void GenericMode::getAllGeom() {
 
       currCath->coils.push_back(coilDat);
     }
+    // We have a catheter if we have at least one coil.
+    if (currCath->numCoils > 0)  res = true;
   }
+
+  return res;
 }
+

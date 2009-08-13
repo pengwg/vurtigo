@@ -43,8 +43,6 @@ void SenderThread::run() {
   connect(this, SIGNAL(connectSignal()), &threadObj->sender, SLOT(connectAndMessage()), Qt::QueuedConnection);
   connect(this, SIGNAL(disconnectSignal()), &threadObj->sender, SLOT(disconnect()), Qt::QueuedConnection);
   connect(this, SIGNAL(readAndSetDataSignal()), threadObj, SLOT(readAndSetData()), Qt::QueuedConnection);
-  qRegisterMetaType<SenderSimp::TxtFileType>("SenderSimp::TxtFileType");
-  connect(this, SIGNAL(sendFileSignal(QString,SenderSimp::TxtFileType)), &threadObj->sender, SLOT(sendFile(QString,SenderSimp::TxtFileType)));
   objCV.wakeAll();
   exec();
 }
@@ -89,15 +87,3 @@ arguments * SenderThread::getArgs() {
   return threadObj->sender.getArgs();
 }
 
-//! Sends a file, returns true if the file directory and file type is proper
-/*!
-  Will temporarily connect to the server if needed.
-  @param fileDir file directory
-  @param fileType file type of text file (not needed)
- */
-void SenderThread::sendFile(QString & fileDir, SenderSimp::TxtFileType fileType) {
-  if (!calledDestructor) {
-    checkObjects();
-    emit sendFileSignal(fileDir, fileType);
-  }
-}

@@ -5,10 +5,6 @@
 #include <QString>
 #include <QObject>
 
-//Definitions for filetypes
-#define DICOM_EXT ".dcm"
-#define TXT_EXT ".txt"
-#define OPEN_FILE_TYPES "*.dcm *.txt"
 
 //! A wrapping class for sending information
 /*!
@@ -23,8 +19,6 @@ class SenderSimp : public QObject {
   arguments args;
   //! For reading information
   GenericMode * readMode;
-  //! For writing information
-  GenericMode * writeMode;
   //! true, if the application is connecting temporarily (for sending information)
   bool tempConnect;
 
@@ -48,10 +42,7 @@ class SenderSimp : public QObject {
 
     void print();
     void runReadMode();
-    bool sendFile(QString fileDir, SenderSimp::TxtFileType fileType = tft_None);
 
-  private:
-    bool setFileType(QString & fileDir, TxtFileType fileType = tft_None);
 };
 
 #endif

@@ -11,8 +11,6 @@ using namespace std;
 void GeomServerUI::setupSlots() {
   connect(connectButton, SIGNAL(clicked()), this, SLOT(serverConnect()));
   connect(disconnectButton, SIGNAL(clicked()), this, SLOT(serverDisconnect()));
-  connect(fileDirToolButton, SIGNAL(clicked()), this, SLOT(selectSendFile()));
-  connect(sendFileButton, SIGNAL(clicked()), this, SLOT(sendFile()));
 }
 
 //! Set defaults of the UI state
@@ -59,25 +57,4 @@ void GeomServerUI::serverDisconnect() {
 }
 
 
-//! Uses dialog box to put the file directory to the file directory label
-void GeomServerUI::selectSendFile() {
-  const char * message = "Select file to send";
-  fileDirLineEdit->insert(QFileDialog::getOpenFileName(this, message, ".", OPEN_FILE_TYPES));
-}
 
-//! For text files, they may have internal file types. This function returns the file type relating to the text file from user input
-SenderSimp::TxtFileType GeomServerUI::checkboxTxtFileType() {
-  SenderSimp::TxtFileType fileType = SenderSimp::tft_None;
-
-//  if (fileTypeCathRadio->isChecked()) {
-//    fileType = SenderThread::tft_Cath;
-//  }
-
-  return fileType;
-}
-
-//! Sends file to server
-void GeomServerUI::sendFile() {
-  QString fileDir = fileDirLineEdit->text();
-  senderThread.sendFile(fileDir, checkboxTxtFileType());
-}

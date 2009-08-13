@@ -36,6 +36,19 @@ public:
   bool setTransform(float rotMatrix[9], float transMatrix[3]);
   bool setVtkMatrix(vtkMatrix4x4* m);
 
+ public slots:
+  void spinRight();
+  void spinLeft();
+  void rotateUp();
+  void rotateDown();
+  void rotateLeft();
+  void rotateRight();
+  void pushPlane();
+  void pullPlane();
+  void xTranslate(double);
+  void yTranslate(double);
+  void zTranslate(double);
+
  protected:
   // Functions
   void setupGUI();

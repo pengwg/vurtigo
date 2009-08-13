@@ -1,7 +1,6 @@
 #include "SenderSimp.h"
 #include <iostream>
 #include "readOnlyMode.h"
-#include "writeOnlyMode.h"
 
 using namespace std;
 
@@ -18,7 +17,6 @@ void SenderSimp::setSenderDefaults() {
 
 SenderSimp::SenderSimp() {
   readMode = new ReadOnlyMode();
-  writeMode = new WriteOnlyMode();
   tempConnect = false;
 
   setSenderDefaults();
@@ -31,7 +29,6 @@ SenderSimp::~SenderSimp() {
   delete [] args.dicomFile;
 
   delete (ReadOnlyMode *) readMode;
-  delete (WriteOnlyMode *) writeMode;
 }
 
 //! Connect and print appropriate message to console
@@ -41,8 +38,7 @@ bool SenderSimp::connectAndMessage() {
     return true;
   }
   else if (!sender.connect(args.hostname,args.port,args.swap)) {
-    char * server = "Geometry Server";
-    cerr << "Error connecting to " << server <<". Check that " << server << " is running on port " << args.port << " on host: " << args.hostname << endl;
+    cerr << "Error connecting to Geometry Server. Check that it is running on port " << args.port << " on host: " << args.hostname << endl;
     sender.disconnect();
     return false;
   } else {
@@ -91,54 +87,6 @@ vector<CATHDATA> & SenderSimp::getCaths() {
 //! Returns a vector of remote image objects
 vector<IMAGEDATA> & SenderSimp::getImages() {
   return readMode->getImages();
-}
-
-//! Given a file directory and a text file type, this method sets the filename for "args" and returns true if it is a valid file type
-bool SenderSimp::setFileType(QString & fileDir, TxtFileType fileType) {
-  args.cathFile = NULL;
-  args.dicomFile = NULL;
-
-  if (fileDir.endsWith(TXT_EXT)) {
-//Sample code for working with different text fle type
-//    if (fileType == tft_Cath) {
-//      copyString(&args.cathFile, fileDir.toAscii().data());
-//      return true;
-//    }
-    SenderSimp::copyString(&args.cathFile, fileDir.toAscii().data());
-    return true;
-  }
-  else if (fileDir.endsWith(DICOM_EXT)) {
-    SenderSimp::copyString(&args.dicomFile, fileDir.toAscii().data());
-    return true;
-  }
-  cout << "Send file type not supported. Check text file type?" << endl;
-  return false;
-}
-
-//! Sends a file, returns true if the file directory and file type is proper
-/*!
-  Will temporarily connect to the server if needed.
-  @param fileDir file directory
-  @param fileType file type of text file (not needed)
-  @return true, if the file directory and file type is proper
- */
-bool SenderSimp::sendFile(QString fileDir, TxtFileType fileType) {
-  if (setFileType(fileDir, fileType)) {
-    if (!sender.isConnected()) {
-      tempConnect = true;
-      connectAndMessage();
-    }
-
-    writeMode->init(&sender, &args);
-    writeMode->runMode();
-
-    if (tempConnect) {
-      disconnect();
-      tempConnect = false;
-    }
-    return true;
-  }
-  return false;
 }
 
 //! Copys a string from src to dest

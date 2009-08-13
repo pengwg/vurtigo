@@ -7,7 +7,7 @@
 #include "Converter.h"
 
 //Time in milliseconds the plugin calls update()
-#define UPDATE_TIME 10
+#define UPDATE_TIME 100
 
 //! Plugin object for GeomServer
 /*!

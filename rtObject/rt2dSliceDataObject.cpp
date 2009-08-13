@@ -32,6 +32,9 @@ rt2DSliceDataObject::~rt2DSliceDataObject() {
 void rt2DSliceDataObject::update() {
   if(!m_trans) return;
 
+  // If we have manual prescription then we do not want to update the GUI.
+  if(m_optionsWidget.prescribeGroupBox->isChecked()) return;
+
   double translate[3];
   m_trans->GetPosition(translate);
   m_optionsWidget.xDoubleSpinBox->setValue(translate[0]);
@@ -43,7 +46,20 @@ void rt2DSliceDataObject::update() {
 void rt2DSliceDataObject::setupGUI() {
   m_optionsWidget.setupUi(getBaseWidget());
 
+ connect(m_optionsWidget.spinLeftButton, SIGNAL(clicked()), this, SLOT(spinLeft()));
+ connect(m_optionsWidget.spinRightButton, SIGNAL(clicked()), this, SLOT(spinRight()));
 
+ connect(m_optionsWidget.rotateUpButton, SIGNAL(clicked()), this, SLOT(rotateUp()));
+ connect(m_optionsWidget.rotateDownButton, SIGNAL(clicked()), this, SLOT(rotateDown()));
+ connect(m_optionsWidget.rotateLeftButton, SIGNAL(clicked()), this, SLOT(rotateLeft()));
+ connect(m_optionsWidget.rotateRightButton, SIGNAL(clicked()), this, SLOT(rotateRight()));
+
+ connect(m_optionsWidget.pushForwardButton, SIGNAL(clicked()), this, SLOT(pushPlane()));
+ connect(m_optionsWidget.pullBackButton, SIGNAL(clicked()), this, SLOT(pullPlane()));
+
+ connect(m_optionsWidget.xDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(xTranslate(double)));
+ connect(m_optionsWidget.yDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(yTranslate(double)));
+ connect(m_optionsWidget.zDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(zTranslate(double)));
 }
 
 //! Clean the GUI widgets.
@@ -94,4 +110,62 @@ bool rt2DSliceDataObject::setVtkMatrix(vtkMatrix4x4* m) {
   m_trans->Identity();
   m_trans->SetMatrix(m);
   return true;
+}
+
+
+void rt2DSliceDataObject::spinRight() {
+}
+
+void rt2DSliceDataObject::spinLeft() {
+}
+
+void rt2DSliceDataObject::rotateUp() {
+}
+
+void rt2DSliceDataObject::rotateDown() {
+}
+
+void rt2DSliceDataObject::rotateLeft() {
+}
+
+void rt2DSliceDataObject::rotateRight() {
+}
+
+void rt2DSliceDataObject::pushPlane() {
+}
+
+void rt2DSliceDataObject::pullPlane() {
+}
+
+void rt2DSliceDataObject::xTranslate(double v) {
+  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+
+  m_trans->GetMatrix(mat);
+  mat->SetElement(0, 3, v);
+  m_trans->SetMatrix(mat);
+
+  mat->Delete();
+  Modified();
+}
+
+void rt2DSliceDataObject::yTranslate(double v) {
+  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+
+  m_trans->GetMatrix(mat);
+  mat->SetElement(1, 3, v);
+  m_trans->SetMatrix(mat);
+
+  mat->Delete();
+  Modified();
+}
+
+void rt2DSliceDataObject::zTranslate(double v) {
+  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+
+  m_trans->GetMatrix(mat);
+  mat->SetElement(2, 3, v);
+  m_trans->SetMatrix(mat);
+
+  mat->Delete();
+  Modified();
 }

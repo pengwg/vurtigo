@@ -17,7 +17,6 @@ class GeomServerUI : public QWidget, private Ui::MainUI {
   void setupSlots();
   void setupDefaults();
   void init();
-  SenderSimp::TxtFileType checkboxTxtFileType();
 
   public:
     GeomServerUI(SenderThread & senderThread);
@@ -26,8 +25,6 @@ class GeomServerUI : public QWidget, private Ui::MainUI {
   public slots:
     void serverConnect();
     void serverDisconnect();
-    void selectSendFile();
-    void sendFile();
 };
 
 #endif

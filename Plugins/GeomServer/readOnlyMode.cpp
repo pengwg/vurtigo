@@ -14,7 +14,6 @@ ReadOnlyMode::~ReadOnlyMode() {
 bool ReadOnlyMode::init(GeometrySender* geom, struct arguments* args) {
   IMAGEDATA imgData;
   CATHDATA cathData;
-  int ix1;
 
   m_sender = geom;
  
@@ -22,7 +21,7 @@ bool ReadOnlyMode::init(GeometrySender* geom, struct arguments* args) {
   m_numPlanes = 2;
   m_imgDataArray.clear();
   imgData.img = NULL;
-  for (ix1=0; ix1<m_numPlanes; ix1++) {
+  for (int ix1=0; ix1<m_numPlanes; ix1++) {
     m_imgDataArray.push_back(imgData);
   }
 
@@ -34,15 +33,11 @@ bool ReadOnlyMode::init(GeometrySender* geom, struct arguments* args) {
 }
 
 void ReadOnlyMode::runMode() {
-  int ix1, ix2;
-  char fname[256];
-  int fileSize;
-
     // Read all the relevant planes
-    for (ix2=0; ix2<m_numPlanes; ix2++) {
-      m_planeID = ix2;
-      m_sender->setPlaneID(m_planeID);
-      getAllGeom();
+    for (int ix1=0; ix1<m_numPlanes; ix1++) {
+      m_planeID = ix1;
+      receivePlane(m_planeID);
     }
+    receiveCatheter();
 }
 

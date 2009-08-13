@@ -15,8 +15,8 @@ class GenericMode{
   virtual ~GenericMode();
 
   // Variables that are common to all modes.
-  GeometrySender* m_sender; //! Object that communicates with the Geometry Server.
-  int m_lastClientIndex; //! The index of the last client that used this data.
+  //! Object that communicates with the Geometry Server.
+  GeometrySender* m_sender;
   std::vector<IMAGEDATA> m_imgDataArray; //! All data related to the image.
   std::vector<CATHDATA> m_cathDataArray; //! All data related to the catheter
   int m_planeID;
@@ -32,7 +32,8 @@ class GenericMode{
 
   // Print the data.
   void print();
-  void getAllGeom();
+  bool receivePlane(int id);
+  bool receiveCatheter();
 
   std::vector<CATHDATA> & getCaths() {
     return m_cathDataArray;

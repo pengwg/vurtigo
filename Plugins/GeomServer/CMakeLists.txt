@@ -4,7 +4,6 @@ set(GEOM_SRC_FILES
   geom_client.cpp
   genericMode.cpp
   readOnlyMode.cpp
-  writeOnlyMode.cpp
   GeomServerPlugin.cpp
   Converter.cpp
   GeomServerUI.cpp

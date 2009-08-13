@@ -54,7 +54,6 @@ public:
   void readAndSetData();
   void serverConnect();
   void serverDisconnect();
-  void sendFile(QString & fileDir, SenderSimp::TxtFileType fileType = SenderSimp::tft_None);
 
   arguments * getArgs();
 
@@ -63,7 +62,6 @@ signals:
   void readAndSetDataSignal();
   void connectSignal();
   void disconnectSignal();
-  void sendFileSignal(QString fileDir, SenderSimp::TxtFileType fileType);
 };
 
 #endif
