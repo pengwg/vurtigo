@@ -3,7 +3,6 @@ set(GEOM_SRC_FILES
   sender.cpp
   geom_client.cpp
   genericMode.cpp
-  readOnlyMode.cpp
   GeomServerPlugin.cpp
   Converter.cpp
   GeomServerUI.cpp

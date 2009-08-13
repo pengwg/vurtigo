@@ -1,6 +1,5 @@
 #include "SenderSimp.h"
 #include <iostream>
-#include "readOnlyMode.h"
 
 using namespace std;
 
@@ -16,7 +15,7 @@ void SenderSimp::setSenderDefaults() {
 }
 
 SenderSimp::SenderSimp() {
-  readMode = new ReadOnlyMode();
+  readMode = new GenericMode();
   tempConnect = false;
 
   setSenderDefaults();
@@ -28,7 +27,7 @@ SenderSimp::~SenderSimp() {
   delete [] args.cathFile;
   delete [] args.dicomFile;
 
-  delete (ReadOnlyMode *) readMode;
+  delete (GenericMode *) readMode;
 }
 
 //! Connect and print appropriate message to console

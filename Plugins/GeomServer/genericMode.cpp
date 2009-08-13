@@ -51,6 +51,39 @@ void GenericMode::print() {
   cout << "-------------------------------- END PRINT" << endl;
 }
 
+
+bool GenericMode::init(GeometrySender* geom, struct arguments* args) {
+  IMAGEDATA imgData;
+  CATHDATA cathData;
+
+  m_sender = geom;
+
+  m_planeID = 0;
+  m_numPlanes = 2;
+  m_imgDataArray.clear();
+  imgData.img = NULL;
+  for (int ix1=0; ix1<m_numPlanes; ix1++) {
+    m_imgDataArray.push_back(imgData);
+  }
+
+  // A single catheter may be read in this mode.
+  m_cathDataArray.clear();
+  m_cathDataArray.push_back(cathData);
+
+  return true;
+}
+
+void GenericMode::runMode() {
+    // Read all the relevant planes
+    for (int ix1=0; ix1<m_numPlanes; ix1++) {
+      m_planeID = ix1;
+      receivePlane(m_planeID);
+    }
+    receiveCatheter();
+}
+
+
+
 bool GenericMode::receivePlane(int id) {
   IMAGEDATA* currImg;
   float *rotation, *translation;

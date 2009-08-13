@@ -10,25 +10,23 @@ class GenericMode{
  private:
 
  protected:
-  // This class cannot be created directly.
-  GenericMode();
-  virtual ~GenericMode();
-
   // Variables that are common to all modes.
   //! Object that communicates with the Geometry Server.
   GeometrySender* m_sender;
   std::vector<IMAGEDATA> m_imgDataArray; //! All data related to the image.
   std::vector<CATHDATA> m_cathDataArray; //! All data related to the catheter
   int m_planeID;
+  int m_numPlanes;
  public:
-
-  // All functions that have =0 are pure virtual. They MUST be implemented by the base class. void getAllGeom();
+  // This class cannot be created directly.
+  GenericMode();
+  virtual ~GenericMode();
 
   // Init the mode based on the command line arguments.
-  virtual bool init(GeometrySender* geom, struct arguments* args)=0;
+  bool init(GeometrySender* geom, struct arguments* args);
 
   // Start the mode running.
-  virtual void runMode()=0;
+  void runMode();
 
   // Print the data.
   void print();
