@@ -31,7 +31,6 @@ Q_OBJECT
   void setReadFlag(bool f) { m_readOnly = f; }
 
   virtual QWidget* getBaseWidget() { return &m_baseWidget; }
-  virtual QPushButton* getApplyButton() { return m_applyButton; }
 
   QDateTime getModified();
 
@@ -44,10 +43,12 @@ Q_OBJECT
   void unlock() { m_objectLock.unlock(); }
 
  public slots:
-  //! The apply button has been pressed. 
-  virtual void apply() = 0;
-
   void Modified();
+  void updateGUI();
+
+ signals:
+  //! Signal is sent when an object has been modified.
+  void objectChanged();
 
  protected:
   rtDataObject();
@@ -67,7 +68,6 @@ Q_OBJECT
   rtConstants::rtObjectType m_objType;
   bool m_readOnly;
   QWidget m_baseWidget;
-  QPushButton* m_applyButton;
 
   //! Time when this object was last modified.
   QDateTime m_modifyTime;

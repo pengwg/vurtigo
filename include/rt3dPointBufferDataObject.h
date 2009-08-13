@@ -73,7 +73,6 @@ public:
   void addPoint(SimplePoint sp);
   void removePoint(SimplePoint sp);
 
-  void apply();
   void update();
 
  protected:

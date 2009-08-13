@@ -11,12 +11,6 @@ rtNoneDataObject::~rtNoneDataObject() {
   cleanupGUI();
 }
 
-
-//! Take the info from the GUI
-void rtNoneDataObject::apply() {
-
-}
-
 //! Send the info to the GUI
 void rtNoneDataObject::update() {
 

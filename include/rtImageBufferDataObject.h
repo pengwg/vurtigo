@@ -15,7 +15,6 @@ public:
   rtImageBufferDataObject();
   ~rtImageBufferDataObject();
 
-  void apply();
   void update();
 
  protected:

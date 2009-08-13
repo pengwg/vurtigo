@@ -40,7 +40,6 @@ public:
   rtCathDataObject();
   ~rtCathDataObject();
 
-  void apply();
   void update();
 
   // Coil specific

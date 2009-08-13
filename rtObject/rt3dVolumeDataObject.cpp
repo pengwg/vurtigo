@@ -57,11 +57,6 @@ rt3DVolumeDataObject::~rt3DVolumeDataObject() {
 }
 
 
-//! Take the info from the GUI (When the apply button is pressed)
-void rt3DVolumeDataObject::apply() {
-
-}
-
 void rt3DVolumeDataObject::surfaceFunctionChanged() {
   if(m_optionsWidget.radioComposite->isChecked()) {
     m_rayCastFunction=RCF_COMPOSITE;

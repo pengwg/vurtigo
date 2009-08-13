@@ -62,7 +62,6 @@ public:
 
   int getInterpolation() { return m_interpolationType; }
 
-  void apply();
   void update();
 
  public slots:

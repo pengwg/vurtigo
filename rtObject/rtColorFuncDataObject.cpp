@@ -20,11 +20,6 @@ bool rtColorFuncDataObject::setColorFunction(vtkColorTransferFunction* ctf) {
   return true;
 }
 
-//! Take the info from the GUI
-void rtColorFuncDataObject::apply() {
-
-}
-
 //! Send the info to the GUI
 void rtColorFuncDataObject::update() {
 

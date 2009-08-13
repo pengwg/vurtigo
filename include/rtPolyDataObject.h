@@ -42,7 +42,6 @@ Points should be joined into triangles to be rendered.
   rtPolyDataObject();
   ~rtPolyDataObject();
 
-  void apply();
   void update();
 
   vtkPolyData* getPolyData() { return m_polyData; }

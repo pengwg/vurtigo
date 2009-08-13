@@ -11,12 +11,6 @@ rt4DVolumeDataObject::~rt4DVolumeDataObject() {
   cleanupGUI();
 }
 
-
-//! Take the info from the GUI
-void rt4DVolumeDataObject::apply() {
-
-}
-
 //! Send the info to the GUI
 void rt4DVolumeDataObject::update() {
 

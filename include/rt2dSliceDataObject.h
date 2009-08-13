@@ -25,7 +25,6 @@ public:
   rt2DSliceDataObject();
   ~rt2DSliceDataObject();
 
-  void apply();
   void update();
 
   bool isDataValid() { return m_imgDataValid; }

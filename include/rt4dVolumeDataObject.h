@@ -15,7 +15,6 @@ public:
   rt4DVolumeDataObject();
   ~rt4DVolumeDataObject();
 
-  void apply();
   void update();
 
  protected:

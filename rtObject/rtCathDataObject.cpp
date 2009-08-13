@@ -41,12 +41,6 @@ rtCathDataObject::~rtCathDataObject() {
   delete m_tipPropertyDlg;
 }
 
-
-//! Take the info from the GUI
-void rtCathDataObject::apply() {
-
-}
-
 //! Send the info to the GUI
 void rtCathDataObject::update() {
 

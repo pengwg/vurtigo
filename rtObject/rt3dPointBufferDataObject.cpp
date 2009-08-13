@@ -31,14 +31,6 @@ void rt3DPointBufferDataObject::removePoint(SimplePoint sp) {
 }
 
 
-//! Take the info from the GUI
-/*!
-  @todo Write the GUI
- */
-void rt3DPointBufferDataObject::apply() {
-
-}
-
 //! Send the info to the GUI
 /*!
   @todo Write the GUI

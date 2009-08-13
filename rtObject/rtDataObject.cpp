@@ -3,12 +3,12 @@
 
 rtDataObject::rtDataObject() {
   m_readOnly = false;
-  m_applyButton = new QPushButton("Apply");
-  connect(m_applyButton, SIGNAL(pressed()), this, SLOT(apply()));
+
+  // When the object changes we can update the GUI.
+  connect(this, SIGNAL(objectChanged()), this, SLOT(updateGUI()));
 }
 
 rtDataObject::~rtDataObject() {
-  if (m_applyButton) delete m_applyButton;
 }
 
 int rtDataObject::getId() {
@@ -41,9 +41,15 @@ void rtDataObject::setObjectType(rtConstants::rtObjectType ot) {
 void rtDataObject::Modified() {
   m_modifyTime=QDateTime::currentDateTime();
   rtPluginLoader::instance().objectModified(m_objId);
+  emit objectChanged();
 }
 
 //! Get the last time the object was modified.
 QDateTime rtDataObject::getModified() {
   return m_modifyTime;
+}
+
+void rtDataObject::updateGUI() {
+  // Call the update function for each object.
+  update();
 }

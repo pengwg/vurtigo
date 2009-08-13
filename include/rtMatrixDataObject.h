@@ -19,7 +19,6 @@ public:
   rtMatrixDataObject();
   ~rtMatrixDataObject();
 
-  void apply();
   void update();
 
   //! Return the transform as a matrix object.

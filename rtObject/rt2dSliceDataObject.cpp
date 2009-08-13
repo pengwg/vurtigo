@@ -28,11 +28,6 @@ rt2DSliceDataObject::~rt2DSliceDataObject() {
 }
 
 
-//! Take the info from the GUI
-void rt2DSliceDataObject::apply() {
-
-}
-
 //! Send the info to the GUI
 void rt2DSliceDataObject::update() {
   if(!m_trans) return;

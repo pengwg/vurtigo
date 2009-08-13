@@ -11,12 +11,6 @@ rtImageBufferDataObject::~rtImageBufferDataObject() {
   cleanupGUI();
 }
 
-
-//! Take the info from the GUI
-void rtImageBufferDataObject::apply() {
-
-}
-
 //! Send the info to the GUI
 void rtImageBufferDataObject::update() {
 

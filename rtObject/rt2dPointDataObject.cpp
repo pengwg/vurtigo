@@ -26,11 +26,6 @@ void rt2DPointDataObject::removePoint(SimplePoint2D sp) {
   }
 }
 
-//! Take the info from the GUI
-void rt2DPointDataObject::apply() {
-
-}
-
 //! Send the info to the GUI
 void rt2DPointDataObject::update() {
 

@@ -18,7 +18,6 @@ public:
   rtColorFuncDataObject();
   ~rtColorFuncDataObject();
 
-  void apply();
   void update();
 
   //! Get the value of the current color function.

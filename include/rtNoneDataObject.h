@@ -12,7 +12,6 @@ public:
   rtNoneDataObject();
   ~rtNoneDataObject();
 
-  void apply();
   void update();
 
  protected:

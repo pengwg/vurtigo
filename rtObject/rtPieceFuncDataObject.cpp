@@ -20,11 +20,6 @@ bool rtPieceFuncDataObject::setPiecewiseFunction(vtkPiecewiseFunction* piece) {
   return true;
 }
 
-//! Take the info from the GUI
-void rtPieceFuncDataObject::apply() {
-
-}
-
 //! Send the info to the GUI
 void rtPieceFuncDataObject::update() {
 

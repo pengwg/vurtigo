@@ -33,11 +33,11 @@ class rtLabelDataObject : public rtDataObject {
 
   vtkTextProperty* getTextProperty();
 
-  void apply();
   void update();
 
  public slots:
   void propertyDialog();
+  void textChanged(QString);
 
  protected:
   //Properties

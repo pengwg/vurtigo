@@ -19,7 +19,6 @@ public:
   rtPieceFuncDataObject();
   ~rtPieceFuncDataObject();
 
-  void apply();
   void update();
 
   //! Get the value of the current piecewise function.

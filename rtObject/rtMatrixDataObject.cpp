@@ -16,12 +16,6 @@ rtMatrixDataObject::~rtMatrixDataObject() {
   if (m_currTransform) m_currTransform->Delete();
 }
 
-
-//! Take the info from the GUI
-void rtMatrixDataObject::apply() {
-
-}
-
 //! Send the info to the GUI
 void rtMatrixDataObject::update() {
 

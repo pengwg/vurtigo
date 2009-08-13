@@ -30,6 +30,7 @@ void rtLabelDataObject::setupGUI() {
 
   m_chooseTextLabel.setText("Display Text: ");
   m_chooseTextEdit = new QLineEdit();
+  connect(m_chooseTextEdit, SIGNAL(textEdited(QString)), this, SLOT(textChanged(QString)));
   m_masterLayout->addWidget(&m_chooseTextLabel, 1, 0);
   m_masterLayout->addWidget(m_chooseTextEdit, 1, 1);
 
@@ -40,7 +41,6 @@ void rtLabelDataObject::setupGUI() {
   m_masterLayout->addWidget(&m_propertyLabel, 2, 0);
   m_masterLayout->addWidget(&m_propertyButton, 2, 1);
 
-  m_masterLayout->addWidget(getApplyButton(), 3, 1);
 }
 
 void rtLabelDataObject::cleanupGUI() {
@@ -52,8 +52,8 @@ void rtLabelDataObject::cleanupGUI() {
 }
 
 //! Take the info from the GUI
-void rtLabelDataObject::apply() {
-  m_labelText = m_chooseTextEdit->text();
+void rtLabelDataObject::textChanged(QString txt) {
+  m_labelText = txt;
   Modified();
 }
 
@@ -64,7 +64,6 @@ void rtLabelDataObject::update() {
 
 void rtLabelDataObject::setText(QString text) {
   m_labelText = text;
-  m_chooseTextEdit->setText(m_labelText);
 }
 
 QString rtLabelDataObject::getText() {

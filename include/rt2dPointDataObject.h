@@ -44,7 +44,6 @@ public:
   void addPoint(SimplePoint2D sp);
   void removePoint(SimplePoint2D sp);
 
-  void apply();
   void update();
 
  protected:

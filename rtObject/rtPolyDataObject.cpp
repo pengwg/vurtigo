@@ -98,12 +98,6 @@ bool rtPolyDataObject::copyLookupTable(vtkColorTransferFunction* lookupTable) {
   return true;
 }
 
-
-//! Take the info from the GUI
-void rtPolyDataObject::apply() {
-
-}
-
 //! Send the info to the GUI
 void rtPolyDataObject::update() {
 
