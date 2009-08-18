@@ -1,4 +1,5 @@
 #include "rt2dSliceDataObject.h"
+#include <cmath>
 
 //! Constructor
 rt2DSliceDataObject::rt2DSliceDataObject() {
@@ -114,27 +115,120 @@ bool rt2DSliceDataObject::setVtkMatrix(vtkMatrix4x4* m) {
 
 
 void rt2DSliceDataObject::spinRight() {
+  int dims[3];
+  double space[3];
+  m_imgData->GetDimensions(dims);
+  m_imgData->GetSpacing(space);
+
+  m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
+  m_trans->RotateWXYZ(1.0, 0.0, 0.0, 1.0);
+  m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
+  Modified();
 }
 
 void rt2DSliceDataObject::spinLeft() {
+  int dims[3];
+  double space[3];
+  m_imgData->GetDimensions(dims);
+  m_imgData->GetSpacing(space);
+
+  m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
+  m_trans->RotateWXYZ(-1.0, 0.0, 0.0, 1.0);
+  m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
+  Modified();
 }
 
 void rt2DSliceDataObject::rotateUp() {
+  int dims[3];
+  double space[3];
+  m_imgData->GetDimensions(dims);
+  m_imgData->GetSpacing(space);
+
+  m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
+  m_trans->RotateWXYZ(1.0, 0.0, 1.0, 0.0);
+  m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
+  Modified();
 }
 
 void rt2DSliceDataObject::rotateDown() {
+  int dims[3];
+  double space[3];
+  m_imgData->GetDimensions(dims);
+  m_imgData->GetSpacing(space);
+
+  m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
+  m_trans->RotateWXYZ(-1.0, 0.0, 1.0, 0.0);
+  m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
+  Modified();
 }
 
 void rt2DSliceDataObject::rotateLeft() {
+  int dims[3];
+  double space[3];
+  m_imgData->GetDimensions(dims);
+  m_imgData->GetSpacing(space);
+
+  m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
+  m_trans->RotateWXYZ(1.0, 1.0, 0.0, 0.0);
+  m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
+  Modified();
 }
 
 void rt2DSliceDataObject::rotateRight() {
+  int dims[3];
+  double space[3];
+  m_imgData->GetDimensions(dims);
+  m_imgData->GetSpacing(space);
+
+  m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
+  m_trans->RotateWXYZ(-1.0, 1.0, 0.0, 0.0);
+  m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
+  Modified();
+
 }
 
 void rt2DSliceDataObject::pushPlane() {
+  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+
+  m_trans->GetMatrix(mat);
+
+  double zDirec[3];
+  double sumSq = 0.0;
+  for (int ix1=0; ix1<3; ix1++) {
+    zDirec[ix1] = mat->GetElement(ix1, 2);
+    sumSq += zDirec[ix1]*zDirec[ix1];
+  }
+  sumSq = sqrt(sumSq);
+
+  for (int ix1=0; ix1<3; ix1++) {
+    mat->SetElement(ix1, 3, mat->GetElement(ix1, 3)+zDirec[ix1]/sumSq);
+  }
+  m_trans->SetMatrix(mat);
+
+  mat->Delete();
+  Modified();
 }
 
 void rt2DSliceDataObject::pullPlane() {
+  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+
+  m_trans->GetMatrix(mat);
+
+  double zDirec[3];
+  double sumSq = 0.0;
+  for (int ix1=0; ix1<3; ix1++) {
+    zDirec[ix1] = mat->GetElement(ix1, 2);
+    sumSq += zDirec[ix1]*zDirec[ix1];
+  }
+  sumSq = sqrt(sumSq);
+
+  for (int ix1=0; ix1<3; ix1++) {
+    mat->SetElement(ix1, 3, mat->GetElement(ix1, 3)-zDirec[ix1]/sumSq);
+  }
+  m_trans->SetMatrix(mat);
+
+  mat->Delete();
+  Modified();
 }
 
 void rt2DSliceDataObject::xTranslate(double v) {

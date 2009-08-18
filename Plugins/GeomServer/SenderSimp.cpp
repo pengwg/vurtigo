@@ -12,6 +12,7 @@ void SenderSimp::setSenderDefaults() {
   args.swap = false;
   args.cathFile = new char[1];
   args.dicomFile = new char[1];
+
 }
 
 SenderSimp::SenderSimp() {
@@ -20,6 +21,8 @@ SenderSimp::SenderSimp() {
 
   setSenderDefaults();
   readMode->init(&sender, &args);
+  // Put one resource into the semaphore.
+  runLock.release();
 }
 
 SenderSimp::~SenderSimp() {
@@ -65,7 +68,13 @@ void SenderSimp::disconnect() {
 
 //! Reads the information
 void SenderSimp::runReadMode() {
+  // Check that the connection has been made.
+  if (!isConnected()) return;
+
+  if (runLock.tryAcquire()) {
     readMode->runMode();
+    runLock.release();
+  }
 }
 
 //! Prints the information read

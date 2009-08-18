@@ -4,7 +4,7 @@
 #include "genericMode.h"
 #include <QString>
 #include <QObject>
-
+#include <QSemaphore>
 
 //! A wrapping class for sending information
 /*!
@@ -22,6 +22,9 @@ class SenderSimp : public QObject {
   //! true, if the application is connecting temporarily (for sending information)
   bool tempConnect;
 
+  //! Semaphore to ensure only one read process is running at a time.
+  QSemaphore runLock;
+
   void setSenderDefaults();
 
   public:
@@ -35,6 +38,8 @@ class SenderSimp : public QObject {
     std::vector<CATHDATA> & getCaths();
     std::vector<IMAGEDATA> & getImages();
     static void copyString(char ** const dest, const char * const src);
+
+    GenericMode* getReaderHandle() { return readMode; }
 
   public slots:
     bool connectAndMessage();

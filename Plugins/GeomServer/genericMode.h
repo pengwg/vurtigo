@@ -5,6 +5,13 @@
 #include "sender.h"
 #include "arguments.h"
 
+#include <QList>
+#include <QSemaphore>
+
+#include "SenderThread.h"
+
+class Converter;
+
 //** Defines the superclass for all modes. This class cannot and should not be instantiated directly.
 class GenericMode{
  private:
@@ -16,7 +23,14 @@ class GenericMode{
   std::vector<IMAGEDATA> m_imgDataArray; //! All data related to the image.
   std::vector<CATHDATA> m_cathDataArray; //! All data related to the catheter
   int m_planeID;
-  int m_numPlanes;
+
+  QList<SenderThread::ListObject> m_planeList;
+  QList<SenderThread::ListObject> m_cathList;
+
+  Converter* converter;
+  QSemaphore m_planeListLock;
+  QSemaphore m_cathListLock;
+
  public:
   // This class cannot be created directly.
   GenericMode();
@@ -30,8 +44,13 @@ class GenericMode{
 
   // Print the data.
   void print();
+  bool sendPlanePosition(int id);
+  bool receivePlanePosition(int id);
   bool receivePlane(int id);
   bool receiveCatheter();
+
+  void setPlaneList(QList<SenderThread::ListObject>  plane);
+  void setCathList(QList<SenderThread::ListObject> cath);
 
   std::vector<CATHDATA> & getCaths() {
     return m_cathDataArray;

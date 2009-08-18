@@ -3,6 +3,7 @@
 
 #include "ui_GeomServer.h"
 #include "SenderThread.h"
+#include <QList>
 
 //! User interface for the GeomServer plugin
 /*!
@@ -18,6 +19,15 @@ class GeomServerUI : public QWidget, private Ui::MainUI {
   void setupDefaults();
   void init();
 
+  protected:
+    QList<SenderThread::ListObject> m_planeList;
+    QList<SenderThread::ListObject> m_cathList;
+    int m_numPlanes, m_numCath;
+
+    void updateObjectList();
+    void updateListGUI();
+    void updateReaderObject();
+
   public:
     GeomServerUI(SenderThread & senderThread);
     ~GeomServerUI();
@@ -25,6 +35,10 @@ class GeomServerUI : public QWidget, private Ui::MainUI {
   public slots:
     void serverConnect();
     void serverDisconnect();
+    void numPlanesChanged(int i);
+    void numCathChanged(int i);
+
+    void itemStateChanged(int);
 };
 
 #endif

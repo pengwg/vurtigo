@@ -3,6 +3,7 @@
 #include "SenderSimp.h"
 
 #include <map>
+#include <vector>
 
 #include "arguments.h"
 
@@ -72,13 +73,13 @@ class Converter {
 
   Converter::Node * getLocalObjNode(int id, NodeMap * nodeMap, NodeMap * remoteMap = NULL, rtConstants::rtObjectType objType = UNDEFINED_RT_OBJECT_TYPE, const char * name = NULL);
   Converter::Node * getNode(int id, NodeMap * nodeMap);
-  rtCathDataObject * getLocalCath(int remoteId);
+
   int getLocalCoilId(int remoteCoilId, rtCathDataObject * localCath, int remoteCoilLoc = UNDEFINED_REMOTE_COIL_LOC);
 
   int getRemoteCathId(int localId);
   int getRemoteCoilId(int localCathId, int localCoilId);
 
-  rt2DSliceDataObject * getLocalImage(int remoteId, int imageSize);
+
 public:
   Converter();
   ~Converter();
@@ -88,10 +89,12 @@ public:
   void printAllLocalCath();
   void printAllLocalImages();
 
+  rtCathDataObject * getLocalCath(int remoteId);
   bool setLocalCath(CATHDATA & remote, rtCathDataObject * local);
-  bool setLocalCathAll(SenderSimp & sender);
 
+  rt2DSliceDataObject * getLocalImage(int remoteId, int imageSize);
   bool setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local);
-  bool setLocalImageAll(SenderSimp & sender);
+  bool setLocalImageOnly(IMAGEDATA & remote, rt2DSliceDataObject * local);
+  bool setRemoteImageTransform(std::vector<IMAGEDATA> & image);
 };
 #endif

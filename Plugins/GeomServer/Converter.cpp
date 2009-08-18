@@ -1,7 +1,6 @@
 #include "Converter.h"
 
 #include <iostream>
-#include <vector>
 
 #include "rtBaseHandle.h"
 
@@ -267,34 +266,6 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
   return success;
 }
 
-//! Sets the value of all the local cathaters. Returns true of successful.
-bool Converter::setLocalCathAll(SenderSimp & sender) {
-#ifdef CONVERTER_DEBUG
-  cout << "Converter::setLocalCathAll()" << endl;
-#endif
-  //get all caths
-  vector<CATHDATA> & remoteCaths = sender.getCaths();
-  rtCathDataObject * localCath;
-
-  bool success = true;
-  //for all remote caths
-
-  //Solution for how the Geometry Client works to determine no Caths
-  if (remoteCaths.at(0).cathMode != NO_CATHETERS) {
-    int cathIndex = 0;
-    for (vector<CATHDATA>::iterator it = remoteCaths.begin(); it != remoteCaths.end(); it++) {
-      localCath = getLocalCath(cathIndex);
-      success = success && setLocalCath(*it, localCath);
-      cathIndex++;
-    }
-  }
-
-#ifdef CONVERTER_DEBUG
-  cout << "Converter::setLocalCathAll() return " << success << endl;
-#endif
-  return success;
-}
-
 //! Retruns a local image object with the matching remoteId, if one doesn't exist. One is a local image object is created.
 rt2DSliceDataObject * Converter::getLocalImage(int remoteId, int imageSize) {
   IdMap::iterator foundId = localImageMap->find(remoteId);
@@ -317,8 +288,6 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
   if (remote.FOV <= 0 || remote.imgSize <= 0 || remote.numChannels <= 0) return false;
 
   bool success = true;
-
-
 
   vtkImageData *img = vtkImageData::New();
 
@@ -371,7 +340,7 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
     if (ix1/3>0)  matrix->SetElement(ix1/3, ix1%3, -remote.rotMatrix[ix1]);
   }
 
-  matrix->SetElement(0, 3, -ptOut[0]+remote.transMatrix[0]);
+  matrix->SetElement(0, 3, -(ptOut[0]-remote.transMatrix[0]));
   matrix->SetElement(1, 3, ptOut[1]-remote.transMatrix[1]);
   matrix->SetElement(2, 3, ptOut[2]-remote.transMatrix[2]);
 
@@ -391,29 +360,113 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
   return success;
 }
 
-//! Sets the value of all the local cathaters. Returns true of successful.
-bool Converter::setLocalImageAll(SenderSimp & sender) {
-#ifdef CONVERTER_DEBUG
-  cout << "Converter::setLocalImageAll()" << endl;
-#endif
-  vector<IMAGEDATA> & remoteImages = sender.getImages();
 
+//! Sets the value of the local image object, BUT NOT THE TRANSFORM. Returns true of successful.
+bool Converter::setLocalImageOnly(IMAGEDATA & remote, rt2DSliceDataObject * local) {
+  if (remote.FOV <= 0 || remote.imgSize <= 0 || remote.numChannels <= 0) return false;
+
+  bool success = true;
+
+  vtkImageData *img = vtkImageData::New();
+
+  double spacing = ((double)remote.FOV*10)/((double)remote.imgSize);
+
+  img->Initialize();
+  img->SetScalarTypeToUnsignedChar();
+  img->SetSpacing(spacing, spacing, 1.0);
+  img->SetOrigin(0.0,0.0,0.0);
+  img->SetDimensions(remote.imgSize,remote.imgSize,1);
+  img->SetNumberOfScalarComponents(remote.numChannels);
+  img->SetWholeExtent(0, remote.FOV*10, 0, remote.FOV*10,0,1);
+  img->AllocateScalars();
+
+  vtkImageChangeInformation *imgChangeInfo = vtkImageChangeInformation::New();
+
+  // Copy the data
+  int pos = 0;
+  unsigned char* temp;
+  for (int ix1 = 0; ix1 < remote.imgSize; ix1++) {
+    for (int ix2 = 0; ix2 < remote.imgSize; ix2++) {
+      temp = static_cast<unsigned char*>(img->GetScalarPointer( remote.imgSize-ix2-1,remote.imgSize-ix1-1, 0));
+      for (int ix3 = 0; ix3 < remote.numChannels; ix3++) {
+        *(temp+ix3) = remote.img[pos];
+        pos++;
+      }
+    }
+  }
+  img->Update();
+
+  imgChangeInfo->SetInput(img);
+  imgChangeInfo->Update();
+
+  local->lock();
+  // Translate the FOV into milimeters
+  success = success && local->copyImageData2D(imgChangeInfo->GetOutput());
+  local->unlock();
+
+  //if successful, call local->Modified
+  if (success) local->Modified();
+
+  img->Delete();
+  imgChangeInfo->Delete();
+
+  return success;
+}
+
+
+bool Converter::setRemoteImageTransform(std::vector<IMAGEDATA> & remoteImages) {
   rt2DSliceDataObject * localImage;
   bool success = true;
+
+  if (remoteImages.size() == 0) return false;
 
   int imageIndex = 0;
   for (vector<IMAGEDATA>::iterator it = remoteImages.begin(); it != remoteImages.end(); it++) {
     localImage = getLocalImage(imageIndex, (*it).imgSize * (*it).imgSize * (*it).numChannels);
-
+    imageIndex++;
     //if image is invalid, continue
     if (localImage == NULL) continue;
 
-    success = success && setLocalImage(*it, localImage);
-    imageIndex++;
+    vtkMatrix4x4 *matrix = vtkMatrix4x4::New();
+
+    matrix->DeepCopy(localImage->getTransform()->GetMatrix());
+
+    // First isolate the translation
+    double translate[3];
+
+    // Negate the X value immediately
+    translate[0] = -matrix->GetElement(0, 3);
+    translate[1] = matrix->GetElement(1, 3);
+    translate[2] = matrix->GetElement(2, 3);
+
+    matrix->SetElement(0, 3, 0.0f);
+    matrix->SetElement(1, 3, 0.0f);
+    matrix->SetElement(2, 3, 0.0f);
+
+    // Negate the bottom rows.
+    for (int ix1=3; ix1<9; ix1++) {
+      matrix->SetElement(ix1/3, ix1%3, -matrix->GetElement(ix1/3, ix1%3));
+    }
+
+    // Copy the transformation matrix.
+    for (int ix1=0; ix1<9; ix1++) {
+      (*it).rotMatrix[ix1] = matrix->GetElement(ix1/3, ix1%3);
+    }
+
+    double ptIn[4], ptOut[4];
+    ptIn[0] = (((double)(*it).FOV*10)/2.0f);
+    ptIn[1] = (((double)(*it).FOV*10)/2.0f);
+    ptIn[2] = 0.0f;
+    ptIn[3] = 1.0f;
+
+    matrix->MultiplyPoint(ptIn, ptOut);
+
+    (*it).transMatrix[0] = -(translate[0]-ptOut[0]);
+    (*it).transMatrix[1] = -(translate[1]-ptOut[1]);
+    (*it).transMatrix[2] = -(translate[2]-ptOut[2]);
+    //matrix->Print(std::cout);
+    matrix->Delete();
   }
-#ifdef CONVERTER_DEBUG
-  cout << "Converter::setLocalImageAll() return " << success << endl;
-#endif
+
   return success;
 }
-
