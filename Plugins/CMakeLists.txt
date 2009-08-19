@@ -23,3 +23,8 @@ set(VURTIGO_PLUGIN_SCREEN_CAPTURE ON CACHE BOOL "Compile the Screen Capture Plug
 if (VURTIGO_PLUGIN_SCREEN_CAPTURE)
 add_subdirectory(ScreenCapture)
 endif (VURTIGO_PLUGIN_SCREEN_CAPTURE)
+
+set(VURTIGO_PLUGIN_CATH_TRACKING ON CACHE BOOL "Compile the Catheter Tracking Plugin")
+if (VURTIGO_PLUGIN_CATH_TRACKING)
+add_subdirectory(CathTracking)
+endif (VURTIGO_PLUGIN_CATH_TRACKING)
