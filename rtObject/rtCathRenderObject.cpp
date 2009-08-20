@@ -75,20 +75,23 @@ void rtCathRenderObject::update() {
     }
   }
 
-  if (numLoc == 1) {
-    // Just one location. Render just a ball and no spline or anything else.
-    int loc;
-    double coords[3];
-    double SNR;
+  double SNR;
+  int loc;
+  double coords[3];
 
+  // Get a value for the SNR
+  if ( numLoc>0 ) {
     loc = dObj->getLocationList().value(0);
     dObj->getPositionAtLocation(loc, coords);
     dObj->getSNRAtLocation(loc, SNR);
+  }
 
+  if (numLoc == 1) {
+    // Just one location. Render just a ball and no spline or anything else.
     // The the first and only sphere.
     temp = m_sphereList.value(0);
     temp->SetCenter(coords);
-    temp->SetRadius(((double)dObj->getPointSize())/SNR);
+    temp->SetRadius(25*((double)dObj->getPointSize())/SNR);
     temp->SetThetaResolution(50);
     temp->SetPhiResolution(50);
 
@@ -97,16 +100,7 @@ void rtCathRenderObject::update() {
     m_coneActor->VisibilityOff();
   } else if (numLoc > 1) {
     // Multiple locations. Render everyting.
-    int loc;
-    double coords[3];
     double direc[3];
-    double SNR;
-
-    // Do the tip.
-    loc = dObj->getLocationList().value(0);
-    dObj->getPositionAtLocation(loc, coords);
-    dObj->getSNRAtLocation(loc, SNR);
-
     m_coneSource->SetCenter(coords);
     m_coneSource->SetRadius(25.0f/SNR);
     m_coneSource->SetHeight(30.0f/SNR);
@@ -128,7 +122,7 @@ void rtCathRenderObject::update() {
 
       temp = m_sphereList.value(ix1);
       temp->SetCenter(coords);
-      temp->SetRadius(((double)dObj->getPointSize())/SNR);
+      temp->SetRadius(25*((double)dObj->getPointSize())/SNR);
       temp->SetThetaResolution(50);
       temp->SetPhiResolution(50);
 

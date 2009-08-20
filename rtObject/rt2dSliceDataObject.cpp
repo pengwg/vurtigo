@@ -113,6 +113,50 @@ bool rt2DSliceDataObject::setVtkMatrix(vtkMatrix4x4* m) {
   return true;
 }
 
+bool rt2DSliceDataObject::setPlaneCenter(double center[3]) {
+  int dims[3];
+  double space[3];
+  m_imgData->GetDimensions(dims);
+  m_imgData->GetSpacing(space);
+
+  vtkMatrix4x4* mat = vtkMatrix4x4::New();
+
+  double xOff, yOff;
+  xOff = dims[0]*space[0]/2.0f;
+  yOff = dims[1]*space[1]/2.0f;
+
+  mat->DeepCopy(m_trans->GetMatrix());
+  mat->SetElement(0, 3, -xOff*mat->GetElement(0, 0) - yOff*mat->GetElement(0, 1) + center[0]);
+  mat->SetElement(1, 3, -xOff*mat->GetElement(1, 0) - yOff*mat->GetElement(1, 1) + center[1]);
+  mat->SetElement(2, 3, -xOff*mat->GetElement(2, 0) - yOff*mat->GetElement(2, 1) + center[2]);
+  m_trans->Identity();
+  m_trans->SetMatrix(mat);
+
+  if(mat) mat->Delete();
+  return true;
+}
+
+void rt2DSliceDataObject::pushPlaneBy(double amt) {
+  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+
+  m_trans->GetMatrix(mat);
+
+  double zDirec[3];
+  double sumSq = 0.0;
+  for (int ix1=0; ix1<3; ix1++) {
+    zDirec[ix1] = mat->GetElement(ix1, 2);
+    sumSq += zDirec[ix1]*zDirec[ix1];
+  }
+  sumSq = sqrt(sumSq);
+
+  for (int ix1=0; ix1<3; ix1++) {
+    mat->SetElement( ix1, 3, mat->GetElement(ix1, 3) + (amt*zDirec[ix1]/sumSq) );
+  }
+  m_trans->SetMatrix(mat);
+
+  mat->Delete();
+  Modified();
+}
 
 void rt2DSliceDataObject::spinRight() {
   int dims[3];
@@ -188,47 +232,11 @@ void rt2DSliceDataObject::rotateRight() {
 }
 
 void rt2DSliceDataObject::pushPlane() {
-  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
-
-  m_trans->GetMatrix(mat);
-
-  double zDirec[3];
-  double sumSq = 0.0;
-  for (int ix1=0; ix1<3; ix1++) {
-    zDirec[ix1] = mat->GetElement(ix1, 2);
-    sumSq += zDirec[ix1]*zDirec[ix1];
-  }
-  sumSq = sqrt(sumSq);
-
-  for (int ix1=0; ix1<3; ix1++) {
-    mat->SetElement(ix1, 3, mat->GetElement(ix1, 3)+zDirec[ix1]/sumSq);
-  }
-  m_trans->SetMatrix(mat);
-
-  mat->Delete();
-  Modified();
+  pushPlaneBy(1.0);
 }
 
 void rt2DSliceDataObject::pullPlane() {
-  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
-
-  m_trans->GetMatrix(mat);
-
-  double zDirec[3];
-  double sumSq = 0.0;
-  for (int ix1=0; ix1<3; ix1++) {
-    zDirec[ix1] = mat->GetElement(ix1, 2);
-    sumSq += zDirec[ix1]*zDirec[ix1];
-  }
-  sumSq = sqrt(sumSq);
-
-  for (int ix1=0; ix1<3; ix1++) {
-    mat->SetElement(ix1, 3, mat->GetElement(ix1, 3)-zDirec[ix1]/sumSq);
-  }
-  m_trans->SetMatrix(mat);
-
-  mat->Delete();
-  Modified();
+  pushPlaneBy(-1.0);
 }
 
 void rt2DSliceDataObject::xTranslate(double v) {

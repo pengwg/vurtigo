@@ -35,6 +35,9 @@ public:
 
   bool setTransform(float rotMatrix[9], float transMatrix[3]);
   bool setVtkMatrix(vtkMatrix4x4* m);
+  bool setPlaneCenter(double center[3]);
+
+  void pushPlaneBy(double amt);
 
  public slots:
   void spinRight();

@@ -2,12 +2,14 @@
 set(CATH_TRACK_SRC_FILES
   CathTrackingPlugin.cpp
   CathTrackingUI.cpp
+  TrackData.cpp
 )
 
 # MOC files are the ones the use Q_OBJECT
 set (CATH_TRACK_MOC_FILES
   CathTrackingPlugin.h
   CathTrackingUI.h
+  TrackData.h
 )
 set (UI_FILES_CATH_TRACK
   CathTracking.ui

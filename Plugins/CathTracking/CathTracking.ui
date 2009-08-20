@@ -24,7 +24,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="cathComboBox"/>
+      <widget class="QComboBox" name="cathComboBox">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -38,12 +45,19 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="planeComboBox"/>
+      <widget class="QComboBox" name="planeComboBox">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="trackGroupBox">
      <property name="title">
       <string>Track Catheter with Plane</string>
      </property>

@@ -6,6 +6,7 @@
 #include <QMap>
 #include <ui_CathTracking.h>
 
+#include "TrackData.h"
 #include "rt2dSliceDataObject.h"
 #include "rtCathDataObject.h"
 
@@ -27,9 +28,15 @@ public slots:
   void trackLocationChanged(int);
   void trackOffsetChanged(double);
 
+  void trackChanged(bool);
+
 protected:
   void connectSignals();
   void populateLists();
+  void updateCheckableStatus();
+  void trackingPairChanged();
+
+  TrackData* getPair(rt2DSliceDataObject*, rtCathDataObject*);
 
   //! Map the combo box indices to the catheter objects.
   QMap<int, rt2DSliceDataObject*> m_planeObjectMap;
@@ -37,6 +44,7 @@ protected:
   //! Map the combo box indices to the plane objects.
   QMap<int, rtCathDataObject*> m_cathObjectMap;
 
+  QList<TrackData*> m_trackList;
 
 };
 

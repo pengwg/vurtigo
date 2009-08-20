@@ -250,7 +250,7 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
 
     //set the local values
     success = success && local->setCoilAngles(localCoilId, currCoil->angles[0], currCoil->angles[1]);
-    success = success && local->setCoilCoords(localCoilId, currCoil->coords[0], currCoil->coords[1], -currCoil->coords[2]);
+    success = success && local->setCoilCoords(localCoilId, currCoil->coords[0], -currCoil->coords[1], -currCoil->coords[2]);
     success = success && local->setCoilSNR(localCoilId, currCoil->SNR);
     coilIndex++;
   }
