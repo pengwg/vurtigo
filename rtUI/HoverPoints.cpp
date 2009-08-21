@@ -38,7 +38,7 @@ QPointF HoverPoints::bound_point(const QPointF &spacePoint, const QRectF &bounds
     return p;
 }
 
-//! Given space points, reset, then store the points within this instance
+//! Given space points, reset, then store the points within this instance.
 void HoverPoints::setSpacePoints(const QPolygonF & points) {
     this->points.clear();
     for (int a = 0; a < points.size(); a++) {
@@ -390,7 +390,7 @@ QPointF HoverPoints::getDataPoint(QPointF const & spacePoint) const {
 }
 
 //! Changes the data space, scaling the visual space and removing points outside of the data space
-void HoverPoints::changeDataSpace(const QRectF & dataSpace) {
+void HoverPoints::setDataSpace(const QRectF & dataSpace) {
     settings.dataSpace = dataSpace;
 
     //Remove or move points
@@ -411,7 +411,7 @@ void HoverPoints::changeDataSpace(const QRectF & dataSpace) {
 
 //! Loads the given profile
 void HoverPoints::loadProfile(const Profile & profile) {
-    changeDataSpace(profile.dataSpace);
+    setDataSpace(profile.dataSpace);
     setDataPoints(profile.points);
 
     //Load the locks

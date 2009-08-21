@@ -36,7 +36,7 @@ void VtkRangeDialog::applyChanges() {
     dataSpace.setTop(currDataSpace.top());
     dataSpace.setBottom(currDataSpace.bottom());
 
-    hoverPoints->changeDataSpace(dataSpace);
+    hoverPoints->setDataSpace(dataSpace);
 }
 
 VtkRangeWidget::VtkRangeWidget(QWidget * parent, HoverPoints * hoverPoints) : QWidget(parent) {

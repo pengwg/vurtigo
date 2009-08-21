@@ -90,7 +90,7 @@ public:
     const QRectF & getDataSpace() { return settings.dataSpace; }
 
 public slots:
-    void changeDataSpace(const QRectF & dataSpace);
+    void setDataSpace(const QRectF & dataSpace);
     void setSpacePoints(const QPolygonF & points);
     void setDataPoints(const QPolygonF & points);
     void sortPoints();

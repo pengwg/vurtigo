@@ -8,6 +8,7 @@
 #define SPACE_HEIGHT 1
 #define DEFAULT_SPACE_WIDTH 300
 #define CLAMPING_LABEL_TEXT "Clamping: "
+#define DATASPACE_MARGIN 50
 
 //! Widget to clamp the vtkPiecewiseFunction
 class ClampingWidget : public QWidget , protected Ui::ClampingWidget {
@@ -29,7 +30,7 @@ public:
     ~VtkPiecewiseGraph();
 
     vtkPiecewiseFunction * getPiecewiseFunction();
-    bool setPiecewiseFunction(vtkPiecewiseFunction * func);
+    bool setPiecewiseFunction(vtkPiecewiseFunction * const func);
 
 public slots:
     void clamp();

@@ -77,7 +77,7 @@ void VtkPiecewiseGraph::init() {
 
 //! Creates the points to start with
 void VtkPiecewiseGraph::createStartUpPoints(QPolygonF & startPoints, QVector<HoverPoints::LockType> & locks) {
-    QRectF bounds = graphWidget->getSettings().hoverPointsSettings.dataSpace;
+    const QRectF & bounds = graphWidget->getSettings().hoverPointsSettings.dataSpace;
     startPoints << QPointF(bounds.left(),  (double)bounds.top()/2)
             << QPointF(bounds.right(), (double)bounds.top()/2);
     locks << HoverPoints::LockToLeft << HoverPoints::LockToRight;
@@ -108,23 +108,26 @@ VtkPiecewiseGraph::VtkPiecewiseGraph(QWidget *parent) : ControlGraphWidget(paren
 VtkPiecewiseGraph::~VtkPiecewiseGraph() {
 }
 
-//! The function to immitate clamping
+//! The function to immitate clamping. If matchVtkPiecewiseFunction is true, will match the profile to piecewiseFunction
 void VtkPiecewiseGraph::clamp() {
     HoverPoints & hoverPoints = *graphWidget->getHoverPoints();
 
-    if (piecewiseFunction->GetClamping()) {
-        QRectF bounds = graphWidget->getSettings().hoverPointsSettings.dataSpace;
-        hoverPoints.addDataPoint(0, QPointF(bounds.left(),  (double)bounds.top()/2));
-        hoverPoints.addDataPoint(graphWidget->getPoints().size() - 1, QPointF(bounds.right(), (double)bounds.top()/2));
-
-        hoverPoints.setPointLock(0, HoverPoints::LockToLeft);
-        hoverPoints.setPointLock(graphWidget->getPoints().size() - 1, HoverPoints::LockToRight);
-    }
-    else {
-        if (hoverPoints.getPoints().size() > 2) {
+    if (!piecewiseFunction->GetClamping()) {
+        if (hoverPoints.getPoints().size() >= 2) {
             hoverPoints.removePoint(0);
             hoverPoints.removePoint(graphWidget->getPoints().size() - 1);
         }
+        else {
+           cerr << "VtkPiecewiseGraph.cpp: error, the graph is not clamped, but has < 2 points." << endl;
+        }
+    }
+    else {
+        const QRectF & bounds = graphWidget->getSettings().hoverPointsSettings.dataSpace;
+        hoverPoints.addDataPoint(0, QPointF(bounds.left(),  (double)bounds.top()/2));
+        hoverPoints.addDataPoint(graphWidget->getPoints().size(), QPointF(bounds.right(), (double)bounds.top()/2));
+
+        hoverPoints.setPointLock(0, HoverPoints::LockToLeft);
+        hoverPoints.setPointLock(graphWidget->getPoints().size() - 1, HoverPoints::LockToRight);
     }
     updateVtkPiecewisePoints();
 }
@@ -160,23 +163,49 @@ vtkPiecewiseFunction * VtkPiecewiseGraph::getPiecewiseFunction() {
     return piecewiseFunction;
 }
 
-//! Set a new piecewise function and update the GUI.
-/*!
-  @todo Update the GUI here.
-  */
-bool VtkPiecewiseGraph::setPiecewiseFunction(vtkPiecewiseFunction * func) {
-  if (!func) return false;
+inline static bool x_less_than(const QPointF &p1, const QPointF &p2) {
+    return p1.x() < p2.x();
+}
 
-  piecewiseFunction = func;
-  HoverPoints::Profile newProfile;
+//! Set a new piecewise function and update the GUI. The data space of HoverPoints will change.
+bool VtkPiecewiseGraph::setPiecewiseFunction(vtkPiecewiseFunction * const func) {
+    if (!func) return false;
 
+    piecewiseFunction->DeepCopy(func);
+  
+    QPolygonF points;
+    double * data = piecewiseFunction->GetDataPointer();
+    for (int a = 0; a < piecewiseFunction->GetSize(); a++) {
+        points << QPointF(data[2* a], data[2 * a + 1]);
+    }
+    qSort(points.begin(), points.end(), x_less_than);
+
+    const QRectF & dataSpace = graphWidget->getSettings().hoverPointsSettings.dataSpace;
+    QRectF dataSpaceNew;
+    dataSpaceNew.setBottom((int)dataSpace.bottom());
+    dataSpaceNew.setTop((int)dataSpace.top());
+    dataSpaceNew.setLeft(((int)points.at(0).x() - ((int)points.at(0).x()) % DATASPACE_MARGIN));
+    dataSpaceNew.setRight(((int)points.at(points.size() - 1).x() - ((int) points.at(points.size() - 1).x()) % DATASPACE_MARGIN + DATASPACE_MARGIN));
+
+    HoverPoints & hoverPoints = *graphWidget->getHoverPoints();
+    hoverPoints.setDataSpace(dataSpaceNew);
+    hoverPoints.setDataPoints(points);
+
+    if (!piecewiseFunction->GetClamping()) {
+        hoverPoints.addDataPoint(0, QPointF(dataSpaceNew.left(),  (double)dataSpaceNew.top()/2));
+        hoverPoints.addDataPoint(graphWidget->getPoints().size(), QPointF(dataSpaceNew.right(), (double)dataSpaceNew.top()/2));
+
+        hoverPoints.setPointLock(0, HoverPoints::LockToLeft);
+        hoverPoints.setPointLock(graphWidget->getPoints().size() - 1, HoverPoints::LockToRight);
+    }
+    updateVtkPiecewisePoints();
 }
 
 //! Checks whethter the graph is clamped whenever the points change
 void VtkPiecewiseGraph::checkClamping() {
     const QVector<HoverPoints::LockType> & locks = graphWidget->getLocks();
 
-    if (locks.at(0) == HoverPoints::LockToLeft && locks.at(locks.size() - 1) == HoverPoints::LockToRight) {
+    if (locks.size() >= 2 && locks.at(0) == HoverPoints::LockToLeft && locks.at(locks.size() - 1) == HoverPoints::LockToRight) {
         if (piecewiseFunction->GetClamping()) {
             clampingWidget->setMainLabelText(QString(CLAMPING_LABEL_TEXT) + QString("Off"));
             piecewiseFunction->ClampingOff();
