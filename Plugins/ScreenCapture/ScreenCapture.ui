@@ -322,9 +322,9 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="aviMovie">
+     <widget class="QWidget" name="oggMovie">
       <attribute name="title">
-       <string>AVI Movie</string>
+       <string>Ogg Movie</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>

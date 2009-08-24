@@ -6,7 +6,7 @@
 #include <QTimer>
 
 #include <vtkSmartPointer.h>
-#include <vtkFFMPEGWriter.h>
+#include <vtkImageData.h>
 
 class ScreenCaptureThread;
 
@@ -38,7 +38,6 @@ signals:
 
 protected:
   quint16 m_currImg;
-  vtkSmartPointer<vtkFFMPEGWriter> m_aviWriter;
   QString m_fileName;
   ScreenCaptureThread* m_capThread;
 
