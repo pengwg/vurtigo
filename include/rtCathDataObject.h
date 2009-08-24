@@ -68,6 +68,7 @@ public:
   void setEstimationType(EstimationType et) { m_eType = et; }
 
   int getPointSize() { return m_pointSize; }
+  bool useSNRSize() { return m_useSNRSize; }
 
  public slots:
   void splinePropertyDialog();
@@ -75,6 +76,8 @@ public:
   void tipPropertyDialog();
 
   void pointSizeChanged(int size);
+
+  void useSNRSizeChanged(int);
 
  protected:
   // Functions
@@ -105,6 +108,8 @@ public:
 
   //! Size multiplier for each of the points.
   int m_pointSize;
+
+  bool m_useSNRSize;
 
   //! The objects that sets the widgets for the cath options.
   Ui::cathOptions m_cathGuiSetup;

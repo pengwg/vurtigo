@@ -8,6 +8,7 @@
 #include "vtkImageReslice.h"
 #include "vtkImageShiftScale.h"
 #include "vtkMatrix4x4.h"
+#include "vtkImageLuminance.h"
 
 #include "ui_slice2DOptions.h"
 
@@ -39,6 +40,9 @@ public:
 
   void pushPlaneBy(double amt);
 
+  double getWindow() { return m_window; }
+  double getLevel() { return m_level; }
+
  public slots:
   void spinRight();
   void spinLeft();
@@ -52,6 +56,9 @@ public:
   void yTranslate(double);
   void zTranslate(double);
 
+  void windowSliderMoved(int);
+  void levelSliderMoved(int);
+
  protected:
   // Functions
   void setupGUI();
@@ -60,12 +67,17 @@ public:
   vtkImageData* m_imgData;
   vtkImageShiftScale * m_imgUCharCast;
   vtkTransform* m_trans;
+  vtkImageLuminance* m_lumin;
 
   int m_FOV;
   int m_imgSize;
   int m_numChan;
 
   bool m_imgDataValid;
+
+  double m_window;
+  double m_level;
+  double m_range[2];
 
   Ui::slice2DOptions m_optionsWidget;
 };

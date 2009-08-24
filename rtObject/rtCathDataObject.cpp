@@ -20,6 +20,7 @@ rtCathDataObject::rtCathDataObject() {
   // More than enough coils
   m_max_coils = 128;
 
+
   // Set the default point size.
   m_pointSize = 10;
   m_cathGuiSetup.pointSizeSlider->setValue(m_pointSize);
@@ -255,6 +256,10 @@ void rtCathDataObject::setupGUI() {
   QWidget* wid = getBaseWidget();
 
   m_cathGuiSetup.setupUi(wid);
+
+  m_useSNRSize = false;
+  m_cathGuiSetup.snrSizeCheckBox->setChecked(m_useSNRSize);
+
   connect(m_cathGuiSetup.splinePropButton, SIGNAL(pressed()), this, SLOT(splinePropertyDialog()));
   connect(m_cathGuiSetup.pointPropButton, SIGNAL(pressed()), this, SLOT(pointPropertyDialog()));
   connect(m_cathGuiSetup.tipPropButton, SIGNAL(pressed()), this, SLOT(tipPropertyDialog()));
@@ -264,6 +269,8 @@ void rtCathDataObject::setupGUI() {
   connect(m_splinePropertyDlg, SIGNAL(propertyChanged()), this, SLOT(Modified()));
   connect(m_pointPropertyDlg, SIGNAL(propertyChanged()), this, SLOT(Modified()));
   connect(m_tipPropertyDlg, SIGNAL(propertyChanged()), this, SLOT(Modified()));
+
+  connect(m_cathGuiSetup.snrSizeCheckBox, SIGNAL(stateChanged(int)),  this, SLOT(useSNRSizeChanged(int)));
 }
 
 //! Clean the GUI widgets.
@@ -300,4 +307,13 @@ void rtCathDataObject::pointSizeChanged(int size) {
   m_cathGuiSetup.pointSizeLabel->setText(QString::number(size) + " X.");
   m_pointSize = size;
   Modified();
+}
+
+//! The SNR check box was changed
+void rtCathDataObject::useSNRSizeChanged(int status) {
+  if (status == Qt::Unchecked) {
+    m_useSNRSize = false;
+  } else {
+    m_useSNRSize = true;
+  }
 }

@@ -42,6 +42,9 @@ void rt2DSliceRenderObject::update() {
   dObj->getUCharData()->GetScalarRange(scaleRange);
   m_lookupTable->SetRange(scaleRange[0], scaleRange[1]);
 
+  m_lookupTable->SetWindow(dObj->getWindow());
+  m_lookupTable->SetLevel(dObj->getLevel());
+
   double orig[3], pt1[3], pt2[3], opp[3];
   double bounds[6];
   double xsize, ysize, zsize;
@@ -134,10 +137,16 @@ void rt2DSliceRenderObject::setupPipeline() {
   m_textureActor = vtkActor::New();
   m_texture = vtkTexture::New();
   m_imgMapToColors = vtkImageMapToColors::New();
-  m_lookupTable = vtkLookupTable::New();
+  m_lookupTable = vtkWindowLevelLookupTable::New();
 
   // Balck and white.
   m_imgMapToColors->SetOutputFormatToLuminance();
+
+
+  m_lookupTable->SetHueRange(0.0, 0.0);
+  m_lookupTable->SetSaturationRange(0.0, 0.0);
+  m_lookupTable->SetValueRange(0.0, 1.0);
+
 
   m_texturePlane->SetOrigin(0,0,0);
   m_texturePlane->SetPoint1(1,0,0);

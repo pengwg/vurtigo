@@ -91,7 +91,11 @@ void rtCathRenderObject::update() {
     // The the first and only sphere.
     temp = m_sphereList.value(0);
     temp->SetCenter(coords);
-    temp->SetRadius(25*((double)dObj->getPointSize())/SNR);
+     if (dObj->useSNRSize()) {
+      temp->SetRadius(25.0f*((double)dObj->getPointSize())/SNR);
+    } else {
+      temp->SetRadius( ((double)dObj->getPointSize())/3.0f );
+    }
     temp->SetThetaResolution(50);
     temp->SetPhiResolution(50);
 
@@ -102,9 +106,9 @@ void rtCathRenderObject::update() {
     // Multiple locations. Render everyting.
     double direc[3];
     m_coneSource->SetCenter(coords);
-    m_coneSource->SetRadius(25.0f/SNR);
-    m_coneSource->SetHeight(30.0f/SNR);
-    m_coneSource->SetResolution(80);
+    m_coneSource->SetRadius(1.0f);
+    m_coneSource->SetHeight(1.0f);
+    m_coneSource->SetResolution(50);
 
     loc = dObj->getLocationList().value(1);
     dObj->getPositionAtLocation(loc, direc);
@@ -122,7 +126,11 @@ void rtCathRenderObject::update() {
 
       temp = m_sphereList.value(ix1);
       temp->SetCenter(coords);
-      temp->SetRadius(25*((double)dObj->getPointSize())/SNR);
+      if (dObj->useSNRSize()) {
+        temp->SetRadius(25.0f*((double)dObj->getPointSize())/SNR);
+      } else {
+        temp->SetRadius( ((double)dObj->getPointSize())/3.0f );
+      }
       temp->SetThetaResolution(50);
       temp->SetPhiResolution(50);
 
@@ -144,7 +152,7 @@ void rtCathRenderObject::update() {
                                m_spline[2]->Evaluate( ((double)numLoc-1.0f)/((double)m_numSplinePoints)*(double)ix1 ));
     }
 
-    m_splineFilter->SetRadius(5.0f/SNR);
+    m_splineFilter->SetRadius(0.2f);
 
     m_sphereActor->VisibilityOn();
     m_splineActor->VisibilityOn();

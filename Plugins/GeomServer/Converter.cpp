@@ -298,7 +298,11 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
   img->SetSpacing(spacing, spacing, 1.0);
   img->SetOrigin(0.0,0.0,0.0);
   img->SetDimensions(remote.imgSize,remote.imgSize,1);
-  img->SetNumberOfScalarComponents(remote.numChannels);
+  if (remote.numChannels >= 3) {
+    img->SetNumberOfScalarComponents(3);
+  } else {
+    img->SetNumberOfScalarComponents(1);
+  }
   img->SetWholeExtent(0, remote.FOV*10, 0, remote.FOV*10,0,1);
   img->AllocateScalars();
 
@@ -311,7 +315,7 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
     for (int ix2 = 0; ix2 < remote.imgSize; ix2++) {  
       temp = static_cast<unsigned char*>(img->GetScalarPointer( remote.imgSize-ix2-1,remote.imgSize-ix1-1, 0));
       for (int ix3 = 0; ix3 < remote.numChannels; ix3++) {
-        *(temp+ix3) = remote.img[pos];
+        if ( (remote.numChannels >= 3 && ix3<3) || (ix3==0) ) *(temp+ix3) = remote.img[pos];
         pos++;
       }
     }
@@ -376,7 +380,12 @@ bool Converter::setLocalImageOnly(IMAGEDATA & remote, rt2DSliceDataObject * loca
   img->SetSpacing(spacing, spacing, 1.0);
   img->SetOrigin(0.0,0.0,0.0);
   img->SetDimensions(remote.imgSize,remote.imgSize,1);
-  img->SetNumberOfScalarComponents(remote.numChannels);
+  // Cannot use more than 3.
+  if (remote.numChannels >= 3) {
+    img->SetNumberOfScalarComponents(3);
+  } else {
+    img->SetNumberOfScalarComponents(1);
+  }
   img->SetWholeExtent(0, remote.FOV*10, 0, remote.FOV*10,0,1);
   img->AllocateScalars();
 
@@ -389,7 +398,7 @@ bool Converter::setLocalImageOnly(IMAGEDATA & remote, rt2DSliceDataObject * loca
     for (int ix2 = 0; ix2 < remote.imgSize; ix2++) {
       temp = static_cast<unsigned char*>(img->GetScalarPointer( remote.imgSize-ix2-1,remote.imgSize-ix1-1, 0));
       for (int ix3 = 0; ix3 < remote.numChannels; ix3++) {
-        *(temp+ix3) = remote.img[pos];
+        if ( (remote.numChannels >= 3 && ix3<3) || (ix3==0) ) *(temp+ix3) = remote.img[pos];
         pos++;
       }
     }
@@ -429,7 +438,9 @@ bool Converter::setRemoteImageTransform(std::vector<IMAGEDATA> & remoteImages) {
 
     vtkMatrix4x4 *matrix = vtkMatrix4x4::New();
 
+    localImage->lock();
     matrix->DeepCopy(localImage->getTransform()->GetMatrix());
+    localImage->unlock();
 
     // First isolate the translation
     double translate[3];

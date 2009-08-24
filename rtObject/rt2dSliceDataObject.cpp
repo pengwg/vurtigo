@@ -14,9 +14,13 @@ rt2DSliceDataObject::rt2DSliceDataObject() {
   m_imgData = vtkImageData::New();
   m_trans = vtkTransform::New();
   m_imgUCharCast = vtkImageShiftScale::New();
+  m_lumin = vtkImageLuminance::New();
 
-  m_imgUCharCast->SetInput(m_imgData);
-  m_imgUCharCast->SetOutputScalarTypeToUnsignedChar();
+  m_range[0] = 0;
+  m_range[1] = 100;
+  m_window = 100;
+  m_level = 50;
+
 }
 
 //! Destructor
@@ -26,6 +30,7 @@ rt2DSliceDataObject::~rt2DSliceDataObject() {
   if (m_imgData) m_imgData->Delete();
   if (m_trans) m_trans->Delete();
   if (m_imgUCharCast) m_imgUCharCast->Delete();
+  if (m_lumin) m_lumin->Delete();
 }
 
 
@@ -61,6 +66,9 @@ void rt2DSliceDataObject::setupGUI() {
  connect(m_optionsWidget.xDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(xTranslate(double)));
  connect(m_optionsWidget.yDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(yTranslate(double)));
  connect(m_optionsWidget.zDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(zTranslate(double)));
+
+ connect(m_optionsWidget.windowSlider, SIGNAL(valueChanged(int)), this, SLOT(windowSliderMoved(int)));
+ connect(m_optionsWidget.levelSlider, SIGNAL(valueChanged(int)), this, SLOT(levelSliderMoved(int)));
 }
 
 //! Clean the GUI widgets.
@@ -76,10 +84,47 @@ bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
 
   double rangeI[2];
 
+  img->GetScalarRange(rangeI);
   m_imgData->DeepCopy(img);
-  m_imgData->GetScalarRange(rangeI);
+  m_imgUCharCast->SetOutputScalarTypeToUnsignedChar();
 
+  if( m_imgData->GetNumberOfScalarComponents() == 3) {
+    m_lumin->SetInput(m_imgData);
+    m_lumin->GetOutput()->GetScalarRange(rangeI);
+    m_imgUCharCast->SetInput(m_lumin->GetOutput());
+  }
+  else {
+    m_imgData->GetScalarRange(rangeI);
+    m_imgUCharCast->SetInput(m_imgData);
+  }  
   m_imgUCharCast->SetShift(-rangeI[0]);
+
+    // Check if the range needs to be reset.
+  if (rangeI[0] != m_range[0] || rangeI[1] != m_range[1] || !m_imgDataValid) {
+
+    m_range[0] = 0;
+    m_range[1] = rangeI[1]-rangeI[0];
+
+    m_optionsWidget.windowSlider->setMinimum(m_range[0]);
+    m_optionsWidget.windowSlider->setMaximum(m_range[1]);
+
+    m_optionsWidget.levelSlider->setMinimum(m_range[0]);
+    m_optionsWidget.levelSlider->setMaximum(m_range[1]);
+
+    m_optionsWidget.windowMinLabel->setText(QString::number(m_range[0]));
+    m_optionsWidget.windowMaxLabel->setText(QString::number(m_range[1]));
+    m_optionsWidget.levelMinLabel->setText(QString::number(m_range[0]));
+    m_optionsWidget.levelMaxLabel->setText(QString::number(m_range[1]));
+
+    if (m_window > m_range[1]) {
+      m_window = m_range[1];
+      m_optionsWidget.windowSlider->setValue(m_window);
+    }
+    if (m_level < m_range[0] || m_level > m_range[1]) {
+      m_level = (m_range[0] + m_range[1])/2.0f;
+      m_optionsWidget.levelSlider->setValue(m_level);
+    }
+  }
 
   m_imgDataValid = true;
   return true;
@@ -269,5 +314,17 @@ void rt2DSliceDataObject::zTranslate(double v) {
   m_trans->SetMatrix(mat);
 
   mat->Delete();
+  Modified();
+}
+
+
+void rt2DSliceDataObject::windowSliderMoved(int val) {
+  m_window = val;
+  Modified();
+}
+
+
+void rt2DSliceDataObject::levelSliderMoved(int val) {
+  m_level = val;
   Modified();
 }
