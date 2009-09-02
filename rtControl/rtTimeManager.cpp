@@ -7,6 +7,7 @@
 #include "rtObjectManager.h"
 
 #include <iostream>
+#include <cmath>
 
 #include <QTimer>
 
@@ -16,14 +17,18 @@ rtTimeManager::rtTimeManager() {
   m_pluginUpdateTime = new QTimer();
   m_planeUpdateTime = new QTimer();
 
+  m_estimationLen = 50;
+  m_renderTimeBuffer.reserve(m_estimationLen);
+  m_renderTimeBuffer.resize(m_estimationLen, 0.0f);
+
   // Fire every 40 mils or 25 fps.
-  m_renderTime->setInterval(40);
+  m_renderTime->setInterval(10);
 
   // About 40 fps
-  m_pluginUpdateTime->setInterval(25);
+  m_pluginUpdateTime->setInterval(10);
 
   // About 30 fps.
-  m_planeUpdateTime->setInterval(34);
+  m_planeUpdateTime->setInterval(10);
 
   connect(m_pluginUpdateTime, SIGNAL(timeout()), this, SLOT(pluginUpdate()));
   connect(m_planeUpdateTime, SIGNAL(timeout()), this, SLOT(planeUpdate()));
@@ -33,10 +38,7 @@ rtTimeManager::rtTimeManager() {
 
   m_mainWin = NULL;
 
-  for (int ix1=0; ix1<10; ix1++) {
-    m_renderTimeBuffer[ix1] = 1.0;
-  }
-  m_currentSum = 10.0;
+  m_currentSum = 0.0;
   m_renderTimePosition = 0;
   m_frameRateLabel = NULL;
 }
@@ -79,6 +81,10 @@ void rtTimeManager::renderTimeout() {
 //! Do the frame rate calculations.
 void rtTimeManager::calcFrameRate() {
   double frameRate;
+  double avgFrameRate;
+  double tempSum;
+  double stdev;
+  QString text = "   ";
 
   if (!m_frameRateLabel)
     m_frameRateLabel = rtObjectManager::instance().addObjectOfType(rtConstants::OT_TextLabel, "Frame Rate");
@@ -87,11 +93,27 @@ void rtTimeManager::calcFrameRate() {
   m_currentSum -= m_renderTimeBuffer[m_renderTimePosition];
   m_currentSum += frameRate;
   m_renderTimeBuffer[m_renderTimePosition] = frameRate;
-  m_renderTimePosition = (m_renderTimePosition+1) % 10;
+  m_renderTimePosition = (m_renderTimePosition+1) % m_estimationLen;
 
-  // Update only every thenth.
+
+
+  // Update only every nth.
   if (m_renderTimePosition == 0) {
-    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->setText(QString("  ").append(QString::number(m_currentSum/10.0f).append(QString(" FPS "))));
+    avgFrameRate = m_currentSum/((double)m_estimationLen);
+
+    tempSum = 0.0f;
+    for (int ix1=0; ix1<m_estimationLen; ix1++) {
+      tempSum += (avgFrameRate-m_renderTimeBuffer[ix1])*(avgFrameRate-m_renderTimeBuffer[ix1]);
+    }
+    tempSum = tempSum / ((double)m_estimationLen);
+    stdev = sqrt(tempSum);
+
+    text.append(QString::number(avgFrameRate));
+    text.append("  (+ or -)  ");
+    text.append(QString::number(stdev));
+    text.append(" FPS ");
+
+    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->setText(text);
     static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->getTextProperty()->SetLineOffset(4);
     static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->Modified();
   }

@@ -31,11 +31,22 @@ DICOMFileReader::DICOMFileReader() {
 
 
 DICOMFileReader::~DICOMFileReader() {
+  cleanupImageData();
   m_matrixToTransform->Delete();
   m_matrix->Delete();
   m_vtkImgData->Delete();
   m_transform->Delete();
   m_infoFix->Delete();
+}
+
+void DICOMFileReader::cleanupImageData() {
+  while (!m_imgData.isEmpty()) {
+    // Cleanup the old image data.
+    short* tmp = m_imgData.takeFirst().shortData;
+    if (tmp)
+      delete [] tmp;
+  }
+  m_comments.clear();
 }
 
 //! Set the name of the directory to get the DICOM files from.
@@ -60,14 +71,10 @@ bool DICOMFileReader::setDirectory(QString dirPath) {
     return false;
   }
 
-  while (!m_imgData.isEmpty()) {
-    // Cleanup the old image data.
-    short* tmp = m_imgData.takeFirst().shortData;
-    if (tmp)
-      delete [] tmp;
-  }
+  cleanupImageData();
 
   for (int ix1=0; ix1<files.count(); ix1++) {
+    m_comments.append("Image Number: ===== " + QString::number(ix1) + " ===== \n");
     if ( !readFile(fileDir.filePath(files.at(ix1))) ) {
       // Failed to read the file.
       std::cout << "Failed to Read DICOM File: " << fileDir.filePath(files.at(ix1)).toStdString() << std::endl;
@@ -92,8 +99,6 @@ bool DICOMFileReader::readFile(QString fName) {
   DcmDataset* datSet;
 
   const unsigned short* temp;
-
-  m_comments = "";
 
   // Load the DICOM file.
   status = dcmFile.loadFile(fName.toStdString().c_str());
@@ -127,6 +132,35 @@ bool DICOMFileReader::readFile(QString fName) {
   if (datSet->findAndGetUint16(DCM_BitsStored, m_ddata.bitsPerPixel).good()) {
     //std::cout << "Bits Per Pixel: " << m_ddata.bitsPerPixel << std::endl;
   }
+  if (datSet->findAndGetSint32(DCM_NumberOfFrames, m_ddata.numFrames).good()) {
+    // std::cout << "Number of Frames: " << m_ddata.numFrames << std::endl;
+  } else {
+    m_ddata.numFrames = 1;
+  }
+
+  OFString numImgs;
+  OFString currImg;
+  // Check for cine.
+  if (datSet->findAndGetOFString(DCM_CardiacNumberOfImages, numImgs).good()) {
+    //std::cout << "Images For Each Cardiac Cycle: " << m_ddata.imagesPerCycle.c_str() << std::endl;
+    m_ddata.imagesPerCycle = QString(numImgs.c_str()).toUShort();
+  }
+  if (m_ddata.imagesPerCycle < 1) {
+     m_ddata.imagesPerCycle = 1;
+  }
+  m_comments.append("Images Per Cycle: " + QString::number(m_ddata.imagesPerCycle) + "\n");
+
+  // Special GE tag. The current cardiac cycle.
+  if (datSet->findAndGetOFString(DcmTagKey(0x0019, 0x10d7), currImg).good()) {
+    //std::cout << "Cardiac Phase: " << m_ddata.cardiacPhase.c_str() << std::endl;
+    m_ddata.cardiacPhase = QString(currImg.c_str()).toUShort();
+  }
+  if (m_ddata.cardiacPhase < 1) {
+     m_ddata.cardiacPhase = 1;
+  }
+
+
+
   if (datSet->findAndGetUint16(DCM_PixelRepresentation, m_ddata.sine).good()) {
     // std::cout << "Pixels are signed: " << m_ddata.sine << std::endl;
   }

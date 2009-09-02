@@ -40,7 +40,7 @@ class DataInterface {
   //! Set the update time for this plugin.
   /*!
     The update time is defined by the number of miliseconds between calls to update. The base will try to update at the desired rate but that is not guaranteed.
-    The minimum update time is 25 milisecs. Lower times will be defaulted to 25 milisecs. If the set time is negative the update function will never be called.
+    The minimum update time is 15 milisecs. Lower times will be defaulted to 15 milisecs. If the set time is negative the update function will never be called.
     The default value is -1 which means that update is not called by default.
     @see getUpdateTime()
     @param The update time.
@@ -48,8 +48,8 @@ class DataInterface {
   void setUpdateTime(int time) {
     if (time<0) {
       m_updateTime = -1;
-    } else if (time<25) {
-      m_updateTime = 25;
+    } else if (time<15) {
+      m_updateTime = 15;
     } else {
       m_updateTime = time;
     }

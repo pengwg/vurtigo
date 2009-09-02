@@ -15,6 +15,13 @@ public:
   rt4DVolumeDataObject();
   ~rt4DVolumeDataObject();
 
+  enum RayCastFunction {
+    RCF_COMPOSITE,
+    RCF_ISOSURFACE,
+    RCF_MIP
+  };
+
+
   void update();
 
  protected:

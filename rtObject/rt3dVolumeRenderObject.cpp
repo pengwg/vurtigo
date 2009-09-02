@@ -236,6 +236,7 @@ void rt3DVolumeRenderObject::setupPipeline() {
   // Volume Rendering
   m_rayMapper->SetInput( m_transFilter->GetOutput() );
   m_rayMapper->SetVolumeRayCastFunction( dObj->getRayCastFunction() );
+  m_rayMapper->AutoAdjustSampleDistancesOn ();
 
   m_volumeActor->SetMapper(m_rayMapper);
   m_volumeActor->SetProperty( dObj->getVolumeProperty() );

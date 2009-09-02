@@ -1,6 +1,9 @@
 #ifndef RT_2D_SLICE_DATA_OBJECT_H
 #define RT_2D_SLICE_DATA_OBJECT_H
 
+#include <QSemaphore>
+#include <QDateTime>
+
 #include "rtDataObject.h"
 
 #include "vtkImageData.h"
@@ -59,6 +62,11 @@ public:
   void windowSliderMoved(int);
   void levelSliderMoved(int);
 
+ public slots:
+  void copyImageData2DSlot();
+ signals:
+  void copyImageData2DSignal();
+
  protected:
   // Functions
   void setupGUI();
@@ -68,6 +76,8 @@ public:
   vtkImageShiftScale * m_imgUCharCast;
   vtkTransform* m_trans;
   vtkImageLuminance* m_lumin;
+
+  QSemaphore m_dataCopyLock;
 
   int m_FOV;
   int m_imgSize;
@@ -80,6 +90,8 @@ public:
   double m_range[2];
 
   Ui::slice2DOptions m_optionsWidget;
+
+  QDateTime m_currTime;
 };
 
 #endif 

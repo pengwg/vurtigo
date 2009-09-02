@@ -50,7 +50,7 @@ enum CatheterMode {
 /*!
   The GUI is updated by a timer that is triggered at regular intervals. This constant sets the time between consecutive GUI updates. 
  */
-#define MSEC_DELAY_GUI_UPDATE 100
+#define MSEC_DELAY_GUI_UPDATE 10
 
 //! Update flags for the UI
 /*!

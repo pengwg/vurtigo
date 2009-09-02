@@ -33,10 +33,12 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_render3DLayout->setContentsMargins(0,0,0,0);
   m_inter3D = m_render3DVTKWidget->GetInteractor();
   m_renWin3D = m_inter3D->GetRenderWindow();
+  m_renWin3D->StereoCapableWindowOn();
   m_renderer3D = vtkRenderer::New();
   m_renWin3D->AddRenderer(m_renderer3D);
 
-  m_renWin3D->SetDesiredUpdateRate(0.0f);
+  m_inter3D->SetDesiredUpdateRate(2.0f);
+  m_inter3D->SetStillUpdateRate(1.0f);
 
   m_axesActor = vtkAxesActor::New();
   m_propAssembly = vtkPropAssembly::New();

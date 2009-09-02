@@ -47,6 +47,9 @@ public:
     double imgOrient[6]; // Direction cosines
     int fov; // FOV is only valid for square datasets.
     double sliceThickness;
+    long numFrames; // Number of frames in a single image.
+    unsigned short imagesPerCycle; // Number of images in one cardiac cycle.
+    unsigned short cardiacPhase; // The cardiac phase of the current image.
   };
 
 
@@ -58,6 +61,8 @@ public:
   vtkTransform* getTransform() { return m_transform; }
 
   QString getComments() { return m_comments; }
+
+  void cleanupImageData();
 
 protected:
   QList<QString> m_fileList;

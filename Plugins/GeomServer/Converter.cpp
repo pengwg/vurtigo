@@ -237,7 +237,7 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
   //for all remote coils
   int coilIndex = 0;
   
-  local->lock();
+
   for (vector<COILDATA>::iterator currCoil = remote.coils.begin(); currCoil != remote.coils.end(); currCoil++) {
     #ifdef CONVERTER_DEBUG
       cout << "loop iteration: " << coilIndex << endl;
@@ -249,15 +249,18 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
     if (localCoilId == NULL_ID) continue;
 
     //set the local values
+    local->lock();
     success = success && local->setCoilAngles(localCoilId, currCoil->angles[0], currCoil->angles[1]);
     success = success && local->setCoilCoords(localCoilId, currCoil->coords[0], -currCoil->coords[1], -currCoil->coords[2]);
     success = success && local->setCoilSNR(localCoilId, currCoil->SNR);
+    local->unlock();
+
     coilIndex++;
   }
   #ifdef CONVERTER_DEBUG
     cout << "Converter::setLocalCath() return " << success << endl;
   #endif
-  local->unlock();
+
   //if not successful, do not call local->Modified, and return
   if (!success)
       return success;

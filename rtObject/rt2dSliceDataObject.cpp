@@ -21,6 +21,7 @@ rt2DSliceDataObject::rt2DSliceDataObject() {
   m_window = 100;
   m_level = 50;
 
+  m_dataCopyLock.release();
 }
 
 //! Destructor
@@ -69,6 +70,8 @@ void rt2DSliceDataObject::setupGUI() {
 
  connect(m_optionsWidget.windowSlider, SIGNAL(valueChanged(int)), this, SLOT(windowSliderMoved(int)));
  connect(m_optionsWidget.levelSlider, SIGNAL(valueChanged(int)), this, SLOT(levelSliderMoved(int)));
+
+ connect( this, SIGNAL(copyImageData2DSignal()), this, SLOT(copyImageData2DSlot()), Qt::QueuedConnection );
 }
 
 //! Clean the GUI widgets.
@@ -82,10 +85,24 @@ void rt2DSliceDataObject::cleanupGUI() {
 bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
   if (!img) return false;
 
+  if (m_dataCopyLock.tryAcquire()) {
+    m_imgData->DeepCopy(img);
+
+    emit copyImageData2DSignal();
+  } else {
+    std::cout << "Frame Copy Dropped!" << std::endl;
+  }
+
+  return true;
+}
+
+void rt2DSliceDataObject::copyImageData2DSlot() {
   double rangeI[2];
 
-  img->GetScalarRange(rangeI);
-  m_imgData->DeepCopy(img);
+  //m_currTime = QDateTime::currentDateTime();
+  //std::cout << m_currTime.toString(Qt::SystemLocaleLongDate).toStdString() << std::endl;
+
+  m_imgData->GetScalarRange(rangeI);
   m_imgUCharCast->SetOutputScalarTypeToUnsignedChar();
 
   if( m_imgData->GetNumberOfScalarComponents() == 3) {
@@ -96,11 +113,11 @@ bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
   else {
     m_imgData->GetScalarRange(rangeI);
     m_imgUCharCast->SetInput(m_imgData);
-  }  
+  }
   m_imgUCharCast->SetShift(-rangeI[0]);
 
     // Check if the range needs to be reset.
-  if (rangeI[0] != m_range[0] || rangeI[1] != m_range[1] || !m_imgDataValid) {
+  if (rangeI[0] < m_range[0] || rangeI[1] > m_range[1] || !m_imgDataValid) {
 
     m_range[0] = 0;
     m_range[1] = rangeI[1]-rangeI[0];
@@ -116,6 +133,7 @@ bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
     m_optionsWidget.levelMinLabel->setText(QString::number(m_range[0]));
     m_optionsWidget.levelMaxLabel->setText(QString::number(m_range[1]));
 
+
     if (m_window > m_range[1]) {
       m_window = m_range[1];
       m_optionsWidget.windowSlider->setValue(m_window);
@@ -126,10 +144,10 @@ bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
     }
   }
 
-  m_imgDataValid = true;
-  return true;
-}
+  m_dataCopyLock.release();
 
+  m_imgDataValid = true;
+}
 
 //! Set the trasformation matrix
 bool rt2DSliceDataObject::setTransform(float rotMatrix[9], float transMatrix[3]) {

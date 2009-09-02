@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QList>
 
-
+#include <vector>
 
 class QTimer;
 
@@ -42,6 +42,8 @@ class rtTimeManager : public QObject {
   void planeUpdate();
 
  protected:
+  unsigned int m_estimationLen;
+
   //! The timer that services the renderer.
   QTimer *m_renderTime;
 
@@ -58,7 +60,7 @@ class rtTimeManager : public QObject {
   QTimer *m_planeUpdateTime;
 
   // Render Time Estimation
-  double m_renderTimeBuffer[10];
+  std::vector<double> m_renderTimeBuffer;
   double m_currentSum;
   int m_renderTimePosition;
   rtRenderObject* m_frameRateLabel;
