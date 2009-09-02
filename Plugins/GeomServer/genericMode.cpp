@@ -4,6 +4,8 @@
 #include "Converter.h"
 #include "rt2dSliceDataObject.h"
 
+#include <QTime>
+
 using namespace std;
 
 GenericMode::GenericMode():m_sender(0) {
@@ -180,6 +182,17 @@ bool GenericMode::receivePlane(int id) {
     currImg->FOV = m_sender->getFOV();
     image =  m_sender->getImage();
 
+    /*
+    if (m_planeID == 0) {
+      QTime temp;
+      temp = QTime::currentTime();
+
+      //std::cout << currImg->trig << " " << currImg->resp << std::endl;
+      //std::cout << temp.second() << " " << temp.msec() << std::endl;
+
+      std::cout << "Lag: " << ((temp.second() - currImg->trig)*1000 + temp.msec() - currImg->resp) << std::endl;
+    }*/
+
     if (currImg->img != NULL)
       delete currImg->img;
 
@@ -202,6 +215,10 @@ bool GenericMode::receiveCatheter() {
 
     // Always use the first catheter.
   currCath = &m_cathDataArray[0];
+
+  QTime temp;
+  temp = QTime::currentTime();
+  std::cout << "Sec: " << temp.second() << "." << temp.msec() << std::endl;
 
   // Get catheter information.
   currCath->cathMode = m_sender->getCathModeAsInt();

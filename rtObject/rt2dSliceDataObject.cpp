@@ -90,7 +90,7 @@ bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
 
     emit copyImageData2DSignal();
   } else {
-    std::cout << "Frame Copy Dropped!" << std::endl;
+    //std::cout << "Frame Copy Dropped!" << std::endl;
   }
 
   return true;

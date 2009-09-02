@@ -37,8 +37,8 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_renderer3D = vtkRenderer::New();
   m_renWin3D->AddRenderer(m_renderer3D);
 
-  m_inter3D->SetDesiredUpdateRate(2.0f);
-  m_inter3D->SetStillUpdateRate(1.0f);
+  m_inter3D->SetDesiredUpdateRate(4.0f);
+  m_inter3D->SetStillUpdateRate(3.0f);
 
   m_axesActor = vtkAxesActor::New();
   m_propAssembly = vtkPropAssembly::New();
