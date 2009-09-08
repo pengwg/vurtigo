@@ -37,7 +37,6 @@ class GeomServerUI : public QWidget, private Ui::MainUI {
     void serverDisconnect();
     void numPlanesChanged(int i);
     void numCathChanged(int i);
-
     void itemStateChanged(int);
 };
 

@@ -24,7 +24,7 @@ void customQVTKWidget::resizeEvent(QResizeEvent* event) {
   QSize newSize;
   QResizeEvent* e2;
   newSize = event->size();
-  std::cout << newSize.height() << " " << newSize.width() << std::endl;
+  //std::cout << newSize.height() << " " << newSize.width() << std::endl;
   if (m_forceSquare && newSize.height()!=newSize.width()) {
     // Force a square
     newSize.setWidth(newSize.height());

@@ -2,6 +2,7 @@
 #include "rtDataObject.h"
 #include "rtMainWindow.h"
 #include "rtRenderObject.h"
+#include "rtMessage.h"
 
 // Types of render objects
 #include "rt3dPointBufferRenderObject.h"
@@ -18,6 +19,7 @@
 #include "rtImageBufferRenderObject.h"
 #include "rt2dPointRenderObject.h"
 
+#include <sstream>
 
 //! Object Manager constructor.
 /*!
@@ -72,8 +74,13 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
 
   // Try to get a valid ID. 
   nextID = getNextID();
-  if (nextID == -1) return NULL;
- 
+  if (nextID == -1) {
+    std::stringstream msg;
+    msg << "Could not find a valid ID for a new object! ";
+    rtMessage::instance().error(__LINE__, __FILE__, msg.str());
+    return NULL;
+  }
+
   // Find out which object will be used. 
   switch(objType) {
   case rtConstants::OT_None:
@@ -117,14 +124,20 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     temp=new rtLabelRenderObject();
     break;
   default:
+    std::stringstream msg;
+    msg << "No object of type " << objType;
+    rtMessage::instance().warning(__LINE__, __FILE__,msg.str());
     temp=NULL;
     break;
   }
 
   // The object has been created.
   if (temp){
-    // Debug Statement:
-    qDebug("Created Object with ID: %d", nextID);
+
+    // Push the new object creation to the log.
+    std::stringstream msg;
+    msg << "Created Object with ID: " << nextID;
+    rtMessage::instance().log(msg.str());
 
     dataO = temp->getDataObject();
     dataO->setId(nextID);

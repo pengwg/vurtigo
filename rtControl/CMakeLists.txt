@@ -1,6 +1,7 @@
 set ( RTCONTROL_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rtObjectManager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtTimeManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtMessage.cpp
   CACHE INTERNAL "Vurtigo rtControl Source Files"
 )
 
