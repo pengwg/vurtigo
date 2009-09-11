@@ -255,8 +255,19 @@
      <addaction name="action3D_Only"/>
      <addaction name="action2D_Only"/>
     </widget>
+    <widget class="QMenu" name="menuText_Output">
+     <property name="title">
+      <string>Text Output</string>
+     </property>
+     <addaction name="actionErrorText"/>
+     <addaction name="actionWarningText"/>
+     <addaction name="actionDebugText"/>
+     <addaction name="actionBenchmarkText"/>
+     <addaction name="actionLogText"/>
+    </widget>
     <addaction name="menuLayout"/>
     <addaction name="actionCoordinate_Axes"/>
+    <addaction name="menuText_Output"/>
    </widget>
    <widget class="QMenu" name="menuObjects">
     <property name="title">
@@ -334,6 +345,52 @@
   <action name="actionDeleteSelected">
    <property name="text">
     <string>Delete Selected</string>
+   </property>
+  </action>
+  <action name="actionErrorText">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Error</string>
+   </property>
+  </action>
+  <action name="actionWarningText">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Warning</string>
+   </property>
+  </action>
+  <action name="actionDebugText">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Debug</string>
+   </property>
+  </action>
+  <action name="actionBenchmarkText">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Benchmark</string>
+   </property>
+  </action>
+  <action name="actionLogText">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Log</string>
    </property>
   </action>
  </widget>

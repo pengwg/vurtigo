@@ -9,7 +9,7 @@
 #include "rtRenderObject.h"
 #include "rtDataObject.h"
 #include "rtPluginLoader.h"
-
+#include "rtMessage.h"
 #include "ui_newObjectDialog.h"
 
 #include "vtkPropAssembly.h"
@@ -382,6 +382,11 @@ void rtMainWindow::connectSignals() {
   connect(action3D_Only, SIGNAL(triggered()), this, SLOT(viewChanged3DOnly()));
   connect(action2D_Only, SIGNAL(triggered()), this, SLOT(viewChanged2DOnly()));
   connect(actionCoordinate_Axes, SIGNAL(triggered()), this, SLOT(showAxesOptions()));
+  connect(actionErrorText, SIGNAL(toggled(bool)), this, SLOT(textError(bool)));
+  connect(actionWarningText, SIGNAL(toggled(bool)), this, SLOT(textWarning(bool)));
+  connect(actionDebugText, SIGNAL(toggled(bool)), this, SLOT(textDebug(bool)));
+  connect(actionBenchmarkText, SIGNAL(toggled(bool)), this, SLOT(textBenchmark(bool)));
+  connect(actionLogText, SIGNAL(toggled(bool)), this, SLOT(textLog(bool)));
 
   // Help Menu
   connect(actionContents, SIGNAL(triggered()), this, SLOT(viewContents()));
@@ -475,6 +480,27 @@ void rtMainWindow::showAxesOptions() {
     setCoordType( m_axesProperties->getCoordType() );
   }
 }
+
+void rtMainWindow::textError(bool t) {
+  rtMessage::instance().m_err = t;
+}
+
+void rtMainWindow::textWarning(bool t) {
+  rtMessage::instance().m_warn = t;
+}
+
+void rtMainWindow::textDebug(bool t) {
+  rtMessage::instance().m_debug = t;
+}
+
+void rtMainWindow::textBenchmark(bool t) {
+  rtMessage::instance().m_bench = t;
+}
+
+void rtMainWindow::textLog(bool t) {
+  rtMessage::instance().m_log = t;
+}
+
 
 void rtMainWindow::viewContents() {
 

@@ -1,10 +1,13 @@
 #include "genericMode.h"
 #include <iostream>
 #include <cstring>
-#include "Converter.h"
-#include "rt2dSliceDataObject.h"
+#include <sstream>
 
 #include <QTime>
+
+#include "Converter.h"
+#include "rt2dSliceDataObject.h"
+#include "rtMessage.h"
 
 using namespace std;
 
@@ -44,6 +47,7 @@ void GenericMode::runMode() {
   CATHDATA cathData;
   rt2DSliceDataObject * localImage;
   rtCathDataObject * localCath;
+  QTime tt;
 
   // Nothing to read.
   if (m_planeList.count() == 0 && m_cathList.count() == 0) return;
@@ -52,17 +56,28 @@ void GenericMode::runMode() {
 
   m_planeListLock.acquire();
 
+  tt.start();
   // Re-size as is needed.
   while(m_imgDataArray.size() < m_planeList.count()) {
+    imgData.arraySize = 0;
+    imgData.img = NULL;
     m_imgDataArray.push_back(imgData);
   }
 
+  std::stringstream msg;
+  msg << "Re-size image data array: " << tt.elapsed();
+  rtMessage::instance().bench(msg.str());
+
   // Read all the relevant planes
   for (int ix1=0; ix1<m_planeList.count(); ix1++) {
+    std::stringstream msg;
+    msg << "Image Plane with ID: " << m_planeID << " takes ";
+
+    tt.restart();
     m_planeID = ix1;
     if (m_planeList[ix1].act == SenderThread::OBJ_READ) {
-      receivePlane(m_planeID);
-      receivePlanePosition(m_planeID);
+      receivePlaneAndPosition(m_planeID);
+      msg << " plane and position received: " << tt.elapsed();
       localImage = converter->getLocalImage(ix1, m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].numChannels);
       if (!localImage) continue;
       converter->setLocalImage(m_imgDataArray[ix1], localImage);
@@ -71,6 +86,7 @@ void GenericMode::runMode() {
       converter->setRemoteImageTransform(this->getImages());
       receivePlane(m_planeID);
       sendPlanePosition(m_planeID);
+      msg << " plane received and position sent: " << tt.elapsed();
       localImage = converter->getLocalImage(ix1, m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].numChannels);
       if (!localImage) continue;
       converter->setLocalImageOnly(m_imgDataArray[ix1], localImage);
@@ -79,6 +95,9 @@ void GenericMode::runMode() {
     } else if (m_planeList[ix1].act == SenderThread::OBJ_ERROR) {
       // Do nothing
     }
+
+    msg << " final: " << tt.elapsed();
+    rtMessage::instance().bench(msg.str());
   }
 
   m_planeListLock.release();
@@ -90,6 +109,7 @@ void GenericMode::runMode() {
   }
 
   for (int ix1=0; ix1<m_cathList.count(); ix1++) {
+    tt.restart();
     if (m_cathList[ix1].act == SenderThread::OBJ_READ) {
       receiveCatheter();
       if (m_cathDataArray.at(ix1).cathMode != NO_CATHETERS) {
@@ -104,6 +124,9 @@ void GenericMode::runMode() {
       // Do nothing
     }
 
+    std::stringstream msg;
+    msg << "Catheter with ID: " << ix1 << " takes " << tt.elapsed();
+    rtMessage::instance().bench(msg.str());
   }
   m_cathListLock.release();
 
@@ -182,29 +205,83 @@ bool GenericMode::receivePlane(int id) {
     currImg->FOV = m_sender->getFOV();
     image =  m_sender->getImage();
 
-    /*
-    if (m_planeID == 0) {
-      QTime temp;
-      temp = QTime::currentTime();
+    if (image) {
+      int imageSize = currImg->imgSize * currImg->imgSize * currImg->numChannels;
 
-      //std::cout << currImg->trig << " " << currImg->resp << std::endl;
-      //std::cout << temp.second() << " " << temp.msec() << std::endl;
+      // Check if a resize is needed.
+      if (currImg->arraySize == 0 || currImg->arraySize != imageSize) {
+        if (currImg->img != NULL)
+          delete currImg->img;
+        currImg->img = new unsigned char[imageSize];
+        currImg->arraySize = imageSize;
+      }
 
-      std::cout << "Lag: " << ((temp.second() - currImg->trig)*1000 + temp.msec() - currImg->resp) << std::endl;
-    }*/
-
-    if (currImg->img != NULL)
-      delete currImg->img;
-
-    int imageSize = currImg->imgSize * currImg->imgSize * currImg->numChannels;
-    currImg->img = new unsigned char[imageSize];
-    for (int ix1=0; ix1<imageSize && image; ix1++) {
-      currImg->img[ix1] = image[ix1];
+      memcpy(currImg->img, image, imageSize);
+      res=true;
     }
-    res=true;
   }
   return res;
 }
+
+
+bool GenericMode::receivePlaneAndPosition(int id) {
+  if (id < 0) return false;
+
+  IMAGEDATA* currImg;
+  float *rotation, *translation;
+  unsigned char * image;
+  bool res = false;
+
+  m_planeID = id;
+  currImg = &m_imgDataArray[m_planeID];
+  m_sender->setPlaneID(m_planeID);
+
+  // Get the plane.
+  currImg->imgSize = m_sender->getImgSize();
+  currImg->numChannels = m_sender->getNumChan();
+
+  // Check the image size and the number of channels to see if this makes sense.
+  if (currImg->imgSize > 0 && currImg->imgSize <= 2048 && currImg->numChannels > 0 && currImg->numChannels <= 16) {
+
+    currImg->trig = m_sender->getTrig();
+    currImg->resp = m_sender->getResp();
+    currImg->FOV = m_sender->getFOV();
+    image =  m_sender->getImage();
+
+    if (image) {
+      int imageSize = currImg->imgSize * currImg->imgSize * currImg->numChannels;
+
+      // Check if a resize is needed.
+      if (currImg->arraySize == 0 || currImg->arraySize != imageSize) {
+        if (currImg->img != NULL)
+          delete currImg->img;
+        currImg->img = new unsigned char[imageSize];
+        currImg->arraySize = imageSize;
+      }
+
+      memcpy(currImg->img, image, imageSize);
+      res=true;
+    }
+  }
+
+  // Get the plane position.
+  rotation = m_sender->getImgRotation();
+  translation = m_sender->getImgTranslation();
+
+  if (!rotation || !translation) {
+    res = false;
+  } else {
+    for (int ix1=0; ix1<ROT_MATRIX_SIZE; ix1++) {
+      currImg->rotMatrix[ix1] = rotation[ix1];
+    }
+
+    for (int ix1=0; ix1<TRANS_MATRIX_SIZE; ix1++) {
+      currImg->transMatrix[ix1] = translation[ix1];
+    }
+  }
+  return res;
+}
+
 
 bool GenericMode::receiveCatheter() {
   CATHDATA* currCath;
@@ -216,9 +293,9 @@ bool GenericMode::receiveCatheter() {
     // Always use the first catheter.
   currCath = &m_cathDataArray[0];
 
-  QTime temp;
-  temp = QTime::currentTime();
-  std::cout << "Sec: " << temp.second() << "." << temp.msec() << std::endl;
+  //QTime temp;
+  //temp = QTime::currentTime();
+  //std::cout << "Sec: " << temp.second() << "." << temp.msec() << std::endl;
 
   // Get catheter information.
   currCath->cathMode = m_sender->getCathModeAsInt();

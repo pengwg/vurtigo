@@ -47,6 +47,7 @@ class GenericMode{
   bool sendPlanePosition(int id);
   bool receivePlanePosition(int id);
   bool receivePlane(int id);
+  bool receivePlaneAndPosition(int id);
   bool receiveCatheter();
 
   void setPlaneList(QList<SenderThread::ListObject>  plane);

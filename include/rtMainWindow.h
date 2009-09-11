@@ -73,6 +73,12 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   void showAxesOptions();
 
+  void textError(bool);
+  void textWarning(bool);
+  void textDebug(bool);
+  void textBenchmark(bool);
+  void textLog(bool);
+
   void viewContents();
   void viewAbout();
 
