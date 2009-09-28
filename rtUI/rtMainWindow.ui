@@ -268,6 +268,7 @@
     <addaction name="menuLayout"/>
     <addaction name="actionCoordinate_Axes"/>
     <addaction name="menuText_Output"/>
+    <addaction name="action3D_Render_Options"/>
    </widget>
    <widget class="QMenu" name="menuObjects">
     <property name="title">
@@ -391,6 +392,11 @@
    </property>
    <property name="text">
     <string>Log</string>
+   </property>
+  </action>
+  <action name="action3D_Render_Options">
+   <property name="text">
+    <string>3D Render Options</string>
    </property>
   </action>
  </widget>

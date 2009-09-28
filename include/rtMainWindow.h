@@ -97,6 +97,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void textDebug(bool);
   void textBenchmark(bool);
   void textLog(bool);
+  void showRenderOptions();
 
   void viewContents();
   void viewAbout();

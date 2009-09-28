@@ -22,6 +22,7 @@
 #include <QFileDialog>
 
 #include <iostream>
+#include <cmath>
 
 #include "rtMainWindow.h"
 #include "rtObjectManager.h"
@@ -29,6 +30,7 @@
 #include "rtDataObject.h"
 #include "rtPluginLoader.h"
 #include "rtMessage.h"
+#include "rtRenderOptions.h"
 #include "ui_newObjectDialog.h"
 
 #include "vtkPropAssembly.h"
@@ -56,8 +58,8 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_renderer3D = vtkRenderer::New();
   m_renWin3D->AddRenderer(m_renderer3D);
 
-  //m_inter3D->SetDesiredUpdateRate(4.0f);
-  //m_inter3D->SetStillUpdateRate(3.0f);
+  m_inter3D->SetDesiredUpdateRate(3.0f);
+  m_inter3D->SetStillUpdateRate(1.0f);
 
   m_axesActor = vtkAxesActor::New();
   m_propAssembly = vtkPropAssembly::New();
@@ -406,6 +408,7 @@ void rtMainWindow::connectSignals() {
   connect(actionDebugText, SIGNAL(toggled(bool)), this, SLOT(textDebug(bool)));
   connect(actionBenchmarkText, SIGNAL(toggled(bool)), this, SLOT(textBenchmark(bool)));
   connect(actionLogText, SIGNAL(toggled(bool)), this, SLOT(textLog(bool)));
+  connect(action3D_Render_Options, SIGNAL(triggered()), this, SLOT(showRenderOptions()));
 
   // Help Menu
   connect(actionContents, SIGNAL(triggered()), this, SLOT(viewContents()));
@@ -518,6 +521,49 @@ void rtMainWindow::textBenchmark(bool t) {
 
 void rtMainWindow::textLog(bool t) {
   rtMessage::instance().m_log = t;
+}
+
+//! Display the render options dialog box.
+void rtMainWindow::showRenderOptions() {
+  rtRenderOptions renOpt;
+
+  if (m_inter3D->GetStillUpdateRate() != 0) {
+    renOpt.renQuality( floor((1.0f/sqrt(m_inter3D->GetStillUpdateRate()+1.0f))*100.0f) );
+  } else {
+    renOpt.renQuality( 100 );
+  }
+  if (m_inter3D->GetDesiredUpdateRate() != 0) {
+    renOpt.renUpdateQuality( floor((1.0f/sqrt(m_inter3D->GetDesiredUpdateRate()+1.0f))*100.0f) );
+  } else {
+    renOpt.renUpdateQuality( 100 );
+  }
+
+  if (m_renWin3D->GetStereoRender()) {
+    renOpt.setStereoType(m_renWin3D->GetStereoType());
+  } else {
+    renOpt.setStereoType(0);
+  }
+
+  renOpt.setDirectRender(m_renWin3D->IsDirect());
+  renOpt.setGLRender(m_renWin3D->SupportsOpenGL());
+
+  if(renOpt.exec() == QDialog::Accepted) {  
+    double renUpQual = renOpt.getRenUpdateQuality();
+    double renQual = renOpt.getRenQuality();
+    m_inter3D->SetDesiredUpdateRate( (100.0f/renUpQual)*(100.0f/renUpQual)-1 );
+    m_inter3D->SetStillUpdateRate( (100.0f/renQual)*(100.0f/renQual)-1 );
+
+    int type = renOpt.getStereoType();
+    if (type == 0) {
+      m_renWin3D->StereoRenderOff();
+    } else {
+      m_renWin3D->StereoRenderOn();
+      m_renWin3D->SetStereoType(type);
+    }
+
+    m_renderFlag3D = true;
+  }
+
 }
 
 

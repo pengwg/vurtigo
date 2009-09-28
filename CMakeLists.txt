@@ -90,6 +90,7 @@ set (UI_FILES
   rtUI/ProfileWidget.ui
   rtUI/VtkRangeWidget.ui
   rtUI/slice2DOptions.ui
+  rtUI/rtRenderOptions.ui
 )
 
 
