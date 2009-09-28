@@ -449,7 +449,6 @@ void rtMainWindow::setupObjectTree() {
   With string names the objects can be displayed in the GUI.
 */
 void rtMainWindow::populateObjectTypeNames() {
-  m_rtObjectTypeNames.insert(rtConstants::OT_4DObject, "4D Object");
   m_rtObjectTypeNames.insert(rtConstants::OT_3DObject, "3D Object");
   m_rtObjectTypeNames.insert(rtConstants::OT_2DObject, "2D Object");
   m_rtObjectTypeNames.insert(rtConstants::OT_Cath, "Catheter");

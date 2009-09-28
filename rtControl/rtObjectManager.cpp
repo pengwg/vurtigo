@@ -29,7 +29,6 @@
 #include "rtLabelRenderObject.h"
 #include "rtCathRenderObject.h"
 #include "rt3dVolumeRenderObject.h"
-#include "rt4dVolumeRenderObject.h"
 #include "rt2dSliceRenderObject.h"
 #include "rtMatrixRenderObject.h"
 #include "rtPolyRenderObject.h"
@@ -105,9 +104,6 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   case rtConstants::OT_None:
     temp=new rtNoneRenderObject();
     qWarning("Warning: None Object Requested.");
-    break;
-  case rtConstants::OT_4DObject:
-    temp=new rt4DVolumeRenderObject();
     break;
   case rtConstants::OT_3DObject:
     temp=new rt3DVolumeRenderObject();

@@ -24,7 +24,6 @@ namespace rtConstants {
 
 enum rtObjectType {
   OT_None,
-  OT_4DObject,
   OT_3DObject,
   OT_2DObject,
   OT_Cath,
