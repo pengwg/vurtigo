@@ -23,16 +23,20 @@
 #include "rtDataObject.h"
 #include "ui_volume3DOptions.h"
 
+#include "vtkSmartPointer.h"
 #include "vtkImageData.h"
 #include "vtkTransform.h"
 #include "vtkPiecewiseFunction.h"
 #include "vtkColorTransferFunction.h"
 #include "vtkVolumeProperty.h"
 #include "vtkImageShiftScale.h"
+#include "vtkImageExtractComponents.h"
 
 #include "vtkVolumeRayCastCompositeFunction.h"
 #include "vtkVolumeRayCastIsosurfaceFunction.h"
 #include "vtkVolumeRayCastMIPFunction.h"
+
+#include <QTimer>
 
 //! 3D Volume Data Object
 /*!
@@ -83,6 +87,8 @@ public:
 
   void update();
 
+  int getVisibleComponent() { return m_visibleComponent; }
+
  public slots:
   void surfaceFunctionChanged();
 
@@ -98,6 +104,11 @@ public:
   void flipY();
   void flipZ();
 
+  void setVisibleComponent(int c);
+  void nextVisibleComponent();
+
+  void cineLoop(bool);
+
  protected:
   // Functions
   void setupGUI();
@@ -112,6 +123,10 @@ public:
 
   vtkPiecewiseFunction* m_pieceFuncDefault;
   vtkColorTransferFunction* m_colorTransFuncDefault;
+
+  vtkSmartPointer<vtkImageExtractComponents> m_subImg;
+  int m_visibleComponent;
+  QTimer *m_cineFrame;
 
   bool m_imgDataValid;
 

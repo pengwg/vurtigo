@@ -227,7 +227,6 @@ bool DICOMFileReader::createVolume(QList<DICOMImageData>* imgData) {
   }
 
   int numZSlices, numFrames;
-  int zIndex, timeIndex;
 
   if (imgData->count() <= 0) {
     return false;
@@ -247,20 +246,15 @@ bool DICOMFileReader::createVolume(QList<DICOMImageData>* imgData) {
 
       numFrames = imgData->at(0).imagesPerCycle;
       numZSlices = (int) (imgData->count() / imgData->at(0).imagesPerCycle);
-      zIndex = 0;
-      timeIndex = 0;
     } else {
       numFrames = 1;
       numZSlices = imgData->count();
-      zIndex = 0;
-      timeIndex = 0;
     }
 
     // Multiple Slices
     m_vtkImgData->SetScalarTypeToShort();
     m_vtkImgData->SetDimensions(imgData->at(0).numRows, imgData->at(0).numCols, numZSlices);
-    //m_vtkImgData->SetNumberOfScalarComponents(numFrames); // TODO!!!!!!!!!!!!!!!!!
-    m_vtkImgData->SetNumberOfScalarComponents(1);
+    m_vtkImgData->SetNumberOfScalarComponents(numFrames);
     m_vtkImgData->AllocateScalars();
 
     // Calculate the Z direction spacing.
@@ -306,19 +300,16 @@ bool DICOMFileReader::createVolume(QList<DICOMImageData>* imgData) {
     }
     m_vtkImgData->SetSpacing(m_ddata.pixSpace[0], -m_ddata.pixSpace[1], negZed*zspacing);
 
-    ///////////
-    // TODO: Add the cine support (Only the first frame so far)
-    ///////////
     short* temp;
-    int timePoint = 0;
     // Copy and the data
     for (int ix1=0; ix1<numZSlices; ix1++) {
       for (int row=0; row<imgData->at(0).numRows; row++) {
         for (int col=0; col<imgData->at(0).numCols; col++) {
           temp = (short*)m_vtkImgData->GetScalarPointer(col, row, ix1);
-          *temp =  imgData->at(ix1*numFrames).shortData[row*imgData->at(0).numCols+col];
-	  //for (int frame = 0; frame<numFrames; frame++) {
-	  //}
+          for (int frame = 0; frame<numFrames; frame++) {
+            *temp =  imgData->at(ix1*numFrames+frame).shortData[row*imgData->at(0).numCols+col];
+            temp++;
+          }
         }
       }
     }

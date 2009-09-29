@@ -53,8 +53,16 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   m_isosurfaceFunc = vtkVolumeRayCastIsosurfaceFunction::New();
   m_MIPFunc = vtkVolumeRayCastMIPFunction::New();
 
+  m_visibleComponent = 0;
+  m_subImg = vtkImageExtractComponents::New();
+  m_subImg->SetInput(m_imgUShortCast->GetOutput());
+  m_subImg->SetComponents(m_visibleComponent);
+
   // Setup the interpolation
   m_interpolationType = 1; // Linear interp
+
+  m_cineFrame = new QTimer(this);
+  connect( m_cineFrame,SIGNAL(timeout()), this, SLOT(nextVisibleComponent()) );
 
   setupGUI();
 }
@@ -62,6 +70,11 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
 //! Destructor
 rt3DVolumeDataObject::~rt3DVolumeDataObject() {
   cleanupGUI();
+
+  if (m_cineFrame && m_cineFrame->isActive()) {
+    m_cineFrame->stop();
+  }
+  if (m_cineFrame) delete m_cineFrame;
 
   m_imgUShortCast->Delete();
   m_imgData->Delete();
@@ -73,6 +86,7 @@ rt3DVolumeDataObject::~rt3DVolumeDataObject() {
   m_compositeFunc->Delete();
   m_isosurfaceFunc->Delete();
   m_MIPFunc->Delete();
+  m_subImg->Delete();
 }
 
 
@@ -125,7 +139,7 @@ vtkImageData* rt3DVolumeDataObject::getImageData() {
   The mapper requires either unsigned short or unsigned char to work properly. This function makes it easier to implement that mapper.
   */
 vtkImageData* rt3DVolumeDataObject::getUShortData() {
-  return m_imgUShortCast->GetOutput();
+  return m_subImg->GetOutput();
 }
 
 //! Get a handle to the transform.
@@ -205,6 +219,14 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
 
   m_imgDataValid = true;
   Modified();
+
+  if (m_imgUShortCast->GetOutput()->GetNumberOfScalarComponents() > 1) {
+    m_optionsWidget.frameSlider->setMinimum(0);
+    m_optionsWidget.frameSlider->setMaximum(m_imgUShortCast->GetOutput()->GetNumberOfScalarComponents()-1);
+    m_optionsWidget.cineGroupBox->setDisabled(false);
+  } else {
+    m_optionsWidget.cineGroupBox->setDisabled(true);
+  }
 
   return true;
 }
@@ -303,6 +325,10 @@ void rt3DVolumeDataObject::setupGUI() {
   connect(m_optionsWidget.flipXCheck, SIGNAL(stateChanged(int)), this, SLOT(flipX()));
   connect(m_optionsWidget.flipYCheck, SIGNAL(stateChanged(int)), this, SLOT(flipY()));
   connect(m_optionsWidget.flipZCheck, SIGNAL(stateChanged(int)), this, SLOT(flipZ()));
+
+  // Cine
+  connect(m_optionsWidget.frameSlider, SIGNAL(valueChanged(int)), this, SLOT(setVisibleComponent(int)));
+  connect(m_optionsWidget.cineLoopPushButton, SIGNAL(toggled(bool)), this, SLOT(cineLoop(bool)));
 
   m_optionsWidget.comboPieceFunc->clear();
   m_optionsWidget.comboPieceFunc->addItem("Default");
@@ -405,3 +431,41 @@ void rt3DVolumeDataObject::interpolationChanged(int interp) {
   Modified();
 }
 
+
+void rt3DVolumeDataObject::setVisibleComponent(int c) {
+  if (!m_imgDataValid) return;
+  if (m_visibleComponent == c) return;
+  int numComp = m_imgUShortCast->GetOutput()->GetNumberOfScalarComponents();
+
+  if (c < 0 || c >= numComp) {
+    m_visibleComponent = 0;
+  } else {
+    m_visibleComponent = c;
+  }
+  m_subImg->SetComponents(m_visibleComponent);
+  m_subImg->Update();
+  Modified();
+}
+
+void rt3DVolumeDataObject::nextVisibleComponent() {
+  if (!m_imgDataValid) return;
+  int numComp = m_imgUShortCast->GetOutput()->GetNumberOfScalarComponents();
+  m_visibleComponent = (m_visibleComponent + 1) % numComp;
+  m_subImg->SetComponents(m_visibleComponent);
+
+  m_optionsWidget.frameSlider->setValue(m_visibleComponent);
+
+  m_subImg->Update();
+  Modified();
+}
+
+
+void rt3DVolumeDataObject::cineLoop(bool cine) {
+
+  if (cine) {
+    m_cineFrame->start(100);
+  } else if (m_cineFrame->isActive()) {
+    m_cineFrame->stop();
+  }
+
+}
