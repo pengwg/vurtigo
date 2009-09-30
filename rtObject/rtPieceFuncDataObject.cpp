@@ -36,6 +36,7 @@ rtPieceFuncDataObject::~rtPieceFuncDataObject() {
 bool rtPieceFuncDataObject::setPiecewiseFunction(vtkPiecewiseFunction* piece) {
   if (!piece) return false;
   m_pieceFunc->DeepCopy(piece);
+  setPiecewiseFunction(m_pieceFunc);
   return true;
 }
 

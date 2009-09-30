@@ -24,7 +24,7 @@ rtDataObject::rtDataObject() {
   m_readOnly = false;
 
   // When the object changes we can update the GUI.
-  connect(this, SIGNAL(objectChanged()), this, SLOT(updateGUI()));
+  connect(this, SIGNAL(objectChanged(int)), this, SLOT(updateGUI()));
 }
 
 rtDataObject::~rtDataObject() {
@@ -60,7 +60,7 @@ void rtDataObject::setObjectType(rtConstants::rtObjectType ot) {
 void rtDataObject::Modified() {
   m_modifyTime=QDateTime::currentDateTime();
   rtPluginLoader::instance().objectModified(m_objId);
-  emit objectChanged();
+  emit objectChanged(m_objId);
 }
 
 //! Get the last time the object was modified.

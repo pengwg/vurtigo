@@ -28,6 +28,18 @@ public:
         bool clamping;
     };
 
+    VtkColorTable(QWidget * parent = NULL);
+    ~VtkColorTable();
+
+    void getCurrentProfileState(Profile & profile);
+    void loadProfile(const Profile & profile);
+    void getDefaultProfile(Profile & profile);
+
+    vtkColorTransferFunction * getColorFunction() { return colorFunction; }
+    bool setColorFunction(vtkColorTransferFunction * const func);
+signals:
+    //! Called when the color function has changed.
+    void functionUpdated();
 private:
     vtkColorTransferFunction * colorFunction;
 
@@ -58,16 +70,6 @@ private slots:
     void updateRed(int val, bool updateAll = true);
     void updateGreen(int val, bool updateAll = true);
     void updateBlue(int val, bool updateAll = true);
-public:
-    VtkColorTable(QWidget * parent = NULL);
-    ~VtkColorTable();
-
-    void getCurrentProfileState(Profile & profile);
-    void loadProfile(const Profile & profile);
-    void getDefaultProfile(Profile & profile);
-
-    vtkColorTransferFunction * getColorFunction() { return colorFunction; }
-    bool setColorFunction(vtkColorTransferFunction * const func);
 };
 
 #endif // VTK_COLOR_TABLE_H

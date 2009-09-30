@@ -42,7 +42,7 @@ public:
 
   //! Get the value of the current piecewise function.
   vtkPiecewiseFunction* getPiecewiseFunction() {
-    m_pieceFunc = m_graph->getPiecewiseFunction();
+    m_pieceFunc->DeepCopy(m_graph->getPiecewiseFunction());
     return m_pieceFunc;
   }
 

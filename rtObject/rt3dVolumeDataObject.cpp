@@ -26,7 +26,7 @@
 #include "rtColorFuncRenderObject.h"
 #include "rtPieceFuncDataObject.h"
 
-//! Constructor
+
 rt3DVolumeDataObject::rt3DVolumeDataObject() {
   setObjectType(rtConstants::OT_3DObject);
 
@@ -43,6 +43,10 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   // The the functions as default for now.
   m_pieceFunc = m_pieceFuncDefault;
   m_colorTransFunc = m_colorTransFuncDefault;
+
+  // Set them both to -1 since at the start we are not using external color or piecewise functions.
+  m_piecewiseFuncID = -1;
+  m_colorFuncID = -1;
 
   m_volumeProperty->SetScalarOpacity(m_pieceFunc);
   m_volumeProperty->SetColor(m_colorTransFunc);
@@ -67,7 +71,7 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   setupGUI();
 }
 
-//! Destructor
+
 rt3DVolumeDataObject::~rt3DVolumeDataObject() {
   cleanupGUI();
 
@@ -124,12 +128,6 @@ void rt3DVolumeDataObject::update() {
   }
 }
 
-//! Get a handle to the image data object.
-/*!
-  This function provides a way to access and to modify the image data object.
-  Do not delete the handle returned by this object. The creation and deletion is handled by the Data Object.
-  @return A handle to the image data object.
-  */
 vtkImageData* rt3DVolumeDataObject::getImageData() {
   return m_imgData;
 }
@@ -318,8 +316,8 @@ void rt3DVolumeDataObject::setupGUI() {
   connect(&rtObjectManager::instance(), SIGNAL(objectCreated(int)), this, SLOT(oldObjectRemoved(int)));
 
   // The combo boxes for the CTF and PWF.
-  connect(m_optionsWidget.comboCTFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(colorTransferChanged(QString)));
-  connect(m_optionsWidget.comboPieceFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(piecewiseChanged(QString)));
+  connect(m_optionsWidget.comboCTFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(colorTransferChangedGUI(QString)));
+  connect(m_optionsWidget.comboPieceFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(piecewiseChangedGUI(QString)));
 
   // The flip axis signals.
   connect(m_optionsWidget.flipXCheck, SIGNAL(stateChanged(int)), this, SLOT(flipX()));
@@ -378,20 +376,31 @@ void rt3DVolumeDataObject::oldObjectRemoved(int id) {
 
 }
 
-//! A new color transfer function was chosen through the GUI
-void rt3DVolumeDataObject::colorTransferChanged(QString id) {
+void rt3DVolumeDataObject::colorTransferChangedGUI(QString id) {
   bool ok;
   int idInt;
+
+  // Remove the old connection if there is one.
+  if(m_colorFuncID != -1) {
+    rtColorFuncDataObject* func = static_cast<rtColorFuncDataObject*>(rtObjectManager::instance().getObjectWithID(m_colorFuncID)->getDataObject());
+    if (func) {
+      disconnect(func, SIGNAL(objectChanged(int)), this, SLOT(colorTransferChanged(int)));
+    }
+    m_colorFuncID = -1;
+  }
 
   if (id == "Default") {
     // Setup the default CTF.
     m_colorTransFunc = m_colorTransFuncDefault;
+    m_colorFuncID = -1;
   } else {
 
     idInt = id.toInt(&ok);
     if (ok) {
       rtColorFuncDataObject* func = static_cast<rtColorFuncDataObject*>(rtObjectManager::instance().getObjectWithID(idInt)->getDataObject());
       m_colorTransFunc = func->getColorFunction();
+      m_colorFuncID = idInt;
+      connect(func, SIGNAL(objectChanged(int)), this, SLOT(colorTransferChanged(int)));
     }
   }
 
@@ -399,26 +408,55 @@ void rt3DVolumeDataObject::colorTransferChanged(QString id) {
   Modified();
 }
 
+void rt3DVolumeDataObject::colorTransferChanged(int id) {
+  rtColorFuncDataObject* func = static_cast<rtColorFuncDataObject*>(rtObjectManager::instance().getObjectWithID(id)->getDataObject());
+  if (func) {
+    m_colorTransFunc = func->getColorFunction();
+    m_volumeProperty->SetColor(m_colorTransFunc);
+    Modified();
+  }
+}
+
 //! A new piecewise function was chosen through the GUI
-void rt3DVolumeDataObject::piecewiseChanged(QString id) {
+void rt3DVolumeDataObject::piecewiseChangedGUI(QString id) {
   bool ok;
   int idInt;
+
+  // Remove the old connection if there is one.
+  if (m_piecewiseFuncID != -1) {
+    rtPieceFuncDataObject* func = static_cast<rtPieceFuncDataObject*>(rtObjectManager::instance().getObjectWithID(idInt)->getDataObject());
+    if(func) {   
+      disconnect(func, SIGNAL(objectChanged(int)), this, SLOT(piecewiseChanged(int)));
+    }
+    m_piecewiseFuncID = -1;
+  }
 
   if (id == "Default") {
     // Setup the default PWF.
     m_pieceFunc = m_pieceFuncDefault;
+    m_piecewiseFuncID = -1;
   } else {
 
     idInt = id.toInt(&ok);
     if (ok) {
       rtPieceFuncDataObject* func = static_cast<rtPieceFuncDataObject*>(rtObjectManager::instance().getObjectWithID(idInt)->getDataObject());
       m_pieceFunc = func->getPiecewiseFunction();
+      m_piecewiseFuncID = idInt;
+      connect(func, SIGNAL(objectChanged(int)), this, SLOT(piecewiseChanged(int)));
     }
   }
   m_volumeProperty->SetScalarOpacity(m_pieceFunc);
   Modified();
 }
 
+void rt3DVolumeDataObject::piecewiseChanged(int id) {
+  rtPieceFuncDataObject* func = static_cast<rtPieceFuncDataObject*>(rtObjectManager::instance().getObjectWithID(id)->getDataObject());
+  if (func) {
+    m_pieceFunc = func->getPiecewiseFunction();
+    m_volumeProperty->SetScalarOpacity(m_pieceFunc);
+    Modified();
+  }
+}
 
 //! Clean the GUI widgets.
 void rt3DVolumeDataObject::cleanupGUI() {

@@ -21,6 +21,7 @@
 #define RT_COLOR_FUNC_DATA_OBJECT_H
 
 #include "rtDataObject.h"
+#include "VtkColorTable.h"
 
 #include <vtkSmartPointer.h>
 #include <vtkColorTransferFunction.h>
@@ -40,7 +41,10 @@ public:
   void update();
 
   //! Get the value of the current color function.
-  vtkColorTransferFunction* getColorFunction() { return m_ctf; }
+  vtkColorTransferFunction* getColorFunction() {
+    m_ctf->DeepCopy(m_table->getColorFunction());
+    return m_ctf;
+  }
   bool setColorFunction(vtkColorTransferFunction* ctf);
 
  protected:
@@ -49,6 +53,9 @@ public:
   void cleanupGUI();
   
   vtkSmartPointer<vtkColorTransferFunction> m_ctf;
+
+  VtkColorTable* m_table;
+  QBoxLayout *m_mainLayout;
 };
 
 #endif 

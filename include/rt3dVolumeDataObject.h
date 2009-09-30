@@ -48,16 +48,28 @@ Q_OBJECT
 
 public:
 
+  //! Different types of ray cast functions
   enum RayCastFunction {
     RCF_COMPOSITE,
     RCF_ISOSURFACE,
     RCF_MIP
   };
 
+  //! Constructor
   rt3DVolumeDataObject();
+
+  //! Destructor
   ~rt3DVolumeDataObject();
 
+  //! Get a handle to the image data object.
+  /*!
+  This function provides a way to access and to modify the image data object.
+  Do not delete the handle returned by this object. The creation and deletion is handled by the Data Object.
+  @return A handle to the image data object.
+  */
   vtkImageData* getImageData();
+
+
   vtkImageData* getUShortData();
   vtkTransform* getTransform();
   vtkPiecewiseFunction* getPieceFunc();
@@ -95,9 +107,17 @@ public:
   void newObjectCreated(int id);
   void oldObjectRemoved(int id);
 
-  void colorTransferChanged(QString id);
-  void piecewiseChanged(QString id);
+  //! A new color transfer function was chosen through the GUI
+  void colorTransferChangedGUI(QString id);
+  //! The color transfer function has changed
+  void colorTransferChanged(int);
 
+  //! A new piecewise function has been chosen from the GUI
+  void piecewiseChangedGUI(QString id);
+  //! The piecewise function has changed
+  void piecewiseChanged(int);
+
+  //! The user has changed the intrpolation type from the GUI
   void interpolationChanged(int interp);
 
   void flipX();
@@ -124,12 +144,16 @@ public:
   vtkPiecewiseFunction* m_pieceFuncDefault;
   vtkColorTransferFunction* m_colorTransFuncDefault;
 
+  //! The ID of the external piecewise function used.
+  int m_piecewiseFuncID;
+  //! The ID of the external color function used.
+  int m_colorFuncID;
+
   vtkSmartPointer<vtkImageExtractComponents> m_subImg;
   int m_visibleComponent;
   QTimer *m_cineFrame;
 
   bool m_imgDataValid;
-
   //! The type of interpolation that will be used by the cut planes and the volume reslice.
   /*! The three types possible are: Nearest Neighbour = 0, Linear = 1, Cubic = 2
     */

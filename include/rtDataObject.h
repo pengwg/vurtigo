@@ -67,7 +67,7 @@ Q_OBJECT
 
  signals:
   //! Signal is sent when an object has been modified.
-  void objectChanged();
+  void objectChanged(int);
 
  protected:
   rtDataObject();

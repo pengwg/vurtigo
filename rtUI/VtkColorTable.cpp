@@ -53,11 +53,8 @@ void VtkColorTable::updateColorFunction() {
     const Point & point = points.at(mainTable->currentRow());
 
     colorFunction->RemovePoint(point.scalarValue);
-    colorFunction->AddRGBPoint(point.scalarValue, point.color.red(),
-                               point.color.green(), point.color.blue());
-    #ifdef VTK_TEST
-        cout << *colorFunction << endl;
-    #endif
+    colorFunction->AddRGBPoint(point.scalarValue, point.color.red(), point.color.green(), point.color.blue());
+    emit functionUpdated();
 }
 
 /*!
@@ -78,6 +75,7 @@ void VtkColorTable::removeCheckDupe(int oldScalarVal) {
         colorFunction->AddRGBPoint(point.scalarValue, point.color.red(),
                                     point.color.green(), point.color.blue());
     }
+    emit functionUpdated();
 }
 
 void VtkColorTable::updateRed(int val, bool updateAll) {
@@ -166,6 +164,7 @@ void VtkColorTable::updateFromPoints() {
         colorFunction->AddRGBPoint(currPoint.scalarValue, currPoint.color.red(),
                                    currPoint.color.green(), currPoint.color.blue());
     }
+    emit functionUpdated();
 }
 
 //! Used to keep track which cell the user is editing
@@ -216,9 +215,7 @@ void VtkColorTable::updateCell(int row, int column) {
 
                 qStableSort(points.begin(), points.end(), point_sort);
 
-                #ifdef VTK_TEST
-                    cout << *colorFunction << endl;
-                #endif
+                emit functionUpdated();
 
                 //match the table with the points
                 mainTable->removeRow(row);
@@ -266,9 +263,8 @@ void VtkColorTable::updateClamp(int state) {
         colorFunction->ClampingOff();
     else
         colorFunction->ClampingOn();
-    #ifdef VTK_TEST
-        cout << *colorFunction << endl;
-    #endif
+
+    emit functionUpdated();
 }
 
 void VtkColorTable::newPoint() {
@@ -293,14 +289,13 @@ void VtkColorTable::newPoint() {
     //update colorFunction
     colorFunction->AddRGBPoint(point.scalarValue, point.color.red(),
                                point.color.green(), point.color.blue());
-    #ifdef VTK_TEST
-        cout << *colorFunction << endl;
-    #endif
 
     //update table
     int currentRow = points.lastIndexOf(point);
     addTableRow(currentRow, point);
     mainTable->setCurrentCell(currentRow, 0);
+
+    emit functionUpdated();
 }
 
 void VtkColorTable::delPoint() {
@@ -340,6 +335,7 @@ void VtkColorTable::loadProfile(const Profile & profile) {
         clampCheckBox->setCheckState(Qt::Unchecked);
     }
     updateFromPoints();
+    emit functionUpdated();
 }
 
 void VtkColorTable::getDefaultProfile(Profile & profile) {
@@ -361,7 +357,6 @@ bool VtkColorTable::setColorFunction(vtkColorTransferFunction * const func) {
     points.clear();
 
     double * data = colorFunction->GetDataPointer();
-    cout << *colorFunction << endl;
     for (int a = 0; a < colorFunction->GetSize(); a++) {
         Point point;
         point.scalarValue = data[4*a];
@@ -371,4 +366,5 @@ bool VtkColorTable::setColorFunction(vtkColorTransferFunction * const func) {
     delete data;
 
     updateFromPoints();
+    emit functionUpdated();
 }

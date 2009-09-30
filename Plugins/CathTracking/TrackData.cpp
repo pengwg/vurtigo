@@ -57,22 +57,22 @@ void TrackData::setTrackingOn() {
   m_tracking = true;
 
   // When the catheter changes we update the plane.
-  connect(m_cath, SIGNAL(objectChanged()), this, SLOT(update()));
+  connect(m_cath, SIGNAL(objectChanged(int)), this, SLOT(update()));
 }
 
 void TrackData::setTrackingOff() {
   m_tracking = false;
 
-  disconnect(m_cath,  SIGNAL(objectChanged()), this, SLOT(update()) );
+  disconnect(m_cath,  SIGNAL(objectChanged(int)), this, SLOT(update()) );
 }
 
 void TrackData::setTracking(bool t) {
   m_tracking = t;
 
   if (m_tracking) {
-    connect(m_cath, SIGNAL(objectChanged()), this, SLOT(update()));
+    connect(m_cath, SIGNAL(objectChanged(int)), this, SLOT(update()));
   } else {
-    disconnect(m_cath, SIGNAL(objectChanged()), this, SLOT(update()) );
+    disconnect(m_cath, SIGNAL(objectChanged(int)), this, SLOT(update()) );
   }
 
 }

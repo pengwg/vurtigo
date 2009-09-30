@@ -36,6 +36,7 @@ rtColorFuncDataObject::~rtColorFuncDataObject() {
 bool rtColorFuncDataObject::setColorFunction(vtkColorTransferFunction* ctf) {
   if (!ctf) return false;
   m_ctf->DeepCopy(ctf);
+  m_table->setColorFunction(m_ctf);
   return true;
 }
 
@@ -46,10 +47,19 @@ void rtColorFuncDataObject::update() {
 
 //! Set the GUI widgets.
 void rtColorFuncDataObject::setupGUI() {
+  m_table = new VtkColorTable();
+  QWidget *wid = getBaseWidget();
+  m_mainLayout = new QBoxLayout(QBoxLayout::LeftToRight, wid);
 
+  connect(m_table, SIGNAL(functionUpdated()), this, SLOT(Modified()));
+
+  wid->setLayout(m_mainLayout);
+  m_mainLayout->addWidget(m_table);
 }
 
 //! Clean the GUI widgets.
 void rtColorFuncDataObject::cleanupGUI() {
-
+  m_mainLayout->removeWidget(m_table);
+  delete m_mainLayout;
+  delete m_table;
 }
