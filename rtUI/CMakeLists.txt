@@ -14,6 +14,7 @@ set (RTUI_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/HoverPoints.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VtkPiecewiseGraph.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtRenderOptions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/VtkColorTable.cpp
   CACHE INTERNAL "Vurtigo rtUI Source Files"
 )
 
@@ -32,5 +33,6 @@ set (RTUI_MOC_FILES
   ${CMAKE_HOME_DIRECTORY}/include/HoverPoints.h
   ${CMAKE_HOME_DIRECTORY}/include/VtkPiecewiseGraph.h
   ${CMAKE_HOME_DIRECTORY}/include/rtRenderOptions.h
+  ${CMAKE_HOME_DIRECTORY}/include/VtkColorTable.h
   CACHE INTERNAL "rtUI Files to be processed by Qt first"
 )

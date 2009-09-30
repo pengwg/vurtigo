@@ -91,6 +91,7 @@ set (UI_FILES
   rtUI/VtkRangeWidget.ui
   rtUI/slice2DOptions.ui
   rtUI/rtRenderOptions.ui
+  rtUI/VtkColorTable.ui
 )
 
 
