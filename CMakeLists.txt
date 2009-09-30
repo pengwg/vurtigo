@@ -87,7 +87,6 @@ set (UI_FILES
   rtUI/newObjectDialog.ui
   rtUI/VtkRangeDialog.ui
   rtUI/VtkClampingWidget.ui
-  rtUI/ProfileWidget.ui
   rtUI/VtkRangeWidget.ui
   rtUI/slice2DOptions.ui
   rtUI/rtRenderOptions.ui

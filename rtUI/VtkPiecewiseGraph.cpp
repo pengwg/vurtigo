@@ -87,10 +87,6 @@ void VtkPiecewiseGraph::init() {
 
     rangeWidget = new VtkRangeWidget(this, graphWidget->getHoverPoints());
     mainLayout->addWidget(rangeWidget);
-
-    profileWidget = new ProfileWidget(this, graphWidget->getHoverPoints());
-    mainLayout->addWidget(profileWidget);
-    connect(profileWidget, SIGNAL(getProfileSignal(ProfileHandler::Profile&)), this, SLOT(getDefaultProfile(ProfileHandler::Profile&)));
 }
 
 
@@ -100,14 +96,6 @@ void VtkPiecewiseGraph::createStartUpPoints(QPolygonF & startPoints, QVector<Hov
     startPoints << QPointF(bounds.left(),  (double)bounds.top()/2)
             << QPointF(bounds.right(), (double)bounds.top()/2);
     locks << HoverPoints::LockToLeft << HoverPoints::LockToRight;
-}
-
-
-//! Returns the default new profile
-void VtkPiecewiseGraph::getDefaultProfile(ProfileHandler::Profile & profile) {
-    HoverPoints::Profile & hoverPointsProfile = profile.hoverPointsProfile;
-    createStartUpPoints(hoverPointsProfile.points, hoverPointsProfile.locks);
-    hoverPointsProfile.dataSpace = QRect(0, SPACE_HEIGHT, DEFAULT_SPACE_WIDTH, -SPACE_HEIGHT);
 }
 
 VtkPiecewiseGraph::VtkPiecewiseGraph(QWidget *parent) : ControlGraphWidget(parent) {

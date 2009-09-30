@@ -54,7 +54,6 @@ public:
 public slots:
     void clamp();
     void updateVtkPiecewisePoints();
-    void getDefaultProfile(ProfileHandler::Profile & profile);
 signals:
   void functionUpdated();
 
