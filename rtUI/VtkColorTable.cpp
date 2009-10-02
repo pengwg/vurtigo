@@ -352,7 +352,6 @@ void VtkColorTable::getDefaultProfile(Profile & profile) {
 bool VtkColorTable::setColorFunction(vtkColorTransferFunction * const func) {
     if (!func || colorFunction == func) return false;
 
-    colorFunction->Delete();
     colorFunction->DeepCopy(func);
     points.clear();
 
@@ -360,7 +359,7 @@ bool VtkColorTable::setColorFunction(vtkColorTransferFunction * const func) {
     for (int a = 0; a < colorFunction->GetSize(); a++) {
         Point point;
         point.scalarValue = data[4*a];
-        point.color = QColor(data[4*a + 1], data[4*a + 2], data[4*a + 3]);
+        point.color = QColor(data[4*a + 1]*255.0f, data[4*a + 2]*255.0f, data[4*a + 3]*255.0f);
         points.append(point);
     }
     delete data;
