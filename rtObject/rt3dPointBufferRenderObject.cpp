@@ -103,7 +103,16 @@ void rt3DPointBufferRenderObject::setupDataObject() {
 
 //! Create the part of the pipeline that is done first. 
 void rt3DPointBufferRenderObject::setupPipeline() {
-  //Nothing to do here since the list is empty to start with. 
+  //Create a dummy object in the pipeline
+  SinglePointPipeline *tempPipe;
+  tempPipe = new SinglePointPipeline();
+  tempPipe->sphere->SetThetaResolution(10);
+  tempPipe->sphere->SetPhiResolution(10);
+  tempPipe->sphere->SetRadius(1);
+  tempPipe->sphere->SetCenter(0.0f ,0.0f ,0.0f);
+
+  m_pipeList.append(tempPipe);
+  m_pipe3D.push_back(tempPipe->actor);
 }
 
 

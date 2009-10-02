@@ -100,9 +100,6 @@ void TestSuiteBasic::run() {
       }
       ptObj->Modified();
       ptObj->unlock();
-
-      // Have to force an update for the 3D checkbox to appear.
-      rtBaseHandle::instance().forceRenderUpdate(m_3DPoints);
     }
   }
 

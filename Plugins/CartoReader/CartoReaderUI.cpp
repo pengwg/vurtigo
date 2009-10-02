@@ -119,8 +119,6 @@ void CartoReaderUI::saveAsPoints() {
       ptObj->Modified();
       ptObj->unlock();
     }
-
-    rtBaseHandle::instance().forceRenderUpdate(m_pts);
   }
 }
 
