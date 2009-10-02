@@ -1,0 +1,4 @@
+<plugin>
+  <name title="Carto Reader" version="1.0"/>
+  <lib libname="CartoReader" libpath="/home/spintilie/Code/Vurtigo-build/bin/"/>
+</plugin>

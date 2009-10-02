@@ -28,3 +28,8 @@ set(VURTIGO_PLUGIN_CATH_TRACKING ON CACHE BOOL "Compile the Catheter Tracking Pl
 if (VURTIGO_PLUGIN_CATH_TRACKING)
 add_subdirectory(CathTracking)
 endif (VURTIGO_PLUGIN_CATH_TRACKING)
+
+set(VURTIGO_PLUGIN_CARTO_READER ON CACHE BOOL "Compile the Carto Reader Plugin")
+if (VURTIGO_PLUGIN_CARTO_READER)
+add_subdirectory(CartoReader)
+endif (VURTIGO_PLUGIN_CARTO_READER)
