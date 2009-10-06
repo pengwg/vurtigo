@@ -79,7 +79,6 @@ int rtBaseHandle::requestNewObject(rtConstants::rtObjectType objType, QString na
     if (temp) {
       result = temp->getDataObject()->getId();
     }
-
   } else {
     // Not in the master thread so we need to pass a message to the master.
     // These threads we lock completely.
@@ -95,7 +94,7 @@ int rtBaseHandle::requestNewObject(rtConstants::rtObjectType objType, QString na
   return result;
 }
 
-//! This runs in the main execution thread.
+//! This runs in the main execution thread to request an object.
 void rtBaseHandle::requestNewObjectSlot(rtConstants::rtObjectType objType, QString name) {
   rtRenderObject* temp;
   int result=-1;

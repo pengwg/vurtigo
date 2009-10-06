@@ -13,97 +13,199 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QPushButton" name="loadFilePushButton">
-     <property name="text">
-      <string>Load File ...</string>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTabWidget" name="masterTabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>284</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QTableWidget" name="filePointsTableWidget">
-     <attribute name="horizontalHeaderDefaultSectionSize">
-      <number>60</number>
-     </attribute>
-     <attribute name="horizontalHeaderDefaultSectionSize">
-      <number>60</number>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>ID</string>
-      </property>
-      <property name="textAlignment">
-       <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>X</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Y</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Z</string>
-      </property>
-     </column>
-    </widget>
-   </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="QGroupBox" name="saveOptionsGroupBox">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="title">
-      <string>Save Options</string>
-     </property>
-     <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
-       <widget class="QPushButton" name="saveAsPointsPushButton">
-        <property name="text">
-         <string>Save As Points</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="saveAsPointsLineEdit">
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>0</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="saveAsSurfacePushButton">
-        <property name="text">
-         <string>Save As Surface</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="saveAsSurfaceLineEdit"/>
-      </item>
-     </layout>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Load File</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="loadFilePushButton">
+         <property name="text">
+          <string>Load File ...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>284</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QTableWidget" name="filePointsTableWidget">
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>60</number>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>ID</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>X</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Y</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Z</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>alpha</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>beta</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>gamma</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>UniPolar</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>BiPolar</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>LAT</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>Create Points</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="saveAsPointsPushButton">
+           <property name="text">
+            <string>Save As Points</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="saveAsPointsLineEdit">
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>245</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>Create Surface</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QCheckBox" name="uniPolarCheckBox">
+           <property name="text">
+            <string>Uni-Polar</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="biPolarCheckBox">
+           <property name="text">
+            <string>Bi-Polar</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="latCheckBox">
+           <property name="text">
+            <string>LAT</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QPushButton" name="saveAsSurfacePushButton">
+           <property name="text">
+            <string>Save As Surface</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="saveAsSurfaceLineEdit"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>214</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>

@@ -94,5 +94,4 @@ void setupOrigin() {
   origin.pSize = 10.0f;
   datObj->addPoint(origin);
   datObj->Modified();
-  renObj->tryUpdate();
 }

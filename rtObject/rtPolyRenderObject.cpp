@@ -50,7 +50,7 @@ void rtPolyRenderObject::update() {
 //! Add this object to the given renderer.
 bool rtPolyRenderObject::addToRenderer(vtkRenderer* ren) {
   if (!ren) return false;
-
+  setVisible3D(true);
   if (!ren->HasViewProp(m_actor)) {
     ren->AddViewProp(m_actor);
   }
@@ -61,7 +61,7 @@ bool rtPolyRenderObject::addToRenderer(vtkRenderer* ren) {
 //! Remove this object from the given renderer.
 bool rtPolyRenderObject::removeFromRenderer(vtkRenderer* ren) {
   if (!ren) return false;
-
+  setVisible3D(false);
   if (ren->HasViewProp(m_actor)) {
     ren->RemoveViewProp(m_actor);
   }
@@ -98,7 +98,6 @@ bool rtPolyRenderObject::getObjectLocation(double loc[6]) {
   if (!m_actor) return false;
 
   m_actor->GetBounds(loc);
-
   return true;
 }
 

@@ -27,12 +27,14 @@
 #include <iostream>
 
 CartoFileReader::CartoFileReader() {
+  m_fileLoaded = false;
+  m_dataName = "";
   m_pointList.clear();
 }
 
 
 CartoFileReader::~CartoFileReader() {
-
+  m_fileLoaded = false;
 }
 
 bool CartoFileReader::readFile(QString fName) {
@@ -47,21 +49,58 @@ bool CartoFileReader::readFile(QString fName) {
   QTextStream ts(&f);
   char temp=' ';
   m_dataName=ts.readLine(256);
+  m_dataName = m_dataName.simplified();
+  m_dataName.remove(" ");
   CartoPoint pt;
 
   m_pointList.clear();
 
+  int temp1, temp2;
+  bool firstPoint = true;
+
   while (!ts.atEnd()) {
     while (temp!='P' && !ts.atEnd()) ts >> temp;
     if (!ts.atEnd()) {
-      ts >> pt.col1 >> pt.id >> pt.col3 >> pt.x >> pt.y >> pt.z;
+      ts >> temp1 >> pt.id >> temp2 >> pt.x >> pt.y >> pt.z;
+      ts >> pt.alpha >> pt.beta >> pt.gamma;
+      ts >> pt.uniPolar >> pt.biPolar >> pt.LAT;
       m_pointList.insert(pt.id, pt);
+
+      if (firstPoint) {
+        m_minUniPolar = pt.uniPolar;
+        m_maxUniPolar = pt.uniPolar;
+        m_minBiPolar = pt.biPolar;
+        m_maxBiPolar = pt.biPolar;
+        m_minLAT = pt.LAT;
+        m_maxLAT = pt.LAT;
+        firstPoint = false;
+      } else if (pt.uniPolar < m_minUniPolar) {
+        m_minUniPolar = pt.uniPolar;
+      } else if (pt.uniPolar > m_maxUniPolar) {
+        m_maxUniPolar = pt.uniPolar;
+      }
+
+      if (pt.biPolar < m_minBiPolar) {
+        m_minBiPolar = pt.biPolar;
+      } else if (pt.biPolar > m_maxBiPolar) {
+        m_maxBiPolar = pt.biPolar;
+      }
+
+      if (pt.LAT < m_minLAT) {
+        m_minLAT = pt.LAT;
+      } else if (pt.LAT > m_maxLAT) {
+        m_maxLAT = pt.LAT;
+      }
+
     }
     temp = ' ';
   }
 
   // Cleanup.
   f.close();
+
+  // The file is now loaded.
+  m_fileLoaded=true;
 
   return true;
 }

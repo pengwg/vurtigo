@@ -31,21 +31,34 @@ public:
   ~CartoFileReader();
 
   struct CartoPoint {
-    int col1;
     int id;
-    int col3;
     double x, y, z;
+    double alpha, beta, gamma;
+    double uniPolar;
+    double biPolar;
+    int LAT;
   };
 
   //! Read a particular carto file.
+  /*! Read the file with the name fName. Will return true if the file was read as expected and false otherwise. Note that this function will still return true if an empty carto file was read. As a result it is important to check the point list to verify that there exists at least one point in the list.
+    \param fName The full name of the file to read. It is assumed that the string contains not just the name of the file put also the full path.
+    \return Will return true if the function was able to read the file as expected and false otherwise.
+      */
   bool readFile(QString fName);
 
   //! Get a list of all the carto points loaded by the reader.
   QList<CartoPoint> getPointSet();
 
   //! Get the name of the dataset.
-  /*! This is usually the first line of the file. */
+  /*! The name of the dataset is taken from the first line of the file. Carto files have one line of text at the top that does not have any point informtaion. */
   QString getDataName();
+
+  double getMinUniPolar() { return m_minUniPolar; }
+  double getMaxUniPolar() { return m_maxUniPolar; }
+  double getMinBiPolar() { return m_minBiPolar; }
+  double getMaxBiPolar() { return m_maxBiPolar; }
+  int getMinLAT() { return m_minLAT; }
+  int getMaxLAT() { return m_maxLAT; }
 
 protected:
   //! A map between an object ID and the object itself.
@@ -53,6 +66,24 @@ protected:
 
   //! The name of the dataset which is found on the first line of the file.
   QString m_dataName;
+
+  //! Minimum unipolar
+  double m_minUniPolar;
+  //! Maximum unipolar
+  double m_maxUniPolar;
+
+  //! Min bipolar
+  double m_minBiPolar;
+  //! Max bipolar
+  double m_maxBiPolar;
+
+  //! Min LAT
+  int m_minLAT;
+  //! Max LAT
+  int m_maxLAT;
+
+  //! Flag to determine if a valid flag has been loaded.
+  bool m_fileLoaded;
 };
 
 #endif

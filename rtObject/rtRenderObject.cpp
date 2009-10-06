@@ -101,7 +101,11 @@ void rtRenderObject::updateTreeItem() {
     // Only show the 3D checkbox if there are 3D type of items.
     if (m_pipe3D.count() > 0) {
       m_treeItem->setText(2, "3D");
-      m_treeItem->setCheckState(2,Qt::Unchecked); 
+      if (m_visible3D || m_treeItem->checkState(2) == Qt::Checked) {
+        m_treeItem->setCheckState(2,Qt::Checked);
+      } else {
+        m_treeItem->setCheckState(2,Qt::Unchecked);
+      }
     } else {
       m_treeItem->setText(2, "NA");
     }
