@@ -63,7 +63,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   m_axesActor = vtkAxesActor::New();
   m_propAssembly = vtkPropAssembly::New();
-  m_orientationWidget = vtkOrientationMarkerWidget::New();
+  m_orientationWidget = new rtOrientationMarkerWidget();
 
   m_propAssembly->AddPart( m_axesActor );
   m_orientationWidget->SetOrientationMarker(m_propAssembly);
@@ -103,7 +103,6 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   pluginBrowseFrame->setLayout(&m_pluginWidgetLayout);
 
   // the default is camera mode.
-  m_interactionMode = CAMERA_MODE;
   actionCamera_Mode->setChecked(true);
   actionInteraction_Mode->setChecked(false);
   actionPlacement_Mode->setChecked(false);
@@ -139,7 +138,11 @@ rtMainWindow::~rtMainWindow() {
   if (m_renderer3D) m_renderer3D->Delete();
   if (m_axesActor) m_axesActor->Delete();
   if (m_propAssembly) m_propAssembly->Delete();
-  if (m_orientationWidget) m_orientationWidget->Delete();
+  if (m_orientationWidget) {
+    m_orientationWidget->SetInteractor(NULL);
+    m_orientationWidget->Delete();
+    m_orientationWidget = NULL;
+  }
   if (m_axesProperties) delete m_axesProperties;
 }
 
@@ -680,36 +683,36 @@ void rtMainWindow::setCoordType(rtAxesProperties::CoordType ct) {
 }
 
 void rtMainWindow::cameraModeToggled(bool toggle) {
-  if (m_interactionMode != CAMERA_MODE && toggle) {
-    m_interactionMode = CAMERA_MODE;
+  if (m_render3DVTKWidget->getInteraction() != customQVTKWidget::CAMERA_MODE && toggle) {
+    m_render3DVTKWidget->setInteraction(customQVTKWidget::CAMERA_MODE);
     actionCamera_Mode->setChecked(true);
     actionInteraction_Mode->setChecked(false);
     actionPlacement_Mode->setChecked(false);
-  } else if (m_interactionMode == CAMERA_MODE && !toggle) {
+  } else if (m_render3DVTKWidget->getInteraction() == customQVTKWidget::CAMERA_MODE && !toggle) {
     // Prevent the user from turning all the options off.
     actionCamera_Mode->setChecked(true);
   }
 }
 
 void rtMainWindow::interactionModeToggled(bool toggle) {
-  if (m_interactionMode != INTERACTION_MODE && toggle) {
-    m_interactionMode = INTERACTION_MODE;
+  if (m_render3DVTKWidget->getInteraction() != customQVTKWidget::INTERACTION_MODE && toggle) {
+    m_render3DVTKWidget->setInteraction(customQVTKWidget::INTERACTION_MODE);
     actionCamera_Mode->setChecked(false);
     actionInteraction_Mode->setChecked(true);
     actionPlacement_Mode->setChecked(false);
-  } else if (m_interactionMode == INTERACTION_MODE && !toggle) {
+  } else if (m_render3DVTKWidget->getInteraction() == customQVTKWidget::INTERACTION_MODE && !toggle) {
     // Prevent the user from turning all the options off.
     actionInteraction_Mode->setChecked(true);
   }
 }
 
 void rtMainWindow::placeModeToggled(bool toggle) {
-  if (m_interactionMode != PLACE_MODE && toggle) {
-    m_interactionMode = PLACE_MODE;
+  if (m_render3DVTKWidget->getInteraction() != customQVTKWidget::PLACE_MODE && toggle) {
+    m_render3DVTKWidget->setInteraction(customQVTKWidget::PLACE_MODE);
     actionCamera_Mode->setChecked(false);
     actionInteraction_Mode->setChecked(false);
     actionPlacement_Mode->setChecked(true);
-  } else if (m_interactionMode == PLACE_MODE && !toggle) {
+  } else if (m_render3DVTKWidget->getInteraction() == customQVTKWidget::PLACE_MODE && !toggle) {
     // Prevent the user from turning all the options off.
     actionPlacement_Mode->setChecked(true);
   }

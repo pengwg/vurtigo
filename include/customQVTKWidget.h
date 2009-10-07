@@ -24,16 +24,33 @@
 #include "vtkPropPicker.h"
 #include "vtkProp.h"
 
+#include <QObject>
+
 class rtRenderObject;
 
+//! A major modification of the original QVTKWidget
 class customQVTKWidget : public QVTKWidget {
+
+  Q_OBJECT
+
  public:
+
+  enum InteractionMode {
+    CAMERA_MODE,
+    INTERACTION_MODE,
+    PLACE_MODE
+  };
+
   customQVTKWidget(QWidget* parent = NULL, Qt::WFlags f = 0);
   ~customQVTKWidget();
 
   void setSquare(bool sq) { m_forceSquare = sq; }
   bool isSquare() { return m_forceSquare; }
 
+  InteractionMode getInteraction() { return m_interactionMode; }
+  void setInteraction(InteractionMode mode) { m_interactionMode = mode; }
+//signals:
+//  void camera
  protected:
   virtual void resizeEvent(QResizeEvent* event);
   virtual void mousePressEvent(QMouseEvent* event);
@@ -42,6 +59,7 @@ class customQVTKWidget : public QVTKWidget {
   virtual void mouseDoubleClickEvent(QMouseEvent* event);
 
   bool m_forceSquare;
+  InteractionMode m_interactionMode;
 };
 
 #endif

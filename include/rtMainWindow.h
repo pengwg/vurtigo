@@ -34,13 +34,14 @@
 #include <vtkRenderer.h>
 #include <vtkAxesActor.h>
 #include <vtkPropAssembly.h>
-#include <vtkOrientationMarkerWidget.h>
+
 #include <vtkCellPicker.h>
 
 class rtRenderObject;
 #include "rtAxesProperties.h"
 #include "rtOptions2DView.h"
 #include "objTypes.h"
+#include "rtOrientationMarkerWidget.h"
 
 //! Object that controls the visible Qt widgets. 
 class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
@@ -48,13 +49,6 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   Q_OBJECT
  
  public:
-
-  enum InteractionMode {
-    CAMERA_MODE,
-    INTERACTION_MODE,
-    PLACE_MODE
-  };
-
   //! Constructor
   /*!
     \param parent The parent widget for this window. In most cases this is NULL since this is a main window and has no parent.
@@ -96,7 +90,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   bool remove2DWidget(int id);
   rtOptions2DView* get2DWidget(int id);
 
-  InteractionMode getInteractionMode() { return m_interactionMode; }
+  customQVTKWidget::InteractionMode getInteractionMode() { return m_render3DVTKWidget->getInteraction(); }
 
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
@@ -132,7 +126,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   //! The camera mode button was pressed.
   void cameraModeToggled(bool);
+  //! The interaction mode button was pressed.
   void interactionModeToggled(bool);
+  //! The placement mode button was pressed.
   void placeModeToggled(bool);
 
  protected:
@@ -154,7 +150,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   // The Axes in the corner
   vtkAxesActor *m_axesActor;
   vtkPropAssembly *m_propAssembly;
-  vtkOrientationMarkerWidget *m_orientationWidget;
+  rtOrientationMarkerWidget *m_orientationWidget;
   rtAxesProperties* m_axesProperties;
 
   bool m_renderFlag3D;
@@ -175,9 +171,6 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   //! Layout for the plugin widget.
   QHBoxLayout m_pluginWidgetLayout;
-
-  //! The type of interaction that the user has currently selected.
-  InteractionMode m_interactionMode;
 
   void connectSignals();
   void setupObjectTree();

@@ -14,6 +14,7 @@ set (RTUI_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/VtkPiecewiseGraph.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtRenderOptions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/VtkColorTable.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtOrientationMarkerWidget.cpp
   CACHE INTERNAL "Vurtigo rtUI Source Files"
 )
 
@@ -32,5 +33,7 @@ set (RTUI_MOC_FILES
   ${CMAKE_HOME_DIRECTORY}/include/VtkPiecewiseGraph.h
   ${CMAKE_HOME_DIRECTORY}/include/rtRenderOptions.h
   ${CMAKE_HOME_DIRECTORY}/include/VtkColorTable.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtOrientationMarkerWidget.h
+  ${CMAKE_HOME_DIRECTORY}/include/customQVTKWidget.h
   CACHE INTERNAL "rtUI Files to be processed by Qt first"
 )

@@ -32,6 +32,7 @@
 #include "vtkRenderWindowInteractor.h"
 
 customQVTKWidget::customQVTKWidget(QWidget* parent, Qt::WFlags f) : QVTKWidget(parent, f) {
+  m_interactionMode = CAMERA_MODE;
   m_forceSquare = false;
 }
 
