@@ -102,17 +102,18 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   pluginBrowseFrame->setLayout(&m_pluginWidgetLayout);
 
+  // the default is camera mode.
+  m_interactionMode = CAMERA_MODE;
+  actionCamera_Mode->setChecked(true);
+  actionInteraction_Mode->setChecked(false);
+  actionPlacement_Mode->setChecked(false);
+
   viewChangedMixed();
   populateObjectTypeNames();
   connectSignals();
   setupObjectTree();
 }
 
-//! Destructor
-/*!
-  Removes the current widget from the viewer at the bottom.
-  Also deletes objects that were created in this class. 
- */
 rtMainWindow::~rtMainWindow() {
   m_renderFlag3D = false;
 
@@ -427,6 +428,10 @@ void rtMainWindow::connectSignals() {
   // Plugin Tree
   connect(pluginTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(pluginItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
 
+  // Menu Bar Only
+  connect(actionCamera_Mode, SIGNAL(toggled(bool)), this, SLOT(cameraModeToggled(bool)));
+  connect(actionInteraction_Mode, SIGNAL(toggled(bool)), this, SLOT(interactionModeToggled(bool)));
+  connect(actionPlacement_Mode, SIGNAL(toggled(bool)), this, SLOT(placeModeToggled(bool)));
 }
 
 void rtMainWindow::setupObjectTree() {
@@ -658,7 +663,6 @@ void rtMainWindow::setViewType(rtAxesProperties::ViewType vt) {
   m_renderFlag3D = true;
 }
 
-//! Set the coordinate system that is shown by the axes.
 void rtMainWindow::setCoordType(rtAxesProperties::CoordType ct) {
   switch (ct) {
     case (rtAxesProperties::CT_PATIENT):
@@ -674,6 +678,43 @@ void rtMainWindow::setCoordType(rtAxesProperties::CoordType ct) {
   }
   m_renderFlag3D = true;
 }
+
+void rtMainWindow::cameraModeToggled(bool toggle) {
+  if (m_interactionMode != CAMERA_MODE && toggle) {
+    m_interactionMode = CAMERA_MODE;
+    actionCamera_Mode->setChecked(true);
+    actionInteraction_Mode->setChecked(false);
+    actionPlacement_Mode->setChecked(false);
+  } else if (m_interactionMode == CAMERA_MODE && !toggle) {
+    // Prevent the user from turning all the options off.
+    actionCamera_Mode->setChecked(true);
+  }
+}
+
+void rtMainWindow::interactionModeToggled(bool toggle) {
+  if (m_interactionMode != INTERACTION_MODE && toggle) {
+    m_interactionMode = INTERACTION_MODE;
+    actionCamera_Mode->setChecked(false);
+    actionInteraction_Mode->setChecked(true);
+    actionPlacement_Mode->setChecked(false);
+  } else if (m_interactionMode == INTERACTION_MODE && !toggle) {
+    // Prevent the user from turning all the options off.
+    actionInteraction_Mode->setChecked(true);
+  }
+}
+
+void rtMainWindow::placeModeToggled(bool toggle) {
+  if (m_interactionMode != PLACE_MODE && toggle) {
+    m_interactionMode = PLACE_MODE;
+    actionCamera_Mode->setChecked(false);
+    actionInteraction_Mode->setChecked(false);
+    actionPlacement_Mode->setChecked(true);
+  } else if (m_interactionMode == PLACE_MODE && !toggle) {
+    // Prevent the user from turning all the options off.
+    actionPlacement_Mode->setChecked(true);
+  }
+}
+
 
 //! Create a new 2D widget and return the ID
 /*! Get the main window to create a new widget where a new 2D plane can be displayed.

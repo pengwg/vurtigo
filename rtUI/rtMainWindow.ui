@@ -193,7 +193,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>290</width>
-                  <height>549</height>
+                  <height>539</height>
                  </rect>
                 </property>
                 <property name="sizePolicy">
@@ -294,6 +294,15 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionPlugin_File"/>
+   <addaction name="separator"/>
+   <addaction name="actionMixed"/>
+   <addaction name="action3D_Only"/>
+   <addaction name="action2D_Only"/>
+   <addaction name="separator"/>
+   <addaction name="actionCamera_Mode"/>
+   <addaction name="actionInteraction_Mode"/>
+   <addaction name="actionPlacement_Mode"/>
   </widget>
   <action name="actionQuit">
    <property name="text">
@@ -305,7 +314,7 @@
   </action>
   <action name="actionMixed">
    <property name="text">
-    <string>Mixed</string>
+    <string>Mixed View</string>
    </property>
   </action>
   <action name="action3D_Only">
@@ -397,6 +406,33 @@
   <action name="action3D_Render_Options">
    <property name="text">
     <string>3D Render Options</string>
+   </property>
+  </action>
+  <action name="actionCamera_Mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Camera Mode</string>
+   </property>
+  </action>
+  <action name="actionInteraction_Mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Interaction Mode</string>
+   </property>
+  </action>
+  <action name="actionPlacement_Mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Placement Mode</string>
    </property>
   </action>
  </widget>

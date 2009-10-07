@@ -172,6 +172,7 @@ void rtCathRenderObject::update() {
     }
 
     m_splineFilter->SetRadius(0.2f);
+    m_splineLineData->Modified();
 
     m_sphereActor->VisibilityOn();
     m_splineActor->VisibilityOn();

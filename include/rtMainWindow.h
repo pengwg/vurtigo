@@ -48,7 +48,25 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   Q_OBJECT
  
  public:
+
+  enum InteractionMode {
+    CAMERA_MODE,
+    INTERACTION_MODE,
+    PLACE_MODE
+  };
+
+  //! Constructor
+  /*!
+    \param parent The parent widget for this window. In most cases this is NULL since this is a main window and has no parent.
+    \param flags The window flags.
+    */
   rtMainWindow(QWidget *parent = 0, Qt::WindowFlags flags = 0);
+
+  //! Destructor
+  /*!
+  Removes the current widget from the viewer at the bottom.
+  Also deletes objects that were created in this class.
+  */
   ~rtMainWindow();
 
   vtkRenderWindow* getRenderWindow();
@@ -77,6 +95,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   int createNew2DWidget();
   bool remove2DWidget(int id);
   rtOptions2DView* get2DWidget(int id);
+
+  InteractionMode getInteractionMode() { return m_interactionMode; }
 
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
@@ -110,7 +130,13 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   void update2DWindowLists(QMultiHash<int, QString>* hash);
 
+  //! The camera mode button was pressed.
+  void cameraModeToggled(bool);
+  void interactionModeToggled(bool);
+  void placeModeToggled(bool);
+
  protected:
+  //! The widget that handles the 3D rendering window from VTK.
   customQVTKWidget *m_render3DVTKWidget;
   QHBoxLayout *m_render3DLayout;
   QHBoxLayout *m_objectBrowseLayout;
@@ -150,11 +176,16 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   //! Layout for the plugin widget.
   QHBoxLayout m_pluginWidgetLayout;
 
+  //! The type of interaction that the user has currently selected.
+  InteractionMode m_interactionMode;
+
   void connectSignals();
   void setupObjectTree();
   void populateObjectTypeNames();
 
   void setViewType(rtAxesProperties::ViewType);
+
+  //! Set the coordinate system that is shown by the axes.
   void setCoordType(rtAxesProperties::CoordType);
 
   void view2DHashCleanup();
