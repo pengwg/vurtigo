@@ -38,6 +38,7 @@
 #include <vtkCellPicker.h>
 
 class rtRenderObject;
+class rtCameraControl;
 #include "rtAxesProperties.h"
 #include "rtOptions2DView.h"
 #include "objTypes.h"
@@ -146,6 +147,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   vtkRenderWindow *m_renWin3D;
   vtkRenderer *m_renderer3D;
   vtkCellPicker *m_cellPicker;
+  rtCameraControl *m_cameraControl;
 
   // The Axes in the corner
   vtkAxesActor *m_axesActor;

@@ -49,14 +49,42 @@ class customQVTKWidget : public QVTKWidget {
 
   InteractionMode getInteraction() { return m_interactionMode; }
   void setInteraction(InteractionMode mode) { m_interactionMode = mode; }
-//signals:
-//  void camera
+signals:
+  void cameraMousePress(QMouseEvent*);
+  void cameraMouseMove(QMouseEvent*);
+  void cameraMouseRelease(QMouseEvent*);
+  void cameraMouseDoubleClick(QMouseEvent*);
+  void cameraKeyPress(QKeyEvent*);
+  void cameraKeyRelease(QKeyEvent*);
+  void cameraWheel(QWheelEvent*);
+
+  void interMousePress(QMouseEvent*);
+  void interMouseMove(QMouseEvent*);
+  void interMouseRelease(QMouseEvent*);
+  void interMouseDoubleClick(QMouseEvent*);
+  void interKeyPress(QKeyEvent*);
+  void interKeyRelease(QKeyEvent*);
+  void interWheel(QWheelEvent*);
+
+  void placeMousePress(QMouseEvent*);
+  void placeMouseMove(QMouseEvent*);
+  void placeMouseRelease(QMouseEvent*);
+  void placeMouseDoubleClick(QMouseEvent*);
+  void placeKeyPress(QKeyEvent*);
+  void placeKeyRelease(QKeyEvent*);
+  void placeWheel(QWheelEvent*);
+
  protected:
   virtual void resizeEvent(QResizeEvent* event);
   virtual void mousePressEvent(QMouseEvent* event);
   virtual void mouseMoveEvent(QMouseEvent* event);
   virtual void mouseReleaseEvent(QMouseEvent* event);
   virtual void mouseDoubleClickEvent(QMouseEvent* event);
+
+  virtual void keyPressEvent(QKeyEvent* event);
+  virtual void keyReleaseEvent(QKeyEvent* event);
+
+  virtual void wheelEvent(QWheelEvent* event);
 
   bool m_forceSquare;
   InteractionMode m_interactionMode;

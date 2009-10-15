@@ -17,26 +17,22 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
-#ifndef RT_ORIENTATION_MARKER_WIDGET_H
-#define RT_ORIENTATION_MARKER_WIDGET_H
+#ifndef RT_CAMERA_CONTROL_H
+#define RT_CAMERA_CONTROL_H
 
-#include <vtkOrientationMarkerWidget.h>
 #include <QObject>
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QWheelEvent>
 
+#include "vtkCamera.h"
+
 class customQVTKWidget;
 
-class rtOrientationMarkerWidget : public QObject, public vtkOrientationMarkerWidget
-{
+class rtCameraControl : public QObject {
   Q_OBJECT
 public:
-  //! Constructor
-  rtOrientationMarkerWidget(customQVTKWidget*);
-
-  //! Destructor
-  ~rtOrientationMarkerWidget();
+  rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWidget);
 
 public slots:
   void mousePress(QMouseEvent*);
@@ -48,6 +44,7 @@ public slots:
   void wheel(QWheelEvent*);
 
 protected:
+  vtkCamera* m_camera;
   customQVTKWidget* m_eventWidget;
 
   bool m_leftMouseDown;
@@ -57,4 +54,4 @@ protected:
   void connectEvents();
 };
 
-#endif // RT_ORIENTATION_MARKER_WIDGET_H
+#endif // RT_CAMERA_CONTROL_H

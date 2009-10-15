@@ -17,32 +17,33 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
-#include "rtOrientationMarkerWidget.h"
+#include "rtCameraControl.h"
 #include "customQVTKWidget.h"
-
-rtOrientationMarkerWidget::rtOrientationMarkerWidget(customQVTKWidget* eventWid) {
+#include <iostream>
+rtCameraControl::rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWid) {
+  m_camera = cam;
   m_eventWidget = eventWid;
 
   connectEvents();
+
+  m_leftMouseDown = false;
+  m_rightMouseDown = false;
+  m_midMouseDown = false;
 }
 
-
-rtOrientationMarkerWidget::~rtOrientationMarkerWidget() {
-}
-
-void rtOrientationMarkerWidget::connectEvents() {
+void rtCameraControl::connectEvents() {
   if (!m_eventWidget) return;
-  QObject::connect(m_eventWidget, SIGNAL(cameraMousePress(QMouseEvent*)), this, SLOT(mousePress(QMouseEvent*)));
-  QObject::connect(m_eventWidget, SIGNAL(cameraMouseMove(QMouseEvent*)), this, SLOT(mouseMove(QMouseEvent*)));
-  QObject::connect(m_eventWidget, SIGNAL(cameraMouseRelease(QMouseEvent*)), this, SLOT(mouseRelease(QMouseEvent*)));
-  QObject::connect(m_eventWidget, SIGNAL(cameraMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClick(QMouseEvent*)));
-  QObject::connect(m_eventWidget, SIGNAL(cameraKeyPress(QKeyEvent*)), this, SLOT(keyPress(QKeyEvent*)));
-  QObject::connect(m_eventWidget, SIGNAL(cameraKeyRelease(QKeyEvent*)), this, SLOT(keyRelease(QKeyEvent*)));
-  QObject::connect(m_eventWidget, SIGNAL(cameraWheel(QWheelEvent*)), this, SLOT(wheel(QWheelEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraMousePress(QMouseEvent*)), this, SLOT(mousePress(QMouseEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraMouseMove(QMouseEvent*)), this, SLOT(mouseMove(QMouseEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraMouseRelease(QMouseEvent*)), this, SLOT(mouseRelease(QMouseEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClick(QMouseEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraKeyPress(QKeyEvent*)), this, SLOT(keyPress(QKeyEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraKeyRelease(QKeyEvent*)), this, SLOT(keyRelease(QKeyEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraWheel(QWheelEvent*)), this, SLOT(wheel(QWheelEvent*)));
 }
 
 
-void rtOrientationMarkerWidget::mousePress(QMouseEvent* ev) {
+void rtCameraControl::mousePress(QMouseEvent* ev) {
   if (ev->button() == Qt::LeftButton) {
     m_leftMouseDown = true;
   } else if (ev->button() == Qt::RightButton) {
@@ -54,13 +55,13 @@ void rtOrientationMarkerWidget::mousePress(QMouseEvent* ev) {
 
 }
 
-void rtOrientationMarkerWidget::mouseMove(QMouseEvent* ev) {
+void rtCameraControl::mouseMove(QMouseEvent* ev) {
   if (m_leftMouseDown) {
     // Rotate the camera.
   }
 }
 
-void rtOrientationMarkerWidget::mouseRelease(QMouseEvent* ev) {
+void rtCameraControl::mouseRelease(QMouseEvent* ev) {
   if (ev->button() == Qt::LeftButton) {
     m_leftMouseDown = false;
   } else if (ev->button() == Qt::RightButton) {
@@ -70,14 +71,14 @@ void rtOrientationMarkerWidget::mouseRelease(QMouseEvent* ev) {
   }
 }
 
-void rtOrientationMarkerWidget::mouseDoubleClick(QMouseEvent* ev) {
+void rtCameraControl::mouseDoubleClick(QMouseEvent* ev) {
 }
 
-void rtOrientationMarkerWidget::keyPress(QKeyEvent* ev) {
+void rtCameraControl::keyPress(QKeyEvent* ev) {
 }
 
-void rtOrientationMarkerWidget::keyRelease(QKeyEvent* ev) {
+void rtCameraControl::keyRelease(QKeyEvent* ev) {
 }
 
-void rtOrientationMarkerWidget::wheel(QWheelEvent* ev) {
+void rtCameraControl::wheel(QWheelEvent* ev) {
 }

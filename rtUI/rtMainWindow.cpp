@@ -31,6 +31,7 @@
 #include "rtPluginLoader.h"
 #include "rtMessage.h"
 #include "rtRenderOptions.h"
+#include "rtCameraControl.h"
 #include "ui_newObjectDialog.h"
 
 #include "vtkPropAssembly.h"
@@ -58,12 +59,14 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_renderer3D = vtkRenderer::New();
   m_renWin3D->AddRenderer(m_renderer3D);
 
+  m_cameraControl = new rtCameraControl( m_renderer3D->GetActiveCamera(), m_render3DVTKWidget );
+
   m_inter3D->SetDesiredUpdateRate(3.0f);
   m_inter3D->SetStillUpdateRate(1.0f);
 
   m_axesActor = vtkAxesActor::New();
   m_propAssembly = vtkPropAssembly::New();
-  m_orientationWidget = new rtOrientationMarkerWidget();
+  m_orientationWidget = new rtOrientationMarkerWidget(m_render3DVTKWidget);
 
   m_propAssembly->AddPart( m_axesActor );
   m_orientationWidget->SetOrientationMarker(m_propAssembly);
@@ -117,6 +120,8 @@ rtMainWindow::~rtMainWindow() {
   m_renderFlag3D = false;
 
   m_cellPicker->Delete();
+
+  if (m_cameraControl) delete m_cameraControl;
 
   clearPluginList();
   clearObjectList();

@@ -59,16 +59,61 @@ void customQVTKWidget::resizeEvent(QResizeEvent* event) {
 
 //! Called when one of the mouse buttons is pressed.
 void customQVTKWidget::mousePressEvent(QMouseEvent* event) {
+
+  switch(m_interactionMode) {
+    case(CAMERA_MODE):
+    emit cameraMousePress(event);
+    break;
+    case(INTERACTION_MODE):
+    emit interMousePress(event);
+    break;
+    case(PLACE_MODE):
+    emit placeMousePress(event);
+    break;
+    default:
+    break;
+  }
+
   QVTKWidget::mousePressEvent(event);
 }
 
 //! Called as the mouse is moved.
 void customQVTKWidget::mouseMoveEvent(QMouseEvent* event) {
+
+  switch(m_interactionMode) {
+    case(CAMERA_MODE):
+    emit cameraMouseMove(event);
+    break;
+    case(INTERACTION_MODE):
+    emit interMouseMove(event);
+    break;
+    case(PLACE_MODE):
+    emit placeMouseMove(event);
+    break;
+    default:
+    break;
+  }
+
   QVTKWidget::mouseMoveEvent(event);
 }
 
 //! Called when the click is released.
 void customQVTKWidget::mouseReleaseEvent(QMouseEvent* event) {
+
+  switch(m_interactionMode) {
+    case(CAMERA_MODE):
+    emit cameraMouseRelease(event);
+    break;
+    case(INTERACTION_MODE):
+    emit interMouseRelease(event);
+    break;
+    case(PLACE_MODE):
+    emit placeMouseRelease(event);
+    break;
+    default:
+    break;
+  }
+
   QVTKWidget::mouseReleaseEvent(event);
 }
 
@@ -78,6 +123,81 @@ void customQVTKWidget::mouseReleaseEvent(QMouseEvent* event) {
   This function calls the event ignore function which passes the event up to the parent.
   */
 void customQVTKWidget::mouseDoubleClickEvent(QMouseEvent* event) {
+
+  switch(m_interactionMode) {
+    case(CAMERA_MODE):
+    emit cameraMouseDoubleClick(event);
+    break;
+    case(INTERACTION_MODE):
+    emit interMouseDoubleClick(event);
+    break;
+    case(PLACE_MODE):
+    emit placeMouseDoubleClick(event);
+    break;
+    default:
+    break;
+  }
+
   QVTKWidget::mouseDoubleClickEvent(event);
   event->ignore();
+}
+
+
+void customQVTKWidget::keyPressEvent(QKeyEvent* event) {
+
+  switch(m_interactionMode) {
+    case(CAMERA_MODE):
+    emit cameraKeyPress(event);
+    break;
+    case(INTERACTION_MODE):
+    emit interKeyPress(event);
+    break;
+    case(PLACE_MODE):
+    emit placeKeyPress(event);
+    break;
+    default:
+    break;
+  }
+
+  QVTKWidget::keyPressEvent(event);
+}
+
+
+void customQVTKWidget::keyReleaseEvent(QKeyEvent* event) {
+
+  switch(m_interactionMode) {
+    case(CAMERA_MODE):
+    emit cameraKeyRelease(event);
+    break;
+    case(INTERACTION_MODE):
+    emit interKeyRelease(event);
+    break;
+    case(PLACE_MODE):
+    emit placeKeyRelease(event);
+    break;
+    default:
+    break;
+  }
+
+  QVTKWidget::keyReleaseEvent(event);
+}
+
+
+void customQVTKWidget::wheelEvent(QWheelEvent* event) {
+
+  switch(m_interactionMode) {
+    case(CAMERA_MODE):
+    emit cameraWheel(event);
+    break;
+    case(INTERACTION_MODE):
+    emit interWheel(event);
+    break;
+    case(PLACE_MODE):
+    emit placeWheel(event);
+    break;
+    default:
+    break;
+  }
+
+  QVTKWidget::wheelEvent(event);
 }
