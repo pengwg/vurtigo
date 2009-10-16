@@ -21,6 +21,7 @@
 #include "rtMainWindow.h"
 #include "rtObjectManager.h"
 #include "rtRenderObject.h"
+#include "rtMainWindow.h"
 
 #include <QMouseEvent>
 #include <QList>
@@ -55,6 +56,10 @@ void customQVTKWidget::resizeEvent(QResizeEvent* event) {
   } else {
     QVTKWidget::resizeEvent(event);
   }
+}
+
+void customQVTKWidget::paintEvent(QPaintEvent* event) {
+  rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
 //! Called when one of the mouse buttons is pressed.

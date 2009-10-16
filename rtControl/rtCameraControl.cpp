@@ -18,6 +18,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 #include "rtCameraControl.h"
+#include "rtObjectManager.h"
+#include "rtMainWindow.h"
 #include "customQVTKWidget.h"
 #include <iostream>
 rtCameraControl::rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWid) {
@@ -52,12 +54,48 @@ void rtCameraControl::mousePress(QMouseEvent* ev) {
     m_midMouseDown = true;
   }
 
-
+  m_lastPoint = ev->pos();
 }
 
 void rtCameraControl::mouseMove(QMouseEvent* ev) {
+  QPoint newPt;
+  newPt = ev->pos();
   if (m_leftMouseDown) {
     // Rotate the camera.
+    m_camera->OrthogonalizeViewUp();
+    m_camera->Elevation((double)(m_lastPoint.y() - newPt.y())/(-3.0f));
+    m_camera->Azimuth((double)(m_lastPoint.x() - newPt.x())/3.0f);
+    m_lastPoint = newPt;
+    rtObjectManager::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+    rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
+  } else if (m_rightMouseDown) {
+    // Translate the camera
+    double pos[3];
+    double foc[3];
+    double viewUp[3];
+    double planeNorm[3];
+    double xdirec[3];
+    double yDiff = (double)(m_lastPoint.y() - newPt.y());
+    double xDiff = (double)(m_lastPoint.x() - newPt.x());
+    m_camera->GetPosition(pos);
+    m_camera->GetFocalPoint(foc);
+    m_camera->GetViewUp(viewUp);
+    m_camera->GetViewPlaneNormal(planeNorm);
+
+    xdirec[0] = viewUp[1]*planeNorm[2] - viewUp[2]*planeNorm[1];
+    xdirec[1] = viewUp[2]*planeNorm[0] - viewUp[0]*planeNorm[2];
+    xdirec[2] = viewUp[0]*planeNorm[1] - viewUp[1]*planeNorm[0];
+
+    for (int ix1=0; ix1<3; ix1++) {
+      pos[ix1] = pos[ix1] - viewUp[ix1]*yDiff + xdirec[ix1]*xDiff;
+      foc[ix1] = foc[ix1] - viewUp[ix1]*yDiff + xdirec[ix1]*xDiff;
+    }
+
+    m_camera->SetPosition(pos);
+    m_camera->SetFocalPoint(foc);
+    m_lastPoint = newPt;
+    rtObjectManager::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+    rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
 
@@ -75,10 +113,39 @@ void rtCameraControl::mouseDoubleClick(QMouseEvent* ev) {
 }
 
 void rtCameraControl::keyPress(QKeyEvent* ev) {
+  bool refresh = true;
+
+  m_camera->OrthogonalizeViewUp();
+  switch(ev->key()) {
+    case (Qt::Key_Left):
+    m_camera->Azimuth(1);
+    break;
+    case (Qt::Key_Right):
+    m_camera->Azimuth(-1);
+    break;
+    case (Qt::Key_Up):
+    m_camera->Elevation(-1);
+    break;
+    case (Qt::Key_Down):
+    m_camera->Elevation(1);
+    break;
+    default:
+    refresh = false;
+    break;
+  }
+  if (refresh) {
+    rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
+  }
 }
 
 void rtCameraControl::keyRelease(QKeyEvent* ev) {
 }
 
 void rtCameraControl::wheel(QWheelEvent* ev) {
+  int diff;
+  diff = ev->delta();
+  m_camera->Dolly(1.0+((double)diff)/1200.0f);
+  m_camera->OrthogonalizeViewUp();
+  rtObjectManager::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+  rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
 }

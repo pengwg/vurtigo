@@ -24,6 +24,7 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QWheelEvent>
+#include <QPoint>
 
 #include "vtkCamera.h"
 
@@ -46,6 +47,7 @@ public slots:
 protected:
   vtkCamera* m_camera;
   customQVTKWidget* m_eventWidget;
+  QPoint m_lastPoint;
 
   bool m_leftMouseDown;
   bool m_rightMouseDown;

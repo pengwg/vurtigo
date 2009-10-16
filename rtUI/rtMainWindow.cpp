@@ -39,6 +39,8 @@
 
 #include "version.h"
 
+#define USE_NEW_MESSAGES
+
 rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupUi(this);
 
@@ -68,11 +70,16 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_propAssembly = vtkPropAssembly::New();
   m_orientationWidget = new rtOrientationMarkerWidget(m_render3DVTKWidget);
 
+#ifdef USE_NEW_MESSAGES
+  m_inter3D->Disable();
+#endif
+
   m_propAssembly->AddPart( m_axesActor );
   m_orientationWidget->SetOrientationMarker(m_propAssembly);
 
   m_orientationWidget->SetInteractor( m_inter3D );
   m_orientationWidget->SetViewport( 0.75, 0.0, 1.0, 0.25 );
+  //m_orientationWidget->SetViewport( 0.0, 0.0, 0.25, 0.25 );
 
   m_axesProperties = new rtAxesProperties();
 

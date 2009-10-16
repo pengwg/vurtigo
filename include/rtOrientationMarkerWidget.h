@@ -25,6 +25,7 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QWheelEvent>
+#include <QSize>
 
 class customQVTKWidget;
 
@@ -49,6 +50,7 @@ public slots:
 
 protected:
   customQVTKWidget* m_eventWidget;
+  QSize m_winSize;
 
   bool m_leftMouseDown;
   bool m_rightMouseDown;
