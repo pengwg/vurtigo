@@ -33,6 +33,11 @@ rtCameraControl::rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWid) {
   m_midMouseDown = false;
 }
 
+bool rtCameraControl::cameraMoving() {
+  return (m_leftMouseDown || m_rightMouseDown || m_midMouseDown);
+}
+
+
 void rtCameraControl::connectEvents() {
   if (!m_eventWidget) return;
   connect(m_eventWidget, SIGNAL(cameraMousePress(QMouseEvent*)), this, SLOT(mousePress(QMouseEvent*)));
@@ -107,6 +112,9 @@ void rtCameraControl::mouseRelease(QMouseEvent* ev) {
   } else if (ev->button() == Qt::MidButton) {
     m_midMouseDown = false;
   }
+
+  rtObjectManager::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+  rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
 void rtCameraControl::mouseDoubleClick(QMouseEvent* ev) {

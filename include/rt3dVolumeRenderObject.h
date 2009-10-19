@@ -56,6 +56,8 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   virtual bool removeFromRenderer(vtkRenderer* ren);
   virtual bool getObjectLocation(double loc[6]);
 
+  virtual void setRenderQuality(double quality);
+
  protected:
   void setupDataObject();
   void setupPipeline();

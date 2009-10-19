@@ -91,7 +91,15 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   bool remove2DWidget(int id);
   rtOptions2DView* get2DWidget(int id);
 
+  //! Get the type of interaction the the user has currently selected
   customQVTKWidget::InteractionMode getInteractionMode() { return m_render3DVTKWidget->getInteraction(); }
+
+  //! Check if the camera for the 3D view is moving
+  /*!
+    Some object types will render in lower quality when the camera is moving.
+    \return True if the camera is moving and false otherwise. Also returns false if the camera control object has not yet been created.
+    */
+  bool cameraMoving();
 
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
@@ -131,6 +139,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void interactionModeToggled(bool);
   //! The placement mode button was pressed.
   void placeModeToggled(bool);
+
+  double getMovingQuality() { return m_movingQuality; }
+  double getStillQuality() { return m_stillQuality; }
 
  protected:
   //! The widget that handles the 3D rendering window from VTK.
@@ -173,6 +184,11 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   //! Layout for the plugin widget.
   QHBoxLayout m_pluginWidgetLayout;
+
+  //! Moving Quality
+  double m_movingQuality;
+  //! Quality while the camera is still
+  double m_stillQuality;
 
   void connectSignals();
   void setupObjectTree();

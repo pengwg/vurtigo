@@ -32,7 +32,7 @@
 #include "vtkProperty.h"
 
 
-
+//! A group of points in 3D that are rendered as a group of spheres.
 class rt3DPointBufferRenderObject : public rtRenderObject {
 
  public:
@@ -68,10 +68,21 @@ class rt3DPointBufferRenderObject : public rtRenderObject {
 
   //! Remove this object from the given renderer.
   virtual bool removeFromRenderer(vtkRenderer* ren);
+
+  //! The position of the center of the cluster of points
   virtual bool getObjectLocation(double loc[6]);
 
+  //! Set the render quality as a number in the range [0, 1].
+  /*!
+    Values above 1 of below 0 will be truncated to 1 and 0 respectively. The best quality is 1.
+    */
+  virtual void setRenderQuality(double quality);
+
  protected:
+  //! Create the correct data object.
   void setupDataObject();
+
+  //! Create the part of the pipeline that is done first.
   void setupPipeline();
 
   void update();

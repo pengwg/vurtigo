@@ -70,7 +70,6 @@ void rt3DPointBufferRenderObject::update() {
   }
 }
 
-//! Add this object to the given renderer.
 bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren) {
   if (!ren) return false;
   setVisible3D(true);
@@ -82,7 +81,6 @@ bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren) {
   return true;
 }
 
-//! Remove this object from the given renderer.
 bool rt3DPointBufferRenderObject::removeFromRenderer(vtkRenderer* ren) {
   if (!ren) return false;
   setVisible3D(false);
@@ -92,13 +90,24 @@ bool rt3DPointBufferRenderObject::removeFromRenderer(vtkRenderer* ren) {
   return true;
 }
 
-//! Create the correct data object.
+void rt3DPointBufferRenderObject::setRenderQuality(double quality) {
+  double q;
+  if (quality < 0.0) q = 0.0;
+  else if (quality > 1.0) q = 1.0;
+  else q = quality;
+
+  for (int ix1=0; ix1<m_pipeList.size(); ix1++) {
+    m_pipeList[ix1]->sphere->SetThetaResolution(q*40.0f+5);
+    m_pipeList[ix1]->sphere->SetPhiResolution(q*40.0f+5);
+  }
+}
+
+
 void rt3DPointBufferRenderObject::setupDataObject() {
   m_dataObj = new rt3DPointBufferDataObject();
 }
 
 
-//! Create the part of the pipeline that is done first. 
 void rt3DPointBufferRenderObject::setupPipeline() {
   //Create a dummy object in the pipeline
   SinglePointPipeline *tempPipe;
@@ -113,7 +122,6 @@ void rt3DPointBufferRenderObject::setupPipeline() {
 }
 
 
-//! The position of the center of the cluster of points
 bool rt3DPointBufferRenderObject::getObjectLocation(double loc[6]) {
   rt3DPointBufferDataObject *dObj = dynamic_cast<rt3DPointBufferDataObject*>(m_dataObj);
   if (!dObj) return false;

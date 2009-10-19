@@ -35,6 +35,8 @@ class rtCameraControl : public QObject {
 public:
   rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWidget);
 
+  bool cameraMoving();
+
 public slots:
   void mousePress(QMouseEvent*);
   void mouseMove(QMouseEvent*);

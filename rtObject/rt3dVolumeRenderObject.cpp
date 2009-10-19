@@ -150,6 +150,16 @@ void rt3DVolumeRenderObject::update() {
   }
 }
 
+void rt3DVolumeRenderObject::setRenderQuality(double quality) {
+  if (!m_mainWin) return;
+  double qual;
+
+  if (quality > 1.0f) qual = 1.0f;
+  else if (quality <= 0.0f) qual = 0.01f;
+  else qual = quality;
+
+  m_rayMapper->SetImageSampleDistance(11.0f - 10.0f*qual);
+}
 
 //! Add this object to the given renderer.
 bool rt3DVolumeRenderObject::addToRenderer(vtkRenderer* ren) {
@@ -255,7 +265,9 @@ void rt3DVolumeRenderObject::setupPipeline() {
   // Volume Rendering
   m_rayMapper->SetInput( m_transFilter->GetOutput() );
   m_rayMapper->SetVolumeRayCastFunction( dObj->getRayCastFunction() );
-  m_rayMapper->AutoAdjustSampleDistancesOn ();
+
+  // Manually adjust the sample distances
+  m_rayMapper->AutoAdjustSampleDistancesOff ();
 
   m_volumeActor->SetMapper(m_rayMapper);
   m_volumeActor->SetProperty( dObj->getVolumeProperty() );

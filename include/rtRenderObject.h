@@ -77,13 +77,23 @@ Q_OBJECT
   void resetUpdateTime();
   bool updateNeeded();
 
-  virtual bool mousePressEvent(QMouseEvent* event) { return false; }
-  virtual bool mouseMoveEvent(QMouseEvent* event) { return false; }
-  virtual bool mouseReleaseEvent(QMouseEvent* event) { return false; }
-  virtual bool mouseDoubleClickEvent(QMouseEvent* event) { return false; }
-
   //! Get the location of an object in the 3D space.
   virtual bool getObjectLocation(double loc[6]) = 0;
+
+  //! Set the rendering quality.
+  /*!
+    Some objects are able to render at a lower quality based on speed requirements.
+    \param quality The desired rendering quality. Values are in the range [0, 1] and will be clamped to this if they are outside these bounds.
+    */
+  virtual void setRenderQuality(double quality) { }
+
+ public slots:
+  virtual void mousePressEvent(QMouseEvent* event) {  }
+  virtual void mouseMoveEvent(QMouseEvent* event) {  }
+  virtual void mouseReleaseEvent(QMouseEvent* event) {  }
+  virtual void mouseDoubleClickEvent(QMouseEvent* event) {  }
+
+
 
  protected:
   //! The rtRenderObject constructor.

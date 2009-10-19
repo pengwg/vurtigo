@@ -63,8 +63,8 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   m_cameraControl = new rtCameraControl( m_renderer3D->GetActiveCamera(), m_render3DVTKWidget );
 
-  m_inter3D->SetDesiredUpdateRate(3.0f);
-  m_inter3D->SetStillUpdateRate(1.0f);
+  m_movingQuality = 0.5f;
+  m_stillQuality = 1.0f;
 
   m_axesActor = vtkAxesActor::New();
   m_propAssembly = vtkPropAssembly::New();
@@ -79,7 +79,6 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   m_orientationWidget->SetInteractor( m_inter3D );
   m_orientationWidget->SetViewport( 0.75, 0.0, 1.0, 0.25 );
-  //m_orientationWidget->SetViewport( 0.0, 0.0, 0.25, 0.25 );
 
   m_axesProperties = new rtAxesProperties();
 
@@ -404,6 +403,11 @@ void rtMainWindow::update2DViews() {
   }
 }
 
+bool rtMainWindow::cameraMoving() {
+  if (!m_cameraControl) return false;
+  return m_cameraControl->cameraMoving();
+}
+
 //! Connect the menu actions to the functions that handle them.
 void rtMainWindow::connectSignals() {
   // File Menu
@@ -546,16 +550,8 @@ void rtMainWindow::textLog(bool t) {
 void rtMainWindow::showRenderOptions() {
   rtRenderOptions renOpt;
 
-  if (m_inter3D->GetStillUpdateRate() != 0) {
-    renOpt.renQuality( floor((1.0f/sqrt(m_inter3D->GetStillUpdateRate()+1.0f))*100.0f) );
-  } else {
-    renOpt.renQuality( 100 );
-  }
-  if (m_inter3D->GetDesiredUpdateRate() != 0) {
-    renOpt.renUpdateQuality( floor((1.0f/sqrt(m_inter3D->GetDesiredUpdateRate()+1.0f))*100.0f) );
-  } else {
-    renOpt.renUpdateQuality( 100 );
-  }
+  renOpt.renQuality(m_stillQuality*100.0f);
+  renOpt.renUpdateQuality(m_movingQuality*100.0f);
 
   if (m_renWin3D->GetStereoRender()) {
     renOpt.setStereoType(m_renWin3D->GetStereoType());
@@ -569,8 +565,8 @@ void rtMainWindow::showRenderOptions() {
   if(renOpt.exec() == QDialog::Accepted) {  
     double renUpQual = renOpt.getRenUpdateQuality();
     double renQual = renOpt.getRenQuality();
-    m_inter3D->SetDesiredUpdateRate( (100.0f/renUpQual)*(100.0f/renUpQual)-1 );
-    m_inter3D->SetStillUpdateRate( (100.0f/renQual)*(100.0f/renQual)-1 );
+    m_stillQuality = renQual/100.0f;
+    m_movingQuality = renUpQual/100.0f;
 
     int type = renOpt.getStereoType();
     if (type == 0) {

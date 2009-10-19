@@ -58,6 +58,8 @@ class rtTimeManager : public QObject {
  public slots:
   void renderTimeout();
   void pluginUpdate();
+
+  //! Update the 2D views.
   void planeUpdate();
 
  protected:

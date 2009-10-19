@@ -170,6 +170,16 @@ void rtTimeManager::checkWatchList() {
 
   for (ix1=0; ix1<m_watchList.size(); ix1++) {
     renderNew = m_watchList.at(ix1)->tryUpdate() || renderNew;
+
+    // Adjust the rendering quality.
+    if (m_mainWin) {
+      if (m_mainWin->cameraMoving()) {
+        // Camera is moving implies lower quality.
+        m_watchList.at(ix1)->setRenderQuality(m_mainWin->getMovingQuality());
+      } else {
+        m_watchList.at(ix1)->setRenderQuality(m_mainWin->getStillQuality());
+      }
+    }
   }
 
   if (renderNew && m_mainWin) {
