@@ -313,16 +313,28 @@
    </property>
   </action>
   <action name="actionMixed">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Mixed View</string>
    </property>
   </action>
   <action name="action3D_Only">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>3D Only</string>
    </property>
   </action>
   <action name="action2D_Only">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>2D Only</string>
    </property>

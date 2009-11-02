@@ -505,21 +505,42 @@ void rtMainWindow::populateObjectTypeNames() {
 
 //! Change the view to mixed mode where both the 2D and 3D windows are visible.
 void rtMainWindow::viewChangedMixed() {
-  stackedWidget->setCurrentIndex(0);
-  mainUDSplitter->insertWidget(0, frame3DRender);
-  mainUDSplitter->insertWidget(1, lowerFrame);
+  if (actionMixed->isChecked()) {
+    stackedWidget->setCurrentIndex(0);
+    mainUDSplitter->insertWidget(0, frame3DRender);
+    mainUDSplitter->insertWidget(1, lowerFrame);
+    actionMixed->setChecked(true);
+    action2D_Only->setChecked(false);
+    action3D_Only->setChecked(false);
+  } else {
+    actionMixed->setChecked(true);
+  }
 }
 
 //! Make only the 3D render window visible.
 void rtMainWindow::viewChanged3DOnly() {
-  stackedWidget->setCurrentIndex(1);
-  m_only3DLayout.addWidget(frame3DRender);
+  if (action3D_Only->isChecked()) {
+    stackedWidget->setCurrentIndex(1);
+    m_only3DLayout.addWidget(frame3DRender);
+    actionMixed->setChecked(false);
+    action3D_Only->setChecked(true);
+    action2D_Only->setChecked(false);
+  } else {
+    action3D_Only->setChecked(true);
+  }
 }
 
 //! Make only the 2D window visible
 void rtMainWindow::viewChanged2DOnly() {
-  stackedWidget->setCurrentIndex(2);
-  m_only2DLayout.addWidget(lowerFrame);
+  if (action2D_Only->isChecked()) {
+    stackedWidget->setCurrentIndex(2);
+    m_only2DLayout.addWidget(lowerFrame);
+    actionMixed->setChecked(false);
+    action3D_Only->setChecked(false);
+    action2D_Only->setChecked(true);
+  } else {
+    action2D_Only->setChecked(true);
+  }
 }
 
 //! Update  the lists for all the 2D windows.
