@@ -210,10 +210,10 @@
         <item>
          <widget class="QDoubleSpinBox" name="xDoubleSpinBox">
           <property name="minimum">
-           <double>-200.000000000000000</double>
+           <double>-20000.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>200.000000000000000</double>
+           <double>20000.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -231,10 +231,10 @@
         <item>
          <widget class="QDoubleSpinBox" name="yDoubleSpinBox">
           <property name="minimum">
-           <double>-200.000000000000000</double>
+           <double>-20000.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>200.000000000000000</double>
+           <double>20000.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -252,10 +252,10 @@
         <item>
          <widget class="QDoubleSpinBox" name="zDoubleSpinBox">
           <property name="minimum">
-           <double>-200.000000000000000</double>
+           <double>-20000.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>200.000000000000000</double>
+           <double>20000.000000000000000</double>
           </property>
          </widget>
         </item>

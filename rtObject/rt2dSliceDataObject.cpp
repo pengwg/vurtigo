@@ -18,6 +18,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 #include "rt2dSliceDataObject.h"
+#include "rtObjectManager.h"
+#include "rtMainWindow.h"
 #include <cmath>
 
 //! Constructor
@@ -58,9 +60,6 @@ rt2DSliceDataObject::~rt2DSliceDataObject() {
 void rt2DSliceDataObject::update() {
   if(!m_trans) return;
 
-  // If we have manual prescription then we do not want to update the GUI.
-  if(m_optionsWidget.prescribeGroupBox->isChecked()) return;
-
   double translate[3];
   m_trans->GetPosition(translate);
   m_optionsWidget.xDoubleSpinBox->setValue(translate[0]);
@@ -93,14 +92,12 @@ void rt2DSliceDataObject::setupGUI() {
  connect( this, SIGNAL(copyImageData2DSignal()), this, SLOT(copyImageData2DSlot()), Qt::QueuedConnection );
 }
 
-//! Clean the GUI widgets.
+
 void rt2DSliceDataObject::cleanupGUI() {
 
 }
 
-//! Copy new data over top of this one.
-/*!
-  */
+
 bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
   if (!img) return false;
 
@@ -136,7 +133,7 @@ void rt2DSliceDataObject::copyImageData2DSlot() {
   m_imgUCharCast->SetShift(-rangeI[0]);
 
     // Check if the range needs to be reset.
-  if (rangeI[0] < m_range[0] || rangeI[1] > m_range[1] || !m_imgDataValid) {
+  if ( (rangeI[1]-rangeI[0]) > m_range[1] || !m_imgDataValid) {
 
     m_range[0] = 0;
     m_range[1] = rangeI[1]-rangeI[0];
@@ -169,7 +166,8 @@ void rt2DSliceDataObject::copyImageData2DSlot() {
 }
 
 //! Set the trasformation matrix
-bool rt2DSliceDataObject::setTransform(float rotMatrix[9], float transMatrix[3]) {
+bool rt2DSliceDataObject::setTransform(float rotMatrix[9], float transMatrix[3], bool asUser) {
+  if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return false;
   vtkMatrix4x4* mat = vtkMatrix4x4::New();
 
   for (int ix1=0; ix1<3; ix1++) {
@@ -187,17 +185,20 @@ bool rt2DSliceDataObject::setTransform(float rotMatrix[9], float transMatrix[3])
 }
 
 //! Set the transformation in the form of a vtkMatrix4x4
-bool rt2DSliceDataObject::setVtkMatrix(vtkMatrix4x4* m) {
+bool rt2DSliceDataObject::setVtkMatrix(vtkMatrix4x4* m, bool asUser) {
   if (!m) return false;
-
-  m_trans->Identity();
+  if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return false;
   m_trans->SetMatrix(m);
   return true;
 }
 
-bool rt2DSliceDataObject::setPlaneCenter(double center[3]) {
+bool rt2DSliceDataObject::setPlaneCenter(double center[3], bool asUser) {
   int dims[3];
   double space[3];
+
+
+  if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return false;
+
   m_imgData->GetDimensions(dims);
   m_imgData->GetSpacing(space);
 
@@ -218,7 +219,9 @@ bool rt2DSliceDataObject::setPlaneCenter(double center[3]) {
   return true;
 }
 
-void rt2DSliceDataObject::pushPlaneBy(double amt) {
+void rt2DSliceDataObject::pushPlaneBy(double amt, bool asUser) {
+  if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return;
+
   vtkMatrix4x4 *mat = vtkMatrix4x4::New();
 
   m_trans->GetMatrix(mat);
@@ -231,8 +234,18 @@ void rt2DSliceDataObject::pushPlaneBy(double amt) {
   }
   sumSq = sqrt(sumSq);
 
+  double cameraDirec[3];
+  double dotP=0.0f;
+  rtObjectManager::instance().getMainWinHandle()->getCameraForward(cameraDirec);
+  dotP = zDirec[0]*cameraDirec[0]+zDirec[1]*cameraDirec[1]+zDirec[2]*cameraDirec[2];
+  if (dotP > 0) {
+    dotP = 1.0f;
+  } else if (dotP < 0) {
+    dotP = -1.0f;
+  }
+
   for (int ix1=0; ix1<3; ix1++) {
-    mat->SetElement( ix1, 3, mat->GetElement(ix1, 3) + (amt*zDirec[ix1]/sumSq) );
+    mat->SetElement( ix1, 3, mat->GetElement(ix1, 3) + (dotP*amt*zDirec[ix1]/sumSq) );
   }
   m_trans->SetMatrix(mat);
 
@@ -240,118 +253,178 @@ void rt2DSliceDataObject::pushPlaneBy(double amt) {
   Modified();
 }
 
-void rt2DSliceDataObject::spinRight() {
+
+void rt2DSliceDataObject::spinLeftBy(double amt, bool asUser) {
+  if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return;
+
   int dims[3];
   double space[3];
   m_imgData->GetDimensions(dims);
   m_imgData->GetSpacing(space);
 
+
+  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+
+  m_trans->GetMatrix(mat);
+  double zDirec[3];
+  for (int ix1=0; ix1<3; ix1++) {
+    zDirec[ix1] = mat->GetElement(ix1, 2);
+  }
+  mat->Delete();
+
+  double cameraDirec[3];
+  double dotP=0.0f;
+  rtObjectManager::instance().getMainWinHandle()->getCameraForward(cameraDirec);
+  dotP = zDirec[0]*cameraDirec[0]+zDirec[1]*cameraDirec[1]+zDirec[2]*cameraDirec[2];
+  if (dotP > 0) {
+    dotP = 1.0f;
+  } else if (dotP < 0) {
+    dotP = -1.0f;
+  }
+
   m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
-  m_trans->RotateWXYZ(1.0, 0.0, 0.0, 1.0);
+  m_trans->RotateWXYZ(dotP*amt, 0.0, 0.0, 1.0);
   m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
   Modified();
+}
+
+void rt2DSliceDataObject::rotateUpBy(double amt, bool asUser) {
+  if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return;
+
+  int dims[3];
+  double space[3];
+  m_imgData->GetDimensions(dims);
+  m_imgData->GetSpacing(space);
+
+  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+
+  m_trans->GetMatrix(mat);
+
+  double cameraDirec[3];
+  double dotP1=0.0f;
+  double dotP2=0.0f;
+  double dotP3=0.0f;
+  rtObjectManager::instance().getMainWinHandle()->getCameraRight(cameraDirec);
+  dotP1 = mat->GetElement(0, 0)*cameraDirec[0]+mat->GetElement(1, 0)*cameraDirec[1]+mat->GetElement(2, 0)*cameraDirec[2];
+  dotP2 = mat->GetElement(0, 1)*cameraDirec[0]+mat->GetElement(1, 1)*cameraDirec[1]+mat->GetElement(2, 1)*cameraDirec[2];
+  dotP3 = mat->GetElement(0, 2)*cameraDirec[0]+mat->GetElement(1, 2)*cameraDirec[1]+mat->GetElement(2, 2)*cameraDirec[2];
+
+  mat->Delete();
+
+  if ( fabs(dotP1) > fabs(dotP2) ) {
+    if (dotP1 < 0) dotP1 = -1.0f;
+    else dotP1 = 1.0f;
+    m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
+    m_trans->RotateWXYZ(dotP1*amt, 1.0, 0.0, 0.0);
+    m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
+  } else if ( fabs(dotP1) < fabs(dotP2) ) {
+    if (dotP2 < 0) dotP2 = -1.0f;
+    else dotP2 = 1.0f;
+    m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
+    m_trans->RotateWXYZ(dotP2*amt, 0.0, 1.0, 0.0);
+    m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
+  }
+
+  Modified();
+}
+
+void rt2DSliceDataObject::rotateLeftBy(double amt, bool asUser) {
+  if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return;
+
+  int dims[3];
+  double space[3];
+  m_imgData->GetDimensions(dims);
+  m_imgData->GetSpacing(space);
+
+  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+
+  m_trans->GetMatrix(mat);
+  double cameraDirec[3];
+  double dotP1=0.0f;
+  double dotP2=0.0f;
+  double dotP3=0.0f;
+  rtObjectManager::instance().getMainWinHandle()->getCameraUp(cameraDirec);
+  dotP1 = mat->GetElement(0, 0)*cameraDirec[0]+mat->GetElement(1, 0)*cameraDirec[1]+mat->GetElement(2, 0)*cameraDirec[2];
+  dotP2 = mat->GetElement(0, 1)*cameraDirec[0]+mat->GetElement(1, 1)*cameraDirec[1]+mat->GetElement(2, 1)*cameraDirec[2];
+  dotP3 = mat->GetElement(0, 2)*cameraDirec[0]+mat->GetElement(1, 2)*cameraDirec[1]+mat->GetElement(2, 2)*cameraDirec[2];
+
+  mat->Delete();
+
+  if ( fabs(dotP1) > fabs(dotP2) ) {
+    if (dotP1 < 0) dotP1 = -1.0f;
+    else dotP1 = 1.0f;
+    m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
+    m_trans->RotateWXYZ(dotP1*amt, 1.0, 0.0, 0.0);
+    m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
+  } else if ( fabs(dotP1) < fabs(dotP2) ) {
+    if (dotP2 < 0) dotP2 = -1.0f;
+    else dotP2 = 1.0f;
+    m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
+    m_trans->RotateWXYZ(dotP2*amt, 0.0, 1.0, 0.0);
+    m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
+  }
+
+  Modified();
+}
+
+void rt2DSliceDataObject::translateTo(double x, double y, double z, bool asUser) {
+  if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return;
+
+  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+
+  m_trans->GetMatrix(mat);
+  mat->SetElement(0, 3, x);
+  mat->SetElement(1, 3, y);
+  mat->SetElement(2, 3, z);
+  m_trans->SetMatrix(mat);
+
+  mat->Delete();
+  Modified();
+}
+
+
+void rt2DSliceDataObject::spinRight() {
+  spinLeftBy(-1.0f, true);
 }
 
 void rt2DSliceDataObject::spinLeft() {
-  int dims[3];
-  double space[3];
-  m_imgData->GetDimensions(dims);
-  m_imgData->GetSpacing(space);
-
-  m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
-  m_trans->RotateWXYZ(-1.0, 0.0, 0.0, 1.0);
-  m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
-  Modified();
+  spinLeftBy(1.0f, true);
 }
 
 void rt2DSliceDataObject::rotateUp() {
-  int dims[3];
-  double space[3];
-  m_imgData->GetDimensions(dims);
-  m_imgData->GetSpacing(space);
-
-  m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
-  m_trans->RotateWXYZ(1.0, 0.0, 1.0, 0.0);
-  m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
-  Modified();
+  rotateUpBy(1.0f, true);
 }
 
 void rt2DSliceDataObject::rotateDown() {
-  int dims[3];
-  double space[3];
-  m_imgData->GetDimensions(dims);
-  m_imgData->GetSpacing(space);
-
-  m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
-  m_trans->RotateWXYZ(-1.0, 0.0, 1.0, 0.0);
-  m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
-  Modified();
+  rotateUpBy(-1.0f, true);
 }
 
 void rt2DSliceDataObject::rotateLeft() {
-  int dims[3];
-  double space[3];
-  m_imgData->GetDimensions(dims);
-  m_imgData->GetSpacing(space);
-
-  m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
-  m_trans->RotateWXYZ(1.0, 1.0, 0.0, 0.0);
-  m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
-  Modified();
+  this->rotateLeftBy(1.0, true);
 }
 
 void rt2DSliceDataObject::rotateRight() {
-  int dims[3];
-  double space[3];
-  m_imgData->GetDimensions(dims);
-  m_imgData->GetSpacing(space);
-
-  m_trans->Translate(dims[0]*space[0]/2.0f, dims[1]*space[1]/2.0f, 0.0);
-  m_trans->RotateWXYZ(-1.0, 1.0, 0.0, 0.0);
-  m_trans->Translate(-dims[0]*space[0]/2.0f, -dims[1]*space[1]/2.0f, 0.0);
-  Modified();
-
+  this->rotateLeftBy(-1.0, true);
 }
 
 void rt2DSliceDataObject::pushPlane() {
-  pushPlaneBy(1.0);
+  pushPlaneBy(1.0, true);
 }
 
 void rt2DSliceDataObject::pullPlane() {
-  pushPlaneBy(-1.0);
+  pushPlaneBy(-1.0, true);
 }
 
 void rt2DSliceDataObject::xTranslate(double v) {
-  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
-
-  m_trans->GetMatrix(mat);
-  mat->SetElement(0, 3, v);
-  m_trans->SetMatrix(mat);
-
-  mat->Delete();
-  Modified();
+  translateTo(v, m_optionsWidget.yDoubleSpinBox->value(), m_optionsWidget.zDoubleSpinBox->value(), true);
 }
 
 void rt2DSliceDataObject::yTranslate(double v) {
-  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
-
-  m_trans->GetMatrix(mat);
-  mat->SetElement(1, 3, v);
-  m_trans->SetMatrix(mat);
-
-  mat->Delete();
-  Modified();
+  translateTo(m_optionsWidget.xDoubleSpinBox->value(), v, m_optionsWidget.zDoubleSpinBox->value(), true);
 }
 
 void rt2DSliceDataObject::zTranslate(double v) {
-  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
-
-  m_trans->GetMatrix(mat);
-  mat->SetElement(2, 3, v);
-  m_trans->SetMatrix(mat);
-
-  mat->Delete();
-  Modified();
+  translateTo(m_optionsWidget.xDoubleSpinBox->value(), m_optionsWidget.yDoubleSpinBox->value(), v, true);
 }
 
 

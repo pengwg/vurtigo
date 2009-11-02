@@ -29,6 +29,9 @@
 rt2DSliceRenderObject::rt2DSliceRenderObject() {
   setObjectType(rtConstants::OT_2DObject);
   setName("2DSlice Renderer");
+  m_rotateAxis[0] = 1.0f;
+  m_rotateAxis[1] = 0.0f;
+  m_rotateAxis[2] = 0.0f;
   setupDataObject();
   setupPipeline();
 }
@@ -121,6 +124,16 @@ bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren) {
     ren->AddViewProp(m_outlineActor);
   }
 
+  customQVTKWidget* renWid;
+  renWid = rtObjectManager::instance().getMainWinHandle()->getRenderWidget();
+  // Connect mouse actions
+  connect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
+  connect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
+  connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
+  connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*)));
+  connect(renWid, SIGNAL(interKeyPress(QKeyEvent*)), this, SLOT(keyPressEvent(QKeyEvent*)));
+  connect(renWid, SIGNAL(interKeyRelease(QKeyEvent*)), this, SLOT(keyReleaseEvent(QKeyEvent*)));
+  connect(renWid, SIGNAL(interWheel(QWheelEvent*)), this, SLOT(wheelEvent(QWheelEvent*)));
   return true;
 }
 
@@ -137,7 +150,87 @@ bool rt2DSliceRenderObject::removeFromRenderer(vtkRenderer* ren) {
     ren->RemoveViewProp(m_outlineActor);
   }
 
+  customQVTKWidget* renWid;
+  renWid = rtObjectManager::instance().getMainWinHandle()->getRenderWidget();
+
+  // Disconnect mouse actions
+  disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
+  disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
+  disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
+  disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*)));
+  disconnect(renWid, SIGNAL(interKeyPress(QKeyEvent*)), this, SLOT(keyPressEvent(QKeyEvent*)));
+  disconnect(renWid, SIGNAL(interKeyRelease(QKeyEvent*)), this, SLOT(keyReleaseEvent(QKeyEvent*)));
+  disconnect(renWid, SIGNAL(interWheel(QWheelEvent*)), this, SLOT(wheelEvent(QWheelEvent*)));
+
   return true;
+}
+
+void rt2DSliceRenderObject::mousePressEvent(QMouseEvent* event) {
+  if (!m_selectedProp) return;
+
+  if (event->button() == Qt::LeftButton) {
+    QSize winSize = rtObjectManager::instance().getMainWinHandle()->getRenderWidget()->size();
+    int X = event->x();
+    int Y = winSize.height()-event->y();
+    findCurrentPosition(X, Y);
+  }
+}
+
+void rt2DSliceRenderObject::mouseMoveEvent(QMouseEvent* event) {
+  if (!m_selectedProp) return;
+
+  if (event->buttons() & Qt::LeftButton) {
+
+  }
+
+}
+
+void rt2DSliceRenderObject::mouseReleaseEvent(QMouseEvent* event) {
+  if (!m_selectedProp) return;
+}
+
+void rt2DSliceRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
+  vtkProp* temp;
+
+  temp = rtObjectManager::instance().getMainWinHandle()->getSelectedProp();
+  m_selectedProp = NULL;
+
+  if (temp) {
+    if (temp == m_textureActor.GetPointer() || temp == m_outlineActor.GetPointer()) {
+      m_selectedProp = temp;
+    }
+  }
+
+  rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
+
+  if (m_selectedProp) {
+    m_outlineProperty->SetColor(1.0, 0.0, 0.0);
+    m_outlineProperty->SetLineWidth(4.0);
+    dObj->setManualOn();
+  } else {
+    m_outlineProperty->SetColor(1.0, 1.0, 1.0);
+    m_outlineProperty->SetLineWidth(1.0);
+    dObj->setManualOff();
+  }
+}
+
+void rt2DSliceRenderObject::keyPressEvent(QKeyEvent* event) {
+  if (!m_selectedProp) return;
+}
+
+void rt2DSliceRenderObject::keyReleaseEvent(QKeyEvent* event) {
+  if (!m_selectedProp) return;
+}
+
+void rt2DSliceRenderObject::wheelEvent(QWheelEvent* event) {
+  if (!m_selectedProp) return;
+  rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
+
+  if (!dObj) return;
+
+  int numSteps = event->delta() / 8;
+
+  dObj->pushPlaneBy(numSteps, true);
 }
 
 //! Create the correct data object.
@@ -220,4 +313,65 @@ bool rt2DSliceRenderObject::getObjectLocation(double loc[6]) {
   m_outlineActor->GetBounds(loc);
 
   return true;
+}
+
+void rt2DSliceRenderObject::findCurrentPosition(int x, int y) {
+  double coords[3];
+  double distances[4];
+  vtkPropCollection* coll = vtkPropCollection::New();
+  vtkRenderer* ren = rtObjectManager::instance().getMainWinHandle()->getRenderer();
+  QSize winSize = rtObjectManager::instance().getMainWinHandle()->getRenderWidget()->size();
+  vtkAssemblyPath* path;
+  vtkPoints* pts;
+  double point[4][3];
+
+  pts = m_outlinePolyData->GetPoints();
+  coll->AddItem(m_textureActor);
+
+  path = ren->PickPropFrom(x, y, coll);
+  if (path) {
+    coords[0] = x;
+    coords[1] = y;
+    coords[2] = ren->GetPickedZ();
+    ren->ViewportToNormalizedViewport(coords[0], coords[1]);
+    ren->NormalizedViewportToView(coords[0], coords[1], coords[2]);
+    ren->ViewToWorld(coords[0], coords[1], coords[2]);
+
+    for (int ix1=0; ix1<4; ix1++) {
+      // Get the points.
+      pts->GetPoint(ix1, point[ix1]);
+    }
+
+    // Find the distances from each line.
+    for (int ix1=0; ix1<4; ix1++) {
+      distances[ix1] = findDistancePointToLine(point[(ix1)%4], point[(ix1+1)%4], coords);
+    }
+    std::cout << "======================" << std::endl;
+    for (int ix1=0; ix1<4; ix1++)
+      std::cout << distances[ix1] << std::endl;
+  }
+
+  coll->Delete();
+}
+
+double rt2DSliceRenderObject::findDistancePointToLine(double l1[3], double l2[3], double point[3]) {
+  double vec[3];
+  double hype[3];
+  double vecMag = 0.0f;
+  double hypeDist = 0.0f;
+
+  for (int ix1=0; ix1<3; ix1++) {
+    vec[ix1] = l1[ix1] - l2[ix1];
+    hype[ix1] = l1[ix1] - point[ix1];
+    vecMag += vec[ix1]*vec[ix1];
+    hypeDist += hype[ix1]*hype[ix1];
+  }
+  vecMag = sqrt(vecMag);
+  hypeDist = sqrt(hypeDist);
+
+  // Magnitude is zero! Error!
+  if (vecMag == 0) return -1.0;
+
+  double baseDist = fabs((hype[0]*vec[0]+hype[1]*vec[1]+hype[2]*vec[2])/vecMag);
+  return sqrt((hypeDist*hypeDist)-(baseDist*baseDist));
 }

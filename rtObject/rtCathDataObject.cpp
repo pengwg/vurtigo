@@ -93,8 +93,9 @@ int rtCathDataObject::addCoil(int loc) {
 }
 
 //! Set the SNR for a coil
-bool rtCathDataObject::setCoilSNR(int coilID, int SNR) {
+bool rtCathDataObject::setCoilSNR(int coilID, double SNR) {
   if (m_coilList.contains(coilID)) {
+    if (SNR <= 0.01) SNR = 0.01;
     m_coilList[coilID].SNR = SNR;
     return true;
   }

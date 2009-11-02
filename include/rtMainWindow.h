@@ -34,7 +34,7 @@
 #include <vtkRenderer.h>
 #include <vtkAxesActor.h>
 #include <vtkPropAssembly.h>
-
+#include <vtkProp.h>
 #include <vtkCellPicker.h>
 
 class rtRenderObject;
@@ -69,6 +69,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   vtkRenderer* getRenderer();
   QTreeWidget* getObjectTree();
   vtkCellPicker* getGlobalCellPicker() { return m_cellPicker; }
+  customQVTKWidget* getRenderWidget() { return m_render3DVTKWidget; }
 
   void updateObjectList(QHash<int, rtRenderObject*>*);
   void updatePluginList(QHash<int, QTreeWidgetItem*>*);
@@ -100,6 +101,18 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
     \return True if the camera is moving and false otherwise. Also returns false if the camera control object has not yet been created.
     */
   bool cameraMoving();
+
+  //! Get the currently selected prop.
+  vtkProp* getSelectedProp();
+
+  //! Get the up direction for the camera.
+  void getCameraUp(double val[3]);
+
+  //! Get the direction that points to the right of the camera.
+  void getCameraRight(double val[3]);
+
+  //! Get the direction that points from the camera to the focal point.
+  void getCameraForward(double val[3]);
 
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);

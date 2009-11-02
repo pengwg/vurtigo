@@ -49,6 +49,14 @@ class rt2DSliceRenderObject : public rtRenderObject {
   //! Remove this object from the given renderer.
   virtual bool removeFromRenderer(vtkRenderer* ren);
   virtual bool getObjectLocation(double loc[6]);
+public slots:
+  virtual void mousePressEvent(QMouseEvent* event);
+  virtual void mouseMoveEvent(QMouseEvent* event);
+  virtual void mouseReleaseEvent(QMouseEvent* event);
+  virtual void mouseDoubleClickEvent(QMouseEvent* event);
+  virtual void keyPressEvent(QKeyEvent* event);
+  virtual void keyReleaseEvent(QKeyEvent* event);
+  virtual void wheelEvent(QWheelEvent* event);
 
  protected:
   void setupDataObject();
@@ -70,6 +78,10 @@ class rt2DSliceRenderObject : public rtRenderObject {
   vtkSmartPointer<vtkActor> m_outlineActor;
   vtkSmartPointer<vtkProperty> m_outlineProperty;
 
+  double m_rotateAxis[3];
+
+  void findCurrentPosition(int x, int y);
+  double findDistancePointToLine(double l1[3], double l2[3], double point[3]);
  private:
 
 };

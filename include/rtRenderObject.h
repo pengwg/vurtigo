@@ -92,7 +92,12 @@ Q_OBJECT
   virtual void mouseMoveEvent(QMouseEvent* event) {  }
   virtual void mouseReleaseEvent(QMouseEvent* event) {  }
   virtual void mouseDoubleClickEvent(QMouseEvent* event) {  }
-
+  //! Called when a key is pressed.
+  virtual void keyPressEvent(QKeyEvent* event) {}
+  //! Called when a key is released.
+  virtual void keyReleaseEvent(QKeyEvent* event) {}
+  //! The mouse wheel was moved.
+  virtual void wheelEvent(QWheelEvent* event) {}
 
 
  protected:
@@ -107,7 +112,10 @@ Q_OBJECT
   //! Apply changes from the modified data object.
   virtual void update() = 0;
 
+  //! Pointer to the data object
   rtDataObject* m_dataObj;
+
+  //! A list of props that are part of the 3D pipeline
   QList<vtkProp*> m_pipe3D;
 
   //! There are multiple possible 2D views so a Hash is needed
@@ -121,6 +129,12 @@ Q_OBJECT
 
   //! True if the variable is being rendered in the 3D window.
   bool m_visible3D;
+
+  //! The selected prop for this object.
+  /*!
+    The variable contains a pointer to the prop from this object that has been selected. If no prop from this object is selected then this variable is NULL. Note that if props from other objects are selected then this variable is still NULL.
+    */
+  vtkProp* m_selectedProp;
 
   QDateTime m_lastUpdate;
 

@@ -79,6 +79,8 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   vtkImageCast* m_imgCast[3];
   vtkImageMapper* m_imgMap[3];
   vtkActor2D* m_actor2D[3];
+
+  bool m_firstInit;
  private:
 
 };

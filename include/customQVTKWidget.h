@@ -49,6 +49,14 @@ class customQVTKWidget : public QVTKWidget {
 
   InteractionMode getInteraction() { return m_interactionMode; }
   void setInteraction(InteractionMode mode) { m_interactionMode = mode; }
+
+  //! The the prop that was chosen by the last double click.
+  /*!
+    In interactive mode the user can double click on an object to select it. If no object is selected then NULL is returned.
+    \return The pointer to the prop chosen or NULL if nothing is chosen.
+    */
+  vtkProp* getChosenProp() { return m_propChosen; }
+
 signals:
   void cameraMousePress(QMouseEvent*);
   void cameraMouseMove(QMouseEvent*);
@@ -76,20 +84,56 @@ signals:
 
  protected:
 
+  //! The widget is being repainted.
+  /*!
+    This function effectively resets the render flag to true for the renderer.
+    */
   void paintEvent(QPaintEvent* event);
 
+  //! Called when the window is resized.
+  /*!
+    This function is primarily used to adjust the dimensions of the render window. If the square condidion is true then this function will resize the window to make it a square.
+    \param event The resize event which contains the new size of the widget.
+    \sa m_forceSquare
+    */
   virtual void resizeEvent(QResizeEvent* event);
+
+  //! Called when the mouse button is pressed.
   virtual void mousePressEvent(QMouseEvent* event);
+
+  //! Called if at least one mouse button is held down AND the mouse is being moved.
   virtual void mouseMoveEvent(QMouseEvent* event);
+
+  //! Called when the click is released.
   virtual void mouseReleaseEvent(QMouseEvent* event);
+
+
+  //! Called on a double click.
+  /*!
+  The double click event will be called AFTER a mouse press and mouse release event.
+  This function calls the event ignore function which passes the event up to the parent.
+  */
   virtual void mouseDoubleClickEvent(QMouseEvent* event);
 
+  //! Called when a key is pressed.
   virtual void keyPressEvent(QKeyEvent* event);
+
+  //! Called when a key is released.
   virtual void keyReleaseEvent(QKeyEvent* event);
 
+  //! The mouse wheel was moved.
   virtual void wheelEvent(QWheelEvent* event);
 
+  //! Use prop picking to select a new prop based on a mouse double-click.
+  void selectNewProp(QMouseEvent* event);
+
+  //! The prop that is currently chosen. NULL if no prop is chosen.
+  vtkProp* m_propChosen;
+
+  //! True if this widget is restricted to be a square.
   bool m_forceSquare;
+
+  //! The type of interaction the user has selected.
   InteractionMode m_interactionMode;
 };
 

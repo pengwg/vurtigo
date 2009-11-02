@@ -37,6 +37,29 @@ bool rtCameraControl::cameraMoving() {
   return (m_leftMouseDown || m_rightMouseDown || m_midMouseDown);
 }
 
+void rtCameraControl::getForwardDirection(double val[3]) {
+  m_camera->OrthogonalizeViewUp();
+  m_camera->GetDirectionOfProjection(val);
+}
+
+void rtCameraControl::getUpDirection(double val[3]) {
+  m_camera->OrthogonalizeViewUp();
+  m_camera->GetViewUp(val);
+}
+
+void rtCameraControl::getRightDirection(double val[3]) {
+  m_camera->OrthogonalizeViewUp();
+
+  double forward[3];
+  double up[3];
+  m_camera->GetDirectionOfProjection(forward);
+  m_camera->GetViewUp(up);
+
+  val[0] = forward[1]*up[2]-forward[2]*up[1];
+  val[1] = forward[2]*up[0]-forward[0]*up[2];
+  val[2] = forward[0]*up[1]-forward[1]*up[0];
+}
+
 
 void rtCameraControl::connectEvents() {
   if (!m_eventWidget) return;

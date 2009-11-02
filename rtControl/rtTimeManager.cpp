@@ -183,6 +183,7 @@ void rtTimeManager::checkWatchList() {
   }
 
   if (renderNew && m_mainWin) {
+    m_mainWin->getRenderer()->ResetCameraClippingRange();
     m_mainWin->setRenderFlag3D(true);
   }
 

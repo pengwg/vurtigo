@@ -408,6 +408,23 @@ bool rtMainWindow::cameraMoving() {
   return m_cameraControl->cameraMoving();
 }
 
+void rtMainWindow::getCameraUp(double val[3]) {
+  m_cameraControl->getUpDirection(val);
+}
+
+void rtMainWindow::getCameraRight(double val[3]) {
+  m_cameraControl->getRightDirection(val);
+}
+
+void rtMainWindow::getCameraForward(double val[3]) {
+  m_cameraControl->getForwardDirection(val);
+}
+
+vtkProp* rtMainWindow::getSelectedProp() {
+  if (!m_render3DVTKWidget) return NULL;
+  return m_render3DVTKWidget->getChosenProp();
+}
+
 //! Connect the menu actions to the functions that handle them.
 void rtMainWindow::connectSignals() {
   // File Menu

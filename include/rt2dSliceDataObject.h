@@ -39,6 +39,8 @@
 //! A Single 2D Slice
 /*!
   The data object for a single 2D slice.
+  This object has two modes. A standard updating mode and a special manual user mode. In manual mode the plane is supposed to receive instructions directly from the Vurtigo user and as such instructions from the update mode are ignored.
+  If the Qt group box: m_optionsWidget.prescribeGroupBox is selected then the object is in manual mode. The group box is also checked when the user selects the object in the 3D view. Plugins should not use the manual mode as this may interfere with actions performed by the user when they try to control the plane by hand.
   */
 class rt2DSliceDataObject : public rtDataObject
 {
@@ -51,21 +53,56 @@ public:
   void update();
 
   bool isDataValid() { return m_imgDataValid; }
+
+  //! Copy new data over top of this one.
+  /*!
+  */
   bool copyImageData2D(vtkImageData* img);
+
   vtkImageData* getRawData() { return m_imgData; }
   vtkImageData* getUCharData() { return m_imgUCharCast->GetOutput(); }
   vtkTransform* getTransform() { return m_trans; }
 
-  bool setTransform(float rotMatrix[9], float transMatrix[3]);
-  bool setVtkMatrix(vtkMatrix4x4* m);
-  bool setPlaneCenter(double center[3]);
+  bool setTransform(float rotMatrix[9], float transMatrix[3], bool asUser=false);
+  bool setVtkMatrix(vtkMatrix4x4* m, bool asUser=false);
+  bool setPlaneCenter(double center[3], bool asUser=false);
 
-  void pushPlaneBy(double amt);
+  //! Push the plane in the direction of the surface normal.
+  /*!
+    \param amt The amount to push by. A negative value will push the plane in the opposite direction.
+    \param asUser Push the plane as a user. If this is set to true the plane will move even in user mode.
+    */
+  void pushPlaneBy(double amt, bool asUser=false);
 
+
+  //! Spin the plane to the left.
+  void spinLeftBy(double amt, bool asUser=false);
+
+  //! Rotate the plane up
+  /*!
+    \param amt The amount to rotate by. If negative this function will rotate down.
+    \param asUser If true rotate in user mode.
+    */
+  void rotateUpBy(double amt, bool asUser=false);
+
+  //! Rotate the plane left
+  void rotateLeftBy(double amt, bool asUser=false);
+
+  //! Translate the object to a specific position
+  void translateTo(double x, double y, double z, bool asUser=false);
+
+
+  //! Get the wndow part of the window level
   double getWindow() { return m_window; }
+  //! Get the level part of the window level
   double getLevel() { return m_level; }
 
- public slots:
+  void setManualOn() { m_optionsWidget.prescribeGroupBox->setChecked(true); }
+  void setManualOff() { m_optionsWidget.prescribeGroupBox->setChecked(false); }
+  void setManual(bool man) { m_optionsWidget.prescribeGroupBox->setChecked(man); }
+  bool getManual() { return m_optionsWidget.prescribeGroupBox->isChecked(); }
+
+ protected slots:
   void spinRight();
   void spinLeft();
   void rotateUp();
@@ -81,14 +118,15 @@ public:
   void windowSliderMoved(int);
   void levelSliderMoved(int);
 
- public slots:
   void copyImageData2DSlot();
  signals:
   void copyImageData2DSignal();
 
  protected:
   // Functions
+
   void setupGUI();
+  //! Clean the GUI widgets.
   void cleanupGUI();
   
   vtkImageData* m_imgData;
@@ -103,7 +141,6 @@ public:
   int m_numChan;
 
   bool m_imgDataValid;
-
   double m_window;
   double m_level;
   double m_range[2];

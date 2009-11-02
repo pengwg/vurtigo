@@ -31,8 +31,10 @@
 #include "vtkRenderer.h"
 #include "vtkProp3DCollection.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkPropPicker.h"
 
 customQVTKWidget::customQVTKWidget(QWidget* parent, Qt::WFlags f) : QVTKWidget(parent, f) {
+  m_propChosen = NULL;
   m_interactionMode = CAMERA_MODE;
   m_forceSquare = false;
 }
@@ -40,7 +42,6 @@ customQVTKWidget::customQVTKWidget(QWidget* parent, Qt::WFlags f) : QVTKWidget(p
 customQVTKWidget::~customQVTKWidget() {
 }
 
-//! Called when the window is resized.
 void customQVTKWidget::resizeEvent(QResizeEvent* event) {
   QSize newSize;
   QResizeEvent* e2;
@@ -62,7 +63,7 @@ void customQVTKWidget::paintEvent(QPaintEvent* event) {
   rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
-//! Called when one of the mouse buttons is pressed.
+
 void customQVTKWidget::mousePressEvent(QMouseEvent* event) {
 
   switch(m_interactionMode) {
@@ -82,7 +83,6 @@ void customQVTKWidget::mousePressEvent(QMouseEvent* event) {
   QVTKWidget::mousePressEvent(event);
 }
 
-//! Called as the mouse is moved.
 void customQVTKWidget::mouseMoveEvent(QMouseEvent* event) {
 
   switch(m_interactionMode) {
@@ -102,7 +102,6 @@ void customQVTKWidget::mouseMoveEvent(QMouseEvent* event) {
   QVTKWidget::mouseMoveEvent(event);
 }
 
-//! Called when the click is released.
 void customQVTKWidget::mouseReleaseEvent(QMouseEvent* event) {
 
   switch(m_interactionMode) {
@@ -122,11 +121,6 @@ void customQVTKWidget::mouseReleaseEvent(QMouseEvent* event) {
   QVTKWidget::mouseReleaseEvent(event);
 }
 
-//! Called on a double click.
-/*!
-  The double click event will be called AFTER a mouse press and mouse release event.
-  This function calls the event ignore function which passes the event up to the parent.
-  */
 void customQVTKWidget::mouseDoubleClickEvent(QMouseEvent* event) {
 
   switch(m_interactionMode) {
@@ -134,6 +128,7 @@ void customQVTKWidget::mouseDoubleClickEvent(QMouseEvent* event) {
     emit cameraMouseDoubleClick(event);
     break;
     case(INTERACTION_MODE):
+    selectNewProp(event);
     emit interMouseDoubleClick(event);
     break;
     case(PLACE_MODE):
@@ -205,4 +200,20 @@ void customQVTKWidget::wheelEvent(QWheelEvent* event) {
   }
 
   QVTKWidget::wheelEvent(event);
+}
+
+void customQVTKWidget::selectNewProp(QMouseEvent* event) {
+  m_propChosen = NULL;
+
+  if (!event) return;
+
+  vtkPropPicker* picker = vtkPropPicker::New();
+  int X = event->x();
+  int Y = this->height()-event->y();
+
+  if(picker->PickProp(X, Y, rtObjectManager::instance().getMainWinHandle()->getRenderer())) {
+    m_propChosen = picker->GetViewProp();
+  }
+
+  picker->Delete();
 }

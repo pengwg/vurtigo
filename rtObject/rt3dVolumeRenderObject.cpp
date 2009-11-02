@@ -32,6 +32,8 @@ rt3DVolumeRenderObject::rt3DVolumeRenderObject() {
   m_planes[1] = new rtImagePlaneWidget();
   m_planes[2] = new rtImagePlaneWidget();
 
+  m_firstInit = true;
+
   setupDataObject();
   setupPipeline();
 }
@@ -61,43 +63,46 @@ void rt3DVolumeRenderObject::update() {
   rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
   if (!dObj || !dObj->isDataValid()) return;
 
-  int slicePos[3];
-  // Save the positions.
-  for (int ix1=0; ix1<3; ix1++) {
-    if (m_planes[ix1]->GetPlaneOrientation() >= 0 && m_planes[ix1]->GetPlaneOrientation() <= 2) {
-      slicePos[ix1] = m_planes[ix1]->GetSliceIndex();
-    } else {
-      // Reset the slice.
-      slicePos[ix1] = 0;
+  if (m_firstInit) {
+    int slicePos[3];
+    // Save the positions.
+    for (int ix1=0; ix1<3; ix1++) {
+      if (m_planes[ix1]->GetPlaneOrientation() >= 0 && m_planes[ix1]->GetPlaneOrientation() <= 2) {
+        slicePos[ix1] = m_planes[ix1]->GetSliceIndex();
+      } else {
+        // Reset the slice.
+        slicePos[ix1] = 0;
+      }
     }
-  }
 
-  if (dObj->getInterpolation() == 0) {
-    m_transFilter->SetInterpolationModeToNearestNeighbor();
-  } else if (dObj->getInterpolation() == 1) {
-    m_transFilter->SetInterpolationModeToLinear();
-  } else if (dObj->getInterpolation() == 2) {
-    m_transFilter->SetInterpolationModeToCubic();
-  }
-  m_transFilter->SetResliceAxes( dObj->getTransform()->GetMatrix() );
-  m_transFilter->Update();
+    if (dObj->getInterpolation() == 0) {
+      m_transFilter->SetInterpolationModeToNearestNeighbor();
+    } else if (dObj->getInterpolation() == 1) {
+      m_transFilter->SetInterpolationModeToLinear();
+    } else if (dObj->getInterpolation() == 2) {
+      m_transFilter->SetInterpolationModeToCubic();
+    }
+    m_transFilter->SetResliceAxes( dObj->getTransform()->GetMatrix() );
+    m_transFilter->Update();
 
-  for (int ix1=0; ix1<3; ix1++) {
-    m_planes[ix1]->SetInput( m_transFilter->GetOutput() );
+    for (int ix1=0; ix1<3; ix1++) {
+      m_planes[ix1]->SetInput( m_transFilter->GetOutput() );
 
-  }
+    }
 
-  m_planes[0]->SetPlaneOrientationToXAxes();
-  m_planes[1]->SetPlaneOrientationToYAxes();
-  m_planes[2]->SetPlaneOrientationToZAxes();
+    m_planes[0]->SetPlaneOrientationToXAxes();
+    m_planes[1]->SetPlaneOrientationToYAxes();
+    m_planes[2]->SetPlaneOrientationToZAxes();
 
-  m_planes[0]->SetPlaneOrientationToZAxes();
-  m_planes[1]->SetPlaneOrientationToXAxes();
-  m_planes[2]->SetPlaneOrientationToYAxes();
+    m_planes[0]->SetPlaneOrientationToZAxes();
+    m_planes[1]->SetPlaneOrientationToXAxes();
+    m_planes[2]->SetPlaneOrientationToYAxes();
 
-  // Restore the slice position
-  for (int ix1=0; ix1<3; ix1++) {
-    m_planes[ix1]->SetSliceIndex(slicePos[ix1]);
+    // Restore the slice position
+    for (int ix1=0; ix1<3; ix1++) {
+      m_planes[ix1]->SetSliceIndex(slicePos[ix1]);
+    }
+    m_firstInit = false;
   }
 
   double range[2];
@@ -254,6 +259,8 @@ void rt3DVolumeRenderObject::setupPipeline() {
   m_outline = vtkOutlineFilter::New();
   m_outlineMapper = vtkPolyDataMapper::New();
   m_outlineActor = vtkActor::New();
+
+  m_firstInit = true;
 
   // Transform the data before it enters the pipeline.
   m_transFilter->SetOutputOriginToDefault();

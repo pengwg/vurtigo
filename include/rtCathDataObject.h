@@ -63,7 +63,7 @@ public:
 
   // Coil specific
   int addCoil(int loc);
-  bool setCoilSNR(int coilID, int SNR);
+  bool setCoilSNR(int coilID, double SNR);
   bool setCoilAngles(int coilID, int a1, int a2);
   bool setCoilCoords(int coilID, double cx, double cy, double cz);
   CathCoilData* getCoilHandle(int coilID);

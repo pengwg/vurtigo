@@ -37,6 +37,11 @@ public:
 
   bool cameraMoving();
 
+  void getForwardDirection(double val[3]);
+  void getUpDirection(double val[3]);
+  void getRightDirection(double val[3]);
+
+
 public slots:
   void mousePress(QMouseEvent*);
   void mouseMove(QMouseEvent*);
