@@ -102,7 +102,11 @@ bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
   if (!img) return false;
 
   if (m_dataCopyLock.tryAcquire()) {
+    m_imgData->Delete();
+    m_imgData = vtkImageData::New();
+
     m_imgData->DeepCopy(img);
+
 
     emit copyImageData2DSignal();
   } else {
@@ -114,7 +118,6 @@ bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
 
 void rt2DSliceDataObject::copyImageData2DSlot() {
   double rangeI[2];
-
   //m_currTime = QDateTime::currentDateTime();
   //std::cout << m_currTime.toString(Qt::SystemLocaleLongDate).toStdString() << std::endl;
 
@@ -123,6 +126,7 @@ void rt2DSliceDataObject::copyImageData2DSlot() {
 
   if( m_imgData->GetNumberOfScalarComponents() == 3) {
     m_lumin->SetInput(m_imgData);
+    m_lumin->GetOutput()->Update();
     m_lumin->GetOutput()->GetScalarRange(rangeI);
     m_imgUCharCast->SetInput(m_lumin->GetOutput());
   }
@@ -130,9 +134,10 @@ void rt2DSliceDataObject::copyImageData2DSlot() {
     m_imgData->GetScalarRange(rangeI);
     m_imgUCharCast->SetInput(m_imgData);
   }
+
   m_imgUCharCast->SetShift(-rangeI[0]);
 
-    // Check if the range needs to be reset.
+  // Check if the range needs to be reset.
   if ( (rangeI[1]-rangeI[0]) > m_range[1] || !m_imgDataValid) {
 
     m_range[0] = 0;
@@ -159,7 +164,6 @@ void rt2DSliceDataObject::copyImageData2DSlot() {
       m_optionsWidget.levelSlider->setValue(m_level);
     }
   }
-
   m_dataCopyLock.release();
 
   m_imgDataValid = true;

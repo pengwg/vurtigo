@@ -72,7 +72,7 @@ void rt2DSliceRenderObject::update() {
   double xsize, ysize, zsize;
 
   dObj->getUCharData()->GetBounds(bounds);
-
+  //dObj->getUCharData()->Print(std::cout);
   xsize = bounds[1]-bounds[0];
   ysize = bounds[3]-bounds[2];
 

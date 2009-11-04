@@ -370,6 +370,9 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
   matrix->SetElement(1, 3, ptOut[1]-remote.transMatrix[1]);
   matrix->SetElement(2, 3, ptOut[2]-remote.transMatrix[2]);
 
+  //imgChangeInfo->GetOutput()->Print(std::cout);
+  //matrix->Print(std::cout);
+
   local->lock();
   // Translate the FOV into milimeters
   success = success && local->copyImageData2D(imgChangeInfo->GetOutput());
