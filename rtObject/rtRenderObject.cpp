@@ -135,3 +135,14 @@ bool rtRenderObject::updateNeeded() {
   }
   return false;
 }
+
+
+bool rtRenderObject::saveFile(QFile* file) {
+  if (m_dataObj) return m_dataObj->saveFile(file);
+  else return false;
+}
+
+bool rtRenderObject::loadFile(QFile* file) {
+  if (m_dataObj) return m_dataObj->loadFile(file);
+  else return false;
+}

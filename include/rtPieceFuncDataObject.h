@@ -48,6 +48,9 @@ public:
 
   bool setPiecewiseFunction(vtkPiecewiseFunction* piece);
 
+  virtual bool saveFile(QFile *file);
+  virtual bool loadFile(QFile *file);
+
  protected:
   // Functions
   void setupGUI();

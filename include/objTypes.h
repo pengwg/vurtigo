@@ -20,23 +20,59 @@
 #ifndef OBJ_TYPES_H
 #define OBJ_TYPES_H
 
-namespace rtConstants {
+class rtConstants {
 
-enum rtObjectType {
-  OT_None,
-  OT_3DObject,
-  OT_2DObject,
-  OT_Cath,
-  OT_vtkMatrix4x4,
-  OT_vtkPolyData,
-  OT_vtkPiecewiseFunction,
-  OT_vtkColorTransferFunction,
-  OT_ImageBuffer,
-  OT_2DPointBuffer,
-  OT_3DPointBuffer,
-  OT_TextLabel
+  public:
+  //! An enumeration of the different types of objects
+  enum rtObjectType {
+    OT_None,
+    OT_3DObject,
+    OT_2DObject,
+    OT_Cath,
+    OT_vtkMatrix4x4,
+    OT_vtkPolyData,
+    OT_vtkPiecewiseFunction,
+    OT_vtkColorTransferFunction,
+    OT_ImageBuffer,
+    OT_2DPointBuffer,
+    OT_3DPointBuffer,
+    OT_TextLabel
+  };
+
+  //! Convert the object type into an int.
+  static int objectTypeToInt(rtObjectType type) {
+    return (int)type;
+  }
+
+  //! Convert an int into a variable of type rtObjectType.
+  /*!
+    \var type The object type as an integer.
+    \return The same value but cast as an object type. Will return OT_None if the integer value is not valid.
+    */
+  static rtObjectType intToObjectType(int type) {
+    rtObjectType result;
+    switch (type) {
+      case OT_None:
+      case OT_3DObject:
+      case OT_2DObject:
+      case OT_Cath:
+      case OT_vtkMatrix4x4:
+      case OT_vtkPolyData:
+      case OT_vtkPiecewiseFunction:
+      case OT_vtkColorTransferFunction:
+      case OT_ImageBuffer:
+      case OT_2DPointBuffer:
+      case OT_3DPointBuffer:
+      case OT_TextLabel:
+      result = (rtObjectType)type;
+      break;
+      default:
+      result = OT_None;
+      break;
+    }
+    return result;
+  }
+
 };
-
-}
 
 #endif

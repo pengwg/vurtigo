@@ -433,6 +433,8 @@ void rtMainWindow::connectSignals() {
 
   // Object Menu
   connect( actionNewObject, SIGNAL(triggered()), this, SLOT(addNewObject()) );
+  connect( actionLoad_Object, SIGNAL(triggered()), this, SLOT(loadObject()) );
+  connect( actionSave_Object, SIGNAL(triggered()), this, SLOT(saveObject()) );
   connect( actionDeleteSelected, SIGNAL(triggered()), this, SLOT(removeSelectedObject()) );
 
   // View Menu
@@ -669,6 +671,94 @@ void rtMainWindow::addNewObject() {
     } else if (setupDlg.objTypeCombo->currentText() == "Color Transfer Function") {
       rtObjectManager::instance().addObjectOfType(rtConstants::OT_vtkColorTransferFunction, name);
     }
+  }
+}
+
+void rtMainWindow::loadObject() {
+  QFile file;
+  QStringList names;
+
+  names = QFileDialog::getOpenFileNames(this, "Select Files To Open:");
+  for (int ix1=0; ix1<names.size(); ix1++) {
+    file.setFileName(names.at(ix1));
+    if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      QXmlStreamReader reader(&file);
+      QXmlStreamReader::TokenType type;
+      bool fileInfo = false;
+      bool intOK = false;
+      bool typeRead=false;
+      bool nameRead=false;
+      rtConstants::rtObjectType objType;
+      QString objName="";
+
+      while (!reader.atEnd()) {
+        type = reader.readNext();
+        if(type == QXmlStreamReader::StartElement) {
+
+          if (fileInfo) {
+            if (reader.name() == "type") {
+              objType = rtConstants::intToObjectType(reader.readElementText().toInt(&intOK));
+              if (objType != rtConstants::OT_None && intOK) typeRead = true;
+            } else if (reader.name() == "name") {
+              objName = reader.readElementText();
+              if (objName != "") nameRead = true;
+            }
+          }
+
+          if (reader.name() == "FileInfo") {
+            fileInfo = true;
+          }
+
+        } else if (type == QXmlStreamReader::EndElement) {
+          if (reader.name() == "FileInfo") {
+            fileInfo = false;
+          }
+        }
+
+      }
+      if (reader.hasError()) {
+
+      }
+
+      rtRenderObject* obj;
+      QFile objFile;
+      // Both the type and the name have been recognized.
+      if (typeRead && nameRead) {
+        obj = rtObjectManager::instance().addObjectOfType(objType, objName);
+        if (obj) {
+          objFile.setFileName(names.at(ix1));
+          obj->loadFile(&objFile);
+        }
+      }
+
+      file.close();
+    }
+  }
+
+}
+
+void rtMainWindow::saveObject() {
+  QTreeWidgetItem* current;
+  rtRenderObject* temp;
+  QString fName;
+  QFile file;
+
+  current = objectTree->currentItem();
+
+  if (!current) return;
+
+  // Check for a heading.
+  if (current->columnCount() == 1) {
+    return;
+  }
+
+  // Find the object
+  temp = rtObjectManager::instance().getObjectWithID(current->text(1).toInt());
+  if (temp) {
+    // Find the file name
+    fName = QFileDialog::getSaveFileName(this, "Save As...");
+    file.setFileName(fName);
+    temp->saveFile(&file);
   }
 }
 

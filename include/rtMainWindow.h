@@ -124,6 +124,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void loadPluginFile();
 
   void addNewObject();
+  void loadObject();
+  void saveObject();
   void removeSelectedObject();
 
   void showAxesOptions();

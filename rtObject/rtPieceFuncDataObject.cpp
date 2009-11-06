@@ -19,6 +19,9 @@
 *******************************************************************************/
 #include "rtPieceFuncDataObject.h"
 
+#include <QXmlStreamWriter>
+#include <QXmlStreamReader>
+
 //! Constructor
 rtPieceFuncDataObject::rtPieceFuncDataObject() {
   setObjectType(rtConstants::OT_vtkPiecewiseFunction);
@@ -62,4 +65,73 @@ void rtPieceFuncDataObject::cleanupGUI() {
   m_mainLayout->removeWidget(m_graph);
   delete m_mainLayout;
   delete m_graph;
+}
+
+bool rtPieceFuncDataObject::saveFile(QFile* file) {
+  if (!file->open(QIODevice::WriteOnly | QIODevice::Text))
+    return false;
+
+  QXmlStreamWriter writer(file);
+  writer.setAutoFormatting(true);
+  writer.writeStartDocument();
+  writer.writeStartElement("VurtigoFile");
+  writer.writeStartElement("FileInfo");
+  writer.writeTextElement( "type", QString::number( (int)getObjectType() ) );
+  writer.writeTextElement( "name", getObjName() );
+  writer.writeEndElement();
+
+  vtkPiecewiseFunction* piece;
+  piece = getPiecewiseFunction();
+  double range[2];
+  double node[4];
+  int numPoints = piece->GetSize();
+  piece->GetRange(range);
+
+  writer.writeStartElement("PieceFuncData");
+  writer.writeTextElement( "minBounds", QString::number(range[0]) );
+  writer.writeTextElement( "maxBounds", QString::number(range[1]) );
+  writer.writeTextElement( "clamping", QString::number(piece->GetClamping()) );
+  writer.writeEndElement();
+
+  writer.writeStartElement("PieceFuncPoints");
+  writer.writeAttribute( "numPoints", QString::number(numPoints) );
+  for (int ix1=0; ix1<numPoints; ix1++) {
+    piece->GetNodeValue(ix1, node);
+    writer.writeStartElement("Node");
+    writer.writeAttribute( "x", QString::number(node[0]) );
+    writer.writeAttribute( "y", QString::number(node[1]) );
+    writer.writeAttribute( "mid", QString::number(node[2]) );
+    writer.writeAttribute( "sharp", QString::number(node[3]) );
+    writer.writeEndElement();
+  }
+  writer.writeEndElement();
+  writer.writeEndElement(); // VurtigoFile
+  writer.writeEndDocument();
+
+  file->close();
+  return true;
+}
+
+bool rtPieceFuncDataObject::loadFile(QFile* file) {
+  if (!file->open(QIODevice::ReadOnly | QIODevice::Text))
+    return false;
+
+  QXmlStreamReader reader(file);
+
+  while (!reader.atEnd()) {
+    if(reader.readNext() == QXmlStreamReader::StartElement) {
+      if (reader.name() == "FileInfo") {
+      } else if (reader.name() == "PieceFuncData") {
+      } else if (reader.name() == "PieveFuncPoints") {
+      }
+    }
+
+  }
+  if (reader.hasError()) {
+    file->close();
+    return false;
+  }
+
+  file->close();
+  return true;
 }

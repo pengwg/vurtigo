@@ -26,6 +26,7 @@
 #include <QPushButton>
 #include <QDateTime>
 #include <QMutex>
+#include <QFile>
 #include "objTypes.h"
 
 class rtDataObject : public QObject {
@@ -60,6 +61,9 @@ Q_OBJECT
   bool tryLock() { return m_objectLock.tryLock(); }
   bool tryLock(int timeout) { return m_objectLock.tryLock(timeout); }
   void unlock() { m_objectLock.unlock(); }
+
+  virtual bool saveFile(QFile* file) { return false; }
+  virtual bool loadFile(QFile* file) { return false; }
 
  public slots:
   void Modified();

@@ -26,6 +26,7 @@
 #include <QDateTime>
 #include <QList>
 #include <QHash>
+#include <QFile>
 
 #include <vtkProp.h>
 #include <vtkPropAssembly.h>
@@ -86,6 +87,12 @@ Q_OBJECT
     \param quality The desired rendering quality. Values are in the range [0, 1] and will be clamped to this if they are outside these bounds.
     */
   virtual void setRenderQuality(double quality) { }
+
+  //! Save an object to a file.
+  virtual bool saveFile(QFile* file);
+
+  //! Load this object from a file.
+  virtual bool loadFile(QFile* file);
 
  public slots:
   virtual void mousePressEvent(QMouseEvent* event) {  }

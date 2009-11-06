@@ -275,6 +275,8 @@
      <string>Objects</string>
     </property>
     <addaction name="actionNewObject"/>
+    <addaction name="actionLoad_Object"/>
+    <addaction name="actionSave_Object"/>
     <addaction name="separator"/>
     <addaction name="actionDeleteSelected"/>
    </widget>
@@ -445,6 +447,16 @@
    </property>
    <property name="text">
     <string>Placement Mode</string>
+   </property>
+  </action>
+  <action name="actionLoad_Object">
+   <property name="text">
+    <string>Load Object</string>
+   </property>
+  </action>
+  <action name="actionSave_Object">
+   <property name="text">
+    <string>Save Object</string>
    </property>
   </action>
  </widget>
