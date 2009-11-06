@@ -3,7 +3,7 @@ project (Vurtigo)
 
 # The version number.
 set (Vurtigo_VERSION_MAJOR 0)
-set (Vurtigo_VERSION_MINOR 2)
+set (Vurtigo_VERSION_MINOR 9)
 
 message(STATUS "Begin Install for Vurtigo: " ${Vurtigo_VERSION_MAJOR} "." ${Vurtigo_VERSION_MINOR})
 

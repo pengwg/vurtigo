@@ -424,7 +424,7 @@ void rt3DVolumeDataObject::piecewiseChangedGUI(QString id) {
 
   // Remove the old connection if there is one.
   if (m_piecewiseFuncID != -1) {
-    rtPieceFuncDataObject* func = static_cast<rtPieceFuncDataObject*>(rtObjectManager::instance().getObjectWithID(idInt)->getDataObject());
+    rtPieceFuncDataObject* func = static_cast<rtPieceFuncDataObject*>(rtObjectManager::instance().getObjectWithID(m_piecewiseFuncID)->getDataObject());
     if(func) {   
       disconnect(func, SIGNAL(objectChanged(int)), this, SLOT(piecewiseChanged(int)));
     }
