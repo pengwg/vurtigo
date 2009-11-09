@@ -72,3 +72,33 @@ void rtDataObject::updateGUI() {
   // Call the update function for each object.
   update();
 }
+
+void rtDataObject::saveHeader(QXmlStreamWriter *writer) {
+  rtDataObject::saveHeader(writer, m_objType, m_objName);
+}
+
+void rtDataObject::saveHeader(QXmlStreamWriter *writer, rtConstants::rtObjectType type, QString name) {
+  writer->writeStartElement("FileInfo");
+  writer->writeTextElement( "type", QString::number( (int)type ) );
+  writer->writeTextElement( "name", name );
+  writer->writeEndElement();
+}
+
+void rtDataObject::loadHeader(QXmlStreamReader *reader, rtConstants::rtObjectType &type, QString &name) {
+  bool intOK;
+
+  if ( !(reader->name()=="FileInfo" || reader->isStartElement()) ) return;
+
+  while ( reader->name() != "FileInfo" || !reader->isEndElement() ) {
+    if(reader->readNext() == QXmlStreamReader::StartElement) {
+
+      if(reader->name() == "type") {
+        type = rtConstants::intToObjectType(reader->readElementText().toInt(&intOK));
+      } else if (reader->name() == "name") {
+        name = reader->readElementText();
+      }
+
+    }
+  }
+
+}

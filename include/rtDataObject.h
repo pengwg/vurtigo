@@ -27,6 +27,8 @@
 #include <QDateTime>
 #include <QMutex>
 #include <QFile>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
 #include "objTypes.h"
 
 class rtDataObject : public QObject {
@@ -64,6 +66,11 @@ Q_OBJECT
 
   virtual bool saveFile(QFile* file) { return false; }
   virtual bool loadFile(QFile* file) { return false; }
+
+  void saveHeader(QXmlStreamWriter *writer);
+
+  static void saveHeader(QXmlStreamWriter *reader, rtConstants::rtObjectType type, QString name);
+  static void loadHeader(QXmlStreamReader *reader, rtConstants::rtObjectType &type, QString &name);
 
  public slots:
   void Modified();

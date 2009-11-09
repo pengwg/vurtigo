@@ -75,10 +75,7 @@ bool rtPieceFuncDataObject::saveFile(QFile* file) {
   writer.setAutoFormatting(true);
   writer.writeStartDocument();
   writer.writeStartElement("VurtigoFile");
-  writer.writeStartElement("FileInfo");
-  writer.writeTextElement( "type", QString::number( (int)getObjectType() ) );
-  writer.writeTextElement( "name", getObjName() );
-  writer.writeEndElement();
+  rtDataObject::saveHeader(&writer, getObjectType(), getObjName());
 
   vtkPiecewiseFunction* piece;
   piece = getPiecewiseFunction();
@@ -117,11 +114,13 @@ bool rtPieceFuncDataObject::loadFile(QFile* file) {
     return false;
 
   QXmlStreamReader reader(file);
+  rtConstants::rtObjectType objType;
+  QString objName="";
 
   while (!reader.atEnd()) {
     if(reader.readNext() == QXmlStreamReader::StartElement) {
       if (reader.name() == "FileInfo") {
-        readFileInfo(&reader);
+        rtDataObject::loadHeader(&reader, objType, objName);
       } else if (reader.name() == "PieceFuncData") {
         readFuncData(&reader);
       } else if (reader.name() == "PieceFuncPoints") {
@@ -138,25 +137,6 @@ bool rtPieceFuncDataObject::loadFile(QFile* file) {
   m_graph->setPiecewiseFunction(m_pieceFunc);
   file->close();
   return true;
-}
-
-//! Internal reading function
-void rtPieceFuncDataObject::readFileInfo(QXmlStreamReader* reader) {
-  rtConstants::rtObjectType objType;
-  QString objName="";
-  bool intOK;
-
-  while ( reader->name() != "FileInfo" || !reader->isEndElement() ) {
-    if(reader->readNext() == QXmlStreamReader::StartElement) {
-
-      if(reader->name() == "type") {
-        objType = rtConstants::intToObjectType(reader->readElementText().toInt(&intOK));
-      } else if (reader->name() == "name") {
-        objName = reader->readElementText();
-      }
-
-    }
-  }
 }
 
 void rtPieceFuncDataObject::readFuncData(QXmlStreamReader* reader) {

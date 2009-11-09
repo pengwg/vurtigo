@@ -686,8 +686,6 @@ void rtMainWindow::loadObject() {
     if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
       QXmlStreamReader reader(&file);
       QXmlStreamReader::TokenType type;
-      bool fileInfo = false;
-      bool intOK = false;
       bool typeRead=false;
       bool nameRead=false;
       rtConstants::rtObjectType objType;
@@ -695,32 +693,16 @@ void rtMainWindow::loadObject() {
 
       while (!reader.atEnd()) {
         type = reader.readNext();
-        if(type == QXmlStreamReader::StartElement) {
-
-          if (fileInfo) {
-            if (reader.name() == "type") {
-              objType = rtConstants::intToObjectType(reader.readElementText().toInt(&intOK));
-              if (objType != rtConstants::OT_None && intOK) typeRead = true;
-            } else if (reader.name() == "name") {
-              objName = reader.readElementText();
-              if (objName != "") nameRead = true;
-            }
-          }
-
-          if (reader.name() == "FileInfo") {
-            fileInfo = true;
-          }
-
-        } else if (type == QXmlStreamReader::EndElement) {
-          if (reader.name() == "FileInfo") {
-            fileInfo = false;
-          }
+        if(type == QXmlStreamReader::StartElement && reader.name() == "FileInfo") {
+          rtDataObject::loadHeader(&reader, objType, objName);
         }
-
       }
       if (reader.hasError()) {
 
       }
+
+      if (objType != rtConstants::OT_None) typeRead = true;
+      if (objName != "") nameRead = true;
 
       rtRenderObject* obj;
       QFile objFile;

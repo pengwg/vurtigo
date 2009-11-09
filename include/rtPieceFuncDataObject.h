@@ -64,7 +64,6 @@ public:
   VtkPiecewiseGraph* m_graph;
   QBoxLayout *m_mainLayout;
 
-  void readFileInfo(QXmlStreamReader* reader);
   void readFuncData(QXmlStreamReader* reader);
   void readPointData(QXmlStreamReader* reader);
 };

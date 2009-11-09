@@ -47,6 +47,9 @@ public:
   }
   bool setColorFunction(vtkColorTransferFunction* ctf);
 
+  virtual bool saveFile(QFile *file);
+  virtual bool loadFile(QFile *file);
+
  protected:
   // Functions
   void setupGUI();
@@ -56,6 +59,9 @@ public:
 
   VtkColorTable* m_table;
   QBoxLayout *m_mainLayout;
+
+  void readFuncData(QXmlStreamReader* reader);
+  void readPointData(QXmlStreamReader* reader);
 };
 
 #endif 

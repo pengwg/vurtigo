@@ -53,7 +53,7 @@ void VtkColorTable::updateColorFunction() {
     const Point & point = points.at(mainTable->currentRow());
 
     colorFunction->RemovePoint(point.scalarValue);
-    colorFunction->AddRGBPoint(point.scalarValue, point.color.red(), point.color.green(), point.color.blue());
+    colorFunction->AddRGBPoint(point.scalarValue, point.color.red()/255.0f, point.color.green()/255.0f, point.color.blue()/255.0f);
     emit functionUpdated();
 }
 
@@ -67,13 +67,13 @@ void VtkColorTable::removeCheckDupe(int oldScalarVal) {
     colorFunction->RemovePoint(oldScalarVal);
     if (currentRow > 0 && points.at(currentRow - 1).scalarValue == oldScalarVal) {
         const Point & point = points.at(currentRow - 1);
-        colorFunction->AddRGBPoint(point.scalarValue, point.color.red(),
-                                    point.color.green(), point.color.blue());
+        colorFunction->AddRGBPoint(point.scalarValue, point.color.red()/255.0f,
+                                    point.color.green()/255.0f, point.color.blue()/255.0f);
     }
     else if (points.size() - 1 > currentRow && points.at(currentRow + 1).scalarValue == oldScalarVal) {
         const Point & point = points.at(currentRow + 1);
-        colorFunction->AddRGBPoint(point.scalarValue, point.color.red(),
-                                    point.color.green(), point.color.blue());
+        colorFunction->AddRGBPoint(point.scalarValue, point.color.red()/255.0f,
+                                    point.color.green()/255.0f, point.color.blue()/255.0f);
     }
     emit functionUpdated();
 }
@@ -161,8 +161,8 @@ void VtkColorTable::updateFromPoints() {
         else
             updateTableRow(a, currPoint);
 
-        colorFunction->AddRGBPoint(currPoint.scalarValue, currPoint.color.red(),
-                                   currPoint.color.green(), currPoint.color.blue());
+        colorFunction->AddRGBPoint(currPoint.scalarValue, currPoint.color.red()/255.0f,
+                                   currPoint.color.green()/255.0f, currPoint.color.blue()/255.0f);
     }
     emit functionUpdated();
 }
@@ -205,8 +205,8 @@ void VtkColorTable::updateCell(int row, int column) {
 
                 //update colorFunction
                 removeCheckDupe(point.scalarValue);
-                colorFunction->AddRGBPoint(val, point.color.red(),
-                                           point.color.green(), point.color.blue());
+                colorFunction->AddRGBPoint(val, point.color.red()/255.0f,
+                                           point.color.green()/255.0f, point.color.blue()/255.0f);
 
                 //add the point back in
                 point.scalarValue = val;
@@ -287,8 +287,8 @@ void VtkColorTable::newPoint() {
     qStableSort(points.begin(), points.end(), point_sort);
 
     //update colorFunction
-    colorFunction->AddRGBPoint(point.scalarValue, point.color.red(),
-                               point.color.green(), point.color.blue());
+    colorFunction->AddRGBPoint(point.scalarValue, point.color.red()/255.0f,
+                               point.color.green()/255.0f, point.color.blue()/255.0f);
 
     //update table
     int currentRow = points.lastIndexOf(point);
