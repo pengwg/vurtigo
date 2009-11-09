@@ -4,8 +4,9 @@ project (Vurtigo)
 # The version number.
 set (Vurtigo_VERSION_MAJOR 0)
 set (Vurtigo_VERSION_MINOR 9)
+set (Vurtigo_VERSION_REVISION 0)
 
-message(STATUS "Begin Install for Vurtigo: " ${Vurtigo_VERSION_MAJOR} "." ${Vurtigo_VERSION_MINOR})
+message(STATUS "Begin Install for Vurtigo: " ${Vurtigo_VERSION_MAJOR} "." ${Vurtigo_VERSION_MINOR} "." ${Vurtigo_VERSION_REVISION})
 
 ####################
 # Determine the OS
@@ -70,6 +71,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 file(WRITE ${CMAKE_BINARY_DIR}/version.h "#define VURTIGO_MAJOR_VERSION " ${Vurtigo_VERSION_MAJOR} "\n" )
 file(APPEND ${CMAKE_BINARY_DIR}/version.h "#define VURTIGO_MINOR_VERSION " ${Vurtigo_VERSION_MINOR} "\n" )
+file(APPEND ${CMAKE_BINARY_DIR}/version.h "#define VURTIGO_REVISION_VERSION " ${Vurtigo_VERSION_REVISION} "\n" )
 
 include_directories(include ${CMAKE_BINARY_DIR})
 

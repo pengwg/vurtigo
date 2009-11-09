@@ -636,6 +636,8 @@ void rtMainWindow::viewAbout() {
   ver.append(QString::number(VURTIGO_MAJOR_VERSION));
   ver.append(".");
   ver.append(QString::number(VURTIGO_MINOR_VERSION));
+  ver.append(".");
+  ver.append(QString::number(VURTIGO_REVISION_VERSION));
 
   setup.setupUi(&aboutD);
   setup.versionLabel->setText( ver );
