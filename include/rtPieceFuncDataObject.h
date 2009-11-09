@@ -26,6 +26,8 @@
 #include <vtkSmartPointer.h>
 #include <vtkPiecewiseFunction.h>
 
+class QXmlStreamReader;
+
 //! Data Object from Piecewise Function
 /*!
   The Piecewise Function data defines the opacity of different scalar values.
@@ -38,6 +40,7 @@ public:
   rtPieceFuncDataObject();
   ~rtPieceFuncDataObject();
 
+  //! Send the info to the GUI
   void update();
 
   //! Get the value of the current piecewise function.
@@ -60,6 +63,10 @@ public:
 
   VtkPiecewiseGraph* m_graph;
   QBoxLayout *m_mainLayout;
+
+  void readFileInfo(QXmlStreamReader* reader);
+  void readFuncData(QXmlStreamReader* reader);
+  void readPointData(QXmlStreamReader* reader);
 };
 
 #endif 

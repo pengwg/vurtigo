@@ -43,7 +43,7 @@ bool rtPieceFuncDataObject::setPiecewiseFunction(vtkPiecewiseFunction* piece) {
   return true;
 }
 
-//! Send the info to the GUI
+
 void rtPieceFuncDataObject::update() {
 
 }
@@ -121,8 +121,11 @@ bool rtPieceFuncDataObject::loadFile(QFile* file) {
   while (!reader.atEnd()) {
     if(reader.readNext() == QXmlStreamReader::StartElement) {
       if (reader.name() == "FileInfo") {
+        readFileInfo(&reader);
       } else if (reader.name() == "PieceFuncData") {
-      } else if (reader.name() == "PieveFuncPoints") {
+        readFuncData(&reader);
+      } else if (reader.name() == "PieceFuncPoints") {
+        readPointData(&reader);
       }
     }
 
@@ -132,6 +135,77 @@ bool rtPieceFuncDataObject::loadFile(QFile* file) {
     return false;
   }
 
+  m_graph->setPiecewiseFunction(m_pieceFunc);
   file->close();
   return true;
+}
+
+//! Internal reading function
+void rtPieceFuncDataObject::readFileInfo(QXmlStreamReader* reader) {
+  rtConstants::rtObjectType objType;
+  QString objName="";
+  bool intOK;
+
+  while ( reader->name() != "FileInfo" || !reader->isEndElement() ) {
+    if(reader->readNext() == QXmlStreamReader::StartElement) {
+
+      if(reader->name() == "type") {
+        objType = rtConstants::intToObjectType(reader->readElementText().toInt(&intOK));
+      } else if (reader->name() == "name") {
+        objName = reader->readElementText();
+      }
+
+    }
+  }
+}
+
+void rtPieceFuncDataObject::readFuncData(QXmlStreamReader* reader) {
+  double bounds[2];
+  int clamping;
+  bool intOK;
+
+
+  while ( reader->name() != "PieceFuncData" || !reader->isEndElement() ) {
+    if(reader->readNext() == QXmlStreamReader::StartElement) {
+
+      if (reader->name() == "minBounds") {
+        bounds[0] = reader->readElementText().toDouble(&intOK);
+      } else if (reader->name() == "maxBounds") {
+        bounds[1] = reader->readElementText().toDouble(&intOK);
+      } else if (reader->name() == "clamping") {
+        clamping = reader->readElementText().toInt(&intOK);
+      }
+    }
+  }
+
+  m_pieceFunc->AdjustRange(bounds);
+  m_pieceFunc->SetClamping(clamping);
+}
+
+void rtPieceFuncDataObject::readPointData(QXmlStreamReader* reader) {
+  QXmlStreamAttributes attrib;
+  int numPoints;
+  int currPoint;
+  double node[4];
+  bool intOK;
+
+  m_pieceFunc->RemoveAllPoints();
+
+  attrib = reader->attributes();
+  numPoints = attrib.value("numPoints").toString().toInt();
+  currPoint = 0;
+  while ( currPoint < numPoints ) {
+    if(reader->readNext() == QXmlStreamReader::StartElement) {
+      if (reader->name() == "Node") {
+        attrib = reader->attributes();
+        node[0] = attrib.value("x").toString().toDouble(&intOK);
+        node[1] = attrib.value("y").toString().toDouble(&intOK);
+        node[2] = attrib.value("mid").toString().toDouble(&intOK);
+        node[3] = attrib.value("sharp").toString().toDouble(&intOK);
+        m_pieceFunc->AddPoint(node[0], node[1], node[2], node[3]);
+        currPoint++;
+      }
+    }
+  }
+
 }

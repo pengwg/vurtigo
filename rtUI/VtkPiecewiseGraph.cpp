@@ -191,8 +191,13 @@ bool VtkPiecewiseGraph::setPiecewiseFunction(vtkPiecewiseFunction * const func) 
     QRectF dataSpaceNew;
     dataSpaceNew.setBottom((int)dataSpace.bottom());
     dataSpaceNew.setTop((int)dataSpace.top());
-    dataSpaceNew.setLeft(((int)points.at(0).x() - ((int)points.at(0).x()) % DATASPACE_MARGIN));
-    dataSpaceNew.setRight(((int)points.at(points.size() - 1).x() - ((int) points.at(points.size() - 1).x()) % DATASPACE_MARGIN + DATASPACE_MARGIN));
+
+    double range[2];
+    piecewiseFunction->GetRange(range);
+    //dataSpaceNew.setLeft(((int)points.at(0).x() - ((int)points.at(0).x()) % DATASPACE_MARGIN));
+    //dataSpaceNew.setRight(((int)points.at(points.size() - 1).x() - ((int) points.at(points.size() - 1).x()) % DATASPACE_MARGIN + DATASPACE_MARGIN));
+    dataSpaceNew.setLeft(range[0]);
+    dataSpaceNew.setRight(range[1]);
 
     HoverPoints & hoverPoints = *graphWidget->getHoverPoints();
     hoverPoints.setDataSpace(dataSpaceNew);
