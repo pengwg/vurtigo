@@ -64,16 +64,7 @@ void rt3DVolumeRenderObject::update() {
   if (!dObj || !dObj->isDataValid()) return;
 
   if (m_firstInit) {
-    int slicePos[3];
-    // Save the positions.
-    for (int ix1=0; ix1<3; ix1++) {
-      if (m_planes[ix1]->GetPlaneOrientation() >= 0 && m_planes[ix1]->GetPlaneOrientation() <= 2) {
-        slicePos[ix1] = m_planes[ix1]->GetSliceIndex();
-      } else {
-        // Reset the slice.
-        slicePos[ix1] = 0;
-      }
-    }
+    int extent[6];
 
     if (dObj->getInterpolation() == 0) {
       m_transFilter->SetInterpolationModeToNearestNeighbor();
@@ -90,18 +81,18 @@ void rt3DVolumeRenderObject::update() {
 
     }
 
-    m_planes[0]->SetPlaneOrientationToXAxes();
-    m_planes[1]->SetPlaneOrientationToYAxes();
-    m_planes[2]->SetPlaneOrientationToZAxes();
-
     m_planes[0]->SetPlaneOrientationToZAxes();
     m_planes[1]->SetPlaneOrientationToXAxes();
     m_planes[2]->SetPlaneOrientationToYAxes();
 
-    // Restore the slice position
-    for (int ix1=0; ix1<3; ix1++) {
-      m_planes[ix1]->SetSliceIndex(slicePos[ix1]);
-    }
+    // Set the default slice position
+    m_transFilter->GetOutput()->Update();
+    m_transFilter->GetOutput()->GetExtent(extent);
+
+    m_planes[0]->SetSliceIndex(floor((extent[4]+extent[5])/2.0f));
+    m_planes[1]->SetSliceIndex(floor((extent[0]+extent[1])/2.0f));
+    m_planes[2]->SetSliceIndex(floor((extent[2]+extent[3])/2.0f));
+
     m_firstInit = false;
   }
 
