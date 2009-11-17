@@ -102,6 +102,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
     */
   bool cameraMoving();
 
+  //! Get the distance from the focal point to the camera.
+  double getCameraDistance();
+
   //! Get the currently selected prop.
   vtkProp* getSelectedProp();
 

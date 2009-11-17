@@ -29,9 +29,6 @@
 rt2DSliceRenderObject::rt2DSliceRenderObject() {
   setObjectType(rtConstants::OT_2DObject);
   setName("2DSlice Renderer");
-  m_rotateAxis[0] = 1.0f;
-  m_rotateAxis[1] = 0.0f;
-  m_rotateAxis[2] = 0.0f;
   setupDataObject();
   setupPipeline();
 }
@@ -102,6 +99,8 @@ void rt2DSliceRenderObject::update() {
   m_texturePlane->SetPoint1(pt1);
   m_texturePlane->SetPoint2(pt2);
 
+  m_control.setTransform(dObj->getTransform());
+  m_control.setSize(xsize);
 }
 
 //! Add this object to the given renderer.
@@ -167,26 +166,29 @@ bool rt2DSliceRenderObject::removeFromRenderer(vtkRenderer* ren) {
 
 void rt2DSliceRenderObject::mousePressEvent(QMouseEvent* event) {
   if (!m_selectedProp) return;
-
-  if (event->button() == Qt::LeftButton) {
-    QSize winSize = rtObjectManager::instance().getMainWinHandle()->getRenderWidget()->size();
-    int X = event->x();
-    int Y = winSize.height()-event->y();
-    findCurrentPosition(X, Y);
+  if (m_control.isShowing()) {
+    m_control.mousePressEvent(event);
   }
 }
 
 void rt2DSliceRenderObject::mouseMoveEvent(QMouseEvent* event) {
   if (!m_selectedProp) return;
-
-  if (event->buttons() & Qt::LeftButton) {
-
+  if (m_control.isShowing()) {
+    m_control.mouseMoveEvent(event);
   }
-
 }
 
 void rt2DSliceRenderObject::mouseReleaseEvent(QMouseEvent* event) {
   if (!m_selectedProp) return;
+  if (m_control.isShowing()) {
+    vtkTransform *t = vtkTransform::New();
+    rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
+    m_control.mouseReleaseEvent(event);
+    m_control.getTransform(t);
+    dObj->setVtkMatrix(t->GetMatrix(), true);
+    dObj->Modified();
+    t->Delete();
+  }
 }
 
 void rt2DSliceRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
@@ -195,21 +197,21 @@ void rt2DSliceRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
   temp = rtObjectManager::instance().getMainWinHandle()->getSelectedProp();
   m_selectedProp = NULL;
 
+  if (m_control.isShowing())
+    m_control.hide();
+
   if (temp) {
     if (temp == m_textureActor.GetPointer() || temp == m_outlineActor.GetPointer()) {
       m_selectedProp = temp;
+      m_control.show();
     }
   }
 
   rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
 
   if (m_selectedProp) {
-    m_outlineProperty->SetColor(1.0, 0.0, 0.0);
-    m_outlineProperty->SetLineWidth(4.0);
     dObj->setManualOn();
   } else {
-    m_outlineProperty->SetColor(1.0, 1.0, 1.0);
-    m_outlineProperty->SetLineWidth(1.0);
     dObj->setManualOff();
   }
 }
@@ -313,65 +315,4 @@ bool rt2DSliceRenderObject::getObjectLocation(double loc[6]) {
   m_outlineActor->GetBounds(loc);
 
   return true;
-}
-
-void rt2DSliceRenderObject::findCurrentPosition(int x, int y) {
-  double coords[3];
-  double distances[4];
-  vtkPropCollection* coll = vtkPropCollection::New();
-  vtkRenderer* ren = rtObjectManager::instance().getMainWinHandle()->getRenderer();
-  QSize winSize = rtObjectManager::instance().getMainWinHandle()->getRenderWidget()->size();
-  vtkAssemblyPath* path;
-  vtkPoints* pts;
-  double point[4][3];
-
-  pts = m_outlinePolyData->GetPoints();
-  coll->AddItem(m_textureActor);
-
-  path = ren->PickPropFrom(x, y, coll);
-  if (path) {
-    coords[0] = x;
-    coords[1] = y;
-    coords[2] = ren->GetPickedZ();
-    ren->ViewportToNormalizedViewport(coords[0], coords[1]);
-    ren->NormalizedViewportToView(coords[0], coords[1], coords[2]);
-    ren->ViewToWorld(coords[0], coords[1], coords[2]);
-
-    for (int ix1=0; ix1<4; ix1++) {
-      // Get the points.
-      pts->GetPoint(ix1, point[ix1]);
-    }
-
-    // Find the distances from each line.
-    for (int ix1=0; ix1<4; ix1++) {
-      distances[ix1] = findDistancePointToLine(point[(ix1)%4], point[(ix1+1)%4], coords);
-    }
-    std::cout << "======================" << std::endl;
-    for (int ix1=0; ix1<4; ix1++)
-      std::cout << distances[ix1] << std::endl;
-  }
-
-  coll->Delete();
-}
-
-double rt2DSliceRenderObject::findDistancePointToLine(double l1[3], double l2[3], double point[3]) {
-  double vec[3];
-  double hype[3];
-  double vecMag = 0.0f;
-  double hypeDist = 0.0f;
-
-  for (int ix1=0; ix1<3; ix1++) {
-    vec[ix1] = l1[ix1] - l2[ix1];
-    hype[ix1] = l1[ix1] - point[ix1];
-    vecMag += vec[ix1]*vec[ix1];
-    hypeDist += hype[ix1]*hype[ix1];
-  }
-  vecMag = sqrt(vecMag);
-  hypeDist = sqrt(hypeDist);
-
-  // Magnitude is zero! Error!
-  if (vecMag == 0) return -1.0;
-
-  double baseDist = fabs((hype[0]*vec[0]+hype[1]*vec[1]+hype[2]*vec[2])/vecMag);
-  return sqrt((hypeDist*hypeDist)-(baseDist*baseDist));
 }

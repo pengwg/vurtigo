@@ -120,10 +120,6 @@ public:
   //! The user has changed the intrpolation type from the GUI
   void interpolationChanged(int interp);
 
-  void flipX();
-  void flipY();
-  void flipZ();
-
   void setVisibleComponent(int c);
   void nextVisibleComponent();
 

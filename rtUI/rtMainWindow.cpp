@@ -408,6 +408,10 @@ bool rtMainWindow::cameraMoving() {
   return m_cameraControl->cameraMoving();
 }
 
+double rtMainWindow::getCameraDistance() {
+  return m_renderer3D->GetActiveCamera()->GetDistance();
+}
+
 void rtMainWindow::getCameraUp(double val[3]) {
   m_cameraControl->getUpDirection(val);
 }

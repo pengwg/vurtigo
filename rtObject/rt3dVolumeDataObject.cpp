@@ -272,24 +272,6 @@ void rt3DVolumeDataObject::setDirectionCosinesXY(float* dirCos) {
   mat->Delete();
 }
 
-//! Flip the direction of the X-axis
-void rt3DVolumeDataObject::flipX() {
-  m_dataTransform->Scale(-1,1,1);
-  Modified();
-}
-
-//! Flip the direction of the Y-axis
-void rt3DVolumeDataObject::flipY() {
-  m_dataTransform->Scale(1,-1,1);
-  Modified();
-}
-
-//! Flip the direction of the Z-axis
-void rt3DVolumeDataObject::flipZ() {
-  m_dataTransform->Scale(1,1,-1);
-  Modified();
-}
-
 
 //! Set the GUI widgets.
 void rt3DVolumeDataObject::setupGUI() {
@@ -318,11 +300,6 @@ void rt3DVolumeDataObject::setupGUI() {
   // The combo boxes for the CTF and PWF.
   connect(m_optionsWidget.comboCTFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(colorTransferChangedGUI(QString)));
   connect(m_optionsWidget.comboPieceFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(piecewiseChangedGUI(QString)));
-
-  // The flip axis signals.
-  connect(m_optionsWidget.flipXCheck, SIGNAL(stateChanged(int)), this, SLOT(flipX()));
-  connect(m_optionsWidget.flipYCheck, SIGNAL(stateChanged(int)), this, SLOT(flipY()));
-  connect(m_optionsWidget.flipZCheck, SIGNAL(stateChanged(int)), this, SLOT(flipZ()));
 
   // Cine
   connect(m_optionsWidget.frameSlider, SIGNAL(valueChanged(int)), this, SLOT(setVisibleComponent(int)));

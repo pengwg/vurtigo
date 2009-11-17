@@ -21,6 +21,7 @@
 #define RT_2D_SLICE_RENDER_OBJECT_H
 
 #include "rtRenderObject.h"
+#include "ObjectControlWidget.h"
 
 #include <vtkPlaneSource.h>
 #include <vtkTexture.h>
@@ -78,10 +79,7 @@ public slots:
   vtkSmartPointer<vtkActor> m_outlineActor;
   vtkSmartPointer<vtkProperty> m_outlineProperty;
 
-  double m_rotateAxis[3];
-
-  void findCurrentPosition(int x, int y);
-  double findDistancePointToLine(double l1[3], double l2[3], double point[3]);
+  ObjectControlWidget m_control;
  private:
 
 };

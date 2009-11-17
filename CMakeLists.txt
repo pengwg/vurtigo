@@ -93,6 +93,7 @@ set (UI_FILES
   rtUI/slice2DOptions.ui
   rtUI/rtRenderOptions.ui
   rtUI/VtkColorTable.ui
+  rtUI/rtWindowLevelDialog.ui
 )
 
 

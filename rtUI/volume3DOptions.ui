@@ -85,36 +85,6 @@
        </layout>
       </widget>
      </item>
-     <item>
-      <widget class="QGroupBox" name="groupBox_2">
-       <property name="title">
-        <string>Axis Flips</string>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QCheckBox" name="flipXCheck">
-          <property name="text">
-           <string>Flip X</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="flipYCheck">
-          <property name="text">
-           <string>Flip Y</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="flipZCheck">
-          <property name="text">
-           <string>Flip Z</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>

@@ -50,7 +50,7 @@ signals:
 class VtkRangeWidget : public QWidget , protected Ui::VtkRangeWidget {
     Q_OBJECT
 
-    VtkRangeDialog * rangeDialog;
+    VtkRangeDialog *rangeDialog;
 public:
     VtkRangeWidget(QWidget * parent = NULL, HoverPoints * hoverPoints = NULL);
     ~VtkRangeWidget();
