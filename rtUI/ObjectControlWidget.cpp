@@ -6,6 +6,7 @@
 #include <vtkRenderer.h>
 #include <vtkProperty.h>
 #include <vtkPropCollection.h>
+#include <vtkPlane.h>
 
 ObjectControlWidget::ObjectControlWidget() {
   m_showing = false;
@@ -58,6 +59,9 @@ ObjectControlWidget::ObjectControlWidget() {
     m_lineActor[ix1]->SetMapper(m_lineMapper[ix1]);
     m_lineActor[ix1]->GetProperty()->SetColor(1.0f, 0.0f, 0.0f);
   }
+
+  m_pointActor[0]->GetProperty()->SetColor(1.0f, 1.0f, 0.0f);
+
   m_currPropIndex = -1;
 }
 
@@ -144,7 +148,7 @@ bool ObjectControlWidget::isShowing() {
 void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
   if(!m_showing) return;
 
-  if (event->button() == Qt::LeftButton) {
+  if (event->button() == Qt::LeftButton && m_currPropIndex == -1) {
     QSize winSize = rtObjectManager::instance().getMainWinHandle()->getRenderWidget()->size();
     int X = event->x();
     int Y = winSize.height()-event->y();
@@ -184,22 +188,57 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
 
   double cameraRight[3];
   double cameraUp[3];
+  double cameraForward[3];
   double temp[3];
   double dist = rtObjectManager::instance().getMainWinHandle()->getCameraDistance();
   double xdiff = (X-m_oldX)*(dist)/1200.0f;
   double ydiff = (Y-m_oldY)*(dist)/1200.0f;
 
-  double rotate = (X-m_oldX)+(Y-m_oldY);
+
+
+  double planeNormal[3];
+  for (int ix1=0; ix1<3; ix1++) {
+    planeNormal[ix1] = m_transform->GetMatrix()->GetElement(ix1, 2);
+  }
 
   rtObjectManager::instance().getMainWinHandle()->getCameraRight(cameraRight);
   rtObjectManager::instance().getMainWinHandle()->getCameraUp(cameraUp);
+  rtObjectManager::instance().getMainWinHandle()->getCameraForward(cameraForward);
 
   for (int ix1=0; ix1<9; ix1++) {
     m_transform->TransformPoint(m_pointLocations[ix1], m_convertedLocations[ix1]);
   }
 
+  double rotate;
+  if (m_currPropIndex != 4) {
+    double vecLen=0.0f;
+    for (int ix1=0; ix1<3 ;ix1++) {
+      temp[ix1] = m_convertedLocations[m_currPropIndex][ix1] - m_convertedLocations[4][ix1];
+      vecLen += temp[ix1]*temp[ix1];
+    }
+    vecLen = sqrt(vecLen);
+    for (int ix1=0; ix1<3; ix1++) {
+      temp[ix1] = temp[ix1]/vecLen;
+    }
+    double p1[3], p2[3];
+    p1[0] = X; p1[1] = Y; p1[2] = 0.0;
+    p2[0] = m_oldX; p2[1] = m_oldY; p2[2] = 0.0;
+    double d1 = vtkPlane::DistanceToPlane(p1, temp, m_convertedLocations[4]);
+    double d2 = vtkPlane::DistanceToPlane(p2, temp, m_convertedLocations[4]);
+
+    //std::cout << d1 - d2 << std::endl;
+
+    rotate = (X-m_oldX)+(Y-m_oldY);
+  }
+
   switch (m_currPropIndex) {
     case 0:
+    m_transform->PostMultiply();
+    m_transform->Translate(-m_convertedLocations[4][0], -m_convertedLocations[4][1], -m_convertedLocations[4][2]);
+    m_transform->RotateWXYZ(rotate, planeNormal[0], planeNormal[1], planeNormal[2]);
+    m_transform->Translate(m_convertedLocations[4][0], m_convertedLocations[4][1], m_convertedLocations[4][2]);
+    m_transform->PreMultiply();
+    break;
     case 8:
     for (int ix1=0; ix1<3 ;ix1++) {
       temp[ix1] = m_convertedLocations[2][ix1] - m_convertedLocations[4][ix1];
@@ -265,7 +304,8 @@ void ObjectControlWidget::mouseReleaseEvent(QMouseEvent* event) {
   if(!m_showing) return;
   if (event->button() == Qt::LeftButton) {
     // Clear the colors
-    for (int ix1=0; ix1<9; ix1++) {
+    m_pointActor[0]->GetProperty()->SetColor(1.0f, 1.0f, 0.0f);
+    for (int ix1=1; ix1<9; ix1++) {
       m_pointActor[ix1]->GetProperty()->SetColor(1.0, 1.0, 1.0);
     }
     m_currPropIndex = -1;
@@ -289,7 +329,36 @@ void ObjectControlWidget::keyReleaseEvent(QKeyEvent* event) {
 
 void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   if(!m_showing) return;
+  int numSteps = event->delta() / 8;
 
+  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+
+  m_transform->GetMatrix(mat);
+
+  double zDirec[3];
+  double sumSq = 0.0;
+  for (int ix1=0; ix1<3; ix1++) {
+    zDirec[ix1] = mat->GetElement(ix1, 2);
+    sumSq += zDirec[ix1]*zDirec[ix1];
+  }
+  sumSq = sqrt(sumSq);
+
+  double cameraDirec[3];
+  double dotP=0.0f;
+  rtObjectManager::instance().getMainWinHandle()->getCameraForward(cameraDirec);
+  dotP = zDirec[0]*cameraDirec[0]+zDirec[1]*cameraDirec[1]+zDirec[2]*cameraDirec[2];
+  if (dotP > 0) {
+    dotP = 1.0f;
+  } else if (dotP < 0) {
+    dotP = -1.0f;
+  }
+
+  for (int ix1=0; ix1<3; ix1++) {
+    mat->SetElement( ix1, 3, mat->GetElement(ix1, 3) + (dotP*numSteps*zDirec[ix1]/sumSq) );
+  }
+  m_transform->SetMatrix(mat);
+
+  mat->Delete();
 }
 
 void ObjectControlWidget::updateWidgetPosition() {

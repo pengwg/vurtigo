@@ -226,13 +226,15 @@ void rt2DSliceRenderObject::keyReleaseEvent(QKeyEvent* event) {
 
 void rt2DSliceRenderObject::wheelEvent(QWheelEvent* event) {
   if (!m_selectedProp) return;
-  rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
-
-  if (!dObj) return;
-
-  int numSteps = event->delta() / 8;
-
-  dObj->pushPlaneBy(numSteps, true);
+  if (m_control.isShowing()) {
+    vtkTransform *t = vtkTransform::New();
+    rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
+    m_control.wheelEvent(event);
+    m_control.getTransform(t);
+    dObj->setVtkMatrix(t->GetMatrix(), true);
+    dObj->Modified();
+    t->Delete();
+  }
 }
 
 //! Create the correct data object.
