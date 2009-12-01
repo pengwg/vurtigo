@@ -22,6 +22,7 @@
 
 #include "rtDataObject.h"
 #include "ui_volume3DOptions.h"
+#include "rtWindowLevelDialog.h"
 
 #include "vtkSmartPointer.h"
 #include "vtkImageData.h"
@@ -79,7 +80,19 @@ public:
   RayCastFunction getRayCastType() { return m_rayCastFunction; }
   vtkVolumeRayCastFunction* getRayCastFunction();
 
+  //! Set the new image data.
+  /*!
+  Setting the new image data will cause a lot of re-setting of parameters and options. Volume properites and transfer functions will be modified. The image data will be copied over to this object. This finction emits a newImageData() signal if successful.
+  @param temp The ImageData to be copied.
+  @return true if the data was copied correctly.
+  */
   bool copyNewImageData(vtkImageData* temp);
+
+  //! Set a new position transform for the image data.
+  /*!
+    @param temp The new transform to use.
+    @return true if the new transform was copied.
+    */
   bool copyNewTransform(vtkTransform* temp);
 
   //! Check if the volume should be rendered.
@@ -91,6 +104,7 @@ public:
 
   bool isDataValid() { return m_imgDataValid; }
 
+  //! Translate the data object
   void translateData(double x, double y, double z);
   void scaleData(double x, double y, double z);
   void setDirectionCosinesXY(float* dirCos);
@@ -100,6 +114,11 @@ public:
   void update();
 
   int getVisibleComponent() { return m_visibleComponent; }
+
+  //! Get the window part of the window level.
+  int getWindow() { return m_window; }
+  //! Get the level part of the window level.
+  int getLevel() { return m_level; }
 
  public slots:
   void surfaceFunctionChanged();
@@ -125,6 +144,14 @@ public:
 
   void cineLoop(bool);
 
+  void showWindowLevel();
+
+  //! The window level has been changed by WL dialog.
+  void wlChanged(int w, int l);
+
+ signals:
+  void newImageData();
+
  protected:
   // Functions
   void setupGUI();
@@ -145,6 +172,9 @@ public:
   //! The ID of the external color function used.
   int m_colorFuncID;
 
+  double m_window;
+  double m_level;
+
   vtkSmartPointer<vtkImageExtractComponents> m_subImg;
   int m_visibleComponent;
   QTimer *m_cineFrame;
@@ -163,6 +193,8 @@ public:
 
   // UI objects
   Ui::volume3DOptions m_optionsWidget;
+
+  rtWindowLevelDialog *m_wlDialog;
 
 };
 

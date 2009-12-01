@@ -32,7 +32,7 @@ rt3DVolumeRenderObject::rt3DVolumeRenderObject() {
   m_planes[1] = new rtImagePlaneWidget();
   m_planes[2] = new rtImagePlaneWidget();
 
-  m_firstInit = true;
+  m_isInit = false;
 
   setupDataObject();
   setupPipeline();
@@ -61,40 +61,7 @@ rt3DVolumeRenderObject::~rt3DVolumeRenderObject() {
 //! Take info from the data object. 
 void rt3DVolumeRenderObject::update() {
   rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
-  if (!dObj || !dObj->isDataValid()) return;
-
-  if (m_firstInit) {
-    int extent[6];
-
-    if (dObj->getInterpolation() == 0) {
-      m_transFilter->SetInterpolationModeToNearestNeighbor();
-    } else if (dObj->getInterpolation() == 1) {
-      m_transFilter->SetInterpolationModeToLinear();
-    } else if (dObj->getInterpolation() == 2) {
-      m_transFilter->SetInterpolationModeToCubic();
-    }
-    m_transFilter->SetResliceAxes( dObj->getTransform()->GetMatrix() );
-    m_transFilter->Update();
-
-    for (int ix1=0; ix1<3; ix1++) {
-      m_planes[ix1]->SetInput( m_transFilter->GetOutput() );
-
-    }
-
-    m_planes[0]->SetPlaneOrientationToZAxes();
-    m_planes[1]->SetPlaneOrientationToXAxes();
-    m_planes[2]->SetPlaneOrientationToYAxes();
-
-    // Set the default slice position
-    m_transFilter->GetOutput()->Update();
-    m_transFilter->GetOutput()->GetExtent(extent);
-
-    m_planes[0]->SetSliceIndex(floor((extent[4]+extent[5])/2.0f));
-    m_planes[1]->SetSliceIndex(floor((extent[0]+extent[1])/2.0f));
-    m_planes[2]->SetSliceIndex(floor((extent[2]+extent[3])/2.0f));
-
-    m_firstInit = false;
-  }
+  if (!m_isInit || !dObj || !dObj->isDataValid()) return;
 
   double range[2];
   int dims[3];
@@ -112,8 +79,9 @@ void rt3DVolumeRenderObject::update() {
     m_imgCast[ix1]->GetOutput()->GetScalarRange(range);
     m_imgCast[ix1]->GetOutput()->GetDimensions(dims);
 
-    m_imgMap[ix1]->SetColorWindow( range[1]-range[0] );
-    m_imgMap[ix1]->SetColorLevel( (range[0]+range[1])/2.0f );
+    m_imgMap[ix1]->SetColorWindow( dObj->getWindow() );
+    m_imgMap[ix1]->SetColorLevel( dObj->getLevel() );
+    m_planes[ix1]->setWindowLevel( dObj->getWindow(), dObj->getLevel() );
 
     m_actor2D[ix1]->SetPosition(0, 0);
     m_actor2D[ix1]->SetPosition2(1, 1);
@@ -144,6 +112,46 @@ void rt3DVolumeRenderObject::update() {
   if ( m_mainWin ) {
     m_mainWin->setRenderFlag3D(true);
   }
+}
+
+void rt3DVolumeRenderObject::newDataAvailable() {
+  rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
+  if (!dObj || !dObj->isDataValid()) return;
+
+  if (dObj->getInterpolation() == 0) {
+    m_transFilter->SetInterpolationModeToNearestNeighbor();
+  } else if (dObj->getInterpolation() == 1) {
+    m_transFilter->SetInterpolationModeToLinear();
+  } else if (dObj->getInterpolation() == 2) {
+    m_transFilter->SetInterpolationModeToCubic();
+  }
+
+  // Transform the data before it enters the pipeline.
+  m_transFilter->SetOutputOriginToDefault();
+  m_transFilter->SetOutputSpacingToDefault();
+  m_transFilter->SetOutputExtentToDefault();
+  m_transFilter->AutoCropOutputOn();
+  m_transFilter->AddInput( dObj->getUShortData() );
+  m_transFilter->SetResliceAxes( dObj->getTransform()->GetMatrix() );
+  m_transFilter->Update();
+
+  for (int ix1=0; ix1<3; ix1++) {
+    m_planes[ix1]->SetInput( m_transFilter->GetOutput() );
+  }
+
+  int extent[6];
+  // Set the default slice position
+  m_transFilter->GetOutput()->Update();
+  m_transFilter->GetOutput()->GetExtent(extent);
+
+  m_planes[0]->SetPlaneOrientationToZAxes();
+  m_planes[1]->SetPlaneOrientationToXAxes();
+  m_planes[2]->SetPlaneOrientationToYAxes();
+
+  m_planes[0]->SetSliceIndex(floor((extent[4]+extent[5])/2.0f));
+  m_planes[1]->SetSliceIndex(floor((extent[0]+extent[1])/2.0f));
+  m_planes[2]->SetSliceIndex(floor((extent[2]+extent[3])/2.0f));
+  m_isInit = true;
 }
 
 void rt3DVolumeRenderObject::setRenderQuality(double quality) {
@@ -235,7 +243,9 @@ void rt3DVolumeRenderObject::update3PlaneStatus() {
 
 //! Create the correct data object.
 void rt3DVolumeRenderObject::setupDataObject() {
-  m_dataObj = new rt3DVolumeDataObject();
+  rt3DVolumeDataObject *temp = new rt3DVolumeDataObject();
+  m_dataObj = temp;
+  connect(temp, SIGNAL(newImageData()), this, SLOT(newDataAvailable()));
 }
 
 
@@ -250,15 +260,6 @@ void rt3DVolumeRenderObject::setupPipeline() {
   m_outline = vtkOutlineFilter::New();
   m_outlineMapper = vtkPolyDataMapper::New();
   m_outlineActor = vtkActor::New();
-
-  m_firstInit = true;
-
-  // Transform the data before it enters the pipeline.
-  m_transFilter->SetOutputOriginToDefault();
-  m_transFilter->SetOutputSpacingToDefault();
-  m_transFilter->SetOutputExtentToDefault();
-  m_transFilter->AutoCropOutputOn();
-  m_transFilter->AddInput( dObj->getUShortData() );
 
   // Volume Rendering
   m_rayMapper->SetInput( m_transFilter->GetOutput() );
@@ -329,4 +330,25 @@ bool rt3DVolumeRenderObject::getObjectLocation(double loc[6]) {
   m_volumeActor->GetBounds(loc);
 
   return true;
+}
+
+void rt3DVolumeRenderObject::mousePressEvent(QMouseEvent* event) {
+}
+
+void rt3DVolumeRenderObject::mouseMoveEvent(QMouseEvent* event) {
+}
+
+void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
+}
+
+void rt3DVolumeRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
+}
+
+void rt3DVolumeRenderObject::keyPressEvent(QKeyEvent* event) {
+}
+
+void rt3DVolumeRenderObject::keyReleaseEvent(QKeyEvent* event) {
+}
+
+void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event) {
 }

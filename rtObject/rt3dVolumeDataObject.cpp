@@ -21,6 +21,7 @@
 #include "rtObjectManager.h"
 #include "rtRenderObject.h"
 #include "objTypes.h"
+#include "buildParam.h"
 
 #include "rtColorFuncDataObject.h"
 #include "rtColorFuncRenderObject.h"
@@ -69,6 +70,10 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   connect( m_cineFrame,SIGNAL(timeout()), this, SLOT(nextVisibleComponent()) );
 
   setupGUI();
+
+  m_wlDialog = new rtWindowLevelDialog( QString(CONFIG_FILE_PATH).append("WindowLevel.xml") );
+
+  connect(m_wlDialog, SIGNAL(valuesChanged(int,int)), this, SLOT(wlChanged(int,int)));
 }
 
 
@@ -91,6 +96,8 @@ rt3DVolumeDataObject::~rt3DVolumeDataObject() {
   m_isosurfaceFunc->Delete();
   m_MIPFunc->Delete();
   m_subImg->Delete();
+
+  if (m_wlDialog) delete m_wlDialog;
 }
 
 
@@ -183,17 +190,10 @@ vtkVolumeRayCastFunction* rt3DVolumeDataObject::getRayCastFunction() {
   return temp;
 }
 
-//! Set the new image data.
-/*!
-  Setting the new image data will cause a lot of re-setting of parameters and options. Volume properites and transfer functions will be modified. The image data will be copied over to this object.
-  @param temp The ImageData to be copied.
-  @return true if the data was copied correctly.
-  */
 bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
   if (!temp) return false;
 
   double rangeI[2], rangeP[2];
-
 
   m_imgData->DeepCopy(temp);
   m_imgData->GetScalarRange(rangeI);
@@ -202,7 +202,7 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
   m_imgUShortCast->Update();
   m_imgUShortCast->GetOutput()->GetScalarRange(rangeP);
 
-  //std::cout << "Range: " << rangeP[0] << " " << rangeP[1] << std::endl;
+  m_wlDialog->setImageData(m_imgUShortCast->GetOutput());
 
   m_pieceFuncDefault->RemoveAllPoints();
   m_pieceFuncDefault->AddPoint(rangeP[0], 0.0);
@@ -212,11 +212,11 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
   m_colorTransFuncDefault->AddRGBPoint(rangeP[0], 0.0, 0.0, 0.0);
   m_colorTransFuncDefault->AddRGBPoint(rangeP[1], 1.0, 0.5, 0.5);
 
+  m_window = (rangeI[1]-rangeI[0]);
+  m_level = (rangeI[1]+rangeI[0])/2.0f;
+
   m_volumeProperty->SetScalarOpacity(m_pieceFunc);
   m_volumeProperty->SetColor(m_colorTransFunc);
-
-  m_imgDataValid = true;
-  Modified();
 
   if (m_imgUShortCast->GetOutput()->GetNumberOfScalarComponents() > 1) {
     m_optionsWidget.frameSlider->setMinimum(0);
@@ -226,6 +226,9 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
     m_optionsWidget.cineGroupBox->setDisabled(true);
   }
 
+  m_imgDataValid = true;
+  emit newImageData();
+  Modified();
   return true;
 }
 
@@ -238,8 +241,6 @@ bool rt3DVolumeDataObject::copyNewTransform(vtkTransform* temp) {
   return true;
 }
 
-
-//! Translate the data object
 void rt3DVolumeDataObject::translateData(double x, double y, double z) {
   m_dataTransform->Translate(x,y,z);
 }
@@ -276,6 +277,9 @@ void rt3DVolumeDataObject::setDirectionCosinesXY(float* dirCos) {
 //! Set the GUI widgets.
 void rt3DVolumeDataObject::setupGUI() {
   m_optionsWidget.setupUi(getBaseWidget());
+
+  // Window Level
+  connect(m_optionsWidget.wlButton, SIGNAL(clicked()), this, SLOT(showWindowLevel()));
 
   // Interpolation Type.
   connect(m_optionsWidget.interpolateComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(interpolationChanged(int)));
@@ -433,6 +437,16 @@ void rt3DVolumeDataObject::piecewiseChanged(int id) {
     m_volumeProperty->SetScalarOpacity(m_pieceFunc);
     Modified();
   }
+}
+
+void rt3DVolumeDataObject::showWindowLevel() {
+  m_wlDialog->show();
+}
+
+void rt3DVolumeDataObject::wlChanged(int w, int l) {
+  m_window = w;
+  m_level = l;
+  Modified();
 }
 
 //! Clean the GUI widgets.

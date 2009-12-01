@@ -58,6 +58,17 @@ class rt3DVolumeRenderObject : public rtRenderObject {
 
   virtual void setRenderQuality(double quality);
 
+public slots:
+  virtual void mousePressEvent(QMouseEvent* event);
+  virtual void mouseMoveEvent(QMouseEvent* event);
+  virtual void mouseReleaseEvent(QMouseEvent* event);
+  virtual void mouseDoubleClickEvent(QMouseEvent* event);
+  virtual void keyPressEvent(QKeyEvent* event);
+  virtual void keyReleaseEvent(QKeyEvent* event);
+  virtual void wheelEvent(QWheelEvent* event);
+
+  virtual void newDataAvailable();
+
  protected:
   void setupDataObject();
   void setupPipeline();
@@ -80,7 +91,8 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   vtkImageMapper* m_imgMap[3];
   vtkActor2D* m_actor2D[3];
 
-  bool m_firstInit;
+  //! Check if the data has been initialized
+  bool m_isInit;
  private:
 
 };

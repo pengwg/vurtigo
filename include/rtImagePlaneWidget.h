@@ -56,6 +56,7 @@ class rtImagePlaneWidget : public vtkImagePlaneWidget {
 
   void SetEnabled(int enabling);
   void SetPicker(vtkAbstractPropPicker* picker);
+  void setWindowLevel(int w, int l);
 
   protected:
     QList<vtkProp*>* m_propAssembly;

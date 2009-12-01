@@ -26,6 +26,7 @@
 #include <vtkCommand.h>
 #include <vtkCallbackCommand.h>
 #include <vtkCellPicker.h>
+#include <vtkLookupTable.h>
 
 #include <iostream>
 
@@ -178,4 +179,10 @@ void rtImagePlaneWidget::SetPicker(vtkAbstractPropPicker* picker)
       this->PlanePicker->Delete();
       }
     }
+}
+
+void rtImagePlaneWidget::setWindowLevel(int w, int l) {
+  double rmin = l - 0.5*fabs( w );
+  double rmax = rmin + fabs( w );
+  this->LookupTable->SetTableRange( rmin, rmax );
 }

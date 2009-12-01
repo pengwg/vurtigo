@@ -20,6 +20,7 @@
 #include "rt2dSliceDataObject.h"
 #include "rtObjectManager.h"
 #include "rtMainWindow.h"
+#include "buildParam.h"
 #include <cmath>
 
 //! Constructor
@@ -37,12 +38,14 @@ rt2DSliceDataObject::rt2DSliceDataObject() {
   m_imgUCharCast = vtkImageShiftScale::New();
   m_lumin = vtkImageLuminance::New();
 
-  m_range[0] = 0;
-  m_range[1] = 100;
   m_window = 100;
   m_level = 50;
 
   m_dataCopyLock.release();
+
+  m_wlDialog = new rtWindowLevelDialog( QString(CONFIG_FILE_PATH).append("WindowLevel.xml") );
+
+  connect(m_wlDialog, SIGNAL(valuesChanged(int,int)), this, SLOT(wlChanged(int,int)));
 }
 
 //! Destructor
@@ -53,6 +56,8 @@ rt2DSliceDataObject::~rt2DSliceDataObject() {
   if (m_trans) m_trans->Delete();
   if (m_imgUCharCast) m_imgUCharCast->Delete();
   if (m_lumin) m_lumin->Delete();
+
+  if (m_wlDialog) delete m_wlDialog;
 }
 
 
@@ -86,10 +91,9 @@ void rt2DSliceDataObject::setupGUI() {
  connect(m_optionsWidget.yDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(yTranslate(double)));
  connect(m_optionsWidget.zDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(zTranslate(double)));
 
- connect(m_optionsWidget.windowSlider, SIGNAL(valueChanged(int)), this, SLOT(windowSliderMoved(int)));
- connect(m_optionsWidget.levelSlider, SIGNAL(valueChanged(int)), this, SLOT(levelSliderMoved(int)));
-
  connect( this, SIGNAL(copyImageData2DSignal()), this, SLOT(copyImageData2DSlot()), Qt::QueuedConnection );
+
+ connect( m_optionsWidget.windowLevelPushButton, SIGNAL(clicked()), this, SLOT(showWindowLevel()) );
 }
 
 
@@ -107,7 +111,6 @@ bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
 
     m_imgData->DeepCopy(img);
 
-
     emit copyImageData2DSignal();
   } else {
     //std::cout << "Frame Copy Dropped!" << std::endl;
@@ -118,10 +121,8 @@ bool rt2DSliceDataObject::copyImageData2D(vtkImageData* img) {
 
 void rt2DSliceDataObject::copyImageData2DSlot() {
   double rangeI[2];
-  //m_currTime = QDateTime::currentDateTime();
-  //std::cout << m_currTime.toString(Qt::SystemLocaleLongDate).toStdString() << std::endl;
 
-  m_imgData->GetScalarRange(rangeI);
+  //m_imgData->GetScalarRange(rangeI);
   m_imgUCharCast->SetOutputScalarTypeToUnsignedChar();
 
   if( m_imgData->GetNumberOfScalarComponents() == 3) {
@@ -137,33 +138,9 @@ void rt2DSliceDataObject::copyImageData2DSlot() {
 
   m_imgUCharCast->SetShift(-rangeI[0]);
 
-  // Check if the range needs to be reset.
-  if ( (rangeI[1]-rangeI[0]) > m_range[1] || !m_imgDataValid) {
+  m_imgUCharCast->GetOutput()->Update();
+  m_wlDialog->setImageData( m_imgUCharCast->GetOutput() );
 
-    m_range[0] = 0;
-    m_range[1] = rangeI[1]-rangeI[0];
-
-    m_optionsWidget.windowSlider->setMinimum(m_range[0]);
-    m_optionsWidget.windowSlider->setMaximum(m_range[1]);
-
-    m_optionsWidget.levelSlider->setMinimum(m_range[0]);
-    m_optionsWidget.levelSlider->setMaximum(m_range[1]);
-
-    m_optionsWidget.windowMinLabel->setText(QString::number(m_range[0]));
-    m_optionsWidget.windowMaxLabel->setText(QString::number(m_range[1]));
-    m_optionsWidget.levelMinLabel->setText(QString::number(m_range[0]));
-    m_optionsWidget.levelMaxLabel->setText(QString::number(m_range[1]));
-
-
-    if (m_window > m_range[1]) {
-      m_window = m_range[1];
-      m_optionsWidget.windowSlider->setValue(m_window);
-    }
-    if (m_level < m_range[0] || m_level > m_range[1]) {
-      m_level = (m_range[0] + m_range[1])/2.0f;
-      m_optionsWidget.levelSlider->setValue(m_level);
-    }
-  }
   m_dataCopyLock.release();
 
   m_imgDataValid = true;
@@ -431,14 +408,12 @@ void rt2DSliceDataObject::zTranslate(double v) {
   translateTo(m_optionsWidget.xDoubleSpinBox->value(), m_optionsWidget.yDoubleSpinBox->value(), v, true);
 }
 
-
-void rt2DSliceDataObject::windowSliderMoved(int val) {
-  m_window = val;
+void rt2DSliceDataObject::wlChanged(int w, int l) {
+  m_window = w;
+  m_level = l;
   Modified();
 }
 
-
-void rt2DSliceDataObject::levelSliderMoved(int val) {
-  m_level = val;
-  Modified();
+void rt2DSliceDataObject::showWindowLevel() {
+  m_wlDialog->show();
 }

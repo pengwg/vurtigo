@@ -24,6 +24,7 @@
 #include <QDateTime>
 
 #include "rtDataObject.h"
+#include "rtWindowLevelDialog.h"
 
 #include "vtkImageData.h"
 #include "vtkTransform.h"
@@ -115,10 +116,12 @@ public:
   void yTranslate(double);
   void zTranslate(double);
 
-  void windowSliderMoved(int);
-  void levelSliderMoved(int);
+  void wlChanged(int w, int l);
+
 
   void copyImageData2DSlot();
+
+  void showWindowLevel();
  signals:
   void copyImageData2DSignal();
 
@@ -143,11 +146,12 @@ public:
   bool m_imgDataValid;
   double m_window;
   double m_level;
-  double m_range[2];
 
   Ui::slice2DOptions m_optionsWidget;
 
   QDateTime m_currTime;
+
+  rtWindowLevelDialog *m_wlDialog;
 };
 
 #endif 

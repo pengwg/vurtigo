@@ -106,7 +106,7 @@ Q_OBJECT
   //! The mouse wheel was moved.
   virtual void wheelEvent(QWheelEvent* event) {}
 
-
+  virtual void newDataAvailable() { }
  protected:
   //! The rtRenderObject constructor.
   /*!

@@ -37,7 +37,7 @@
 #include "rtBaseHandle.h"
 #include "rtMessage.h"
 
-#include "version.h"
+#include "buildParam.h"
 
 #include "rt3dPointBufferRenderObject.h"
 #include "rt3dPointBufferDataObject.h"

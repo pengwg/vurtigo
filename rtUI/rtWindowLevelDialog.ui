@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>389</width>
-    <height>455</height>
+    <width>420</width>
+    <height>476</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -104,6 +104,9 @@
    </item>
    <item>
     <widget class="QTableWidget" name="wlFileList">
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
      <column>
       <property name="text">
        <string>Name</string>
@@ -129,6 +132,13 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
+      <widget class="QPushButton" name="newButton">
+       <property name="text">
+        <string>New</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -142,7 +152,14 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="saveButton">
+      <widget class="QPushButton" name="saveAllButton">
+       <property name="text">
+        <string>Save All</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="saveLineButton">
        <property name="text">
         <string>Save Selection</string>
        </property>

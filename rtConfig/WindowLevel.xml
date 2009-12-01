@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WindowLevelConfig>
+    <WL name="WholeRange" window="1" level="0.5"></WL>
+    <WL name="HalfUpper" window="0.5" level="0.759842"></WL>
+    <WL name="HalfLower" window="0.5" level="0.251947"></WL>
+</WindowLevelConfig>

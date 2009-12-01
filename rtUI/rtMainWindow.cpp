@@ -37,7 +37,7 @@
 #include "vtkPropAssembly.h"
 #include "vtkCamera.h"
 
-#include "version.h"
+#include "buildParam.h"
 
 #define USE_NEW_MESSAGES
 
