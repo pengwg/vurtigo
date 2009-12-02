@@ -62,7 +62,7 @@ class DataInterface {
     The minimum update time is 15 milisecs. Lower times will be defaulted to 15 milisecs. If the set time is negative the update function will never be called.
     The default value is -1 which means that update is not called by default.
     @see getUpdateTime()
-    @param The update time.
+    \param time The update time.
     */
   void setUpdateTime(int time) {
     if (time<0) {

@@ -181,8 +181,9 @@ const rtDataObject* const rtBaseHandle::getROObjectWithID(int ID) {
 //! Add a watch to clicks on the main 3D window.
 /*!
   The plugin can register with the base to receive a callback every time the user sets a point in the 3D view. 
-  @param watch True if the watch is to be added. False to remove a watch.
-  @return true if the watch was added/removed as was requested by the caller.
+  \param pluginID The ID of the plugin to register.
+  \param watch True if the watch is to be added. False to remove a watch.
+  \return true if the watch was added/removed as was requested by the caller.
  */
 bool rtBaseHandle::watchClick(int pluginID, bool watch) {
   bool res;

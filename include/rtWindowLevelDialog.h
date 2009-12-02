@@ -26,7 +26,7 @@ class rtWindowLevelDialog : public QDialog, public Ui::rtWindowLevelDialog {
       bool modified;
     };
 
-    rtWindowLevelDialog(QString fileName);
+    rtWindowLevelDialog(QString fileName="");
     ~rtWindowLevelDialog();
 
     void setImageData(vtkImageData* dat);

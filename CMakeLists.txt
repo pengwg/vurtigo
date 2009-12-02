@@ -6,7 +6,10 @@ set (Vurtigo_VERSION_MAJOR 0)
 set (Vurtigo_VERSION_MINOR 9)
 set (Vurtigo_VERSION_REVISION 0)
 
-message(STATUS "Begin Install for Vurtigo: " ${Vurtigo_VERSION_MAJOR} "." ${Vurtigo_VERSION_MINOR} "." ${Vurtigo_VERSION_REVISION})
+set ( Vurtigo_PROJECT_VERSION "${Vurtigo_VERSION_MAJOR}.${Vurtigo_VERSION_MINOR}.${Vurtigo_VERSION_REVISION}"  )
+
+message(STATUS "Begin Install for Vurtigo: " ${Vurtigo_PROJECT_VERSION} )
+
 
 ####################
 # Determine the OS

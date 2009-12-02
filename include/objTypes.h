@@ -46,7 +46,7 @@ class rtConstants {
 
   //! Convert an int into a variable of type rtObjectType.
   /*!
-    \var type The object type as an integer.
+    \param type The object type as an integer.
     \return The same value but cast as an object type. Will return OT_None if the integer value is not valid.
     */
   static rtObjectType intToObjectType(int type) {

@@ -3,11 +3,19 @@
 #include <QXmlStreamWriter>
 #include <QGraphicsItem>
 
+#include "rtConfigOptions.h"
+
 rtWindowLevelDialog::rtWindowLevelDialog(QString fName) : c_histogramSize(50) {
   setupUi(this);
   m_defWindow = 1.0f;
   m_defLevel = 0.5f;
-  m_fName = fName;
+
+  // Check if a parameter was given
+  if (fName == "") {
+    m_fName = rtConfigOptions::instance().getWLFileName();
+  } else {
+    m_fName = fName;
+  }
 
   m_histogram = new int[c_histogramSize];
 

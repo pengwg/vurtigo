@@ -143,6 +143,9 @@ bool rtCathDataObject::removeCoil(int coilID) {
 
 // List specific
 //! Get the number of coils in the list.
+/*!
+  \return The number of coils in the coil list.
+  */
 int rtCathDataObject::getNumCoils() {
   return m_coilList.size();
 }
@@ -150,7 +153,7 @@ int rtCathDataObject::getNumCoils() {
 //! Get the handle to the coil list.
 /*!
   The list should not be modified by the caller.
-  @returnTthe handle to the coil list.
+  \return The handle to the coil list.
   */
 QHash<int, rtCathDataObject::CathCoilData>* rtCathDataObject::getListHandle() {
   return &m_coilList;

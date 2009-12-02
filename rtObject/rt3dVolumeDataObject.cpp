@@ -71,7 +71,7 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
 
   setupGUI();
 
-  m_wlDialog = new rtWindowLevelDialog( QString(CONFIG_FILE_PATH).append("WindowLevel.xml") );
+  m_wlDialog = new rtWindowLevelDialog( );
 
   connect(m_wlDialog, SIGNAL(valuesChanged(int,int)), this, SLOT(wlChanged(int,int)));
 }
