@@ -81,6 +81,24 @@ int main(int argc, char *argv[])
       rtBaseHandle::instance(); // Important to create the object in THIS THREAD.
       mainWin.setupHelpFiles();
 
+      // Load default plugins
+      QList<QString> pluginList;
+      pluginList = rtConfigOptions::instance().getPluginList();
+      for (int ix1=0; ix1<pluginList.size(); ix1++) {
+        QFile file(pluginList[ix1]);
+        if (!file.exists()) {
+          std::stringstream msg;
+          msg << "File not found: " << pluginList[ix1].toStdString();
+          rtMessage::instance().error(__LINE__, __FILE__, msg.str());
+          continue;
+        }
+        if (!rtPluginLoader::instance().loadPluginsFromConfig(&file)) {
+          std::stringstream msg;
+          msg << "Failed to load plugins from: " << pluginList[ix1].toStdString();
+          rtMessage::instance().error(__LINE__, __FILE__, msg.str());
+        }
+      }
+
       setupOrigin();
 
       mainWin.show();
