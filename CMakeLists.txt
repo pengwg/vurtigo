@@ -31,7 +31,7 @@ if (QT4_FOUND)
   # Qt Core and Qt Gui are included by default.
   set(QT_USE_QTNETWORK 1)
   set(QT_USE_QTXML 1)
-
+  set(QT_USE_QTHELP 1)
   include(${QT_USE_FILE})
 endif(QT4_FOUND)
 
@@ -75,7 +75,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 file(WRITE ${CMAKE_BINARY_DIR}/buildParam.h "#define VURTIGO_MAJOR_VERSION " ${Vurtigo_VERSION_MAJOR} "\n" )
 file(APPEND ${CMAKE_BINARY_DIR}/buildParam.h "#define VURTIGO_MINOR_VERSION " ${Vurtigo_VERSION_MINOR} "\n" )
 file(APPEND ${CMAKE_BINARY_DIR}/buildParam.h "#define VURTIGO_REVISION_VERSION " ${Vurtigo_VERSION_REVISION} "\n" )
-file(APPEND ${CMAKE_BINARY_DIR}/buildParam.h "#define CONFIG_FILE_PATH \"" ${CMAKE_HOME_DIRECTORY}/rtConfig/ "\"\n" )
 
 include_directories(include ${CMAKE_BINARY_DIR})
 

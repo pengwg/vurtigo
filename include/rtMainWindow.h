@@ -24,10 +24,7 @@
 #include <QBoxLayout>
 #include <QHash>
 #include <QSemaphore>
-
-#include "ui_rtMainWindow.h"
-#include "ui_rtAboutDialog.h"
-#include "customQVTKWidget.h"
+#include <QtHelp>
 
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderWindow.h>
@@ -39,6 +36,10 @@
 
 class rtRenderObject;
 class rtCameraControl;
+class rtHelpManager;
+
+#include "ui_rtMainWindow.h"
+#include "customQVTKWidget.h"
 #include "rtAxesProperties.h"
 #include "rtOptions2DView.h"
 #include "objTypes.h"
@@ -117,6 +118,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   //! Get the direction that points from the camera to the focal point.
   void getCameraForward(double val[3]);
 
+  //! Read the help index and create the help files.
+  void setupHelpFiles();
+
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
   void itemChanged(QTreeWidgetItem * current, int column);
@@ -140,8 +144,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void textLog(bool);
   void showRenderOptions();
 
-  void viewContents();
-  void viewAbout();
+  void cameraDefaultView();
+  void cameraRobotArmView();
 
   void add2DFrame();
   void remove2DFrame();
@@ -207,8 +211,15 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   double m_movingQuality;
   //! Quality while the camera is still
   double m_stillQuality;
+  
+  //! The class that displays all of the help menu windows.
+  rtHelpManager *m_helpManager;
 
+  // Protected functions
+
+  //! Connect signals to slots for the main window.
   void connectSignals();
+
   void setupObjectTree();
   void populateObjectTypeNames();
 

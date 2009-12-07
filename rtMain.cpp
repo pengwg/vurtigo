@@ -53,7 +53,6 @@ int main(int argc, char *argv[])
     rtMainWindow mainWin;
     QStringList args = app.arguments();
     bool runVurtigo = true;
-    bool configLoaded = false;
     int exitCode = 0;
 
     // Setup the message stream.
@@ -74,28 +73,13 @@ int main(int argc, char *argv[])
       }
     }
 
-    // Try to load the config file.
-    if (runVurtigo) {
-      configLoaded = rtConfigOptions::instance().loadFile(QString(CONFIG_FILE_PATH).append("VurtigoConfig.xml"));
-    }
-
-    // The user wants to run Vurtigo but the config could not be loaded.
-    if (runVurtigo && !configLoaded) {
-      if (QMessageBox::question(&mainWin, "Config File Error",
-                              "The Default Config file for Vurtigo could not be loaded. Select 'open' to choose a custom config file or 'abort' to quit Vurtigo.",
-                              QMessageBox::Abort | QMessageBox::Open ) == QMessageBox::Open) {
-        QString fName = QFileDialog::getOpenFileName(&mainWin, "Open Config File", CONFIG_FILE_PATH);
-        if (fName != "") {
-          configLoaded = rtConfigOptions::instance().loadFile(fName);
-        }
-      }
-    }
-
     // Check if the user wants Vurtigo to run and if the config file was loaded properly.
-    if (runVurtigo && configLoaded) {
+    if (runVurtigo) {
+      rtConfigOptions::instance(); // Reead the config file before anything...
       rtTimeManager::instance().startRenderTimer(&mainWin, 40);
       rtObjectManager::instance().setMainWinHandle(&mainWin);
       rtBaseHandle::instance(); // Important to create the object in THIS THREAD.
+      mainWin.setupHelpFiles();
 
       setupOrigin();
 

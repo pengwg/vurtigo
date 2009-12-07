@@ -17,11 +17,14 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
+
+#include <iostream>
+
 #include "rtCameraControl.h"
 #include "rtObjectManager.h"
 #include "rtMainWindow.h"
 #include "customQVTKWidget.h"
-#include <iostream>
+
 rtCameraControl::rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWid) {
   m_camera = cam;
   m_eventWidget = eventWid;
@@ -31,6 +34,22 @@ rtCameraControl::rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWid) {
   m_leftMouseDown = false;
   m_rightMouseDown = false;
   m_midMouseDown = false;
+
+  m_cameraPosList.clear();
+
+  CameraPosition p;
+
+  // Default Positions
+  p.pos[0] = 0.0f; p.pos[1] = 0.0f; p.pos[2] = 1.0f;
+  p.focal[0] = 0.0f; p.focal[1] = 0.0f; p.focal[2] = -1.0f;
+  p.up[0] = 0.0f; p.up[1] = 1.0f; p.up[2] = 0.0f;
+  m_cameraPosList.append(p);
+
+  // Robot Arm Position
+  p.pos[0] = 0.0f; p.pos[1] = 0.0f; p.pos[2] = -1.0f;
+  p.focal[0] = 0.0f; p.focal[1] = 0.0f; p.focal[2] = 1.0f;
+  p.up[0] = 0.0f; p.up[1] = -1.0f; p.up[2] = 0.0f;
+  m_cameraPosList.append(p);
 }
 
 bool rtCameraControl::cameraMoving() {
@@ -61,6 +80,24 @@ void rtCameraControl::getRightDirection(double val[3]) {
 }
 
 
+void rtCameraControl::setToDefaultPosition() {
+
+  m_camera->SetPosition(m_cameraPosList[0].pos);
+  m_camera->SetFocalPoint(m_cameraPosList[0].focal);
+  m_camera->SetViewUp(m_cameraPosList[0].up);
+
+}
+
+void rtCameraControl::setToRobotArmPosition() {
+  m_camera->SetPosition(m_cameraPosList[1].pos);
+  m_camera->SetFocalPoint(m_cameraPosList[1].focal);
+  m_camera->SetViewUp(m_cameraPosList[1].up);
+}
+
+
+//////////////
+// PUBLIC SLOTS
+///////////////
 void rtCameraControl::connectEvents() {
   if (!m_eventWidget) return;
   connect(m_eventWidget, SIGNAL(cameraMousePress(QMouseEvent*)), this, SLOT(mousePress(QMouseEvent*)));

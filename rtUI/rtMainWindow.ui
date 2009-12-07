@@ -240,6 +240,7 @@
      <string>Help</string>
     </property>
     <addaction name="actionContents"/>
+    <addaction name="actionSource_Docs"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
    </widget>
@@ -265,9 +266,17 @@
      <addaction name="actionBenchmarkText"/>
      <addaction name="actionLogText"/>
     </widget>
+    <widget class="QMenu" name="menuStandard_Views">
+     <property name="title">
+      <string>Standard Views</string>
+     </property>
+     <addaction name="actionDefault_View"/>
+     <addaction name="actionRobot_Arm"/>
+    </widget>
     <addaction name="menuLayout"/>
-    <addaction name="actionCoordinate_Axes"/>
     <addaction name="menuText_Output"/>
+    <addaction name="menuStandard_Views"/>
+    <addaction name="actionCoordinate_Axes"/>
     <addaction name="action3D_Render_Options"/>
    </widget>
    <widget class="QMenu" name="menuObjects">
@@ -457,6 +466,21 @@
   <action name="actionSave_Object">
    <property name="text">
     <string>Save Object</string>
+   </property>
+  </action>
+  <action name="actionDefault_View">
+   <property name="text">
+    <string>Default View</string>
+   </property>
+  </action>
+  <action name="actionRobot_Arm">
+   <property name="text">
+    <string>Robot Arm</string>
+   </property>
+  </action>
+  <action name="actionSource_Docs">
+   <property name="text">
+    <string>Source Docs...</string>
    </property>
   </action>
  </widget>

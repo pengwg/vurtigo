@@ -20,6 +20,7 @@
 #ifndef OBJ_TYPES_H
 #define OBJ_TYPES_H
 
+//! A vurtigo container class for constants such as object types.
 class rtConstants {
 
   public:
@@ -40,6 +41,10 @@ class rtConstants {
   };
 
   //! Convert the object type into an int.
+  /*!
+    \param type The object type as an enum.
+    \return The same value but as an integer.
+    */
   static int objectTypeToInt(rtObjectType type) {
     return (int)type;
   }

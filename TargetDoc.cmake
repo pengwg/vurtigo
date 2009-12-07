@@ -1,29 +1,10 @@
-# Script to make Doxygen Docs. 
-
-# -helper macro to add a "doc" target with CMake build system. 
-# and configure doxy.config.in to doxy.config
-#
-# target "doc" allows building the documentation with doxygen/dot on WIN32 and Linux
-# Creates .chm windows help file if MS HTML help workshop 
-# (available from http://msdn.microsoft.com/workshop/author/htmlhelp)
-# is installed with its DLLs in PATH.
-#
-#
-# Please note, that the tools, e.g.:
-# doxygen, dot, latex, dvips, makeindex, gswin32, etc.
-# must be in path.
-#
-# Note about Visual Studio Projects: 
-# MSVS hast its own path environment which may differ from the shell.
-# See "Menu Tools/Options/Projects/VC++ Directories" in VS 7.1
-#
-# author Jan Woetzel 2004-2006
-# www.mip.informatik.uni-kiel.de/~jw
-
 
 FIND_PACKAGE(Doxygen)
 
+
 IF (DOXYGEN_FOUND)
+
+  ## SET(HELP_QHG_LOCATION ${CMAKE_CURRENT_SOURCE_DIR})
   
   # we need latex for doxygen because of the formulas
   FIND_PACKAGE(LATEX)
@@ -50,5 +31,9 @@ IF (DOXYGEN_FOUND)
   ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/doxy.config.in")
   
   ADD_CUSTOM_TARGET(doc ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG})
+  ADD_CUSTOM_TARGET(qtdoc
+  COMMAND qhelpgenerator ${CMAKE_CURRENT_BINARY_DIR}/Doc/html/index.qhp -o ${CMAKE_CURRENT_BINARY_DIR}/Doc/html/VurtigoSrcHelp.qch
+  COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/rtConfig/VurtigoSrcHelp.qhcp ${CMAKE_CURRENT_BINARY_DIR}/Doc/html/VurtigoSrcHelp.qhcp
+  COMMAND qcollectiongenerator ${CMAKE_CURRENT_BINARY_DIR}/Doc/html/VurtigoSrcHelp.qhcp -o ${CMAKE_CURRENT_BINARY_DIR}/Doc/html/VurtigoSrcHelp.qhc)
   
 ENDIF(DOXYGEN_FOUND)

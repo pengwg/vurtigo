@@ -21,6 +21,8 @@
 #define RTCONFIGOPTIONS_H
 
 #include <QString>
+#include <QSettings>
+#include <QList>
 
 //! Container class for all of the configuration options that are read from a file.
 /*!
@@ -41,43 +43,19 @@ class rtConfigOptions
     return handle;
   }
 
-  //! Load a config file
-  /*!
-    Load all of the parameters from a new config file. Note that any previous settings will be overwritten and lost.
-    This function should be called at least once as part of the initialization of this class. Default parameter values are not useful and may cause problems.
-    \param fName The full path name of the config file to load.
-    \return true if the file was loaded and false if there was an error. Note that a return value of false may leave the internal data in an inconsistent state.
-    \sa getConfigFileName()
-    */
-  bool loadFile(QString fName);
-
-  //! Get the name of the currently loaded file.
-  /*!
-    \return The name of the config file that is currently loaded. A blank string is returned if no file was loaded or if the last load attempt failed.
-    \sa loadFile()
-   */
-  QString getConfigFileName();
-
   QString getWLFileName();
+  QString getSourceCodeHelpFileName();
   QString getHelpCollectionFileName();
+  QList<QString> getPluginList();
 
  protected:
-  //! The name of the file that is loaded.
-  /*!
-    The name of the config file that is currently loaded. This is a blank string if no file was loaded or if the last load attempt failed.
-    \sa loadFile()
-    \sa getConfigFileName()
-    */
-  QString m_fileName;
 
-  //! The window and level config file.
-  /*!
-    The full path and file name of the config file for the window and level data. Empty string by default.
-    */
-  QString m_wlFileName;
+  //! The path to the location of all of vurtigo's config details.
+  QString m_configPath;
 
-  //! The name of the help collection file. Empty string by default.
-  QString m_helpCollectionFile;
+  //! The vurtigo settings object.
+  QSettings *m_settings;
+
 
  private:
   //! Private Constructor

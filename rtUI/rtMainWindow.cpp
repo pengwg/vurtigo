@@ -21,6 +21,9 @@
 #include <QApplication>
 #include <QFileDialog>
 
+#include <vtkPropAssembly.h>
+#include <vtkCamera.h>
+
 #include <iostream>
 #include <cmath>
 
@@ -33,11 +36,9 @@
 #include "rtRenderOptions.h"
 #include "rtCameraControl.h"
 #include "ui_newObjectDialog.h"
-
-#include "vtkPropAssembly.h"
-#include "vtkCamera.h"
-
+#include "rtConfigOptions.h"
 #include "buildParam.h"
+#include "rtHelpManager.h"
 
 #define USE_NEW_MESSAGES
 
@@ -45,7 +46,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupUi(this);
 
   m_cellPicker = vtkCellPicker::New();
-
+  m_helpManager = NULL;
   m_currentObjectWidget = NULL;
   m_currentPluginWidget = NULL;
   m_renderFlag3D = false;
@@ -155,6 +156,18 @@ rtMainWindow::~rtMainWindow() {
     m_orientationWidget = NULL;
   }
   if (m_axesProperties) delete m_axesProperties;
+  if (m_helpManager) delete m_helpManager;
+}
+
+
+void rtMainWindow::setupHelpFiles() {
+  // The help engine
+  m_helpManager = new rtHelpManager();
+
+  // Help Menu
+  connect(actionContents, SIGNAL(triggered()), m_helpManager, SLOT(showHelpContents()));
+  connect(actionSource_Docs, SIGNAL(triggered()), m_helpManager, SLOT(showSourceDocs()));
+  connect(actionAbout, SIGNAL(triggered()), m_helpManager, SLOT(showHelpAbout()));
 }
 
 vtkRenderWindow* rtMainWindow::getRenderWindow() {
@@ -452,10 +465,8 @@ void rtMainWindow::connectSignals() {
   connect(actionBenchmarkText, SIGNAL(toggled(bool)), this, SLOT(textBenchmark(bool)));
   connect(actionLogText, SIGNAL(toggled(bool)), this, SLOT(textLog(bool)));
   connect(action3D_Render_Options, SIGNAL(triggered()), this, SLOT(showRenderOptions()));
-
-  // Help Menu
-  connect(actionContents, SIGNAL(triggered()), this, SLOT(viewContents()));
-  connect(actionAbout, SIGNAL(triggered()), this, SLOT(viewAbout()));
+  connect(actionDefault_View, SIGNAL(triggered()), this , SLOT(cameraDefaultView()));
+  connect(actionRobot_Arm, SIGNAL(triggered()), this, SLOT(cameraRobotArmView()));
 
   // 2D View controls
   connect(add2DFrameBtn, SIGNAL(clicked()), this, SLOT(add2DFrame()));
@@ -625,28 +636,15 @@ void rtMainWindow::showRenderOptions() {
 
 }
 
-
-void rtMainWindow::viewContents() {
-
+void rtMainWindow::cameraDefaultView() {
+  m_cameraControl->setToDefaultPosition();
+  m_renderFlag3D = true;
 }
 
 
-void rtMainWindow::viewAbout() {
-  Ui::rtAboutDialog setup;
-  QDialog aboutD;
-  QString ver;
-
-  ver.append("Version: ");
-  ver.append(QString::number(VURTIGO_MAJOR_VERSION));
-  ver.append(".");
-  ver.append(QString::number(VURTIGO_MINOR_VERSION));
-  ver.append(".");
-  ver.append(QString::number(VURTIGO_REVISION_VERSION));
-
-  setup.setupUi(&aboutD);
-  setup.versionLabel->setText( ver );
-  aboutD.exec();
-
+void rtMainWindow::cameraRobotArmView() {
+  m_cameraControl->setToRobotArmPosition();
+  m_renderFlag3D = true;
 }
 
 //! Load a plugin based on an XML file the user chooses. 
