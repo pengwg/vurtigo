@@ -35,12 +35,7 @@ rt2DSliceRenderObject::rt2DSliceRenderObject() {
 
 
 rt2DSliceRenderObject::~rt2DSliceRenderObject() {
-  if (m_texturePlane) m_texturePlane->Delete();
-  if (m_planeMapper) m_planeMapper->Delete();
-  if (m_textureActor) m_textureActor->Delete();
-  if (m_texture) m_texture->Delete();
-  if (m_imgMapToColors) m_imgMapToColors->Delete();
-  if (m_lookupTable) m_lookupTable->Delete();
+
 }
 
 
@@ -49,40 +44,23 @@ void rt2DSliceRenderObject::update() {
   rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
   if ( !dObj->isDataValid() || !dObj->getUCharData()) return;
 
-  dObj->getUCharData()->Update();
-  m_imgMapToColors->SetInput(dObj->getUCharData());
-
   double scaleRange[2];
-  dObj->getUCharData()->GetScalarRange(scaleRange);
-  m_lookupTable->SetRange(scaleRange[0], scaleRange[1]);
-
-  m_lookupTable->SetWindow(dObj->getWindow());
-  m_lookupTable->SetLevel(dObj->getLevel());
-
-  double orig[3], pt1[3], pt2[3], opp[3];
   double bounds[6];
-  double xsize, ysize, zsize;
+  double xsize;
 
+  dObj->getUCharData()->Update();
+  dObj->getUCharData()->GetScalarRange(scaleRange);
   dObj->getUCharData()->GetBounds(bounds);
   xsize = bounds[1]-bounds[0];
-  ysize = bounds[3]-bounds[2];
 
-  // The Z size should be one...
-  zsize = bounds[5]-bounds[4];
+  m_texturePlane.setImageData(dObj->getUCharData());
+  m_texturePlane.setScalarRange(scaleRange[0], scaleRange[1]);
+  m_texturePlane.setWindow(dObj->getWindow());
+  m_texturePlane.setLevel(dObj->getLevel());
 
-  orig[0]=0.0; orig[1]=0.0; orig[2]=0.0;
-  pt1[0]=1.0*xsize; pt1[1]=0.0; pt1[2]=0.0;
-  pt2[0]=0.0; pt2[1]=1.0*ysize; pt2[2]=0.0;
-  opp[0]=1.0*xsize; opp[1]=1.0*ysize; opp[2]=0.0;
-
-  dObj->getTransform()->TransformPoint(orig, orig);
-  dObj->getTransform()->TransformPoint(pt1, pt1);
-  dObj->getTransform()->TransformPoint(pt2, pt2);
-  dObj->getTransform()->TransformPoint(opp, opp);
-
-  m_texturePlane->SetOrigin(orig);
-  m_texturePlane->SetPoint1(pt1);
-  m_texturePlane->SetPoint2(pt2);
+  m_texturePlane.setBounds(bounds);
+  m_texturePlane.setTransform(dObj->getTransform());
+  m_texturePlane.update();
 
   m_boxOutline.setBounds(bounds);
   m_boxOutline.setTransform(dObj->getTransform());
@@ -104,8 +82,8 @@ bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren) {
   dObj->Modified();
   this->tryUpdate();
 
-  if(!ren->HasViewProp(m_textureActor)) {
-    ren->AddViewProp(m_textureActor);
+  if(!ren->HasViewProp(m_texturePlane.getActor())) {
+    ren->AddViewProp(m_texturePlane.getActor());
   }
 
   if(!ren->HasViewProp(m_boxOutline.getActor())) {
@@ -130,8 +108,8 @@ bool rt2DSliceRenderObject::removeFromRenderer(vtkRenderer* ren) {
   if (!ren) return false;
   setVisible3D(false);
 
-  if(ren->HasViewProp(m_textureActor)) {
-    ren->RemoveViewProp(m_textureActor);
+  if(ren->HasViewProp(m_texturePlane.getActor())) {
+    ren->RemoveViewProp(m_texturePlane.getActor());
   }
 
   if(ren->HasViewProp(m_boxOutline.getActor())) {
@@ -190,7 +168,7 @@ void rt2DSliceRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
     m_control.hide();
 
   if (temp) {
-    if (temp == m_textureActor.GetPointer() || temp == m_boxOutline.getActor()) {
+    if (temp == m_texturePlane.getActor() || temp == m_boxOutline.getActor()) {
       m_selectedProp = temp;
       m_control.show();
     }
@@ -234,37 +212,8 @@ void rt2DSliceRenderObject::setupDataObject() {
 
 //! Create the part of the pipeline that is done first. 
 void rt2DSliceRenderObject::setupPipeline() {
-  rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
-
   // Objects for the texture pipeline.
-  m_texturePlane = vtkPlaneSource::New();
-  m_planeMapper = vtkPolyDataMapper::New();
-  m_textureActor = vtkActor::New();
-  m_texture = vtkTexture::New();
-  m_imgMapToColors = vtkImageMapToColors::New();
-  m_lookupTable = vtkWindowLevelLookupTable::New();
-
-  // Balck and white.
-  m_imgMapToColors->SetOutputFormatToLuminance();
-
-
-  m_lookupTable->SetHueRange(0.0, 0.0);
-  m_lookupTable->SetSaturationRange(0.0, 0.0);
-  m_lookupTable->SetValueRange(0.0, 1.0);
-
-
-  m_texturePlane->SetOrigin(0,0,0);
-  m_texturePlane->SetPoint1(1,0,0);
-  m_texturePlane->SetPoint2(0,1,0);
-
-  m_planeMapper->SetInput(m_texturePlane->GetOutput());
-  m_textureActor->SetMapper(m_planeMapper);
-  m_textureActor->SetTexture(m_texture);
-  m_texture->SetInputConnection(m_imgMapToColors->GetOutputPort());
-  m_texture->SetLookupTable(m_lookupTable);
-  m_imgMapToColors->SetLookupTable(m_lookupTable);
-
-  m_pipe3D.push_back( m_textureActor );
+  m_pipe3D.push_back( m_texturePlane.getActor() );
   m_pipe3D.push_back( m_boxOutline.getActor() );
 }
 

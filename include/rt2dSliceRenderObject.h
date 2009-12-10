@@ -20,19 +20,10 @@
 #ifndef RT_2D_SLICE_RENDER_OBJECT_H
 #define RT_2D_SLICE_RENDER_OBJECT_H
 
-#include <vtkPlaneSource.h>
-#include <vtkTexture.h>
-#include <vtkImageMapToColors.h>
-#include <vtkWindowLevelLookupTable.h>
-#include <vtkPolyData.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkActor.h>
-#include <vtkProperty.h>
-#include <vtkSmartPointer.h>
-
 #include "rtRenderObject.h"
 #include "ObjectControlWidget.h"
 #include "rtBox2DOutline.h"
+#include "rtTexture2DPlane.h"
 
 //! A Single 2D Slice
 /*!
@@ -66,14 +57,7 @@ public slots:
 
   void update();
 
-  // Objects for the texture pipeline.
-  vtkSmartPointer<vtkPlaneSource> m_texturePlane;
-  vtkSmartPointer<vtkPolyDataMapper> m_planeMapper;
-  vtkSmartPointer<vtkActor> m_textureActor;
-  vtkSmartPointer<vtkTexture> m_texture;
-  vtkSmartPointer<vtkImageMapToColors> m_imgMapToColors;
-  vtkSmartPointer<vtkWindowLevelLookupTable> m_lookupTable;
-
+  rtTexture2DPlane m_texturePlane;
   rtBox2DOutline m_boxOutline;
   ObjectControlWidget m_control;
  private:
