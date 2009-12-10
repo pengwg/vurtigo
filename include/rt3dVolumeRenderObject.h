@@ -22,6 +22,8 @@
 
 #include "rtRenderObject.h"
 #include "rtImagePlaneWidget.h"
+#include "ObjectControlWidget.h"
+
 
 #include <vtkImageCast.h>
 #include <vtkVolumeRayCastMapper.h>
@@ -35,7 +37,7 @@
 #include <vtkImageMapper.h>
 #include <vtkImageReslice.h>
 #include <vtkImageChangeInformation.h>
-
+#include <vtkWindowLevelLookupTable.h>
 #include <vtkSmartPointer.h>
 
 //! The 3D Volume render object
@@ -85,11 +87,31 @@ public slots:
   vtkSmartPointer<vtkPolyDataMapper> m_outlineMapper;
   vtkSmartPointer<vtkActor> m_outlineActor;
 
+  ///////////////
   // The 2D planes
+  /////////////////
   rtImagePlaneWidget *m_planes[3];
   vtkImageCast* m_imgCast[3];
   vtkImageMapper* m_imgMap[3];
   vtkActor2D* m_actor2D[3];
+
+
+
+  ////
+  // TODO HERE WORK WITH THESE
+  ////
+  ObjectControlWidget m_planeControl[3];
+  vtkImageReslice* m_imgReslize[3];
+
+    // Objects for the texture pipeline.
+  vtkPlaneSource* m_texturePlane[3];
+  vtkPolyDataMapper* m_planeMapper[3];
+  vtkActor* m_textureActor[3];
+  vtkTexture* m_texture [3];
+  vtkImageMapToColors* m_imgMapToColors[3];
+  vtkWindowLevelLookupTable* m_lookupTable[3];
+
+
 
   //! Check if the data has been initialized
   bool m_isInit;

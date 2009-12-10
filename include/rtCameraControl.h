@@ -50,6 +50,8 @@ public:
   void getUpDirection(double val[3]);
   void getRightDirection(double val[3]);
 
+  vtkMatrix4x4* getViewMatrix() { return m_camera->GetViewTransformMatrix(); }
+
   void setToDefaultPosition();
   void setToRobotArmPosition();
 

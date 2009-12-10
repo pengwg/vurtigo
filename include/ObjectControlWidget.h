@@ -11,6 +11,10 @@
 #include <vtkLineSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
+#include <vtkParametricTorus.h>
+#include <vtkParametricFunctionSource.h>
+
+#include "rtBox2DOutline.h"
 
 class ObjectControlWidget : public QObject
 {
@@ -44,20 +48,32 @@ protected:
   double m_pointLocations[9][3];
   double m_convertedLocations[9][3];
   int m_corners[4];
-  int m_currPropIndex;
 
+  vtkActor *m_currProp;
+  double m_clickPosition[3];
+  double m_positiveDirection[3];
+  double m_positiveDirectionT[3];
+
+  //! The previous x location of the mouse
   int m_oldX;
+  //! The previous y location of the mouse
   int m_oldY;
 
-  vtkSphereSource* m_touchPoints[9];
-  vtkPolyDataMapper* m_pointMapper[9];
-  vtkActor* m_pointActor[9];
+  vtkSphereSource* m_touchPoint;
+  vtkPolyDataMapper* m_pointMapper;
+  vtkActor* m_pointActor;
 
-  vtkLineSource* m_edges[4];
-  vtkPolyDataMapper* m_lineMapper[4];
-  vtkActor* m_lineActor[4];
+  rtBox2DOutline m_boxOutline;
+
+  // The three rings.
+  vtkTransform *m_position[3];
+  vtkParametricTorus *m_torus[3];
+  vtkParametricFunctionSource *m_torusSrc[3];
+  vtkPolyDataMapper *m_diskMapper[3];
+  vtkActor *m_diskActor[3];
 
   void updateWidgetPosition();
+  void normalizeVector(double vec[3]);
 };
 
 #endif // OBJECTCONTROLWIDGET_H

@@ -121,6 +121,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   //! Read the help index and create the help files.
   void setupHelpFiles();
 
+  //! Get the class that controls the camera position and movement.
+  rtCameraControl* getCameraControl() { return m_cameraControl; }
+
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
   void itemChanged(QTreeWidgetItem * current, int column);

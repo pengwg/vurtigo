@@ -198,7 +198,7 @@ void TestSuiteBasic::run() {
       emit sendOutput("Load Very Large Volume Data...");
       vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
 
-      sinSrc->SetWholeExtent(1, 425, 1, 425, 1, 425);
+      sinSrc->SetWholeExtent(1, 400, 1, 400, 1, 400);
       sinSrc->SetDirection(1, 2, 3);
       sinSrc->SetPeriod(50);
       sinSrc->SetPhase(1);
@@ -428,9 +428,9 @@ void TestSuiteBasic::basicTestCreateObjects() {
 
   // Two test volumes
   m_smallVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 128x128x128");
-  m_hugeVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 425x425x425");
+  m_hugeVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 400x400x400");
   testObject(m_smallVol, "Test Volume 128x128x128");
-  testObject(m_hugeVol, "Test Volume 425x425x425");
+  testObject(m_hugeVol, "Test Volume 400x400x400");
 
   // Test image
   m_2DPlane = rtBaseHandle::instance().requestNewObject(rtConstants::OT_2DObject, "Test Image 256x256");

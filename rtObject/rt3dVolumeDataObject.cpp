@@ -74,6 +74,10 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   m_wlDialog = new rtWindowLevelDialog( );
 
   connect(m_wlDialog, SIGNAL(valuesChanged(int,int)), this, SLOT(wlChanged(int,int)));
+
+  for (int ix1=0; ix1<3; ix1++) {
+    m_planeTransform[ix1] = vtkTransform::New();
+  }
 }
 
 
@@ -98,6 +102,10 @@ rt3DVolumeDataObject::~rt3DVolumeDataObject() {
   m_subImg->Delete();
 
   if (m_wlDialog) delete m_wlDialog;
+
+  for (int ix1=0; ix1<3; ix1++) {
+    m_planeTransform[ix1]->Delete();
+  }
 }
 
 
@@ -139,35 +147,23 @@ vtkImageData* rt3DVolumeDataObject::getImageData() {
   return m_imgData;
 }
 
-//! Get the image data but cast to Unsigned Short
-/*!
-  The mapper requires either unsigned short or unsigned char to work properly. This function makes it easier to implement that mapper.
-  */
 vtkImageData* rt3DVolumeDataObject::getUShortData() {
   return m_subImg->GetOutput();
 }
 
-//! Get a handle to the transform.
-/*!
-  This function provides a way to access and to modify the transform.
-  Do not delete the handle returned by this object. The creation and deletion is handled by the Data Object.
-  @return A handle to the image data object.
-  */
+
 vtkTransform* rt3DVolumeDataObject::getTransform() {
   return m_dataTransform;
 }
 
-//! Get the current piecewise function
 vtkPiecewiseFunction* rt3DVolumeDataObject::getPieceFunc() {
   return m_pieceFunc;
 }
 
-//! Get the current color transfer function
 vtkColorTransferFunction* rt3DVolumeDataObject::getColorTransFunc() {
   return m_colorTransFunc;
 }
 
-//! Get volume property
 vtkVolumeProperty* rt3DVolumeDataObject::getVolumeProperty() {
   return m_volumeProperty;
 }

@@ -20,9 +20,6 @@
 #ifndef RT_2D_SLICE_RENDER_OBJECT_H
 #define RT_2D_SLICE_RENDER_OBJECT_H
 
-#include "rtRenderObject.h"
-#include "ObjectControlWidget.h"
-
 #include <vtkPlaneSource.h>
 #include <vtkTexture.h>
 #include <vtkImageMapToColors.h>
@@ -32,6 +29,10 @@
 #include <vtkActor.h>
 #include <vtkProperty.h>
 #include <vtkSmartPointer.h>
+
+#include "rtRenderObject.h"
+#include "ObjectControlWidget.h"
+#include "rtBox2DOutline.h"
 
 //! A Single 2D Slice
 /*!
@@ -73,12 +74,7 @@ public slots:
   vtkSmartPointer<vtkImageMapToColors> m_imgMapToColors;
   vtkSmartPointer<vtkWindowLevelLookupTable> m_lookupTable;
 
-  // Objects for the frame outline pipeline.
-  vtkSmartPointer<vtkPolyData> m_outlinePolyData;
-  vtkSmartPointer<vtkPolyDataMapper> m_outlineMapper;
-  vtkSmartPointer<vtkActor> m_outlineActor;
-  vtkSmartPointer<vtkProperty> m_outlineProperty;
-
+  rtBox2DOutline m_boxOutline;
   ObjectControlWidget m_control;
  private:
 

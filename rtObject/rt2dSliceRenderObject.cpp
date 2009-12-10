@@ -41,11 +41,6 @@ rt2DSliceRenderObject::~rt2DSliceRenderObject() {
   if (m_texture) m_texture->Delete();
   if (m_imgMapToColors) m_imgMapToColors->Delete();
   if (m_lookupTable) m_lookupTable->Delete();
-
-  if (m_outlinePolyData) m_outlinePolyData->Delete();
-  if (m_outlineMapper) m_outlineMapper->Delete();
-  if (m_outlineActor) m_outlineActor->Delete();
-  if (m_outlineProperty) m_outlineProperty->Delete();
 }
 
 
@@ -69,7 +64,6 @@ void rt2DSliceRenderObject::update() {
   double xsize, ysize, zsize;
 
   dObj->getUCharData()->GetBounds(bounds);
-  //dObj->getUCharData()->Print(std::cout);
   xsize = bounds[1]-bounds[0];
   ysize = bounds[3]-bounds[2];
 
@@ -86,18 +80,13 @@ void rt2DSliceRenderObject::update() {
   dObj->getTransform()->TransformPoint(pt2, pt2);
   dObj->getTransform()->TransformPoint(opp, opp);
 
-  vtkPoints* pts = vtkPoints::New();
-  pts->SetNumberOfPoints(4);
-  pts->SetPoint(0, orig);
-  pts->SetPoint(1, pt1);
-  pts->SetPoint(2, opp);
-  pts->SetPoint(3, pt2);
-  m_outlinePolyData->SetPoints(pts);
-  pts->Delete();
-
   m_texturePlane->SetOrigin(orig);
   m_texturePlane->SetPoint1(pt1);
   m_texturePlane->SetPoint2(pt2);
+
+  m_boxOutline.setBounds(bounds);
+  m_boxOutline.setTransform(dObj->getTransform());
+  m_boxOutline.update();
 
   m_control.setTransform(dObj->getTransform());
   m_control.setSize(xsize);
@@ -119,8 +108,8 @@ bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren) {
     ren->AddViewProp(m_textureActor);
   }
 
-  if(!ren->HasViewProp(m_outlineActor)) {
-    ren->AddViewProp(m_outlineActor);
+  if(!ren->HasViewProp(m_boxOutline.getActor())) {
+    ren->AddViewProp(m_boxOutline.getActor());
   }
 
   customQVTKWidget* renWid;
@@ -145,8 +134,8 @@ bool rt2DSliceRenderObject::removeFromRenderer(vtkRenderer* ren) {
     ren->RemoveViewProp(m_textureActor);
   }
 
-  if(ren->HasViewProp(m_outlineActor)) {
-    ren->RemoveViewProp(m_outlineActor);
+  if(ren->HasViewProp(m_boxOutline.getActor())) {
+    ren->RemoveViewProp(m_boxOutline.getActor());
   }
 
   customQVTKWidget* renWid;
@@ -201,7 +190,7 @@ void rt2DSliceRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
     m_control.hide();
 
   if (temp) {
-    if (temp == m_textureActor.GetPointer() || temp == m_outlineActor.GetPointer()) {
+    if (temp == m_textureActor.GetPointer() || temp == m_boxOutline.getActor()) {
       m_selectedProp = temp;
       m_control.show();
     }
@@ -275,46 +264,15 @@ void rt2DSliceRenderObject::setupPipeline() {
   m_texture->SetLookupTable(m_lookupTable);
   m_imgMapToColors->SetLookupTable(m_lookupTable);
 
-  // Objects for the frame outline pipeline.
-  m_outlinePolyData = vtkPolyData::New();
-  m_outlineMapper = vtkPolyDataMapper::New();
-  m_outlineActor = vtkActor::New();
-  m_outlineProperty = vtkProperty::New();
-
-
-  vtkPoints* pts = vtkPoints::New();
-  pts->SetNumberOfPoints(4);
-  pts->SetPoint(0, 0.0, 0.0, 0.0);
-  pts->SetPoint(1, 1.0, 0.0, 0.0);
-  pts->SetPoint(2, 1.0, 1.0, 0.0);
-  pts->SetPoint(3, 0.0, 1.0, 0.0);
-
-  m_outlinePolyData->SetPoints(pts);
-  pts->Delete();
-
-  vtkCellArray* lines = vtkCellArray::New();
-  lines->InsertNextCell(5);
-  lines->InsertCellPoint(0);
-  lines->InsertCellPoint(1);
-  lines->InsertCellPoint(2);
-  lines->InsertCellPoint(3);
-  lines->InsertCellPoint(0);
-  m_outlinePolyData->SetLines(lines);
-  lines->Delete();
-
-  m_outlineMapper->SetInput(m_outlinePolyData);
-  m_outlineActor->SetMapper(m_outlineMapper);
-  m_outlineActor->SetProperty(m_outlineProperty);
-
   m_pipe3D.push_back( m_textureActor );
-  m_pipe3D.push_back( m_outlineActor );
+  m_pipe3D.push_back( m_boxOutline.getActor() );
 }
 
 //! The position of the center of the plane is given
 bool rt2DSliceRenderObject::getObjectLocation(double loc[6]) {
-  if (!m_outlineActor) return false;
+  if (!m_boxOutline.getActor()) return false;
 
-  m_outlineActor->GetBounds(loc);
+  m_boxOutline.getActor()->GetBounds(loc);
 
   return true;
 }

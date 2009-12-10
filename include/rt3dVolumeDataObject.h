@@ -66,15 +66,33 @@ public:
   /*!
   This function provides a way to access and to modify the image data object.
   Do not delete the handle returned by this object. The creation and deletion is handled by the Data Object.
-  @return A handle to the image data object.
+  \return A handle to the image data object.
   */
   vtkImageData* getImageData();
 
-
+  //! Get the image data but cast to Unsigned Short
+  /*!
+  The mapper requires either unsigned short or unsigned char to work properly. This function makes it easier to implement that mapper.
+  \return A pointer to the unsigned short version of the data.
+  */
   vtkImageData* getUShortData();
+
+
+  //! Get a handle to the transform for the 3D volume
+  /*!
+  This function provides a way to access and to modify the transform.
+  Do not delete the handle returned by this object. The creation and deletion is handled by the Data Object.
+  \return A handle to the image data object.
+  */
   vtkTransform* getTransform();
+
+  //! Get the piecewise function for the 3D volume
   vtkPiecewiseFunction* getPieceFunc();
+
+  //! Get the current color transfer function
   vtkColorTransferFunction* getColorTransFunc();
+
+  //! Get volume property
   vtkVolumeProperty* getVolumeProperty();
 
   RayCastFunction getRayCastType() { return m_rayCastFunction; }
@@ -120,6 +138,19 @@ public:
   //! Get the level part of the window level.
   int getLevel() { return m_level; }
 
+
+  //! Get the transform matrix for a particular plane.
+  vtkTransform* getTransformForPlane(int id) {
+    if (id < 0 || id > 2) return NULL;
+    return m_planeTransform[id];
+  }
+
+  //! Set the transform for one of the three planes.
+  void setTransformForPlane(int id, vtkTransform* t) {
+    if (id < 0 || id > 2) return;
+    return m_planeTransform[id]->DeepCopy(t);
+  }
+
  public slots:
   void surfaceFunctionChanged();
 
@@ -153,10 +184,15 @@ public:
   void newImageData();
 
  protected:
+  /////////////
   // Functions
+  /////////////
   void setupGUI();
   void cleanupGUI();
 
+  ////////////////
+  // Variables
+  ///////////////
   vtkImageData* m_imgData;
   vtkTransform* m_dataTransform;
   vtkPiecewiseFunction* m_pieceFunc;
@@ -172,14 +208,18 @@ public:
   //! The ID of the external color function used.
   int m_colorFuncID;
 
+  //! The window value
   double m_window;
+  //! The level value
   double m_level;
 
   vtkSmartPointer<vtkImageExtractComponents> m_subImg;
   int m_visibleComponent;
   QTimer *m_cineFrame;
 
+  //! Flag to determine if the image data has been initialized.
   bool m_imgDataValid;
+
   //! The type of interpolation that will be used by the cut planes and the volume reslice.
   /*! The three types possible are: Nearest Neighbour = 0, Linear = 1, Cubic = 2
     */
@@ -192,10 +232,14 @@ public:
   vtkVolumeRayCastMIPFunction* m_MIPFunc;
 
   // UI objects
+  //! The widget for the options for this object
   Ui::volume3DOptions m_optionsWidget;
 
+  //! The dialog object where the user changes window and level paramters.
   rtWindowLevelDialog *m_wlDialog;
 
+  //! Positions for the three planes
+  vtkTransform* m_planeTransform[3];
 };
 
 #endif 
