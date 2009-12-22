@@ -26,6 +26,7 @@ rtRenderObject::rtRenderObject() {
   m_renderName = "None";
   m_objType = rtConstants::OT_None;
   m_treeItem = new QTreeWidgetItem();
+  m_treeItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
   m_mainWin = NULL;
   m_visible3D = false;
 
@@ -94,7 +95,6 @@ bool rtRenderObject::tryUpdate() {
 void rtRenderObject::updateTreeItem() {
   if (m_treeItem) {
     m_treeItem->setText(0, m_dataObj->getObjName());
-    m_treeItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
     m_treeItem->setText(1, QString::number(m_dataObj->getId()));
     m_treeItem->setTextAlignment(1, Qt::AlignHCenter);
 

@@ -89,6 +89,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   rtRenderObject* temp = NULL;
   rtDataObject* dataO = NULL;
   int nextID;
+  std::stringstream msg;
 
   // Try to get a valid ID. 
   nextID = getNextID();
@@ -102,8 +103,9 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   // Find out which object will be used. 
   switch(objType) {
   case rtConstants::OT_None:
-    temp=new rtNoneRenderObject();
-    qWarning("Warning: None Object Requested.");
+    temp=new rtNoneRenderObject();   
+    msg << "Warning: None Object Requested. ";
+    rtMessage::instance().warning(__LINE__, __FILE__,msg.str());
     break;
   case rtConstants::OT_3DObject:
     temp=new rt3DVolumeRenderObject();
@@ -139,7 +141,6 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     temp=new rtLabelRenderObject();
     break;
   default:
-    std::stringstream msg;
     msg << "No object of type " << objType;
     rtMessage::instance().warning(__LINE__, __FILE__,msg.str());
     temp=NULL;
@@ -148,9 +149,8 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
 
   // The object has been created.
   if (temp){
-
     // Push the new object creation to the log.
-    std::stringstream msg;
+    msg.str(" ");
     msg << "Created Object with ID: " << nextID;
     rtMessage::instance().log(msg.str());
 

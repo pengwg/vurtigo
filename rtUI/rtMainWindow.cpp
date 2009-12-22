@@ -192,18 +192,36 @@ QTreeWidget* rtMainWindow::getObjectTree() {
 void rtMainWindow::updateObjectList(QHash<int, rtRenderObject*>* hash) {
   QHash<int, rtRenderObject*>::iterator i;
   QHash<rtConstants::rtObjectType, QTreeWidgetItem *>::iterator wIter;
+  bool objExists;
 
-  // Remove all the items first from the GUI.
-  while (objectTree->takeTopLevelItem(0));
+  // Update all the items.
+  for (i = hash->begin(); i != hash->end(); ++i) {
+    i.value()->updateTreeItem();
+  }
 
-  for (wIter = m_topItems.begin(); wIter!=m_topItems.end(); ++wIter){
-    objectTree->addTopLevelItem(wIter.value());
+  if (objectTree->topLevelItemCount() == 0) {
+    // Setup the new items.
+    for (wIter = m_topItems.begin(); wIter!=m_topItems.end(); ++wIter){
+      objectTree->addTopLevelItem(wIter.value());
+    }
+  }
+
+  for (int ix1=0; ix1<objectTree->topLevelItemCount(); ix1++) {
+    for (int ix2=0; ix2<objectTree->topLevelItem(ix1)->childCount(); ix2++) {
+      objExists = false;
+      for (i = hash->begin(); i != hash->end(); ++i) {
+        if(i.value()->getTreeItem() == objectTree->topLevelItem(ix1)->child(ix2)) objExists = true;
+      }
+      if(!objExists) objectTree->topLevelItem(ix1)->takeChild(ix2);
+    }
   }
 
   for (i = hash->begin(); i != hash->end(); ++i) {
     i.value()->updateTreeItem();
     if ( m_topItems.contains(i.value()->getObjectType()) ) {
-      m_topItems.value(i.value()->getObjectType())->addChild(i.value()->getTreeItem());
+      if ( m_topItems.value(i.value()->getObjectType())->indexOfChild(i.value()->getTreeItem()) == -1 ) {
+        m_topItems.value(i.value()->getObjectType())->addChild(i.value()->getTreeItem());
+      }
     } else {
       qWarning("Warning: Could not find category: %d for object: %#x", i.value()->getObjectType(), i.value());
     }
@@ -293,7 +311,6 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
 
 //! User has double clicked on an item so we need to re-center on it.
 /*!
-  @todo Actually re-center on the object.
   */
 void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
   rtRenderObject *temp;
