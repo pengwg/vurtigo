@@ -293,6 +293,11 @@ void rt3DVolumeDataObject::setupGUI() {
   connect(m_optionsWidget.checkSagittal3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
   connect(m_optionsWidget.checkCoronal3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
 
+  // 2D plane reset
+  connect(m_optionsWidget.axialResetButton, SIGNAL(clicked()), this, SLOT(axialResetSlot()));
+  connect(m_optionsWidget.sagittalResetButton, SIGNAL(clicked()), this, SLOT(sagittalResetSlot()));
+  connect(m_optionsWidget.coronalResetButton, SIGNAL(clicked()), this, SLOT(coronalResetSlot()));
+
   // Watch for new objects to update the lists.
   connect(&rtObjectManager::instance(), SIGNAL(objectCreated(int)), this, SLOT(newObjectCreated(int)));
   connect(&rtObjectManager::instance(), SIGNAL(objectCreated(int)), this, SLOT(oldObjectRemoved(int)));
@@ -442,6 +447,21 @@ void rt3DVolumeDataObject::showWindowLevel() {
 void rt3DVolumeDataObject::wlChanged(int w, int l) {
   m_window = w;
   m_level = l;
+  Modified();
+}
+
+void rt3DVolumeDataObject::axialResetSlot() {
+  emit axialResetSignal();
+  Modified();
+}
+
+void rt3DVolumeDataObject::sagittalResetSlot() {
+  emit sagittalResetSignal();
+  Modified();
+}
+
+void rt3DVolumeDataObject::coronalResetSlot() {
+  emit coronalResetSignal();
   Modified();
 }
 

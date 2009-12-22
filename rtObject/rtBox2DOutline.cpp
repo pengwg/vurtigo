@@ -115,11 +115,9 @@ void rtBox2DOutline::setCorners(double orig[3], double pt1[3], double opp[3], do
     yd[ix1]=pt2[ix1]-orig[ix1];
   }
 
-  normalizeVec(xd);
-  normalizeVec(yd);
-  zd[0] = xd[1]*yd[2]-xd[2]*yd[1];
-  zd[1] = xd[2]*yd[0]-xd[0]*yd[2];
-  zd[2] = xd[0]*yd[1]-xd[1]*yd[0];
+  vtkMath::Normalize(xd);
+  vtkMath::Normalize(yd);
+  vtkMath::Cross(xd, yd, zd);
 
   vtkMatrix4x4 *temp = vtkMatrix4x4::New();
   for (int ix1=0; ix1<3; ix1++) {
@@ -207,13 +205,4 @@ void rtBox2DOutline::getNormal( double n[3] ) {
   getVector1(v1);
   getVector2(v2);
   vtkMath::Cross(v1, v2, n);
-}
-
-void rtBox2DOutline::normalizeVec(double vec[3]) {
-  double sumT;
-  sumT = vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2];
-  sumT = sqrt(sumT);
-  vec[0] = vec[0]/sumT;
-  vec[1] = vec[1]/sumT;
-  vec[2] = vec[2]/sumT;
 }

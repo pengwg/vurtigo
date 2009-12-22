@@ -118,9 +118,6 @@ class rtBox2DOutline
   double m_opposite[3];
   double m_pt1[3];
   double m_pt2[3];
-
-  //! Normalize a given vector.
-  void normalizeVec(double vec[3]);
 };
 
 #endif // RTBOX2DOUTLINE_H

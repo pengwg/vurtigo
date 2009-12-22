@@ -95,7 +95,10 @@ public:
   //! Get volume property
   vtkVolumeProperty* getVolumeProperty();
 
+  //! Get the type of ray cast function
   RayCastFunction getRayCastType() { return m_rayCastFunction; }
+
+  //! Get the ray cast function
   vtkVolumeRayCastFunction* getRayCastFunction();
 
   //! Set the new image data.
@@ -180,8 +183,16 @@ public:
   //! The window level has been changed by WL dialog.
   void wlChanged(int w, int l);
 
+  void axialResetSlot();
+  void sagittalResetSlot();
+  void coronalResetSlot();
+
  signals:
   void newImageData();
+
+  void axialResetSignal();
+  void sagittalResetSignal();
+  void coronalResetSignal();
 
  protected:
   /////////////

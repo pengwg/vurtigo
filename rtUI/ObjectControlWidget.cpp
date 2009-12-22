@@ -8,6 +8,7 @@
 #include <vtkProperty.h>
 #include <vtkPropCollection.h>
 #include <vtkPlane.h>
+#include <vtkMath.h>
 
 #include <algorithm>
 
@@ -266,7 +267,7 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
     normalDirectionT[0] = m_positiveDirectionT[0]-m_clickPosition[0];
     normalDirectionT[1] = m_positiveDirectionT[1]-m_clickPosition[1];
     normalDirectionT[2] = m_positiveDirectionT[2]-m_clickPosition[2];
-    normalizeVector(normalDirectionT);
+    vtkMath::Normalize(normalDirectionT);
 
     tempMatrix->DeepCopy(rtObjectManager::instance().getMainWinHandle()->getCameraControl()->getViewMatrix());
 
@@ -287,7 +288,7 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
     viewTransform->Delete();
     tempMatrix->Delete();
 
-    normalizeVector(viewDirec);
+    vtkMath::Normalize(viewDirec);
 
     double dotProd = normalDirectionT[0]*viewDirec[0]+normalDirectionT[1]*viewDirec[1]+normalDirectionT[2]*viewDirec[2];
     double rotate=dotProd*3;
@@ -421,16 +422,4 @@ void ObjectControlWidget::updateWidgetPosition() {
   for (int ix1=0; ix1<3; ix1++) {
     m_diskActor[ix1]->SetUserTransform(m_position[ix1]);
   }
-}
-
-void ObjectControlWidget::normalizeVector(double vec[3]) {
-  double sumT;
-  sumT = vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2];
-  sumT=sqrt(sumT);
-
-  if (sumT<0.1) sumT = 0.1;
-
-  vec[0] = vec[0]/sumT;
-  vec[1] = vec[1]/sumT;
-  vec[2] = vec[2]/sumT;
 }

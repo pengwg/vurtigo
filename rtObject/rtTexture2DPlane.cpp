@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 #include <vtkImageData.h>
+#include <vtkMath.h>
 
 #include "rtTexture2DPlane.h"
 
@@ -111,11 +112,9 @@ void rtTexture2DPlane::setCorners(double orig[3], double pt1[3], double pt2[3]) 
     yd[ix1]=pt2[ix1]-orig[ix1];
   }
 
-  normalizeVec(xd);
-  normalizeVec(yd);
-  zd[0] = xd[1]*yd[2]-xd[2]*yd[1];
-  zd[1] = xd[2]*yd[0]-xd[0]*yd[2];
-  zd[2] = xd[0]*yd[1]-xd[1]*yd[0];
+  vtkMath::Normalize(xd);
+  vtkMath::Normalize(yd);
+  vtkMath::Cross(xd, yd, zd);
 
   vtkMatrix4x4 *temp = vtkMatrix4x4::New();
   for (int ix1=0; ix1<3; ix1++) {
@@ -142,14 +141,4 @@ void rtTexture2DPlane::update() {
   m_texturePlane->SetOrigin(orig);
   m_texturePlane->SetPoint1(pt1);
   m_texturePlane->SetPoint2(pt2);
-}
-
-
-void rtTexture2DPlane::normalizeVec(double vec[3]) {
-  double sumT;
-  sumT = vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2];
-  sumT = sqrt(sumT);
-  vec[0] = vec[0]/sumT;
-  vec[1] = vec[1]/sumT;
-  vec[2] = vec[2]/sumT;
 }

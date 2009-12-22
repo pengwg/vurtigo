@@ -107,6 +107,10 @@ Q_OBJECT
   virtual void wheelEvent(QWheelEvent* event) {}
 
   virtual void newDataAvailable() { }
+
+  virtual void resetAxialPlane() { }
+  virtual void resetSagittalPlane() { }
+  virtual void resetCoronalPlane() { }
  protected:
   //! The rtRenderObject constructor.
   /*!

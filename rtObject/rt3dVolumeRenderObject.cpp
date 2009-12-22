@@ -149,7 +149,6 @@ void rt3DVolumeRenderObject::newDataAvailable() {
     m_imgReslice[ix1]->AutoCropOutputOff();
     m_imgReslice[ix1]->SetOutputDimensionality(2);
     m_imgReslice[ix1]->AddInput( m_transFilter->GetOutput() );
-    //m_imgReslice[ix1]->AddInput( dObj->getUShortData() );
   }
 
   for (int ix1=0; ix1<3; ix1++) {
@@ -365,6 +364,9 @@ void rt3DVolumeRenderObject::setupDataObject() {
   rt3DVolumeDataObject *temp = new rt3DVolumeDataObject();
   m_dataObj = temp;
   connect(temp, SIGNAL(newImageData()), this, SLOT(newDataAvailable()));
+  connect(temp, SIGNAL(axialResetSignal()), this, SLOT(resetAxialPlane()));
+  connect(temp, SIGNAL(sagittalResetSignal()), this, SLOT(resetSagittalPlane()));
+  connect(temp, SIGNAL(coronalResetSignal()), this, SLOT(resetCoronalPlane()));
 }
 
 
@@ -475,9 +477,6 @@ void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
 
     t->Delete();
     if ( m_mainWin ) m_mainWin->setRenderFlag3D(true);
-
-    //m_imgReslice[m_currentPlane]->GetOutput()->Update();
-    //m_imgReslice[m_currentPlane]->GetOutput()->Print(std::cout);
   }
 }
 

@@ -74,7 +74,6 @@ protected:
   vtkActor *m_diskActor[3];
 
   void updateWidgetPosition();
-  void normalizeVector(double vec[3]);
 };
 
 #endif // OBJECTCONTROLWIDGET_H

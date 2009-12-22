@@ -71,9 +71,9 @@ public slots:
 
   virtual void newDataAvailable();
 
-  void resetAxialPlane();
-  void resetSagittalPlane();
-  void resetCoronalPlane();
+  virtual void resetAxialPlane();
+  virtual void resetSagittalPlane();
+  virtual void resetCoronalPlane();
 
  protected:
   void setupDataObject();

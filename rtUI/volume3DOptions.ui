@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>392</height>
+    <height>407</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -86,6 +86,27 @@
           </property>
           <property name="checked">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="axialResetButton">
+          <property name="text">
+           <string>Reset Axial</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="sagittalResetButton">
+          <property name="text">
+           <string>Reset Sagittal</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="coronalResetButton">
+          <property name="text">
+           <string>Reset Coronal</string>
           </property>
          </widget>
         </item>

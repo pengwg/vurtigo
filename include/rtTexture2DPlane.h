@@ -92,9 +92,6 @@ protected:
   double m_xsize;
   double m_ysize;
   vtkTransform* m_transform;
-
-  //! Normalize a given vector.
-  void normalizeVec(double vec[3]);
 };
 
 #endif // RTTEXTURE2DPLANE_H
