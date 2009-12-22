@@ -155,12 +155,12 @@ void rt3DVolumeRenderObject::newDataAvailable() {
     m_texturePlane[ix1].setImageData(m_imgReslice[ix1]->GetOutput());
   }
 
+  // The reset calls will lead to three modified calls on the data object and then to an update call.
   resetAxialPlane();
   resetSagittalPlane();
   resetCoronalPlane();
 
   m_isInit = true;
-  if ( m_mainWin ) m_mainWin->setRenderFlag3D(true);
 }
 
 void rt3DVolumeRenderObject::resetAxialPlane() {
@@ -187,12 +187,12 @@ void rt3DVolumeRenderObject::resetAxialPlane() {
 
   m_boxOutline[0].setCorners(pts[0], pts[1], pts[2], pts[3]);
   m_texturePlane[0].setCorners(pts[0], pts[1], pts[3]);
-
   adjustReslice(0);
-
   m_planeControl[0].setTransform(m_boxOutline[0].getTransform());
   m_planeControl[0].setSize(bounds[3]-bounds[2], bounds[1]-bounds[0] );
 
+  // Modify the data object so that the update function will be called.
+  m_dataObj->Modified();
 }
 
 void rt3DVolumeRenderObject::resetSagittalPlane() {
@@ -222,6 +222,9 @@ void rt3DVolumeRenderObject::resetSagittalPlane() {
   adjustReslice(1);
   m_planeControl[1].setTransform(m_boxOutline[1].getTransform());
   m_planeControl[1].setSize(bounds[3]-bounds[2], bounds[5]-bounds[4] );
+
+  // Modify the data object so that the update function will be called.
+  m_dataObj->Modified();
 }
 
 void rt3DVolumeRenderObject::resetCoronalPlane() {
@@ -251,6 +254,9 @@ void rt3DVolumeRenderObject::resetCoronalPlane() {
   adjustReslice(2);
   m_planeControl[2].setTransform(m_boxOutline[2].getTransform());
   m_planeControl[2].setSize(bounds[5]-bounds[4], bounds[1]-bounds[0] );
+
+  // Modify the data object so that the update function will be called.
+  m_dataObj->Modified();
 }
 
 
@@ -476,7 +482,9 @@ void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
     adjustReslice(m_currentPlane);
 
     t->Delete();
-    if ( m_mainWin ) m_mainWin->setRenderFlag3D(true);
+
+    // Modify the data object so that the update function will be called.
+    m_dataObj->Modified();
   }
 }
 
