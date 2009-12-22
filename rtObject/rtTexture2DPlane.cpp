@@ -31,13 +31,9 @@ rtTexture2DPlane::rtTexture2DPlane() {
   m_lookupTable = vtkWindowLevelLookupTable::New();
   m_transform = vtkTransform::New();
 
-  // Default bounds.
-  m_bounds[0] = 0.0;
-  m_bounds[1] = 1.0;
-  m_bounds[2] = 0.0;
-  m_bounds[3] = 1.0;
-  m_bounds[4] = 0.0;
-  m_bounds[5] = 1.0;
+  // Default sizes.
+  m_xsize = 1.0f;
+  m_ysize = 1.0f;
 
   // Balck and white.
   m_imgMapToColors->SetOutputFormatToLuminance();
@@ -86,26 +82,58 @@ void rtTexture2DPlane::setImageData(vtkImageData* img) {
 }
 
 void rtTexture2DPlane::setTransform( vtkTransform* t ) {
-  m_transform->DeepCopy(t);
+  m_transform->SetMatrix(t->GetMatrix());
 }
 
-void rtTexture2DPlane::setBounds( double bounds[6] ) {
-  for (int ix1=0; ix1<6; ix1++) m_bounds[ix1] = bounds[ix1];
+void rtTexture2DPlane::setSize( double xsize, double ysize ) {
+  m_xsize = xsize;
+  m_ysize = ysize;
+}
+
+void rtTexture2DPlane::setCorners(double orig[3], double pt1[3], double pt2[3]) {
+  m_texturePlane->SetOrigin(orig);
+  m_texturePlane->SetPoint1(pt1);
+  m_texturePlane->SetPoint2(pt2);
+
+  // Update the sizes
+  m_xsize = sqrt( (pt1[0]-orig[0])*(pt1[0]-orig[0]) + (pt1[1]-orig[1])*(pt1[1]-orig[1]) + (pt1[2]-orig[2])*(pt1[2]-orig[2]) );
+  m_ysize = sqrt( (pt2[0]-orig[0])*(pt2[0]-orig[0]) + (pt2[1]-orig[1])*(pt2[1]-orig[1]) + (pt2[2]-orig[2])*(pt2[2]-orig[2]) );
+
+  // Update the transform too.
+  m_transform->Identity();
+
+  double xd[3];
+  double yd[3];
+  double zd[3];
+
+  for (int ix1=0; ix1<3; ix1++) {
+    xd[ix1]=pt1[ix1]-orig[ix1];
+    yd[ix1]=pt2[ix1]-orig[ix1];
+  }
+
+  normalizeVec(xd);
+  normalizeVec(yd);
+  zd[0] = xd[1]*yd[2]-xd[2]*yd[1];
+  zd[1] = xd[2]*yd[0]-xd[0]*yd[2];
+  zd[2] = xd[0]*yd[1]-xd[1]*yd[0];
+
+  vtkMatrix4x4 *temp = vtkMatrix4x4::New();
+  for (int ix1=0; ix1<3; ix1++) {
+    temp->SetElement(ix1, 0, xd[ix1]);
+    temp->SetElement(ix1, 1, yd[ix1]);
+    temp->SetElement(ix1, 2, zd[ix1]);
+    temp->SetElement(ix1, 3, orig[ix1]);
+  }
+  m_transform->SetMatrix(temp);
+  temp->Delete();
 }
 
 void rtTexture2DPlane::update() {
   double orig[3], pt1[3], pt2[3];
-  double xsize, ysize, zsize;
-
-  xsize = m_bounds[1]-m_bounds[0];
-  ysize = m_bounds[3]-m_bounds[2];
-
-  // The Z size should be one...
-  zsize = m_bounds[5]-m_bounds[4];
 
   orig[0]=0.0; orig[1]=0.0; orig[2]=0.0;
-  pt1[0]=1.0*xsize; pt1[1]=0.0; pt1[2]=0.0;
-  pt2[0]=0.0; pt2[1]=1.0*ysize; pt2[2]=0.0;
+  pt1[0]=1.0*m_xsize; pt1[1]=0.0; pt1[2]=0.0;
+  pt2[0]=0.0; pt2[1]=1.0*m_ysize; pt2[2]=0.0;
 
   m_transform->TransformPoint(orig, orig);
   m_transform->TransformPoint(pt1, pt1);
@@ -114,4 +142,14 @@ void rtTexture2DPlane::update() {
   m_texturePlane->SetOrigin(orig);
   m_texturePlane->SetPoint1(pt1);
   m_texturePlane->SetPoint2(pt2);
+}
+
+
+void rtTexture2DPlane::normalizeVec(double vec[3]) {
+  double sumT;
+  sumT = vec[0]*vec[0]+vec[1]*vec[1]+vec[2]*vec[2];
+  sumT = sqrt(sumT);
+  vec[0] = vec[0]/sumT;
+  vec[1] = vec[1]/sumT;
+  vec[2] = vec[2]/sumT;
 }

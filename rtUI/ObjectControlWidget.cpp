@@ -9,9 +9,12 @@
 #include <vtkPropCollection.h>
 #include <vtkPlane.h>
 
+#include <algorithm>
+
 ObjectControlWidget::ObjectControlWidget() {
   m_showing = false;
-  m_size = 1.0;
+  m_xsize = 1.0;
+  m_ysize = 1.0;
   m_transform = vtkTransform::New();
   m_transform->Identity();
 
@@ -56,7 +59,7 @@ ObjectControlWidget::ObjectControlWidget() {
   m_pointActor = vtkActor::New();
 
   m_touchPoint->SetCenter(m_pointLocations[4]);
-  m_touchPoint->SetRadius(m_size*0.1);
+  m_touchPoint->SetRadius(std::max(m_xsize, m_ysize)*0.1);
 
   m_pointMapper->SetInputConnection(m_touchPoint->GetOutputPort());
   m_pointActor->SetMapper(m_pointMapper);
@@ -98,22 +101,27 @@ void ObjectControlWidget::getTransform(vtkTransform* output) {
   output->DeepCopy(m_transform);
 }
 
-void ObjectControlWidget::setSize(double size) {
-  m_size = size/2.0f;
+void ObjectControlWidget::setSize(double xsize, double ysize) {
+  m_xsize = xsize/2.0f;
+  m_ysize = ysize/2.0f;
 
   // When the size changes so do the point locations.
   for (int ix1=0; ix1<3; ix1++) {
     for (int ix2=0; ix2<3; ix2++) {
-      m_pointLocations[ix1+3*ix2][0] = (ix1)*m_size;
-      m_pointLocations[ix1+3*ix2][1] = (ix2)*m_size;
+      m_pointLocations[ix1+3*ix2][0] = (ix1)*m_xsize;
+      m_pointLocations[ix1+3*ix2][1] = (ix2)*m_ysize;
       m_pointLocations[ix1+3*ix2][2] = 0.0f;  // The z is centered.
     }
   }
 }
 
 
-double ObjectControlWidget::getSize() {
-  return m_size*2.0f;
+double ObjectControlWidget::getXSize() {
+  return m_xsize*2.0f;
+}
+
+double ObjectControlWidget::getYSize() {
+  return m_ysize*2.0f;
 }
 
 void ObjectControlWidget::show() {
@@ -348,7 +356,7 @@ void ObjectControlWidget::keyReleaseEvent(QKeyEvent* event) {
 
 void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   if(!m_showing) return;
-  int numSteps = event->delta() / 8;
+  int numSteps = event->delta() / 16;
 
   vtkMatrix4x4 *mat = vtkMatrix4x4::New();
 
@@ -378,6 +386,7 @@ void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   m_transform->SetMatrix(mat);
 
   mat->Delete();
+  updateWidgetPosition();
 }
 
 void ObjectControlWidget::updateWidgetPosition() {
@@ -388,7 +397,7 @@ void ObjectControlWidget::updateWidgetPosition() {
 
   // Put it in the middle of the plane.
   m_touchPoint->SetCenter(m_convertedLocations[4]);
-  m_touchPoint->SetRadius(m_size*0.2);
+  m_touchPoint->SetRadius(std::max(m_xsize, m_ysize)*0.1);
 
   m_boxOutline.setCorners(m_convertedLocations[m_corners[0]], m_convertedLocations[m_corners[1]], m_convertedLocations[m_corners[2]], m_convertedLocations[m_corners[3]]);
 
@@ -397,8 +406,8 @@ void ObjectControlWidget::updateWidgetPosition() {
   for (int ix1=0; ix1<3; ix1++) {
 
     // Update Size too.
-    m_torus[ix1]->SetRingRadius(m_size*0.75);
-    m_torus[ix1]->SetCrossSectionRadius(m_size*0.075);
+    m_torus[ix1]->SetRingRadius(std::max(m_xsize, m_ysize)*0.75);
+    m_torus[ix1]->SetCrossSectionRadius(std::max(m_xsize, m_ysize)*0.05);
 
     m_position[ix1]->Identity();
     m_position[ix1]->Translate(m_convertedLocations[4][0] - pos[0], m_convertedLocations[4][1] - pos[1], m_convertedLocations[4][2] - pos[2]);

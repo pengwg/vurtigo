@@ -46,28 +46,26 @@ void rt2DSliceRenderObject::update() {
 
   double scaleRange[2];
   double bounds[6];
-  double xsize;
 
   dObj->getUCharData()->Update();
   dObj->getUCharData()->GetScalarRange(scaleRange);
   dObj->getUCharData()->GetBounds(bounds);
-  xsize = bounds[1]-bounds[0];
 
   m_texturePlane.setImageData(dObj->getUCharData());
   m_texturePlane.setScalarRange(scaleRange[0], scaleRange[1]);
   m_texturePlane.setWindow(dObj->getWindow());
   m_texturePlane.setLevel(dObj->getLevel());
 
-  m_texturePlane.setBounds(bounds);
+  m_texturePlane.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2]);
   m_texturePlane.setTransform(dObj->getTransform());
   m_texturePlane.update();
 
-  m_boxOutline.setBounds(bounds);
+  m_boxOutline.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2]);
   m_boxOutline.setTransform(dObj->getTransform());
   m_boxOutline.update();
 
   m_control.setTransform(dObj->getTransform());
-  m_control.setSize(xsize);
+  m_control.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2] );
 }
 
 //! Add this object to the given renderer.

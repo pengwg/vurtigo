@@ -26,8 +26,9 @@ public:
   void setTransform(vtkTransform* input);
   void getTransform(vtkTransform* output);
 
-  void setSize(double size);
-  double getSize();
+  void setSize(double xsize, double ysize);
+  double getXSize();
+  double getYSize();
 
   void show();
   void hide();
@@ -43,7 +44,7 @@ public slots:
 protected:
   bool m_showing;
   vtkTransform* m_transform;
-  double m_size;
+  double m_xsize, m_ysize;
 
   double m_pointLocations[9][3];
   double m_convertedLocations[9][3];

@@ -43,24 +43,28 @@ class rtBox2DOutline
   /*!
     The transform will be modified within the class but the GUI will not be updated until update() is called.
     Don't forget to call update() for the changes to take effect.
-    \sa setBounds()
+    \sa setSize()
     \sa update()
     */
   void setTransform( vtkTransform* t );
 
-  //! Set new bounds for the outline
+  //! Get the transform for the outline.
+  vtkTransform* getTransform() { return m_transform; }
+
+  //! Set the x and y sizes for the outline.
   /*!
-    Modify the bounds. Will not take effect until update() is called.
-    \param bounds The bounds for the plane defined in order as: {xmin, xmax, ymin, ymax, zmin, zmax}.
+    Modify the sizes. Will not take effect until update() is called.
+    \param xsize The the size in the x direction. The plane height.
+    \param ysize The size in the y direction. The plane width.
     \sa setTransform
     \sa update()
     */
-  void setBounds( double bounds[6] );
+  void setSize( double xsize, double ysize );
 
 
   //! Set the four points to the plane directly.
   /*!
-    This is an alternate way to specify the position of the plane. Note that this function should not be used with setTransform and setBounds.
+    This is an alternate way to specify the position of the plane. Note that this function should not be used with setTransform and setSize.
     The points are listed clockwise around the plane. The update() call is NOT NEEDED as this function updates on the spot.
     \param orig The origin
     \param p1 Point clockwise of the origin
@@ -81,6 +85,24 @@ class rtBox2DOutline
     */
   void setOutlineColor(double r, double g, double b);
 
+  //! The the origin of the outline
+  void getOrigin( double orig[3] );
+
+  //! Get the midpoint of the plane. This dictates the translation of the plane.
+  void getMidpoint( double mid[3] );
+
+  //! Get the point opposite from the origin.
+  void getOpposite( double opp[3] );
+
+  void getVector1( double v1[3] );
+  void getVector2( double v2[3] );
+
+  //! Get the normal to the plane.
+  void getNormal( double n[3] );
+
+  double getXSize() { return m_xsize; }
+  double getYSize() { return m_ysize; }
+
  protected:
   // Objects for the frame outline pipeline.
   vtkPolyData* m_outlinePolyData;
@@ -88,8 +110,17 @@ class rtBox2DOutline
   vtkActor* m_outlineActor;
   vtkProperty* m_outlineProperty;
 
-  double m_bounds[6];
+  double m_xsize;
+  double m_ysize;
   vtkTransform* m_transform;
+  double m_origin[3];
+  double m_midpoint[3];
+  double m_opposite[3];
+  double m_pt1[3];
+  double m_pt2[3];
+
+  //! Normalize a given vector.
+  void normalizeVec(double vec[3]);
 };
 
 #endif // RTBOX2DOUTLINE_H

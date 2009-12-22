@@ -1,4 +1,4 @@
-/*******************************************************************************
+ /*******************************************************************************
     Vurtigo: Visualization software for interventional applications in medicine
     Copyright (C) 2009 Sunnybrook Health Sciences Centre
 
@@ -21,9 +21,9 @@
 #define RT_3D_VOLUME_RENDER_OBJECT_H
 
 #include "rtRenderObject.h"
-#include "rtImagePlaneWidget.h"
 #include "ObjectControlWidget.h"
-
+#include "rtBox2DOutline.h"
+#include "rtTexture2DPlane.h"
 
 #include <vtkImageCast.h>
 #include <vtkVolumeRayCastMapper.h>
@@ -71,6 +71,10 @@ public slots:
 
   virtual void newDataAvailable();
 
+  void resetAxialPlane();
+  void resetSagittalPlane();
+  void resetCoronalPlane();
+
  protected:
   void setupDataObject();
   void setupPipeline();
@@ -90,31 +94,23 @@ public slots:
   ///////////////
   // The 2D planes
   /////////////////
-  rtImagePlaneWidget *m_planes[3];
   vtkImageCast* m_imgCast[3];
   vtkImageMapper* m_imgMap[3];
   vtkActor2D* m_actor2D[3];
 
+  int m_currentPlane;
 
-
-  ////
-  // TODO HERE WORK WITH THESE
-  ////
   ObjectControlWidget m_planeControl[3];
-  vtkImageReslice* m_imgReslize[3];
+  vtkImageReslice* m_imgReslice[3];
 
-    // Objects for the texture pipeline.
-  vtkPlaneSource* m_texturePlane[3];
-  vtkPolyDataMapper* m_planeMapper[3];
-  vtkActor* m_textureActor[3];
-  vtkTexture* m_texture [3];
-  vtkImageMapToColors* m_imgMapToColors[3];
-  vtkWindowLevelLookupTable* m_lookupTable[3];
-
-
+  rtBox2DOutline m_boxOutline[3];
+  rtTexture2DPlane m_texturePlane[3];
 
   //! Check if the data has been initialized
   bool m_isInit;
+
+  //! Adjust the reslice position with a given ID.
+  void adjustReslice(int slice);
  private:
 
 };
