@@ -3,7 +3,6 @@ set (RTUI_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rtTextPropertyDialog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtPropertyChooserDialog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtAxesProperties.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rtImagePlaneWidget.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/customQVTKWidget.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtOptions2DView.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/GraphWidget.cpp
