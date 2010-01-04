@@ -36,7 +36,6 @@ class QMutex;
 #include "GeomServerConsts.h"
 
 
-
 // Define the geometry client class
 class GeomClient {
 
@@ -55,7 +54,7 @@ class GeomClient {
     ~GeomClient();
 
     // Functions to connect to server
-    int connect(const char* hostname, int port, bool swap=false);
+    int connect(const char* hostname, int port);
     void disconnect();
 
     // Functions for setting/updating geometry information

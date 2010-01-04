@@ -28,7 +28,6 @@ void SenderSimp::setSenderDefaults() {
   args.hostname = NULL;
   SenderSimp::copyString(&args.hostname, hostname);
   args.port = 1777;
-  args.swap = false;
   args.cathFile = new char[1];
   args.dicomFile = new char[1];
 
@@ -58,7 +57,7 @@ bool SenderSimp::connectAndMessage() {
     cout << "Already connected." << endl;
     return true;
   }
-  else if (!sender.connect(args.hostname,args.port,args.swap)) {
+  else if (!sender.connect(args.hostname,args.port)) {
     cerr << "Error connecting to Geometry Server. Check that it is running on port " << args.port << " on host: " << args.hostname << endl;
     sender.disconnect();
     return false;

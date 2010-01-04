@@ -38,16 +38,7 @@
 #include <QDataStream>
 #include <QMutex>
 #include <QString>
-#include <cstdlib>
 #include <iostream>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-
-
-using namespace std;
 
 // Constructor
 GeomClient::GeomClient () 
@@ -96,9 +87,7 @@ GeomClient::~GeomClient () {
 // connect
 //
 // Connects to a geometry server on the specified _geomClient->setAllhostname and port
-// and uses (1) or doesn't use (0) network byte swapping based on
-// the value of the swap parameter
-  int GeomClient::connect(const char *hostname, int port, bool swap) {
+  int GeomClient::connect(const char *hostname, int port) {
   qint32 message_size=0;
 
   // Lock.
@@ -111,8 +100,8 @@ GeomClient::~GeomClient () {
   m_geomXfer = new QDataStream(m_geomSocket);
 
   if (!m_geomSocket->waitForConnected(2000)) {
-    cout << "Socket Failed to Connect. " << endl;
-    cout << m_geomSocket->error() << endl;
+    std::cout << "Socket Failed to Connect. " << std::endl;
+    std::cout << m_geomSocket->error() << std::endl;
     m_commLock->unlock();
     return -1;
   }
@@ -154,7 +143,7 @@ void GeomClient::disconnect() {
     }
     
   } catch (...) {
-    cerr << "Disconnecting from geometry server failed." << endl;
+    std::cerr << "Disconnecting from geometry server failed." << std::endl;
     throw;
   }
   m_commLock->unlock();

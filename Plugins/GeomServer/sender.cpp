@@ -18,8 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 // C++
-#include <iostream>        
-#include <fstream>
+#include <iostream>
 #include <strstream>
 
 // Internal
@@ -40,14 +39,14 @@ GeometrySender::~GeometrySender()
   if (m_geomClient) delete m_geomClient;
 }
 
-bool GeometrySender::connect(char* hostname, int port, bool swap){
+bool GeometrySender::connect(char* hostname, int port){
   if (m_clientID > 0) {
     // Already connected. 
     cout << "Client: Already connected with ID: " << m_clientID << endl;
     return true; 
   }
 
-  m_clientID=m_geomClient->connect(hostname,port,swap);
+  m_clientID=m_geomClient->connect(hostname,port);
   if (m_clientID > 0) {
     cout << "Client: Connected with ID: " << m_clientID << endl;
   }

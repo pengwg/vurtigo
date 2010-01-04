@@ -29,7 +29,6 @@ struct arguments
 {
   char * hostname;
   int port;
-  bool swap;
   char* cathFile;
   char* dicomFile;
 };

@@ -20,8 +20,6 @@
 #ifndef GEOM_TEST_SENDER_H
 #define GEOM_TEST_SENDER_H
 
-#include <string>
-#include <vector>
 #include "arguments.h"
 
 // Client Lib
@@ -35,7 +33,7 @@ class GeometrySender {
         GeometrySender();
         ~GeometrySender();
 
-	bool connect(char*, int, bool);
+    bool connect(char*, int);
 	void disconnect();        
         bool isConnected();
 
