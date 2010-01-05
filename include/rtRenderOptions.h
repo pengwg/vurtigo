@@ -33,6 +33,8 @@ public:
   rtRenderOptions();
   ~rtRenderOptions();
 
+  void removeStereoFeature();
+
   int getRenQuality() { return m_renQuality; }
   int getRenUpdateQuality() { return m_renUpdateQuality; }
   int getStereoType() { return m_currStereo; }

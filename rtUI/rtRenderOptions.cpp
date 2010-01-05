@@ -51,6 +51,9 @@ rtRenderOptions::~rtRenderOptions() {
 
 }
 
+void rtRenderOptions::removeStereoFeature() {
+  stereoCombo->setDisabled(true);
+}
 
 void rtRenderOptions::renQuality(int qual) {
   if (renQualSlider->value() != qual) {

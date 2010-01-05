@@ -20,12 +20,6 @@
 #ifndef RT_MAIN_WINDOW_H
 #define RT_MAIN_WINDOW_H
 
-#include <QHBoxLayout>
-#include <QBoxLayout>
-#include <QHash>
-#include <QSemaphore>
-#include <QtHelp>
-
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
@@ -33,6 +27,20 @@
 #include <vtkPropAssembly.h>
 #include <vtkProp.h>
 #include <vtkCellPicker.h>
+
+// Remove the conflict with AssertMacros.h
+// Conflict occurs in OSX
+#ifdef Q_WS_MAC
+  #ifdef check
+  #undef check
+  #endif
+#endif
+
+#include <QHBoxLayout>
+#include <QBoxLayout>
+#include <QHash>
+#include <QSemaphore>
+#include <QtHelp>
 
 class rtRenderObject;
 class rtCameraControl;

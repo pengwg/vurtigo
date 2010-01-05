@@ -58,7 +58,14 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_render3DLayout->setContentsMargins(0,0,0,0);
   m_inter3D = m_render3DVTKWidget->GetInteractor();
   m_renWin3D = m_inter3D->GetRenderWindow();
+
+  // Stereo rendering causes bugs in OSX.
+#ifdef Q_WS_MAC
+
+#else
   m_renWin3D->StereoCapableWindowOn();
+#endif
+
   m_renderer3D = vtkRenderer::New();
   m_renWin3D->AddRenderer(m_renderer3D);
 
@@ -625,11 +632,16 @@ void rtMainWindow::showRenderOptions() {
   renOpt.renQuality(m_stillQuality*100.0f);
   renOpt.renUpdateQuality(m_movingQuality*100.0f);
 
+  // Stereo is broken on OSX
+#ifdef Q_WS_MAC
+  renOpt.removeStereoFeature();
+#else
   if (m_renWin3D->GetStereoRender()) {
     renOpt.setStereoType(m_renWin3D->GetStereoType());
   } else {
     renOpt.setStereoType(0);
   }
+#endif
 
   renOpt.setDirectRender(m_renWin3D->IsDirect());
   renOpt.setGLRender(m_renWin3D->SupportsOpenGL());
@@ -640,6 +652,10 @@ void rtMainWindow::showRenderOptions() {
     m_stillQuality = renQual/100.0f;
     m_movingQuality = renUpQual/100.0f;
 
+    // Stereo is broken on OSX
+#ifdef Q_WS_MAC
+
+#else
     int type = renOpt.getStereoType();
     if (type == 0) {
       m_renWin3D->StereoRenderOff();
@@ -647,6 +663,7 @@ void rtMainWindow::showRenderOptions() {
       m_renWin3D->StereoRenderOn();
       m_renWin3D->SetStereoType(type);
     }
+#endif
 
     m_renderFlag3D = true;
   }
