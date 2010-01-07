@@ -24,6 +24,8 @@
 #include <ostream>
 #include <string>
 
+#include <QTextStream>
+
 class rtMessage {
  public:
   ~rtMessage();
@@ -33,13 +35,22 @@ class rtMessage {
     return handle;
   }
 
-  void setStream(std::ostream* stream) { m_out = stream; }
+  void setStream(QTextStream *stream) { m_out = stream; }
 
   void error(int lineNum, std::string fileName, std::string text);
+  void error(int lineNum, QString fileName, QString text);
+
   void warning(int lineNum, std::string fileName, std::string text);
+  void warning(int lineNum, QString fileName, QString text);
+
   void debug(std::string text);
+  void debug(QString text);
+
   void bench(std::string text);
+  void bench(QString text);
+
   void log(std::string text);
+  void log(QString text);
 
   bool m_err; //<! Display error messages.
   bool m_warn;
@@ -48,7 +59,7 @@ class rtMessage {
   bool m_log;
 
  protected:
-  std::ostream* m_out;
+  QTextStream* m_out;
  
  private:
   rtMessage();

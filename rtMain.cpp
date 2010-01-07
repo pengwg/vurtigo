@@ -27,10 +27,11 @@
 #include <QStringList>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QTextStream>
 
 #include <iostream> 
-#include <string>
 #include <sstream>
+#include <cstdio>
 
 #include "rtMainWindow.h"
 #include "rtObjectManager.h"
@@ -56,12 +57,15 @@ int main(int argc, char *argv[])
     int exitCode = 0;
 
     // Setup the message stream.
-    rtMessage::instance().setStream(&(std::cout));
+    // This defaults to standard out.
+    QTextStream stream(stdout, QIODevice::WriteOnly);
+    rtMessage::instance().setStream(&stream);
 
-    std::cout << "Vurtigo Copyright (C) 2009 Sunnybrook Health Sciences Centre. ";
-    std::cout << "This program comes with ABSOLUTELY NO WARRANTY; ";
-    std::cout << "This is free software, and you are welcome to redistribute it under certain conditions; ";
-    std::cout << "See COPYING and COPYING.LESSER for details.\n\n" << std::endl;
+    stream << "Vurtigo Copyright (C) 2009 Sunnybrook Health Sciences Centre. ";
+    stream << "This program comes with ABSOLUTELY NO WARRANTY; ";
+    stream << "This is free software, and you are welcome to redistribute it under certain conditions; ";
+    stream << "See COPYING and COPYING.LESSER for details.\n\n";
+    stream.flush();
 
     // Start at 1 since the first element is the name of the program
     for (int ix1=1; ix1<args.count(); ix1++) {
@@ -87,15 +91,11 @@ int main(int argc, char *argv[])
       for (int ix1=0; ix1<pluginList.size(); ix1++) {
         QFile file(pluginList[ix1]);
         if (!file.exists()) {
-          std::stringstream msg;
-          msg << "File not found: " << pluginList[ix1].toStdString();
-          rtMessage::instance().error(__LINE__, __FILE__, msg.str());
+          rtMessage::instance().error(__LINE__, __FILE__, QString("File not found: ").append(pluginList[ix1]));
           continue;
         }
         if (!rtPluginLoader::instance().loadPluginsFromConfig(&file)) {
-          std::stringstream msg;
-          msg << "Failed to load plugins from: " << pluginList[ix1].toStdString();
-          rtMessage::instance().error(__LINE__, __FILE__, msg.str());
+          rtMessage::instance().error(__LINE__, __FILE__, QString("Failed to load plugins from: ").append(pluginList[ix1]));
         }
       }
 
