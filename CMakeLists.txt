@@ -10,6 +10,7 @@ set ( Vurtigo_PROJECT_VERSION "${Vurtigo_VERSION_MAJOR}.${Vurtigo_VERSION_MINOR}
 
 message(STATUS "Begin Install for Vurtigo: " ${Vurtigo_PROJECT_VERSION} )
 
+set(DEBUG_VERBOSE_MODE OFF CACHE BOOL "Build in Debug Verbose Mode. Slower but provides useful info.")
 
 ####################
 # Determine the OS
@@ -75,6 +76,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 file(WRITE ${CMAKE_BINARY_DIR}/buildParam.h "#define VURTIGO_MAJOR_VERSION " ${Vurtigo_VERSION_MAJOR} "\n" )
 file(APPEND ${CMAKE_BINARY_DIR}/buildParam.h "#define VURTIGO_MINOR_VERSION " ${Vurtigo_VERSION_MINOR} "\n" )
 file(APPEND ${CMAKE_BINARY_DIR}/buildParam.h "#define VURTIGO_REVISION_VERSION " ${Vurtigo_VERSION_REVISION} "\n" )
+file(APPEND ${CMAKE_BINARY_DIR}/buildParam.h "#define DEBUG_VERBOSE_MODE_" ${DEBUG_VERBOSE_MODE} "\n" )
 
 include_directories(include ${CMAKE_BINARY_DIR})
 

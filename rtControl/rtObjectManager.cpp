@@ -22,6 +22,7 @@
 #include "rtMainWindow.h"
 #include "rtRenderObject.h"
 #include "rtMessage.h"
+#include "buildParam.h"
 
 // Types of render objects
 #include "rt3dPointBufferRenderObject.h"
@@ -44,12 +45,18 @@
   Among other things, the constructor sets the maximum number of objects.
  */
 rtObjectManager::rtObjectManager() {
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtObjectManager::rtObjectManager() start") );
+#endif
   m_max_object = 10000;
   m_objectHash.clear();
   m_mainWinHandle = NULL;
 
   m_list2DHash.clear();
   m_list2DHash.insert(-1, "NONE");
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtObjectManager::rtObjectManager() end") );
+#endif
 }
 
 //! Object Manager destructor.
@@ -61,7 +68,10 @@ rtObjectManager::~rtObjectManager() {
   The object manager needs to communicate with the GUI so it needs to be given an instance of the handle.  
 */
 void rtObjectManager::setMainWinHandle(rtMainWindow* mainWin) {
-  if (!mainWin) return;
+  if (!mainWin) {
+    rtMessage::instance().error(__LINE__, __FILE__, QString("rtObjectManager::setMainWinHandle() Main Window Handle is NULL."));
+    return;
+  }
 
   m_mainWinHandle = mainWin;
   m_mainWinHandle->update2DWindowLists(&m_list2DHash);
@@ -86,6 +96,10 @@ rtMainWindow* rtObjectManager::getMainWinHandle() {
   @return An instance of a new object of a particular type. NULL is returned if the object could not be created.
  */
 rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objType, QString objName) {
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtObjectManager::addObjectOfType() start") );
+#endif
+
   rtRenderObject* temp = NULL;
   rtDataObject* dataO = NULL;
   int nextID;
@@ -94,9 +108,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   // Try to get a valid ID. 
   nextID = getNextID();
   if (nextID == -1) {
-    std::stringstream msg;
-    msg << "Could not find a valid ID for a new object! ";
-    rtMessage::instance().error(__LINE__, __FILE__, msg.str());
+    rtMessage::instance().error(__LINE__, __FILE__, QString("Could not find a valid ID for a new object! "));
     return NULL;
   }
 
@@ -104,8 +116,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   switch(objType) {
   case rtConstants::OT_None:
     temp=new rtNoneRenderObject();   
-    msg << "Warning: None Object Requested. ";
-    rtMessage::instance().warning(__LINE__, __FILE__,msg.str());
+    rtMessage::instance().warning(__LINE__, __FILE__, QString("Warning: None Object Requested. "));
     break;
   case rtConstants::OT_3DObject:
     temp=new rt3DVolumeRenderObject();
@@ -172,7 +183,10 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
 
     emit objectCreated(nextID);
   }
-  
+
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtObjectManager::addObjectOfType() end") );
+#endif
   return temp;
 }
 

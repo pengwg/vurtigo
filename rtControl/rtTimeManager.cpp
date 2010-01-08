@@ -24,6 +24,8 @@
 #include "rtLabelRenderObject.h"
 #include "rtLabelDataObject.h"
 #include "rtObjectManager.h"
+#include "buildParam.h"
+#include "rtMessage.h"
 
 #include <iostream>
 #include <cmath>
@@ -32,6 +34,9 @@
 
 //! Constructor
 rtTimeManager::rtTimeManager() {
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::rtTimeManager() start") );
+#endif
   m_renderTime = new QTimer();
   m_pluginUpdateTime = new QTimer();
   m_planeUpdateTime = new QTimer();
@@ -60,6 +65,10 @@ rtTimeManager::rtTimeManager() {
   m_currentSum = 0.0;
   m_renderTimePosition = 0;
   m_frameRateLabel = NULL;
+
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::rtTimeManager() end") );
+#endif
 }
 
 //! Destructor
@@ -77,24 +86,43 @@ rtTimeManager::~rtTimeManager() {
 
 //! Start the timer for the main window. Pass in the handle to the main window.
 void rtTimeManager::startRenderTimer(rtMainWindow* mainWin, int delay) {
-  if (!mainWin) return;
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::startRenderTimer() start") );
+#endif
+
+  if (!mainWin) {
+    rtMessage::instance().error(__LINE__, __FILE__, QString("rtTimeManager::startRenderTimer() mainWin pointer is NULL. Render timer not started.") );
+    return;
+  }
 
   m_mainWin = mainWin;
   m_renderTime->setInterval(delay);
   connect(m_renderTime, SIGNAL(timeout()), this, SLOT(renderTimeout()));
 
   m_renderTime->start();
-  
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::startRenderTimer() end") );
+#endif
 }
 
 //! Function called by a timer to update the render window.
 void rtTimeManager::renderTimeout() {
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::renderTimeout() start") );
+#endif
+
   if (m_mainWin) {
     checkWatchList();
     m_mainWin->tryRender3D();
 
     calcFrameRate();
+  } else {
+    rtMessage::instance().warning(__LINE__, __FILE__, QString("rtTimeManager::renderTimeout() Timeout received but window is still NULL ") );
   }
+
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::renderTimeout() end") );
+#endif
 }
 
 //! Do the frame rate calculations.
@@ -114,8 +142,6 @@ void rtTimeManager::calcFrameRate() {
   m_renderTimeBuffer[m_renderTimePosition] = frameRate;
   m_renderTimePosition = (m_renderTimePosition+1) % m_estimationLen;
 
-
-
   // Update only every nth.
   if (m_renderTimePosition == 0) {
     avgFrameRate = m_currentSum/((double)m_estimationLen);
@@ -132,22 +158,40 @@ void rtTimeManager::calcFrameRate() {
     text.append(QString::number(stdev));
     text.append(" FPS ");
 
-    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->setText(text);
-    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->getTextProperty()->SetLineOffset(4);
-    static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject())->Modified();
+    rtLabelDataObject* labelObj;
+    labelObj = static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject());
+    if (labelObj) {
+      labelObj->setText(text);
+      labelObj->getTextProperty()->SetLineOffset(4);
+      labelObj->Modified();
+    } else {
+      rtMessage::instance().error(__LINE__, __FILE__, QString("rtTimeManager::calcFrameRate() Frame Rate Label is NULL.") );
+    }
   }
 }
 
 //! Function called by a timer to update the plugins that need to be updated.
 void rtTimeManager::pluginUpdate() {
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::pluginUpdate() start") );
+#endif
   rtPluginLoader::instance().updatePlugins();
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::pluginUpdate() end") );
+#endif
 }
 
 //! Add a render object to the watch list.
 void rtTimeManager::addToWatchList(rtRenderObject* obj) {
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::addToWatchList() start") );
+#endif
   if(!m_watchList.contains(obj)) {
     m_watchList.append(obj);
   }
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::addToWatchList() end") );
+#endif
 }
 
 //! Check if the watch list contains a particular render object.
@@ -157,18 +201,32 @@ bool rtTimeManager::isInWatchList(rtRenderObject* obj) {
 
 //! Remove a render object from the watch list.
 void rtTimeManager::removeFromWatchList(rtRenderObject* obj) {
-  int index;
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::removeFromWatchList() start") );
+#endif
+  int index=-1;
   index = m_watchList.indexOf(obj);
 
   if (index >= 0) m_watchList.removeAt(index);
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::removeFromWatchList() end") );
+#endif
 }
 
 //! Try to update every object on the watch list.
 void rtTimeManager::checkWatchList() {
-  int ix1;
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::checkWatchList() start") );
+#endif
+  int ix1=0;
   bool renderNew=false;
 
   for (ix1=0; ix1<m_watchList.size(); ix1++) {
+    if (!m_watchList.at(ix1)) {
+      rtMessage::instance().error(__LINE__, __FILE__, QString("rtTimeManager::checkWatchList() Watch List Object is NULL at position: ").append(QString::number(ix1)) );
+      continue;
+    }
+
     renderNew = m_watchList.at(ix1)->tryUpdate() || renderNew;
 
     // Adjust the rendering quality.
@@ -186,10 +244,21 @@ void rtTimeManager::checkWatchList() {
     m_mainWin->getRenderer()->ResetCameraClippingRange();
     m_mainWin->setRenderFlag3D(true);
   }
-
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::checkWatchList() end") );
+#endif
 }
 
 void rtTimeManager::planeUpdate() {
-  if (!m_mainWin) return;
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::planeUpdate() start") );
+#endif
+  if (!m_mainWin) {
+    rtMessage::instance().warning(__LINE__, __FILE__, QString("rtTimeManager::planeUpdate() Main window pointer is NULL. Update skipped. ") );
+    return;
+  }
   m_mainWin->update2DViews();
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtMessage::instance().debug( QString("rtTimeManager::planeUpdate() end") );
+#endif
 }

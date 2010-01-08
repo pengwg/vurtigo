@@ -51,8 +51,6 @@ void setupOrigin();
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    rtMainWindow mainWin;
-    QStringList args = app.arguments();
     bool runVurtigo = true;
     int exitCode = 0;
 
@@ -66,6 +64,9 @@ int main(int argc, char *argv[])
     stream << "This is free software, and you are welcome to redistribute it under certain conditions; ";
     stream << "See COPYING and COPYING.LESSER for details.\n\n";
     stream.flush();
+
+    rtMainWindow mainWin;
+    QStringList args = app.arguments();
 
     // Start at 1 since the first element is the name of the program
     for (int ix1=1; ix1<args.count(); ix1++) {
@@ -88,6 +89,11 @@ int main(int argc, char *argv[])
       // Load default plugins
       QList<QString> pluginList;
       pluginList = rtConfigOptions::instance().getPluginList();
+
+#ifdef DEBUG_VERBOSE_MODE_ON
+      rtMessage::instance().debug( QString("main() Processing Plugin List") );
+#endif
+
       for (int ix1=0; ix1<pluginList.size(); ix1++) {
         QFile file(pluginList[ix1]);
         if (!file.exists()) {
@@ -99,9 +105,17 @@ int main(int argc, char *argv[])
         }
       }
 
+#ifdef DEBUG_VERBOSE_MODE_ON
+      rtMessage::instance().debug( QString("main() Setup Origin") );
+#endif
       setupOrigin();
-
+#ifdef DEBUG_VERBOSE_MODE_ON
+      rtMessage::instance().debug( QString("main() Show Window") );
+#endif
       mainWin.show();
+#ifdef DEBUG_VERBOSE_MODE_ON
+      rtMessage::instance().debug( QString("main() Before call to app.exec()") );
+#endif
       exitCode = app.exec();
     }
     return exitCode;

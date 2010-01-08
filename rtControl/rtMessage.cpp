@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 #include "rtMessage.h"
+#include "buildParam.h"
 
 #include <QString>
 
@@ -28,7 +29,13 @@ rtMessage::rtMessage() {
 
   m_err = true;
   m_warn = false;
+
+#ifdef DEBUG_VERBOSE_MODE_ON
+  m_debug = true;
+#else
   m_debug = false;
+#endif
+
   m_bench = false;
   m_log = true;
 }
