@@ -30,12 +30,9 @@ class rtMessage {
  public:
   ~rtMessage();
 
-  static rtMessage& instance() {
-    static rtMessage handle;
-    return handle;
-  }
+  static rtMessage& instance();
 
-  void setStream(QTextStream *stream) { m_out = stream; }
+  inline void setStream(QTextStream *stream) { m_out = stream; }
 
   void error(int lineNum, std::string fileName, std::string text);
   void error(int lineNum, QString fileName, QString text);

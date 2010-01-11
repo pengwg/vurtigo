@@ -56,6 +56,10 @@ rtConfigOptions::~rtConfigOptions() {
   if(m_settings) delete m_settings;
 }
 
+  rtConfigOptions& rtConfigOptions::instance() {
+    static rtConfigOptions handle;
+    return handle;
+  }
 
 QString rtConfigOptions::getWLFileName() {
   return m_settings->value("WLFileName").toString();

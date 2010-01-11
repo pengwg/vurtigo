@@ -43,11 +43,7 @@ class rtPluginLoader {
   /*! 
     There should only be one instance of a class that does loading of plugins. Therefore, this is a singleton class. This function will always return the same instance of this class.
   */
-  static rtPluginLoader& instance()
-  {
-    static rtPluginLoader loader;
-    return loader;
-  }
+  static rtPluginLoader& instance();
 
   ~rtPluginLoader();
 

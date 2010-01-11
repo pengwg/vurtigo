@@ -40,10 +40,7 @@
 
 #include <sstream>
 
-//! Object Manager constructor.
-/*!
-  Among other things, the constructor sets the maximum number of objects.
- */
+
 rtObjectManager::rtObjectManager() {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtMessage::instance().debug( QString("rtObjectManager::rtObjectManager() start") );
@@ -61,6 +58,11 @@ rtObjectManager::rtObjectManager() {
 
 //! Object Manager destructor.
 rtObjectManager::~rtObjectManager() {
+}
+
+rtObjectManager& rtObjectManager::instance() {
+  static rtObjectManager handle;
+  return handle;
 }
 
 //! Give the object manager the main window object.

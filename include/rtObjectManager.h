@@ -40,10 +40,7 @@ class rtObjectManager : public QObject {
  public:
   ~rtObjectManager();
 
-  static rtObjectManager& instance() {
-    static rtObjectManager handle;
-    return handle;
-  } 
+  static rtObjectManager& instance();
 
   void setMainWinHandle(rtMainWindow* mainWin);
   rtMainWindow* getMainWinHandle();
@@ -58,7 +55,7 @@ class rtObjectManager : public QObject {
 
   rtRenderObject* getObjectWith3DProp(vtkProp* prop);
 
-  QMultiHash<int, QString>* get2DObjectNameHash() { return &m_list2DHash; }
+  inline QMultiHash<int, QString>* get2DObjectNameHash() { return &m_list2DHash; }
 
  protected:
   //! A pointer to the main window object.
@@ -87,6 +84,11 @@ class rtObjectManager : public QObject {
 
   int getNextID();
 
+  //! Object Manager constructor. Private.
+/*!
+  The class is a singleton and so the constructor is private.
+  Among other things, the constructor sets the maximum number of objects.
+ */
   rtObjectManager();
   rtObjectManager(const rtObjectManager&);
   rtObjectManager& operator=(const rtObjectManager&);

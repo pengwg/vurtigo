@@ -38,10 +38,7 @@ class rtConfigOptions
   ~rtConfigOptions();
 
   //! Get the refernce to this object
-  static rtConfigOptions& instance() {
-    static rtConfigOptions handle;
-    return handle;
-  }
+  static rtConfigOptions& instance();
 
   QString getWLFileName();
   QString getSourceCodeHelpFileName();

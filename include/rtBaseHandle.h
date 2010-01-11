@@ -49,10 +49,7 @@ class rtBaseHandle : public QObject {
   ~rtBaseHandle();
 
   //! Get the instance of rtBaseHandle
-  static rtBaseHandle& instance() {
-    static rtBaseHandle handle;
-    return handle;
-  }
+  static rtBaseHandle& instance();
 
   int requestNewObject(rtConstants::rtObjectType objType, QString name="pluginObj");
   bool removeObject(int ID);

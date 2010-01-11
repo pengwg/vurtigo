@@ -47,6 +47,11 @@ rtBaseHandle::~rtBaseHandle() {
   m_screen->Delete();
 }
 
+rtBaseHandle& rtBaseHandle::instance() {
+  static rtBaseHandle handle;
+  return handle;
+}
+
 //! Connect the signals to the slots.
 void rtBaseHandle::connectSignals() {
   qRegisterMetaType<rtConstants::rtObjectType>("rtConstants::rtObjectType");

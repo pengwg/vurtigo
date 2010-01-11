@@ -42,10 +42,7 @@ class rtTimeManager : public QObject {
  public:
   ~rtTimeManager();
 
-  static rtTimeManager& instance() {
-    static rtTimeManager handle;
-    return handle;
-  }
+  static rtTimeManager& instance();
 
   void startRenderTimer(rtMainWindow* mainWin, int delay=34);
 
