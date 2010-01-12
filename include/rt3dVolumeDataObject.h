@@ -176,6 +176,8 @@ public:
   void setVisibleComponent(int c);
   void nextVisibleComponent();
 
+  void isoValueChanged(int v);
+
   void cineLoop(bool);
 
   void showWindowLevel();

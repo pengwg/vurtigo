@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>407</height>
+    <width>428</width>
+    <height>447</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -170,6 +170,20 @@
       </item>
       <item row="2" column="2">
        <widget class="QComboBox" name="comboCTFunc"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Iso Value (Isosurface only):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QSlider" name="isoValueSlider">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

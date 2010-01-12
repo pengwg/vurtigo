@@ -223,6 +223,9 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
   }
 
   m_isosurfaceFunc->SetIsoValue(m_level);
+  m_optionsWidget.isoValueSlider->setMinimum(rangeI[0]);
+  m_optionsWidget.isoValueSlider->setMaximum(rangeI[1]);
+  m_optionsWidget.isoValueSlider->setValue(m_level);
 
   m_imgDataValid = true;
   emit newImageData();
@@ -307,6 +310,9 @@ void rt3DVolumeDataObject::setupGUI() {
   // The combo boxes for the CTF and PWF.
   connect(m_optionsWidget.comboCTFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(colorTransferChangedGUI(QString)));
   connect(m_optionsWidget.comboPieceFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(piecewiseChangedGUI(QString)));
+
+  // Iso Value
+  connect(m_optionsWidget.isoValueSlider, SIGNAL(valueChanged(int)), this, SLOT(isoValueChanged(int)));
 
   // Cine
   connect(m_optionsWidget.frameSlider, SIGNAL(valueChanged(int)), this, SLOT(setVisibleComponent(int)));
@@ -513,6 +519,14 @@ void rt3DVolumeDataObject::cineLoop(bool cine) {
     m_cineFrame->start(100);
   } else if (m_cineFrame->isActive()) {
     m_cineFrame->stop();
+  }
+
+}
+
+void rt3DVolumeDataObject::isoValueChanged(int v) {
+  if (m_isosurfaceFunc->GetIsoValue() != v) {
+    m_isosurfaceFunc->SetIsoValue(v);
+    Modified();
   }
 
 }
