@@ -222,6 +222,8 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
     m_optionsWidget.cineGroupBox->setDisabled(true);
   }
 
+  m_isosurfaceFunc->SetIsoValue(m_level);
+
   m_imgDataValid = true;
   emit newImageData();
   Modified();

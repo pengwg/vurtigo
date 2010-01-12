@@ -95,9 +95,9 @@ void rt3DVolumeRenderObject::update() {
 
     // Fix the extents
     int extents[4];
-    extents[0] = 0;
+    extents[0] = 1;
     extents[1] = dims[0];
-    extents[2] = 0;
+    extents[2] = 1;
     extents[3] = dims[1];
     m_imgMap[ix1]->UseCustomExtentsOn();
     m_imgMap[ix1]->SetCustomDisplayExtents(extents);

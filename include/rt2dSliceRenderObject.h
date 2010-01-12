@@ -24,6 +24,9 @@
 #include "ObjectControlWidget.h"
 #include "rtBox2DOutline.h"
 #include "rtTexture2DPlane.h"
+#include "vtkImageCast.h"
+#include "vtkImageMapper.h"
+#include "vtkActor2D.h"
 
 //! A Single 2D Slice
 /*!
@@ -60,6 +63,10 @@ public slots:
   rtTexture2DPlane m_texturePlane;
   rtBox2DOutline m_boxOutline;
   ObjectControlWidget m_control;
+
+  vtkImageCast* m_imgCast;
+  vtkImageMapper* m_imgMap;
+  vtkActor2D* m_actor2D;
  private:
 
 };

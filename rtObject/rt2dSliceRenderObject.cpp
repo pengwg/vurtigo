@@ -35,7 +35,9 @@ rt2DSliceRenderObject::rt2DSliceRenderObject() {
 
 
 rt2DSliceRenderObject::~rt2DSliceRenderObject() {
-
+  m_imgCast->Delete();
+  m_imgMap->Delete();
+  m_actor2D->Delete();
 }
 
 
@@ -66,6 +68,36 @@ void rt2DSliceRenderObject::update() {
 
   m_control.setTransform(dObj->getTransform());
   m_control.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2] );
+
+  // Update the 2D as well
+  m_imgCast->SetInput(dObj->getUCharData());
+
+  double range[2];
+  int dims[3];
+
+  m_imgCast->Update();
+  m_imgCast->GetOutput()->GetScalarRange(range);
+  m_imgCast->GetOutput()->GetDimensions(dims);
+
+  m_imgMap->SetColorWindow( dObj->getWindow() );
+  m_imgMap->SetColorLevel( dObj->getLevel() );
+
+  m_actor2D->SetPosition(0, 0);
+  m_actor2D->SetPosition2(1, 1);
+
+  // Fix the extents
+  int extents[4];
+  extents[0] = 1;
+  extents[1] = dims[0];
+  extents[2] = 1;
+  extents[3] = dims[1];
+  m_imgMap->UseCustomExtentsOn();
+  m_imgMap->SetZSlice(1);
+  m_imgMap->SetCustomDisplayExtents(extents);
+
+  if ( m_mainWin ) {
+    m_mainWin->setRenderFlag3D(true);
+  }
 }
 
 //! Add this object to the given renderer.
@@ -213,6 +245,20 @@ void rt2DSliceRenderObject::setupPipeline() {
   // Objects for the texture pipeline.
   m_pipe3D.push_back( m_texturePlane.getActor() );
   m_pipe3D.push_back( m_boxOutline.getActor() );
+
+    // Do the 2D planes as well.
+  m_imgCast = vtkImageCast::New();
+  m_imgMap = vtkImageMapper::New();
+  m_actor2D = vtkActor2D::New();
+
+  m_imgCast->SetOutputScalarTypeToUnsignedShort();
+
+  m_imgMap->SetInputConnection(m_imgCast->GetOutputPort());
+  m_imgMap->RenderToRectangleOn();
+
+  m_actor2D->SetMapper(m_imgMap);
+
+  m_pipe2D.insert("2DSlice", m_actor2D);
 }
 
 //! The position of the center of the plane is given
