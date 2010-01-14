@@ -75,6 +75,8 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
 
   connect(m_wlDialog, SIGNAL(valuesChanged(int,int)), this, SLOT(wlChanged(int,int)));
 
+  connect(this, SIGNAL(newImageData()), this, SLOT(updateInfoText()), Qt::QueuedConnection);
+
   for (int ix1=0; ix1<3; ix1++) {
     m_planeTransform[ix1] = vtkTransform::New();
   }
@@ -223,8 +225,8 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
   }
 
   m_isosurfaceFunc->SetIsoValue(m_level);
-  m_optionsWidget.isoValueSlider->setMinimum(rangeI[0]);
-  m_optionsWidget.isoValueSlider->setMaximum(rangeI[1]);
+  m_optionsWidget.isoValueSlider->setMinimum(0);
+  m_optionsWidget.isoValueSlider->setMaximum(m_window);
   m_optionsWidget.isoValueSlider->setValue(m_level);
 
   m_imgDataValid = true;
@@ -528,5 +530,17 @@ void rt3DVolumeDataObject::isoValueChanged(int v) {
     m_isosurfaceFunc->SetIsoValue(v);
     Modified();
   }
+  m_optionsWidget.isoValueLabel->setText(QString::number(v));
+}
 
+void rt3DVolumeDataObject::updateInfoText() {
+  QString infoText;
+  QTextStream ts(&infoText, QIODevice::WriteOnly);
+  m_optionsWidget.volumeInfoTextEdit->clear();
+  ts << this->getObjName() << "\n";
+  ts << "-------------------------------------------------\n";
+  ts << "Range: [0, " << m_window << "] \n";
+  ts.flush();
+
+  m_optionsWidget.volumeInfoTextEdit->setPlainText(infoText);
 }

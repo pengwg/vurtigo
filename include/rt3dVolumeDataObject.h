@@ -189,6 +189,8 @@ public:
   void sagittalResetSlot();
   void coronalResetSlot();
 
+  void updateInfoText();
+
  signals:
   void newImageData();
 
@@ -253,6 +255,8 @@ public:
 
   //! Positions for the three planes
   vtkTransform* m_planeTransform[3];
+
+
 };
 
 #endif 

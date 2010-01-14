@@ -1,0 +1,4 @@
+
+This is a much thinner version of DCMTK from OFFIS. Vurtigo does not need the full functionality of DCMTK and since we would like to minimize the need for external dependencies it was decided that DCMTK would be cut down to fit our needs. 
+
+We would like to thank OFFIS for writing this code and alowing us to use it. 

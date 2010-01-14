@@ -31,15 +31,7 @@
 #include "vtkMatrixToLinearTransform.h"
 
 // DCMTK
-
-#if defined Q_WS_X11 || defined Q_WS_QWS || defined Q_WS_MAC
-#include "cfunix.h"
-#endif
-
-#if defined Q_WS_WIN
-#include "cfwin32.h"
-#endif
-
+#include "osconfig.h"
 #include "ofstring.h"
 
   const int NUM_ENTRIES = 4;

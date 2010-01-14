@@ -80,6 +80,14 @@ file(APPEND ${CMAKE_BINARY_DIR}/buildParam.h "#define DEBUG_VERBOSE_MODE_" ${DEB
 
 include_directories(include ${CMAKE_BINARY_DIR})
 
+# Include the DCMTK Vurtigo bridge code. 
+include_directories(
+  external/dcmtk-Vurtigo/ 
+  external/dcmtk-Vurtigo/dcmtk/config
+  external/dcmtk-Vurtigo/dcmtk/dcmdata
+  external/dcmtk-Vurtigo/dcmtk/ofstd
+  external/dcmtk-Vurtigo/Vurtigo
+)
 
 
 set (UI_FILES 
@@ -106,6 +114,7 @@ qt4_wrap_ui(UI_FILES_OUT ${UI_FILES})
 message(STATUS "UI Files: " ${UI_FILES_OUT})
 add_custom_target(UIFirst DEPENDS ${UI_FILES_OUT})
 
+add_subdirectory(external)
 add_subdirectory(rtUI)
 add_subdirectory(rtObject)
 add_subdirectory(rtControl)

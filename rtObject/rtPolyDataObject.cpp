@@ -27,6 +27,7 @@
 #include <vtkIntArray.h>
 #include <vtkCellArray.h>
 #include <vtkPointData.h>
+#include <vtkPolyDataWriter.h>
 
 //! Constructor
 rtPolyDataObject::rtPolyDataObject() {

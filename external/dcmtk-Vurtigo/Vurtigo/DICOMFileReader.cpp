@@ -27,7 +27,7 @@
 #include <math.h>
 
 //DCMTK
-#include "cfunix.h"
+#include "osconfig.h"
 #include "dcdeftag.h"
 #include "dcfilefo.h"
 #include "ofcond.h"
