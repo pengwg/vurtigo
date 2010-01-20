@@ -60,6 +60,8 @@ public:
   QString getComments() { return m_comments; }
 
   void cleanupImageData();
+  
+  QList<double>* getTriggerList() { return &m_triggerList; }
 
 protected:
   QList<QString> m_fileList;

@@ -27,7 +27,6 @@
 #include <vtkPolyData.h>
 #include <vtkProperty.h>
 #include <vtkColorTransferFunction.h>
-#include <vtkSmartPointer.h>
 
 //! Object that represents polygonal data
 /*!
@@ -63,22 +62,41 @@ Points should be joined into triangles to be rendered.
 
   void update();
 
-  vtkPolyData* getPolyData() { return m_polyData; }
-  vtkProperty* getProperty() { return m_polyProperty; }
-  vtkColorTransferFunction* getColorTable() { return m_colorLookup; }
+  vtkPolyData* getPolyData();
+  vtkProperty* getProperty();
+  vtkColorTransferFunction* getColorTable();
 
-  bool setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink> *links);
+  //! Clear all of the poly data.
+  /*!
+   Removes and deletes all of the poly data from all the internal lists. This should reset the object to the initial state. 
+   */
+  void clearAllData();
+  
+  //! Set the points and connections for a new poly dataset.
+  /*!
+  This function will remove the old poly dataset and replace it based on the input parameters.
+  Long computations are performed in this function so resetting of the geometry should not be done all the time.
+  @return True if the replacement was a success.
+  */
+  bool setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink> *links, double trigDelay=0);
   bool copyPolyData(vtkPolyData*);
   bool copyLookupTable(vtkColorTransferFunction*);
 
+  bool setCurrTrigDelay(double trigDelay);
+  bool setCurrPhase(int phase);
+  
+  int getCurrPhase() { return m_currentPhase; }
+  
  protected:
   // Functions
   void setupGUI();
   void cleanupGUI();
   
-  vtkSmartPointer<vtkPolyData> m_polyData;
-  vtkSmartPointer<vtkProperty> m_polyProperty;
-  vtkSmartPointer<vtkColorTransferFunction> m_colorLookup;
+  QList<double> m_trigDelayList;
+  QList<vtkPolyData*> m_polyData;
+  QList<vtkProperty*> m_polyProperty;
+  QList<vtkColorTransferFunction*> m_colorLookup;
+  int m_currentPhase;
 
 };
 

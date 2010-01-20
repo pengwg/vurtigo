@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 #include "rtPolyDataObject.h"
+#include "rtMessage.h"
 
 #include <QHash>
 #include <QColor>
@@ -34,30 +35,88 @@ rtPolyDataObject::rtPolyDataObject() {
   setObjectType(rtConstants::OT_vtkPolyData);
   setupGUI();
 
-  m_polyData = vtkPolyData::New();
-  m_polyProperty = vtkProperty::New();
-  m_colorLookup = vtkColorTransferFunction::New();
+  m_currentPhase = -1;
+  m_trigDelayList.clear();
+  m_polyData.clear();
+  m_polyProperty.clear();
+  m_colorLookup.clear();
 }
 
 //! Destructor
 rtPolyDataObject::~rtPolyDataObject() {
   cleanupGUI();
-
-  if ( m_polyData.GetPointer() ) m_polyData->Delete();
-  if ( m_polyProperty.GetPointer() ) m_polyProperty->Delete();
-  if ( m_colorLookup.GetPointer() ) m_colorLookup->Delete();
+  clearAllData();
+}
+  
+vtkPolyData* rtPolyDataObject::getPolyData() { 
+  if (m_currentPhase==-1) return NULL;
+  return m_polyData[m_currentPhase];
 }
 
-//! Set the points and connections for a new poly dataset.
-/*!
-  This function will remove the old poly dataset and replace it based on the input parameters.
-  Long computations are performed in this function so resetting of the geometry should not be done all the time.
-  @return True if the replacement was a success.
-  */
-bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink> *links) {
-  if (!pts || !links) return false;
-  if (pts->empty() || links->empty()) return false;
+vtkProperty* rtPolyDataObject::getProperty() { 
+  if (m_currentPhase==-1) return NULL;
+  return m_polyProperty[m_currentPhase]; 
+}
 
+vtkColorTransferFunction* rtPolyDataObject::getColorTable() { 
+  if (m_currentPhase==-1) return NULL;
+  return m_colorLookup[m_currentPhase]; 
+}
+  
+void rtPolyDataObject::clearAllData() {
+  m_currentPhase = -1;
+  m_trigDelayList.clear();
+  while (!m_polyData.empty()) {
+  	m_polyData.takeFirst()->Delete();
+  }
+  while (!m_polyProperty.empty()) {
+  	m_polyProperty.takeFirst()->Delete();
+  }
+  while (!m_colorLookup.empty()) {
+  	m_colorLookup.takeFirst()->Delete();
+  }
+}
+  
+
+bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink> *links, double trigDelay) {
+	
+  // Check that the pointers are valid. 
+  if (!pts || !links) {
+  	rtMessage::instance().error(__LINE__, __FILE__, QString("Pointers to new geometry are NULL."));
+  	return false;
+  }
+  
+  // Check that both lists have something in them.
+  if (pts->empty() || links->empty()) {
+  	rtMessage::instance().error(__LINE__, __FILE__, QString("At least one new geometry list is empty."));
+  	return false;
+  }
+  
+  // Check that trigger delay is within bounds. 
+  if (trigDelay < 0) {
+  	rtMessage::instance().error(__LINE__, __FILE__, QString("Invalid trigger delay value: ").append(QString::number(trigDelay)));
+  	return false;
+  }
+  
+  int addIndex;
+  addIndex = m_trigDelayList.indexOf(trigDelay);
+  
+  // Check if the trig delay does not exist.
+  if (addIndex == -1) {
+	// No such delay. So add it. 
+	m_trigDelayList.append(trigDelay);
+	if (m_currentPhase == -1) m_currentPhase = 0;
+	m_polyData.append( vtkPolyData::New() );
+	m_polyProperty.append( vtkProperty::New() );
+	m_colorLookup.append( vtkColorTransferFunction::New() );
+  }
+  
+  addIndex = m_trigDelayList.indexOf(trigDelay);
+  if (addIndex == -1) {
+  	rtMessage::instance().error(__LINE__, __FILE__, QString("Failed to add index for a new trigger delay!"));
+  	return false;
+  }
+  
   vtkPoints *pointList = vtkPoints::New();
   vtkIntArray *scalars = vtkIntArray::New();
   vtkCellArray *surf = vtkCellArray::New();
@@ -67,8 +126,7 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
   QColor temp;
 
   // Remove old table points
-  m_colorLookup->RemoveAllPoints();
-
+  m_colorLookup[addIndex]->RemoveAllPoints();
 
   pointList->SetNumberOfPoints( pts->count() );
   scalars->SetNumberOfValues( pts->count() );
@@ -80,14 +138,14 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
     if (!colorTable.contains(temp.name())) {
       colorTable.insert(temp.name(), ix1);
     }
-    m_colorLookup->AddRGBPoint(colorTable.value(temp.name()), ((double)temp.red())/255.0f, ((double)temp.green())/255.0f, ((double)temp.blue())/255.0f );
+    m_colorLookup[addIndex]->AddRGBPoint(colorTable.value(temp.name()), ((double)temp.red())/255.0f, ((double)temp.green())/255.0f, ((double)temp.blue())/255.0f );
     scalars->SetTupleValue(ix1, &colorTable[temp.name()]);
 
   }
 
-  m_polyData->Reset();
-  m_polyData->SetPoints(pointList);
-  m_polyData->GetPointData()->SetScalars(scalars);
+  m_polyData[addIndex]->Reset();
+  m_polyData[addIndex]->SetPoints(pointList);
+  m_polyData[addIndex]->GetPointData()->SetScalars(scalars);
   for (int ix1=0; ix1<links->count(); ix1++) {
     tempLine[0] =  (*links)[ix1].threeVertex[0];
     tempLine[1] =  (*links)[ix1].threeVertex[1];
@@ -95,7 +153,7 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
     surf->InsertNextCell(3, tempLine);
   }
 
-  m_polyData->SetPolys(surf);
+  m_polyData[addIndex]->SetPolys(surf);
 
   surf->Delete();
   scalars->Delete();
@@ -107,17 +165,37 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
 //! Copy a new poly data object. The old data is replaced.
 bool rtPolyDataObject::copyPolyData(vtkPolyData* polyData) {
   if (!polyData) return false;
-  m_polyData->DeepCopy(polyData);
+  m_polyData[m_currentPhase]->DeepCopy(polyData);
   return true;
 }
 
 //! Copy a new lookup table. The old table is replaced.
 bool rtPolyDataObject::copyLookupTable(vtkColorTransferFunction* lookupTable) {
   if (!lookupTable) return false;
-  m_colorLookup->DeepCopy(lookupTable);
+  m_colorLookup[m_currentPhase]->DeepCopy(lookupTable);
+  return true;
+}
+  
+bool rtPolyDataObject::setCurrTrigDelay(double trigDelay) {
+  if (trigDelay < 0 || m_trigDelayList.count() == 0) return false;
+  double diff = (m_trigDelayList[0] - trigDelay)*(m_trigDelayList[0] - trigDelay);
+  int phase = 0;
+  for (int ix1=1; ix1<m_trigDelayList.count(); ix1++) {
+  	if ( diff > (m_trigDelayList[ix1] - trigDelay)*(m_trigDelayList[ix1] - trigDelay) ) {
+  		diff = (m_trigDelayList[ix1] - trigDelay)*(m_trigDelayList[ix1] - trigDelay);
+  		phase = ix1;
+  	}
+  }
+  m_currentPhase = phase;
   return true;
 }
 
+bool rtPolyDataObject::setCurrPhase(int phase) {
+  if (phase < 0 || phase >= m_trigDelayList.count()) return false;
+  m_currentPhase = phase;
+  return true;
+}
+  
 //! Send the info to the GUI
 void rtPolyDataObject::update() {
 
