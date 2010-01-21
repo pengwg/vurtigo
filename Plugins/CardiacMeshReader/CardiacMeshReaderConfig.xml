@@ -1,0 +1,4 @@
+<plugin>
+  <name title="Cardiac Mesh Reader" version="1.0"/>
+  <lib libname="CardiacMeshReader" libpath="/home/spintilie/Code/Vurtigo-build/bin/"/>
+</plugin>

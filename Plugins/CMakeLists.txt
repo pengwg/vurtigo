@@ -19,6 +19,11 @@ if (VURTIGO_PLUGIN_DICOM_READER)
 add_subdirectory(DICOMReader)
 endif (VURTIGO_PLUGIN_DICOM_READER)
 
+set(VURTIGO_PLUGIN_CARDIACMESH_READER ON CACHE BOOL "Compile the Cardiac Mesh Reader Plugin")
+if (VURTIGO_PLUGIN_CARDIACMESH_READER)
+add_subdirectory(CardiacMeshReader)
+endif (VURTIGO_PLUGIN_CARDIACMESH_READER)
+
 set(VURTIGO_PLUGIN_SCREEN_CAPTURE ON CACHE BOOL "Compile the Screen Capture Plugin")
 if (VURTIGO_PLUGIN_SCREEN_CAPTURE)
 add_subdirectory(ScreenCapture)

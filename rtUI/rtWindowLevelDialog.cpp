@@ -106,18 +106,27 @@ void rtWindowLevelDialog::setImageData(vtkImageData* dat) {
     for (int ix1=0; ix1<dims[0]*dims[1]*dims[2]; ix1++) {
       loc=((float)ucharP[ix1])/((float)(rangeI[1]-rangeI[0]))*c_histogramSize;
       spot = floor(loc);
-      m_histogram[spot] = m_histogram[spot]+1;
+      if (spot < c_histogramSize) {
+        m_histogram[spot] = m_histogram[spot]+1;
+      } else {
+        // Fail silently. Data may have a couple 'bad points'.
+        //std::cout << "Spot for histogram is off: " << spot << " and loc: " << loc << std::endl;
+      }
     }
   } else if (dat->GetScalarType() == VTK_UNSIGNED_SHORT) {
     ushortP = static_cast<unsigned short*>(dat->GetScalarPointer());
     for (int ix1=0; ix1<dims[0]*dims[1]*dims[2]; ix1++) {
       loc=((float)ushortP[ix1])/((float)(rangeI[1]-rangeI[0]))*c_histogramSize;
       spot = floor(loc);
-      m_histogram[spot] = m_histogram[spot]+1;
+      if (spot < c_histogramSize) {
+        m_histogram[spot] = m_histogram[spot]+1;
+      } else {
+        // Fail silently. Data may have a couple 'bad points'.
+        //std::cout << "Spot for histogram is off: " << spot << " and loc: " << loc << std::endl;
+        //std::cout << "ushort: " << ushortP[ix1] << " range " << rangeI[1]-rangeI[0] << std::endl;
+      }
     }
   }
-
-
 
   QList<QGraphicsItem *> test = m_scene->items();
   int barLocation;
