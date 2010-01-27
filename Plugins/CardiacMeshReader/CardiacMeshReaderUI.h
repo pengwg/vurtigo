@@ -24,9 +24,11 @@
 #include <QString>
 #include <ui_CardiacMeshReader.h>
 
-#include <vtkSmartPointer.h>
-
 #include "DICOMFileReader.h"
+#include "MeshFileReader.h"
+#include "MeshPointSet.h"
+
+class rtPolyDataObject;
 
 class CardiacMeshReaderUI : public QWidget, public Ui::CardiacMeshReader
 {
@@ -39,17 +41,38 @@ public:
 public slots:
   void newDirectory();
   void dirChooser();
-  void saveAsVolume();
+  void page1Next();
+  void page1Finish();
+
+  void newDirectoryMesh();
+  void dirChooserMesh();
+  void page2Next();
+  void page2Back();
+  void page2Finish();
+
+  void namesChanged();
+  void page3Back();
+  void page3Finish();
 
 protected:
   void connectSignals();
 
+  bool loadPolyDataFromPoints(rtPolyDataObject* data, MeshPointSet::PointType type);
+
   QString m_lastDir;
+  QString m_lastMeshDir;
 
   DICOMFileReader m_customReader;
+  MeshFileReader m_meshReader;
 
   //! The ID of the newest volume
   int m_vol;
+
+  //! The ID of the poly data icontour
+  int m_icontour;
+
+  //! The ID of the poly data ocontour
+  int m_ocontour;
 };
 
 #endif

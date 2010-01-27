@@ -3,6 +3,8 @@
 set(MESH_SRC_FILES
   CardiacMeshReaderPlugin.cpp
   CardiacMeshReaderUI.cpp
+  MeshFileReader.cpp
+  MeshPointSet.cpp
 )
 
 # MOC files are the ones that use Q_OBJECT

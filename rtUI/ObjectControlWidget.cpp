@@ -46,8 +46,8 @@ ObjectControlWidget::ObjectControlWidget() {
     m_diskMapper[ix1] = vtkPolyDataMapper::New();
     m_diskActor[ix1] = vtkActor::New();
 
-    m_torus[ix1]->SetRingRadius(75);
-    m_torus[ix1]->SetCrossSectionRadius(5);
+    m_torus[ix1]->SetRingRadius(70.0);
+    m_torus[ix1]->SetCrossSectionRadius(2.0);
 
     m_torusSrc[ix1]->SetParametricFunction(m_torus[ix1]);
     m_diskMapper[ix1]->SetInputConnection(m_torusSrc[ix1]->GetOutputPort());
@@ -398,7 +398,7 @@ void ObjectControlWidget::updateWidgetPosition() {
 
   // Put it in the middle of the plane.
   m_touchPoint->SetCenter(m_convertedLocations[4]);
-  m_touchPoint->SetRadius(std::max(m_xsize, m_ysize)*0.1);
+  m_touchPoint->SetRadius(std::max(m_xsize, m_ysize)*0.05);
 
   m_boxOutline.setCorners(m_convertedLocations[m_corners[0]], m_convertedLocations[m_corners[1]], m_convertedLocations[m_corners[2]], m_convertedLocations[m_corners[3]]);
 
@@ -408,7 +408,7 @@ void ObjectControlWidget::updateWidgetPosition() {
 
     // Update Size too.
     m_torus[ix1]->SetRingRadius(std::max(m_xsize, m_ysize)*0.75);
-    m_torus[ix1]->SetCrossSectionRadius(std::max(m_xsize, m_ysize)*0.05);
+    m_torus[ix1]->SetCrossSectionRadius(std::max(m_xsize, m_ysize)*0.03);
 
     m_position[ix1]->Identity();
     m_position[ix1]->Translate(m_convertedLocations[4][0] - pos[0], m_convertedLocations[4][1] - pos[1], m_convertedLocations[4][2] - pos[2]);

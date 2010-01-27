@@ -48,6 +48,8 @@ DICOMFileReader::DICOMFileReader() {
   m_transform->Inverse();
 
   m_ddata = NULL;
+
+  m_volName = "";
 }
 
 
@@ -133,6 +135,9 @@ bool DICOMFileReader::setDirectory(QString dirPath) {
   if (!createVolume(&m_imgData)) {
     std::cout << "Could not create final volume." << std::endl;
     return false;
+  } else {
+    // Volume was created correctly. So give it a default name.
+    m_volName = fileDir.dirName();
   }
   return true;
 }
