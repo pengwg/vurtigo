@@ -21,6 +21,7 @@
 #define RT_POLY_DATA_OBJECT_H
 
 #include "rtDataObject.h"
+#include "ui_polyDataOptions.h"
 
 #include <QList>
 
@@ -86,12 +87,21 @@ Points should be joined into triangles to be rendered.
   bool setCurrPhase(int phase);
   
   int getCurrPhase() { return m_currentPhase; }
-  
+public slots:
+  void opacityChanged(int);
+  void meshCheckBoxChanged(int);
+
+  void setVisibleComponent(int);
+  void cineLoop(bool);
+
  protected:
   // Functions
   void setupGUI();
   void cleanupGUI();
   
+  //! The widget for the options for this object
+  Ui::polyDataOptions m_optionsWidget;
+
   QList<double> m_trigDelayList;
   QList<vtkPolyData*> m_polyData;
   QList<vtkProperty*> m_polyProperty;

@@ -357,7 +357,7 @@ void ObjectControlWidget::keyReleaseEvent(QKeyEvent* event) {
 
 void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   if(!m_showing) return;
-  int numSteps = event->delta() / 16;
+  int numSteps = event->delta() / 32;
 
   vtkMatrix4x4 *mat = vtkMatrix4x4::New();
 

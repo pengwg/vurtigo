@@ -103,12 +103,16 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
   
   // Check if the trig delay does not exist.
   if (addIndex == -1) {
-	// No such delay. So add it. 
-	m_trigDelayList.append(trigDelay);
-	if (m_currentPhase == -1) m_currentPhase = 0;
-	m_polyData.append( vtkPolyData::New() );
-	m_polyProperty.append( vtkProperty::New() );
-	m_colorLookup.append( vtkColorTransferFunction::New() );
+    // No such delay. So add it.
+    m_trigDelayList.append(trigDelay);
+    if (m_currentPhase == -1) m_currentPhase = 0;
+    m_polyData.append( vtkPolyData::New() );
+    vtkProperty* pr = vtkProperty::New();
+    m_polyProperty.append( pr );
+    m_colorLookup.append( vtkColorTransferFunction::New() );
+
+    if(m_optionsWidget.frameSlider) m_optionsWidget.frameSlider->setMinimum(0);
+    if(m_optionsWidget.frameSlider) m_optionsWidget.frameSlider->setMaximum(m_trigDelayList.count()-1);
   }
   
   addIndex = m_trigDelayList.indexOf(trigDelay);
@@ -201,9 +205,54 @@ void rtPolyDataObject::update() {
 
 }
 
+/////////////////
+// Slots
+//////////////
+void rtPolyDataObject::opacityChanged(int opacity) {
+  m_optionsWidget.opacityLabel->setText(QString::number(opacity).append(" %"));
+  for (int ix1=0; ix1<m_polyProperty.count(); ix1++) {
+    m_polyProperty[ix1]->SetOpacity(((double)opacity)/100.0f);
+  }
+  Modified();
+}
+
+void rtPolyDataObject::meshCheckBoxChanged(int state) {
+
+  if (state == Qt::Checked) {
+    for (int ix1=0; ix1<m_polyProperty.count(); ix1++) {
+      m_polyProperty[ix1]->SetRepresentationToWireframe();
+    }
+  } else {
+    for (int ix1=0; ix1<m_polyProperty.count(); ix1++) {
+      m_polyProperty[ix1]->SetRepresentationToSurface();
+    }
+  }
+
+  Modified();
+}
+
+void rtPolyDataObject::setVisibleComponent(int comp) {
+  m_currentPhase = comp;
+  Modified();
+}
+
+void rtPolyDataObject::cineLoop(bool loop) {
+
+}
+
+////////////////
+// Protected
+////////////////
 //! Set the GUI widgets.
 void rtPolyDataObject::setupGUI() {
+  m_optionsWidget.setupUi(getBaseWidget());
 
+  connect(m_optionsWidget.opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacityChanged(int)));
+  connect(m_optionsWidget.renderMeshCheckBox, SIGNAL(stateChanged(int)), this, SLOT(meshCheckBoxChanged(int)));
+
+  // Cine controls
+  connect(m_optionsWidget.frameSlider, SIGNAL(valueChanged(int)), this, SLOT(setVisibleComponent(int)));
+  connect(m_optionsWidget.cineLoopPushButton, SIGNAL(toggled(bool)), this, SLOT(cineLoop(bool)));
 }
 
 //! Clean the GUI widgets.

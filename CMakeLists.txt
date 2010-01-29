@@ -107,6 +107,7 @@ set (UI_FILES
   rtUI/rtRenderOptions.ui
   rtUI/VtkColorTable.ui
   rtUI/rtWindowLevelDialog.ui
+  rtUI/polyDataOptions.ui
 )
 
 

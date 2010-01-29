@@ -202,6 +202,7 @@ void CardiacMeshReaderUI::page3Finish() {
     if (ptObj) {
       ptObj->lock();
       ptObj->copyNewTransform(m_customReader.getTransform());
+      //ptObj->copyNewTransform(vtkTransform::New());
       ptObj->copyNewImageData(m_customReader.getImageData());
       ptObj->Modified();
       ptObj->unlock();
@@ -256,17 +257,27 @@ bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPo
   m_customReader.getImageData()->GetSpacing(space);
 
   vtkTransform* trans = m_customReader.getTransform();
+  //vtkTransform* trans = vtkTransform::New();
   trans->Inverse();
   // ASSUME 20 PHASES
-  for (int ix1=0; ix1<=20; ix1++) {
-
+  int numPhases=20;
+  int maxSlices=0;
+  for (int ix1=0; ix1<=numPhases; ix1++) {
     MeshPointSet* currPhase=NULL;
+    currPhase = m_meshReader.getPointSet(ix1);
+    if(!currPhase) continue;
+    if (currPhase->getMaxSlice() > maxSlices) {
+      maxSlices = currPhase->getMaxSlice();
+    }
+  }
 
+  for (int ix1=0; ix1<=numPhases; ix1++) {
+    MeshPointSet* currPhase=NULL;
     currPhase = m_meshReader.getPointSet(ix1);
     if(!currPhase) continue;
 
     int numVertices=0;
-    for (double curvePos=2.0; curvePos<=currPhase->getMaxSlice()-1; curvePos+=0.1){
+    for (double curvePos=3.0; curvePos<=maxSlices-1; curvePos+=0.1) {
       for (int ix2=0; ix2<=currPhase->getMaxPtNum(); ix2++) {
         temp.ptList[0] = currPhase->getInterpolateXValue(type, curvePos, ix2)*space[0];
         temp.ptList[1] = currPhase->getInterpolateYValue(type, curvePos, ix2)*space[1];

@@ -144,6 +144,8 @@ void MeshPointSet::checkForSpline(QMap<int, vtkKochanekSpline*>* map, int ptNum)
     vtkKochanekSpline* temp = vtkKochanekSpline::New();
     map->insert(ptNum, temp);
     temp->SetDefaultContinuity(m_continuity);
+    temp->SetDefaultBias(0.0);
+    temp->SetDefaultTension(1.0);
   }
 }
 
