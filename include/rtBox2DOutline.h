@@ -103,6 +103,8 @@ class rtBox2DOutline
   double getXSize() { return m_xsize; }
   double getYSize() { return m_ysize; }
 
+  void setUserTransform(vtkTransform* t) { m_outlineActor->SetUserTransform(t); }
+
  protected:
   // Objects for the frame outline pipeline.
   vtkPolyData* m_outlinePolyData;

@@ -18,6 +18,8 @@ ObjectControlWidget::ObjectControlWidget() {
   m_ysize = 1.0;
   m_transform = vtkTransform::New();
   m_transform->Identity();
+  m_userTransform = vtkTransform::New();
+  m_userTransform->Identity();
 
   // Setup how the points are located around the widget
   //////////////////////
@@ -73,6 +75,7 @@ ObjectControlWidget::ObjectControlWidget() {
 
 ObjectControlWidget::~ObjectControlWidget() {
   m_transform->Delete();
+  m_userTransform->Delete();
 
   for (int ix1=0; ix1<3; ix1++) {
     m_position[ix1]->Delete();
@@ -99,7 +102,8 @@ void ObjectControlWidget::setTransform(vtkTransform* input) {
 }
 
 void ObjectControlWidget::getTransform(vtkTransform* output) {
-  output->DeepCopy(m_transform);
+  output->Identity();
+  output->Concatenate(m_transform);
 }
 
 void ObjectControlWidget::setSize(double xsize, double ysize) {
@@ -162,6 +166,19 @@ void ObjectControlWidget::hide() {
 bool ObjectControlWidget::isShowing() {
   return m_showing;
 }
+
+void ObjectControlWidget::setUserTransform(vtkTransform* t) {
+  if (!t) return;
+
+  m_boxOutline.setUserTransform(t);
+  m_pointActor->SetUserTransform(t);
+  m_diskActor[0]->SetUserTransform(t);
+  m_diskActor[1]->SetUserTransform(t);
+  m_diskActor[2]->SetUserTransform(t);
+  m_userTransform->Identity();
+  m_userTransform->Concatenate(t);
+}
+
 
 void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
   if(!m_showing) return;
@@ -234,8 +251,6 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
   double xdiff = (X-m_oldX)*(dist)/1200.0f;
   double ydiff = (Y-m_oldY)*(dist)/1200.0f;
 
-
-
   double planeNormal[3];
   for (int ix1=0; ix1<3; ix1++) {
     planeNormal[ix1] = m_transform->GetMatrix()->GetElement(ix1, 2);
@@ -249,15 +264,16 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
     m_transform->TransformPoint(m_pointLocations[ix1], m_convertedLocations[ix1]);
   }
 
+  vtkTransform *movement = vtkTransform::New();
 
   if (m_currProp == m_pointActor) {
     temp[0] = cameraRight[0]*xdiff+cameraUp[0]*ydiff;
     temp[1] = cameraRight[1]*xdiff+cameraUp[1]*ydiff;
     temp[2] = cameraRight[2]*xdiff+cameraUp[2]*ydiff;
 
-    m_transform->PostMultiply();
-    m_transform->Translate(temp[0], temp[1], temp[2]);
-    m_transform->PreMultiply();
+    //m_transform->PostMultiply();
+    movement->Translate(temp[0], temp[1], temp[2]);
+    //m_transform->PreMultiply();
   } else {
 
     double normalDirectionT[3];
@@ -303,28 +319,34 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
       for (int ix1=0; ix1<3 ;ix1++) {
         temp[ix1] = m_convertedLocations[7][ix1] - m_convertedLocations[4][ix1];
       }
-      m_transform->PostMultiply();
-      m_transform->Translate(-m_convertedLocations[4][0], -m_convertedLocations[4][1], -m_convertedLocations[4][2]);
-      m_transform->RotateWXYZ(rotate, temp[0], temp[1], temp[2]);
-      m_transform->Translate(m_convertedLocations[4][0], m_convertedLocations[4][1], m_convertedLocations[4][2]);
-      m_transform->PreMultiply();
+      movement->PostMultiply();
+      movement->Translate(-m_convertedLocations[4][0], -m_convertedLocations[4][1], -m_convertedLocations[4][2]);
+      movement->RotateWXYZ(rotate, temp[0], temp[1], temp[2]);
+      movement->Translate(m_convertedLocations[4][0], m_convertedLocations[4][1], m_convertedLocations[4][2]);
+      movement->PreMultiply();
     } else if (m_currProp == m_diskActor[1]) {
       for (int ix1=0; ix1<3 ;ix1++) {
         temp[ix1] = m_convertedLocations[3][ix1] - m_convertedLocations[4][ix1];
       }
-      m_transform->PostMultiply();
-      m_transform->Translate(-m_convertedLocations[4][0], -m_convertedLocations[4][1], -m_convertedLocations[4][2]);
-      m_transform->RotateWXYZ(rotate, temp[0], temp[1], temp[2]);
-      m_transform->Translate(m_convertedLocations[4][0], m_convertedLocations[4][1], m_convertedLocations[4][2]);
-      m_transform->PreMultiply();
+      movement->PostMultiply();
+      movement->Translate(-m_convertedLocations[4][0], -m_convertedLocations[4][1], -m_convertedLocations[4][2]);
+      movement->RotateWXYZ(rotate, temp[0], temp[1], temp[2]);
+      movement->Translate(m_convertedLocations[4][0], m_convertedLocations[4][1], m_convertedLocations[4][2]);
+      movement->PreMultiply();
     } else if (m_currProp == m_diskActor[2]) {
-      m_transform->PostMultiply();
-      m_transform->Translate(-m_convertedLocations[4][0], -m_convertedLocations[4][1], -m_convertedLocations[4][2]);
-      m_transform->RotateWXYZ(rotate, -planeNormal[0], -planeNormal[1], -planeNormal[2]);
-      m_transform->Translate(m_convertedLocations[4][0], m_convertedLocations[4][1], m_convertedLocations[4][2]);
-      m_transform->PreMultiply();
+      movement->PostMultiply();
+      movement->Translate(-m_convertedLocations[4][0], -m_convertedLocations[4][1], -m_convertedLocations[4][2]);
+      movement->RotateWXYZ(rotate, -planeNormal[0], -planeNormal[1], -planeNormal[2]);
+      movement->Translate(m_convertedLocations[4][0], m_convertedLocations[4][1], m_convertedLocations[4][2]);
+      movement->PreMultiply();
     }
   }
+
+  m_transform->PostMultiply();
+  m_transform->Concatenate(movement);
+  m_transform->PreMultiply();
+
+  movement->Delete();
 
   updateWidgetPosition();
   m_oldX = X;
@@ -374,6 +396,9 @@ void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   double cameraDirec[3];
   double dotP=0.0f;
   rtObjectManager::instance().getMainWinHandle()->getCameraForward(cameraDirec);
+
+  m_userTransform->MultiplyPoint(cameraDirec, cameraDirec);
+
   dotP = zDirec[0]*cameraDirec[0]+zDirec[1]*cameraDirec[1]+zDirec[2]*cameraDirec[2];
   if (dotP > 0) {
     dotP = 1.0f;
@@ -411,8 +436,9 @@ void ObjectControlWidget::updateWidgetPosition() {
     m_torus[ix1]->SetCrossSectionRadius(std::max(m_xsize, m_ysize)*0.03);
 
     m_position[ix1]->Identity();
+    m_position[ix1]->Concatenate(m_userTransform);
     m_position[ix1]->Translate(m_convertedLocations[4][0] - pos[0], m_convertedLocations[4][1] - pos[1], m_convertedLocations[4][2] - pos[2]);
-    m_position[ix1]->Concatenate(m_transform->GetMatrix());
+    m_position[ix1]->Concatenate(m_transform);
 
   }
 

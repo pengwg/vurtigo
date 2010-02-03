@@ -81,6 +81,8 @@ public:
   //! Update the widget.
   void update();
 
+  void setUserTransform(vtkTransform* t) { m_textureActor->SetUserTransform(t); }
+
 protected:
   vtkPlaneSource* m_texturePlane;
   vtkPolyDataMapper* m_planeMapper;

@@ -137,8 +137,8 @@ void rt3DVolumeRenderObject::newDataAvailable() {
   m_transFilter->SetOutputExtentToDefault();
   m_transFilter->AutoCropOutputOn();
   m_transFilter->AddInput( dObj->getUShortData() );
-  m_transFilter->SetResliceAxes( dObj->getTransform()->GetMatrix() );
-  //m_transFilter->SetResliceAxes( vtkMatrix4x4::New() );
+  //m_transFilter->SetResliceAxes( dObj->getTransform()->GetMatrix() );
+  m_transFilter->SetResliceAxes( vtkMatrix4x4::New() );
   m_transFilter->Update();
 
   m_transFilter->GetOutput()->Update();
@@ -161,19 +161,25 @@ void rt3DVolumeRenderObject::newDataAvailable() {
   resetSagittalPlane();
   resetCoronalPlane();
 
-  /*
+
   vtkTransform *t = vtkTransform::New();
   t->Concatenate(dObj->getTransform());
   t->Inverse();
   m_volumeActor->SetUserTransform(t);
   m_outlineActor->SetUserTransform(t);
   t->Delete();
-*/
+
   m_isInit = true;
 }
 
 void rt3DVolumeRenderObject::resetAxialPlane() {
   double bounds[6];
+
+  rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
+
+  // Ensure the data object exists.
+  if (!dObj) return;
+
   m_transFilter->GetOutput()->GetBounds(bounds);
 
   double pts[4][3];
@@ -194,11 +200,23 @@ void rt3DVolumeRenderObject::resetAxialPlane() {
   pts[3][1] = bounds[2];
   pts[3][2] = (bounds[4]+bounds[5])/2.0f;
 
+  vtkTransform* tt = vtkTransform::New();
+  tt->Concatenate(dObj->getTransform()->GetMatrix());
+  tt->Inverse();
+
   m_boxOutline[0].setCorners(pts[0], pts[1], pts[2], pts[3]);
   m_texturePlane[0].setCorners(pts[0], pts[1], pts[3]);
   adjustReslice(0);
+
   m_planeControl[0].setTransform(m_boxOutline[0].getTransform());
   m_planeControl[0].setSize(bounds[3]-bounds[2], bounds[1]-bounds[0] );
+
+  m_texturePlane[0].setUserTransform(tt);
+  m_boxOutline[0].setUserTransform(tt);
+  m_planeControl[0].setUserTransform(tt);
+
+  tt->Delete();
+
 
   // Modify the data object so that the update function will be called.
   m_dataObj->Modified();
@@ -206,6 +224,12 @@ void rt3DVolumeRenderObject::resetAxialPlane() {
 
 void rt3DVolumeRenderObject::resetSagittalPlane() {
   double bounds[6];
+
+  rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
+
+  // Ensure the data object exists.
+  if (!dObj) return;
+
   m_transFilter->GetOutput()->GetBounds(bounds);
 
   double pts[4][3];
@@ -226,11 +250,21 @@ void rt3DVolumeRenderObject::resetSagittalPlane() {
   pts[3][1] = bounds[2];
   pts[3][2] = bounds[5];
 
+  vtkTransform* tt = vtkTransform::New();
+  tt->Concatenate(dObj->getTransform()->GetMatrix());
+  tt->Inverse();
+
   m_boxOutline[1].setCorners(pts[0], pts[1], pts[2], pts[3]);
   m_texturePlane[1].setCorners(pts[0], pts[1], pts[3]);
   adjustReslice(1);
   m_planeControl[1].setTransform(m_boxOutline[1].getTransform());
   m_planeControl[1].setSize(bounds[3]-bounds[2], bounds[5]-bounds[4] );
+
+  m_texturePlane[1].setUserTransform(tt);
+  m_boxOutline[1].setUserTransform(tt);
+  m_planeControl[1].setUserTransform(tt);
+
+  tt->Delete();
 
   // Modify the data object so that the update function will be called.
   m_dataObj->Modified();
@@ -238,6 +272,12 @@ void rt3DVolumeRenderObject::resetSagittalPlane() {
 
 void rt3DVolumeRenderObject::resetCoronalPlane() {
   double bounds[6];
+
+  rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
+
+  // Ensure the data object exists.
+  if (!dObj) return;
+
   m_transFilter->GetOutput()->GetBounds(bounds);
 
   double pts[4][3];
@@ -258,11 +298,21 @@ void rt3DVolumeRenderObject::resetCoronalPlane() {
   pts[3][1] = (bounds[2]+bounds[3])/2.0f;
   pts[3][2] = bounds[4];
 
+  vtkTransform* tt = vtkTransform::New();
+  tt->Concatenate(dObj->getTransform()->GetMatrix());
+  tt->Inverse();
+
   m_boxOutline[2].setCorners(pts[0], pts[1], pts[2], pts[3]);
   m_texturePlane[2].setCorners(pts[0], pts[1], pts[3]);
   adjustReslice(2);
   m_planeControl[2].setTransform(m_boxOutline[2].getTransform());
   m_planeControl[2].setSize(bounds[5]-bounds[4], bounds[1]-bounds[0] );
+
+  m_texturePlane[2].setUserTransform(tt);
+  m_boxOutline[2].setUserTransform(tt);
+  m_planeControl[2].setUserTransform(tt);
+
+  tt->Delete();
 
   // Modify the data object so that the update function will be called.
   m_dataObj->Modified();
@@ -547,6 +597,10 @@ void rt3DVolumeRenderObject::mouseMoveEvent(QMouseEvent* event) {
 
 void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
   if (!m_selectedProp || m_currentPlane == -1) return;
+
+  rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
+
+  if(!dObj) return;
 
   if (m_planeControl[m_currentPlane].isShowing()) {
     vtkTransform *t = vtkTransform::New();

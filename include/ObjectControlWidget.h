@@ -33,6 +33,8 @@ public:
   void show();
   void hide();
   bool isShowing();
+
+  void setUserTransform(vtkTransform* t);
 public slots:
   virtual void mousePressEvent(QMouseEvent* event);
   virtual void mouseMoveEvent(QMouseEvent* event);
@@ -44,6 +46,7 @@ public slots:
 protected:
   bool m_showing;
   vtkTransform* m_transform;
+  vtkTransform* m_userTransform;
   double m_xsize, m_ysize;
 
   double m_pointLocations[9][3];
