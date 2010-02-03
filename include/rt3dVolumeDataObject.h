@@ -189,6 +189,8 @@ public:
   void sagittalResetSlot();
   void coronalResetSlot();
 
+  void resetToScanPlane();
+
   void updateInfoText();
 
  signals:
@@ -197,6 +199,7 @@ public:
   void axialResetSignal();
   void sagittalResetSignal();
   void coronalResetSignal();
+  void resetToScanPlaneSignal();
 
  protected:
   /////////////

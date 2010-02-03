@@ -277,11 +277,11 @@ bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPo
     if(!currPhase) continue;
 
     int numVertices=0;
-    for (double curvePos=3.0; curvePos<=maxSlices-1; curvePos+=0.1) {
+    for (double curvePos=0.0; curvePos<=maxSlices; curvePos+=0.1) {
       for (int ix2=0; ix2<=currPhase->getMaxPtNum(); ix2++) {
         temp.ptList[0] = currPhase->getInterpolateXValue(type, curvePos, ix2)*space[0];
         temp.ptList[1] = currPhase->getInterpolateYValue(type, curvePos, ix2)*space[1];
-        temp.ptList[2] = curvePos*space[2]+0.5f*space[2];
+        temp.ptList[2] = (curvePos*space[2]+0.5f*space[2]);
 
         trans->TransformPoint(temp.ptList, temp.ptList);
         pointList.append(temp);

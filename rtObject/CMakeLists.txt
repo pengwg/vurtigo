@@ -39,6 +39,7 @@ set (RTOBJECT_MOC_FILES
   ${CMAKE_HOME_DIRECTORY}/include/rtNoneDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtCathDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rt3dVolumeDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rt3dVolumeRenderObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rt2dSliceDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtMatrixDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtPolyDataObject.h

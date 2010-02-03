@@ -39,12 +39,15 @@
 #include <vtkImageChangeInformation.h>
 #include <vtkWindowLevelLookupTable.h>
 #include <vtkSmartPointer.h>
+#include <vtkImageResample.h>
 
 //! The 3D Volume render object
 /*!
   Rendering pipeline for the 3D object.
   */
 class rt3DVolumeRenderObject : public rtRenderObject {
+
+  Q_OBJECT
 
  public:
 
@@ -74,6 +77,8 @@ public slots:
   virtual void resetAxialPlane();
   virtual void resetSagittalPlane();
   virtual void resetCoronalPlane();
+
+  void resetToScanPlane();
 
  protected:
   void setupDataObject();

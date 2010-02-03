@@ -26,6 +26,7 @@
 
 #include <vtkProperty.h>
 #include <vtkMath.h>
+#include <vtkMatrix4x4.h>
 
 rt3DVolumeRenderObject::rt3DVolumeRenderObject() {
   setObjectType(rtConstants::OT_3DObject);
@@ -60,7 +61,6 @@ rt3DVolumeRenderObject::~rt3DVolumeRenderObject() {
   if(m_outline) m_outline->Delete();
   if(m_outlineMapper) m_outlineMapper->Delete();
   if(m_outlineActor) m_outlineActor->Delete();
-
 }
 
 
@@ -138,6 +138,7 @@ void rt3DVolumeRenderObject::newDataAvailable() {
   m_transFilter->AutoCropOutputOn();
   m_transFilter->AddInput( dObj->getUShortData() );
   m_transFilter->SetResliceAxes( dObj->getTransform()->GetMatrix() );
+  //m_transFilter->SetResliceAxes( vtkMatrix4x4::New() );
   m_transFilter->Update();
 
   m_transFilter->GetOutput()->Update();
@@ -160,6 +161,14 @@ void rt3DVolumeRenderObject::newDataAvailable() {
   resetSagittalPlane();
   resetCoronalPlane();
 
+  /*
+  vtkTransform *t = vtkTransform::New();
+  t->Concatenate(dObj->getTransform());
+  t->Inverse();
+  m_volumeActor->SetUserTransform(t);
+  m_outlineActor->SetUserTransform(t);
+  t->Delete();
+*/
   m_isInit = true;
 }
 
@@ -259,7 +268,75 @@ void rt3DVolumeRenderObject::resetCoronalPlane() {
   m_dataObj->Modified();
 }
 
+void rt3DVolumeRenderObject::resetToScanPlane() {
+  double bounds[6];
+  rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
 
+  // Ensure the data object exists.
+  if (!dObj) return;
+
+  dObj->getUShortData()->GetBounds(bounds);
+
+  double pts[4][3];
+
+  pts[0][0] = bounds[0];
+  pts[0][1] = bounds[2];
+  pts[0][2] = (bounds[4]+bounds[5])/2.0f;
+
+  pts[1][0] = bounds[0];
+  pts[1][1] = bounds[3];
+  pts[1][2] = (bounds[4]+bounds[5])/2.0f;
+
+  pts[2][0] = bounds[1];
+  pts[2][1] = bounds[3];
+  pts[2][2] = (bounds[4]+bounds[5])/2.0f;
+
+  pts[3][0] = bounds[1];
+  pts[3][1] = bounds[2];
+  pts[3][2] = (bounds[4]+bounds[5])/2.0f;
+
+  vtkTransform* tt = vtkTransform::New();
+  tt->Concatenate(dObj->getTransform()->GetMatrix());
+  double pos[3];
+  tt->GetPosition(pos);
+  tt->Inverse();
+  tt->Translate(pos);
+  for (int ix1=0; ix1<4; ix1++) {
+    tt->MultiplyPoint(pts[ix1], pts[ix1]);
+  }
+  tt->Delete();
+
+
+  // Adjust the position in the middle of the box.
+
+  // Get the adjusted bounds
+  m_transFilter->GetOutput()->GetBounds(bounds);
+
+  double boxMiddle[3];
+  double planeMiddle[3];
+  double offset[3];
+
+  for (int ix1=0; ix1<3; ix1++) {
+    boxMiddle[ix1] = (bounds[ix1*2]+bounds[ix1*2+1])*0.5f;
+    planeMiddle[ix1] = (pts[0][ix1] + pts[2][ix1])*0.5f;
+    offset[ix1] = boxMiddle[ix1] - planeMiddle[ix1];
+  }
+
+  for (int ix1=0; ix1<4; ix1++) {
+    pts[ix1][0] = pts[ix1][0] + offset[0];
+    pts[ix1][1] = pts[ix1][1] + offset[1];
+    pts[ix1][2] = pts[ix1][2] + offset[2];
+  }
+
+  m_boxOutline[0].setCorners(pts[0], pts[1], pts[2], pts[3]);
+  m_texturePlane[0].setCorners(pts[0], pts[1], pts[3]);
+  adjustReslice(0);
+  m_planeControl[0].setTransform(m_boxOutline[0].getTransform());
+  m_planeControl[0].setSize(bounds[3]-bounds[2], bounds[1]-bounds[0] );
+
+  // Modify the data object so that the update function will be called.
+  m_dataObj->Modified();
+}
 
 
 void rt3DVolumeRenderObject::setRenderQuality(double quality) {
@@ -373,6 +450,7 @@ void rt3DVolumeRenderObject::setupDataObject() {
   connect(temp, SIGNAL(axialResetSignal()), this, SLOT(resetAxialPlane()));
   connect(temp, SIGNAL(sagittalResetSignal()), this, SLOT(resetSagittalPlane()));
   connect(temp, SIGNAL(coronalResetSignal()), this, SLOT(resetCoronalPlane()));
+  connect(temp, SIGNAL(resetToScanPlaneSignal()), this, SLOT(resetToScanPlane()));
 }
 
 
@@ -507,8 +585,6 @@ void rt3DVolumeRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
     }
   }
   if ( m_mainWin ) m_mainWin->setRenderFlag3D(true);
-
-
 }
 
 void rt3DVolumeRenderObject::keyPressEvent(QKeyEvent* event) {

@@ -305,6 +305,8 @@ void rt3DVolumeDataObject::setupGUI() {
   connect(m_optionsWidget.sagittalResetButton, SIGNAL(clicked()), this, SLOT(sagittalResetSlot()));
   connect(m_optionsWidget.coronalResetButton, SIGNAL(clicked()), this, SLOT(coronalResetSlot()));
 
+  connect(m_optionsWidget.scanPlaneResetButton, SIGNAL(clicked()), this, SLOT(resetToScanPlane()));
+
   // Watch for new objects to update the lists.
   connect(&rtObjectManager::instance(), SIGNAL(objectCreated(int)), this, SLOT(newObjectCreated(int)));
   connect(&rtObjectManager::instance(), SIGNAL(objectCreated(int)), this, SLOT(oldObjectRemoved(int)));
@@ -472,6 +474,11 @@ void rt3DVolumeDataObject::sagittalResetSlot() {
 
 void rt3DVolumeDataObject::coronalResetSlot() {
   emit coronalResetSignal();
+  Modified();
+}
+
+void rt3DVolumeDataObject::resetToScanPlane() {
+  emit resetToScanPlaneSignal();
   Modified();
 }
 
