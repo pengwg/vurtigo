@@ -24,6 +24,7 @@
 #include "ui_polyDataOptions.h"
 
 #include <QList>
+#include <QTimer>
 
 #include <vtkPolyData.h>
 #include <vtkProperty.h>
@@ -92,6 +93,7 @@ public slots:
   void meshCheckBoxChanged(int);
 
   void setVisibleComponent(int);
+  void nextVisibleComponent();
   void cineLoop(bool);
 
  protected:
@@ -107,6 +109,8 @@ public slots:
   QList<vtkProperty*> m_polyProperty;
   QList<vtkColorTransferFunction*> m_colorLookup;
   int m_currentPhase;
+
+  QTimer *m_cineFrame;
 
 };
 

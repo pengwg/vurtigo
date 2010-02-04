@@ -33,6 +33,12 @@
 //! Constructor
 rtPolyDataObject::rtPolyDataObject() {
   setObjectType(rtConstants::OT_vtkPolyData);
+
+
+  m_cineFrame = new QTimer(this);
+  connect( m_cineFrame,SIGNAL(timeout()), this, SLOT(nextVisibleComponent()) );
+
+
   setupGUI();
 
   m_currentPhase = -1;
@@ -44,6 +50,11 @@ rtPolyDataObject::rtPolyDataObject() {
 
 //! Destructor
 rtPolyDataObject::~rtPolyDataObject() {
+  if (m_cineFrame && m_cineFrame->isActive()) {
+    m_cineFrame->stop();
+  }
+  if (m_cineFrame) delete m_cineFrame;
+
   cleanupGUI();
   clearAllData();
 }
@@ -236,8 +247,20 @@ void rtPolyDataObject::setVisibleComponent(int comp) {
   Modified();
 }
 
-void rtPolyDataObject::cineLoop(bool loop) {
 
+void rtPolyDataObject::nextVisibleComponent() {
+  if( m_trigDelayList.count() <= 1) return;
+  m_currentPhase = (m_currentPhase + 1) % m_trigDelayList.count();
+  m_optionsWidget.frameSlider->setValue(m_currentPhase);
+  Modified();
+}
+
+void rtPolyDataObject::cineLoop(bool cine) {
+  if (cine) {
+    m_cineFrame->start(100);
+  } else if (m_cineFrame->isActive()) {
+    m_cineFrame->stop();
+  }
 }
 
 ////////////////
