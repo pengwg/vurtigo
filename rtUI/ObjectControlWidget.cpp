@@ -9,6 +9,7 @@
 #include <vtkPropCollection.h>
 #include <vtkPlane.h>
 #include <vtkMath.h>
+#include <vtkWorldPointPicker.h>
 
 #include <algorithm>
 
@@ -172,9 +173,6 @@ void ObjectControlWidget::setUserTransform(vtkTransform* t) {
 
   m_boxOutline.setUserTransform(t);
   m_pointActor->SetUserTransform(t);
-  m_diskActor[0]->SetUserTransform(t);
-  m_diskActor[1]->SetUserTransform(t);
-  m_diskActor[2]->SetUserTransform(t);
   m_userTransform->Identity();
   m_userTransform->Concatenate(t);
 }
@@ -201,12 +199,15 @@ void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
     col->AddItem(m_diskActor[2]);
 
     if (pick->PickProp(X, Y, ren, col) ) {
-      m_currProp = static_cast<vtkActor*>(pick->GetViewProp());
-      double pos2[3];
+      m_currProp = static_cast<vtkActor*>(pick->GetViewProp());  
       pick->GetPickPosition(m_clickPosition);
 
       for (int ix1=0; ix1<3; ix1++) {
+
+        // Check each rotating disk to see if one has been picked.
         if (m_currProp == m_diskActor[ix1]) {
+          double pos2[3];
+
           m_position[ix1]->Inverse();
           m_position[ix1]->TransformPoint(m_clickPosition, pos2);
           m_position[ix1]->Inverse();
@@ -225,14 +226,16 @@ void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
             m_positiveDirection[1] = pos2[1]+50.0;
           }
           m_positiveDirection[2] = pos2[2]+0.0f;
-
           m_position[ix1]->TransformPoint(m_positiveDirection, m_positiveDirectionT);
         }
       }
     }
+
+    // Change the prop color to red to show it is activated.
     if (m_currProp) {
       m_currProp->GetProperty()->SetColor(1.0, 0.0, 0.0);
     }
+
   }
 }
 
@@ -246,65 +249,77 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
   double cameraRight[3];
   double cameraUp[3];
   double cameraForward[3];
-  double temp[3];
-  double dist = rtObjectManager::instance().getMainWinHandle()->getCameraDistance();
-  double xdiff = (X-m_oldX)*(dist)/1200.0f;
-  double ydiff = (Y-m_oldY)*(dist)/1200.0f;
-
-  double planeNormal[3];
-  for (int ix1=0; ix1<3; ix1++) {
-    planeNormal[ix1] = m_transform->GetMatrix()->GetElement(ix1, 2);
-  }
+  double normalDirectionT[3];
 
   rtObjectManager::instance().getMainWinHandle()->getCameraRight(cameraRight);
   rtObjectManager::instance().getMainWinHandle()->getCameraUp(cameraUp);
   rtObjectManager::instance().getMainWinHandle()->getCameraForward(cameraForward);
 
+  normalDirectionT[0] = m_positiveDirectionT[0]-m_clickPosition[0];
+  normalDirectionT[1] = m_positiveDirectionT[1]-m_clickPosition[1];
+  normalDirectionT[2] = m_positiveDirectionT[2]-m_clickPosition[2];
+  vtkMath::Normalize(normalDirectionT);
+
   for (int ix1=0; ix1<9; ix1++) {
     m_transform->TransformPoint(m_pointLocations[ix1], m_convertedLocations[ix1]);
   }
 
+  double desiredPoint[3];
+
+  desiredPoint[0] = X;
+  desiredPoint[1] = Y;
+
+  double viewZ[3];
+  for (int ix1=0; ix1<3; ix1++) viewZ[ix1] = m_convertedLocations[4][ix1];
+  m_userTransform->TransformPoint(viewZ, viewZ);
+  rtObjectManager::instance().getMainWinHandle()->getRenderer()->WorldToView(viewZ[0], viewZ[1], viewZ[2]);
+  desiredPoint[2] = viewZ[2];
+
+  rtObjectManager::instance().getMainWinHandle()->getRenderer()->DisplayToNormalizedDisplay(desiredPoint[0], desiredPoint[1]);
+  rtObjectManager::instance().getMainWinHandle()->getRenderer()->NormalizedDisplayToViewport(desiredPoint[0], desiredPoint[1]);
+  rtObjectManager::instance().getMainWinHandle()->getRenderer()->ViewportToNormalizedViewport(desiredPoint[0], desiredPoint[1]);
+  rtObjectManager::instance().getMainWinHandle()->getRenderer()->NormalizedViewportToView(desiredPoint[0], desiredPoint[1], desiredPoint[2]);
+  rtObjectManager::instance().getMainWinHandle()->getRenderer()->ViewToWorld(desiredPoint[0], desiredPoint[1], desiredPoint[2]);
+
+  m_userTransform->Inverse();
+  m_userTransform->TransformPoint(desiredPoint, desiredPoint);
+  m_userTransform->Inverse();
+
+  for (int ix1=0; ix1<3; ix1++) {
+    desiredPoint[ix1] = desiredPoint[ix1] - m_convertedLocations[4][ix1] + m_convertedLocations[0][ix1];
+  }
+
   vtkTransform *movement = vtkTransform::New();
+  movement->Identity();
 
   if (m_currProp == m_pointActor) {
-    temp[0] = cameraRight[0]*xdiff+cameraUp[0]*ydiff;
-    temp[1] = cameraRight[1]*xdiff+cameraUp[1]*ydiff;
-    temp[2] = cameraRight[2]*xdiff+cameraUp[2]*ydiff;
+    double pos[3];
 
-    //m_transform->PostMultiply();
-    movement->Translate(temp[0], temp[1], temp[2]);
-    //m_transform->PreMultiply();
+    m_transform->PostMultiply();
+    m_transform->GetPosition(pos);
+    m_transform->Translate(-pos[0], -pos[1], -pos[2]);
+    m_transform->Translate(desiredPoint);
+    m_transform->PreMultiply();
   } else {
-
-    double normalDirectionT[3];
     vtkTransform* viewTransform = vtkTransform::New();
     vtkMatrix4x4* tempMatrix = vtkMatrix4x4::New();
-
-    normalDirectionT[0] = m_positiveDirectionT[0]-m_clickPosition[0];
-    normalDirectionT[1] = m_positiveDirectionT[1]-m_clickPosition[1];
-    normalDirectionT[2] = m_positiveDirectionT[2]-m_clickPosition[2];
-    vtkMath::Normalize(normalDirectionT);
-
-    tempMatrix->DeepCopy(rtObjectManager::instance().getMainWinHandle()->getCameraControl()->getViewMatrix());
-
-    tempMatrix->SetElement(0, 3, 0.0f);
-    tempMatrix->SetElement(1, 3, 0.0f);
-    tempMatrix->SetElement(2, 3, 0.0f);
-    viewTransform->SetMatrix(tempMatrix);
     double mouseDirec[3];
     double viewDirec[3];
-    double matrixP[3];
 
     mouseDirec[0] = (X-m_oldX);
     mouseDirec[1] = (Y-m_oldY);
     mouseDirec[2] = 0.0f;
 
+    tempMatrix->DeepCopy(rtObjectManager::instance().getMainWinHandle()->getCameraControl()->getViewMatrix());
+    tempMatrix->SetElement(0, 3, 0.0f);
+    tempMatrix->SetElement(1, 3, 0.0f);
+    tempMatrix->SetElement(2, 3, 0.0f);
+    viewTransform->SetMatrix(tempMatrix);
     viewTransform->Inverse();
     viewTransform->TransformPoint(mouseDirec, viewDirec);
+    vtkMath::Normalize(viewDirec);
     viewTransform->Delete();
     tempMatrix->Delete();
-
-    vtkMath::Normalize(viewDirec);
 
     double dotProd = normalDirectionT[0]*viewDirec[0]+normalDirectionT[1]*viewDirec[1]+normalDirectionT[2]*viewDirec[2];
     double rotate=dotProd*3;
@@ -316,24 +331,32 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
     }
 
     if (m_currProp == m_diskActor[0]) {
+      double rotateAxis[3];
       for (int ix1=0; ix1<3 ;ix1++) {
-        temp[ix1] = m_convertedLocations[7][ix1] - m_convertedLocations[4][ix1];
+        rotateAxis[ix1] = m_convertedLocations[7][ix1] - m_convertedLocations[4][ix1];
       }
       movement->PostMultiply();
       movement->Translate(-m_convertedLocations[4][0], -m_convertedLocations[4][1], -m_convertedLocations[4][2]);
-      movement->RotateWXYZ(rotate, temp[0], temp[1], temp[2]);
+      movement->RotateWXYZ(rotate, rotateAxis[0], rotateAxis[1], rotateAxis[2]);
       movement->Translate(m_convertedLocations[4][0], m_convertedLocations[4][1], m_convertedLocations[4][2]);
       movement->PreMultiply();
     } else if (m_currProp == m_diskActor[1]) {
+      double rotateAxis[3];
       for (int ix1=0; ix1<3 ;ix1++) {
-        temp[ix1] = m_convertedLocations[3][ix1] - m_convertedLocations[4][ix1];
+        rotateAxis[ix1] = m_convertedLocations[3][ix1] - m_convertedLocations[4][ix1];
       }
       movement->PostMultiply();
       movement->Translate(-m_convertedLocations[4][0], -m_convertedLocations[4][1], -m_convertedLocations[4][2]);
-      movement->RotateWXYZ(rotate, temp[0], temp[1], temp[2]);
+      movement->RotateWXYZ(rotate, rotateAxis[0], rotateAxis[1], rotateAxis[2]);
       movement->Translate(m_convertedLocations[4][0], m_convertedLocations[4][1], m_convertedLocations[4][2]);
       movement->PreMultiply();
     } else if (m_currProp == m_diskActor[2]) {
+      double planeNormal[3];
+
+      for (int ix1=0; ix1<3; ix1++) {
+        planeNormal[ix1] = m_transform->GetMatrix()->GetElement(ix1, 2);
+      }
+
       movement->PostMultiply();
       movement->Translate(-m_convertedLocations[4][0], -m_convertedLocations[4][1], -m_convertedLocations[4][2]);
       movement->RotateWXYZ(rotate, -planeNormal[0], -planeNormal[1], -planeNormal[2]);
@@ -381,9 +404,12 @@ void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   if(!m_showing) return;
   int numSteps = event->delta() / 32;
 
+  vtkTransform *truePos = vtkTransform::New();
   vtkMatrix4x4 *mat = vtkMatrix4x4::New();
 
-  m_transform->GetMatrix(mat);
+  truePos->Identity();
+  truePos->Concatenate(m_transform);
+  truePos->GetMatrix(mat);
 
   double zDirec[3];
   double sumSq = 0.0;
@@ -412,11 +438,11 @@ void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   m_transform->SetMatrix(mat);
 
   mat->Delete();
+  truePos->Delete();
   updateWidgetPosition();
 }
 
 void ObjectControlWidget::updateWidgetPosition() {
-
   for (int ix1=0; ix1<9; ix1++) {
     m_transform->TransformPoint(m_pointLocations[ix1], m_convertedLocations[ix1]);
   }
@@ -445,6 +471,7 @@ void ObjectControlWidget::updateWidgetPosition() {
   m_position[0]->RotateX(90.0f);
   m_position[1]->RotateY(90.0f);
   m_position[2]->RotateZ(90.0f);
+
   for (int ix1=0; ix1<3; ix1++) {
     m_diskActor[ix1]->SetUserTransform(m_position[ix1]);
   }

@@ -56,8 +56,8 @@ void rt3DPointBufferRenderObject::update() {
   QList<rt3DPointBufferDataObject::SimplePoint>* pointList = dObj->getPointList();
   for (int ix1=0; ix1<pointList->size(); ix1++) {
     tempPipe = new SinglePointPipeline();
-    tempPipe->sphere->SetThetaResolution(40);
-    tempPipe->sphere->SetPhiResolution(40);
+    tempPipe->sphere->SetThetaResolution(20);
+    tempPipe->sphere->SetPhiResolution(20);
     tempPipe->sphere->SetRadius(pointList->at(ix1).pSize);
     tempPipe->sphere->SetCenter(pointList->at(ix1).px, pointList->at(ix1).py, pointList->at(ix1).pz);
     tempPipe->actor->SetProperty(pointList->at(ix1).pProp);

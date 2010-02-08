@@ -78,8 +78,6 @@ public slots:
   virtual void resetSagittalPlane();
   virtual void resetCoronalPlane();
 
-  void resetToScanPlane();
-
  protected:
   void setupDataObject();
   void setupPipeline();

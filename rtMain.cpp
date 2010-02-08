@@ -126,10 +126,32 @@ void setupOrigin() {
   rt3DPointBufferRenderObject *renObj = static_cast<rt3DPointBufferRenderObject*>(rtObjectManager::instance().addObjectOfType(rtConstants::OT_3DPointBuffer, "True Origin"));
   rt3DPointBufferDataObject *datObj = static_cast<rt3DPointBufferDataObject*>(renObj->getDataObject());
   rt3DPointBufferDataObject::SimplePoint origin;
+  rt3DPointBufferDataObject::SimplePoint xDir, yDir, zDir;
   origin.px = 0.0f;
   origin.py = 0.0f;
   origin.pz = 0.0f;
-  origin.pSize = 10.0f;
+  origin.pSize = 5.0f;
   datObj->addPoint(origin);
+
+  for (int ix1=10; ix1<=200; ix1+=10) {
+    xDir.px = ix1;
+    xDir.py = 0.0f;
+    xDir.pz = 0.0f;
+    xDir.pSize = 2.0f;
+    datObj->addPoint(xDir);
+    yDir.px = 0.0f;
+    yDir.py = ix1;
+    yDir.pz = 0.0f;
+    yDir.pSize = 2.0f;
+    datObj->addPoint(yDir);
+    zDir.px = 0.0f;
+    zDir.py = 0.0f;
+    zDir.pz = ix1;
+    zDir.pSize = 2.0f;
+    datObj->addPoint(zDir);
+  }
+
   datObj->Modified();
+
+
 }
