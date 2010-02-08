@@ -1154,6 +1154,7 @@ void rtMainWindow::cameraModeToggled(bool toggle) {
     // Prevent the user from turning all the options off.
     actionCamera_Mode->setChecked(true);
   }
+  emit cameraModeSignal(actionCamera_Mode->isChecked());
 }
 
 void rtMainWindow::interactionModeToggled(bool toggle) {
@@ -1166,6 +1167,7 @@ void rtMainWindow::interactionModeToggled(bool toggle) {
     // Prevent the user from turning all the options off.
     actionInteraction_Mode->setChecked(true);
   }
+  emit interactionModeSignal(actionInteraction_Mode->isChecked());
 }
 
 void rtMainWindow::placeModeToggled(bool toggle) {
@@ -1178,6 +1180,7 @@ void rtMainWindow::placeModeToggled(bool toggle) {
     // Prevent the user from turning all the options off.
     actionPlacement_Mode->setChecked(true);
   }
+  emit placeModeSignal(actionPlacement_Mode->isChecked());
 }
 
 

@@ -176,6 +176,11 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   double getMovingQuality() { return m_movingQuality; }
   double getStillQuality() { return m_stillQuality; }
 
+signals:
+  void cameraModeSignal(bool);
+  void interactionModeSignal(bool);
+  void placeModeSignal(bool);
+
  protected:
   //! The widget that handles the 3D rendering window from VTK.
   customQVTKWidget *m_render3DVTKWidget;
