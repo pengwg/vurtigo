@@ -43,6 +43,10 @@ public slots:
   virtual void keyPressEvent(QKeyEvent* event);
   virtual void keyReleaseEvent(QKeyEvent* event);
   virtual void wheelEvent(QWheelEvent* event);
+
+  void cameraMode(bool);
+  void interactionMode(bool);
+  void placeMode(bool);
 protected:
   bool m_showing;
   vtkTransform* m_transform;

@@ -72,6 +72,10 @@ ObjectControlWidget::ObjectControlWidget() {
   m_boxOutline.setCorners(m_pointLocations[m_corners[0]], m_pointLocations[m_corners[1]], m_pointLocations[m_corners[2]], m_pointLocations[m_corners[3]]);
 
   m_currProp = NULL;
+
+  connect( rtObjectManager::instance().getMainWinHandle(), SIGNAL(cameraModeSignal(bool)), this, SLOT(cameraMode(bool)) );
+  connect( rtObjectManager::instance().getMainWinHandle(), SIGNAL(interactionModeSignal(bool)), this, SLOT(interactionMode(bool)) );
+  connect( rtObjectManager::instance().getMainWinHandle(), SIGNAL(placeModeSignal(bool)), this, SLOT(placeMode(bool)) );
 }
 
 ObjectControlWidget::~ObjectControlWidget() {
@@ -138,15 +142,13 @@ void ObjectControlWidget::show() {
   updateWidgetPosition();
 
   ren->AddViewProp(m_pointActor);
-
-
   ren->AddViewProp(m_boxOutline.getActor());
-
 
   for (int ix1=0; ix1<3; ix1++) {
     ren->AddViewProp(m_diskActor[ix1]);
   }
-
+  // Make the window 'dirty' so that it is rerendered
+  rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
 void ObjectControlWidget::hide() {
@@ -156,12 +158,13 @@ void ObjectControlWidget::hide() {
   vtkRenderer* ren = rtObjectManager::instance().getMainWinHandle()->getRenderer();
 
   ren->RemoveViewProp(m_pointActor);
-
   ren->RemoveViewProp(m_boxOutline.getActor());
 
   for (int ix1=0; ix1<3; ix1++) {
     ren->RemoveViewProp(m_diskActor[ix1]);
   }
+  // Make the window 'dirty' so that it is rerendered
+  rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
 bool ObjectControlWidget::isShowing() {
@@ -440,6 +443,18 @@ void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   mat->Delete();
   truePos->Delete();
   updateWidgetPosition();
+}
+
+void ObjectControlWidget::cameraMode(bool toggle) {
+  if (toggle) hide();
+}
+
+void ObjectControlWidget::interactionMode(bool toggle) {
+  if(!toggle) hide();
+}
+
+void ObjectControlWidget::placeMode(bool toggle) {
+  if(toggle) hide();
 }
 
 void ObjectControlWidget::updateWidgetPosition() {

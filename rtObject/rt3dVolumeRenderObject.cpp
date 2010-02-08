@@ -388,6 +388,11 @@ bool rt3DVolumeRenderObject::removeFromRenderer(vtkRenderer* ren) {
   disconnect(renWid, SIGNAL(interKeyRelease(QKeyEvent*)), this, SLOT(keyReleaseEvent(QKeyEvent*)));
   disconnect(renWid, SIGNAL(interWheel(QWheelEvent*)), this, SLOT(wheelEvent(QWheelEvent*)));
 
+  // Remove the interactors too...
+  if ( m_planeControl[0].isShowing() ) m_planeControl[0].hide();
+  if ( m_planeControl[1].isShowing() ) m_planeControl[1].hide();
+  if ( m_planeControl[2].isShowing() ) m_planeControl[2].hide();
+
   return true;
 }
 
