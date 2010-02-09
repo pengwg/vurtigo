@@ -48,6 +48,7 @@ public:
       int angles[2];
       double cx, cy, cz;
       double SNR;
+      bool visible;
   };
 
   enum EstimationType {
@@ -71,6 +72,7 @@ public:
 
   // List specific
   int getNumCoils();
+  int getNumAllCoils();
   QHash<int, CathCoilData>* getListHandle();
   int getNumLocations();
   QList<int> getLocationList();
@@ -98,6 +100,8 @@ public:
 
   void useSNRSizeChanged(int);
 
+  void tableCellChanged(int row, int col);
+
  protected:
   // Functions
   void setupGUI();
@@ -105,11 +109,17 @@ public:
   
   int getNewCoilID();
 
+  void updateCoilTable();
+
   //! A hash of coild ID with the coil data
   QHash<int, CathCoilData> m_coilList;
 
-  //! A hash with coil location and coil ID.
+  //! Storage for coils that are not visible.
+  QHash<int, CathCoilData> m_discardCoilList;
+
+  //! A hash with coil location and coil ID. Only contains the locations for visible coils.
   QMultiMap<int, int> m_coilLocations;
+
 
   vtkProperty* m_splineProperty;
   vtkProperty* m_pointProperty;
@@ -128,6 +138,7 @@ public:
   //! Size multiplier for each of the points.
   int m_pointSize;
 
+  //! Use the SNR value to determine the size of the rendered coil.
   bool m_useSNRSize;
 
   //! The objects that sets the widgets for the cath options.

@@ -113,7 +113,7 @@ void rtCathRenderObject::update() {
      if (dObj->useSNRSize()) {
       temp->SetRadius(25.0f*((double)dObj->getPointSize())/SNR);
     } else {
-      temp->SetRadius( ((double)dObj->getPointSize())/3.0f );
+      temp->SetRadius( ((double)dObj->getPointSize())/10.0f );
     }
     temp->SetThetaResolution(50);
     temp->SetPhiResolution(50);
@@ -148,7 +148,7 @@ void rtCathRenderObject::update() {
       if (dObj->useSNRSize()) {
         temp->SetRadius(25.0f*((double)dObj->getPointSize())/SNR);
       } else {
-        temp->SetRadius( ((double)dObj->getPointSize())/3.0f );
+        temp->SetRadius( ((double)dObj->getPointSize())/10.0f );
       }
       temp->SetThetaResolution(50);
       temp->SetPhiResolution(50);

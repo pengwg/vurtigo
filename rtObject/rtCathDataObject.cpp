@@ -84,9 +84,10 @@ int rtCathDataObject::addCoil(int loc) {
     coil.cy = 0.0;
     coil.cz = 0.0;
     coil.SNR = 1;
+    coil.visible = true;
     m_coilList.insert(cID, coil);
-
     m_coilLocations.insert(loc, cID);
+    updateCoilTable();
   }
 
   return cID;
@@ -94,9 +95,15 @@ int rtCathDataObject::addCoil(int loc) {
 
 //! Set the SNR for a coil
 bool rtCathDataObject::setCoilSNR(int coilID, double SNR) {
-  if (m_coilList.contains(coilID)) {
-    if (SNR <= 0.01) SNR = 0.01;
+  if (SNR <= 0.01) SNR = 0.01;
+
+  if (m_coilList.contains(coilID)) {  
     m_coilList[coilID].SNR = SNR;
+    updateCoilTable();
+    return true;
+  } else if (m_discardCoilList.contains(coilID)) {
+    m_discardCoilList[coilID].SNR = SNR;
+    updateCoilTable();
     return true;
   }
   return false;
@@ -107,6 +114,12 @@ bool rtCathDataObject::setCoilAngles(int coilID, int a1, int a2) {
   if (m_coilList.contains(coilID)) {
     m_coilList[coilID].angles[0] = a1;
     m_coilList[coilID].angles[1] = a2;
+    updateCoilTable();
+    return true;
+  } else if (m_discardCoilList.contains(coilID)) {
+    m_discardCoilList[coilID].angles[0] = a1;
+    m_discardCoilList[coilID].angles[1] = a2;
+    updateCoilTable();
     return true;
   }
   return false;
@@ -118,6 +131,13 @@ bool rtCathDataObject::setCoilCoords(int coilID, double cx, double cy, double cz
     m_coilList[coilID].cx = cx;
     m_coilList[coilID].cy = cy;
     m_coilList[coilID].cz = cz;
+    updateCoilTable();
+    return true;
+  } else if (m_discardCoilList.contains(coilID)) {
+    m_discardCoilList[coilID].cx = cx;
+    m_discardCoilList[coilID].cy = cy;
+    m_discardCoilList[coilID].cz = cz;
+    updateCoilTable();
     return true;
   }
   return false;
@@ -127,6 +147,8 @@ bool rtCathDataObject::setCoilCoords(int coilID, double cx, double cy, double cz
 rtCathDataObject::CathCoilData* rtCathDataObject::getCoilHandle(int coilID) {
   if (m_coilList.contains(coilID)) {
     return &m_coilList[coilID];
+  } else if (m_discardCoilList.contains(coilID)) {
+    return &m_discardCoilList[coilID];
   }
   return NULL;
 }
@@ -136,18 +158,31 @@ bool rtCathDataObject::removeCoil(int coilID) {
   if (m_coilList.contains(coilID)){
     m_coilLocations.remove(m_coilList[coilID].locationID, coilID);
     m_coilList.remove(coilID);
+    updateCoilTable();
+    return true;
+  } else if (m_discardCoilList.contains(coilID)) {
+    m_discardCoilList.remove(coilID);
+    updateCoilTable();
     return true;
   }
   return false;
 }
 
 // List specific
-//! Get the number of coils in the list.
+//! Get the number of visible coils in the list.
 /*!
-  \return The number of coils in the coil list.
+  \return The number of visible coils in the coil list.
   */
 int rtCathDataObject::getNumCoils() {
   return m_coilList.size();
+}
+
+//! Get the number of coils in the list.
+/*!
+  \return The number of coils in the coil list. This includes coils that are not visible.
+  */
+int rtCathDataObject::getNumAllCoils() {
+  return m_coilList.size() + m_discardCoilList.size();
 }
 
 //! Get the handle to the coil list.
@@ -159,19 +194,20 @@ QHash<int, rtCathDataObject::CathCoilData>* rtCathDataObject::getListHandle() {
   return &m_coilList;
 }
 
-//! The the number of unique locations.
+//! The the number of unique visible locations.
 int rtCathDataObject::getNumLocations() {
   return m_coilLocations.uniqueKeys().size();
 }
 
-//! List of unique locations on the catheter.
+//! List of unique visible locations on the catheter.
 QList<int> rtCathDataObject::getLocationList() {
-  return m_coilLocations.uniqueKeys();
+  QList<int> Ids = m_coilLocations.uniqueKeys();
+  return Ids;
 }
 
 //! Get the calculated position at a certain location
 /*!
-  Locations may have multiple coils and the position must be estimated.
+  Locations may have multiple coils and the position must be estimated. Coils that are not visible are not included in the calculation.
   @param loc The location ID
   @param out Resulting position (x,y,z) will be placed here.
   @return True if the resulting position is valid. False otherwise.
@@ -229,7 +265,7 @@ bool rtCathDataObject::getPositionAtLocation(int loc, double out[3]) {
 
 //! Get the SNR at a particular location
 /*!
-  The SNR at a location is also defined by the estimation method.
+  The SNR at a location is also defined by the estimation method. Coils that are not visible are not included in the calculation.
   */
 bool rtCathDataObject::getSNRAtLocation(int loc, double &SNR) {
   if(!m_coilLocations.contains(loc)) return false;
@@ -280,8 +316,20 @@ void rtCathDataObject::setupGUI() {
 
   m_cathGuiSetup.setupUi(wid);
 
+  // setup the use SNR checkbox.
   m_useSNRSize = false;
   m_cathGuiSetup.snrSizeCheckBox->setChecked(m_useSNRSize);
+
+  // Setup the points table.
+  m_cathGuiSetup.pointsTable->setColumnWidth(0, 60);
+  m_cathGuiSetup.pointsTable->setColumnWidth(1, 50);
+  m_cathGuiSetup.pointsTable->setColumnWidth(2, 60);
+  m_cathGuiSetup.pointsTable->setColumnWidth(3, 50);
+  m_cathGuiSetup.pointsTable->setColumnWidth(4, 50);
+  m_cathGuiSetup.pointsTable->setColumnWidth(5, 50);
+  m_cathGuiSetup.pointsTable->setColumnWidth(6, 50);
+
+  connect(m_cathGuiSetup.pointsTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableCellChanged(int,int)));
 
   connect(m_cathGuiSetup.splinePropButton, SIGNAL(pressed()), this, SLOT(splinePropertyDialog()));
   connect(m_cathGuiSetup.pointPropButton, SIGNAL(pressed()), this, SLOT(pointPropertyDialog()));
@@ -298,15 +346,6 @@ void rtCathDataObject::setupGUI() {
 
 //! Clean the GUI widgets.
 void rtCathDataObject::cleanupGUI() {
-}
-
-//! Return the next unused coil ID
-int rtCathDataObject::getNewCoilID() {
-  int ix1;
-  for (ix1=0; ix1<m_max_coils; ix1++) {
-    if (!m_coilList.contains(ix1)) return ix1;
-  }
-  return -1;
 }
 
 //! Called when the spline properties are requested.
@@ -339,4 +378,112 @@ void rtCathDataObject::useSNRSizeChanged(int status) {
   } else {
     m_useSNRSize = true;
   }
+  Modified();
+}
+
+
+void rtCathDataObject::tableCellChanged(int row, int col) {
+
+  // Is it one of the check boxes?
+  if(col == 0) {
+    QTableWidgetItem* item = m_cathGuiSetup.pointsTable->item(row, col);
+    QTableWidgetItem* itemID = m_cathGuiSetup.pointsTable->item(row, col+1);
+
+    if (!item || !itemID) return;
+
+    int id;
+    bool ok;
+
+    id = itemID->text().toInt(&ok);
+
+    if ( ok ) {
+      if (item->checkState()==Qt::Checked) {
+        item->setText("ON");
+
+        // Get from the discard pile...
+        if(m_discardCoilList.contains(id)) {
+          m_coilList.insert(id, m_discardCoilList.take(id));
+          m_coilList[id].visible = true;
+          m_coilLocations.insert(m_coilList[id].locationID, id);
+        }
+
+      } else {
+        item->setText("OFF");
+        if (m_coilList.contains(id)) {
+          // Send to discard pile...
+          m_coilList[id].visible = false;
+          m_coilLocations.remove(m_coilList[id].locationID, id);
+          m_discardCoilList.insert(id, m_coilList.take(id));
+        }
+      }
+      Modified();
+    }
+  }
+}
+
+//! Return the next unused coil ID
+int rtCathDataObject::getNewCoilID() {
+  int ix1;
+  for (ix1=0; ix1<m_max_coils; ix1++) {
+    if (!m_coilList.contains(ix1) && !m_discardCoilList.contains(ix1)) return ix1;
+  }
+  return -1;
+}
+
+void rtCathDataObject::updateCoilTable() {
+  QTableWidgetItem *tempItem;
+  QList<int> keyList = m_coilList.keys();
+
+  keyList += m_discardCoilList.keys();
+
+  m_cathGuiSetup.pointsTable->setRowCount(keyList.size());
+
+  for (int ix1=0; ix1<keyList.size(); ix1++) {
+    CathCoilData dat = m_coilList[keyList[ix1]];
+    tempItem = new QTableWidgetItem();
+    tempItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+    if ( dat.visible ) {
+      tempItem->setCheckState(Qt::Checked);
+      tempItem->setText("ON");
+    } else {
+      tempItem->setCheckState(Qt::Unchecked);
+      tempItem->setText("OFF");
+    }
+    m_cathGuiSetup.pointsTable->setItem(ix1, 0, tempItem);
+
+    tempItem = new QTableWidgetItem();
+    tempItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    tempItem->setText(QString::number(keyList[ix1]));
+    m_cathGuiSetup.pointsTable->setItem(ix1, 1, tempItem);
+
+    tempItem = new QTableWidgetItem();
+    tempItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    tempItem->setText(QString::number(dat.locationID));
+    m_cathGuiSetup.pointsTable->setItem(ix1, 2, tempItem);
+
+    // X
+    tempItem = new QTableWidgetItem();
+    tempItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    tempItem->setText(QString::number(dat.cx));
+    m_cathGuiSetup.pointsTable->setItem(ix1, 3, tempItem);
+
+    // Y
+    tempItem = new QTableWidgetItem();
+    tempItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    tempItem->setText(QString::number(dat.cy));
+    m_cathGuiSetup.pointsTable->setItem(ix1, 4, tempItem);
+
+    // Z
+    tempItem = new QTableWidgetItem();
+    tempItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    tempItem->setText(QString::number(dat.cz));
+    m_cathGuiSetup.pointsTable->setItem(ix1, 5, tempItem);
+
+    // SNR
+    tempItem = new QTableWidgetItem();
+    tempItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    tempItem->setText(QString::number(dat.SNR));
+    m_cathGuiSetup.pointsTable->setItem(ix1, 6, tempItem);
+  }
+  m_cathGuiSetup.pointsTable->sortItems( 1, Qt::AscendingOrder );
 }
