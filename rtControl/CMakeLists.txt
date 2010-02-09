@@ -5,6 +5,7 @@ set ( RTCONTROL_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rtCameraControl.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtConfigOptions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtHelpManager.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtApplication.cpp
   CACHE INTERNAL "Vurtigo rtControl Source Files"
 )
 

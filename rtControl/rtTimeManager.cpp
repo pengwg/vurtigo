@@ -26,6 +26,7 @@
 #include "rtObjectManager.h"
 #include "buildParam.h"
 #include "rtMessage.h"
+#include "rtApplication.h"
 
 #include <iostream>
 #include <cmath>
@@ -60,8 +61,6 @@ rtTimeManager::rtTimeManager() {
   m_pluginUpdateTime->start();
   m_planeUpdateTime->start();
 
-  m_mainWin = NULL;
-
   m_currentSum = 0.0;
   m_renderTimePosition = 0;
   m_frameRateLabel = NULL;
@@ -90,21 +89,15 @@ rtTimeManager& rtTimeManager::instance() {
 }
 
 //! Start the timer for the main window. Pass in the handle to the main window.
-void rtTimeManager::startRenderTimer(rtMainWindow* mainWin, int delay) {
+void rtTimeManager::startRenderTimer(int delay) {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtMessage::instance().debug( QString("rtTimeManager::startRenderTimer() start") );
 #endif
 
-  if (!mainWin) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("rtTimeManager::startRenderTimer() mainWin pointer is NULL. Render timer not started.") );
-    return;
-  }
-
-  m_mainWin = mainWin;
   m_renderTime->setInterval(delay);
   connect(m_renderTime, SIGNAL(timeout()), this, SLOT(renderTimeout()));
-
   m_renderTime->start();
+
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtMessage::instance().debug( QString("rtTimeManager::startRenderTimer() end") );
 #endif
@@ -116,9 +109,9 @@ void rtTimeManager::renderTimeout() {
   rtMessage::instance().debug( QString("rtTimeManager::renderTimeout() start") );
 #endif
 
-  if (m_mainWin) {
+  if ( rtApplication::instance().getMainWinHandle() ) {
     checkWatchList();
-    m_mainWin->tryRender3D();
+    rtApplication::instance().getMainWinHandle()->tryRender3D();
 
     calcFrameRate();
   } else {
@@ -141,7 +134,7 @@ void rtTimeManager::calcFrameRate() {
   if (!m_frameRateLabel)
     m_frameRateLabel = rtObjectManager::instance().addObjectOfType(rtConstants::OT_TextLabel, "Frame Rate");
 
-  frameRate = 1.0f/m_mainWin->getRenderer()->GetLastRenderTimeInSeconds();
+  frameRate = 1.0f/rtApplication::instance().getMainWinHandle()->getRenderer()->GetLastRenderTimeInSeconds();
   m_currentSum -= m_renderTimeBuffer[m_renderTimePosition];
   m_currentSum += frameRate;
   m_renderTimeBuffer[m_renderTimePosition] = frameRate;
@@ -235,19 +228,19 @@ void rtTimeManager::checkWatchList() {
     renderNew = m_watchList.at(ix1)->tryUpdate() || renderNew;
 
     // Adjust the rendering quality.
-    if (m_mainWin) {
-      if (m_mainWin->cameraMoving()) {
+    if (rtApplication::instance().getMainWinHandle()) {
+      if (rtApplication::instance().getMainWinHandle()->cameraMoving()) {
         // Camera is moving implies lower quality.
-        m_watchList.at(ix1)->setRenderQuality(m_mainWin->getMovingQuality());
+        m_watchList.at(ix1)->setRenderQuality(rtApplication::instance().getMainWinHandle()->getMovingQuality());
       } else {
-        m_watchList.at(ix1)->setRenderQuality(m_mainWin->getStillQuality());
+        m_watchList.at(ix1)->setRenderQuality(rtApplication::instance().getMainWinHandle()->getStillQuality());
       }
     }
   }
 
-  if (renderNew && m_mainWin) {
-    m_mainWin->getRenderer()->ResetCameraClippingRange();
-    m_mainWin->setRenderFlag3D(true);
+  if (renderNew && rtApplication::instance().getMainWinHandle()) {
+    rtApplication::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtMessage::instance().debug( QString("rtTimeManager::checkWatchList() end") );
@@ -258,11 +251,11 @@ void rtTimeManager::planeUpdate() {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtMessage::instance().debug( QString("rtTimeManager::planeUpdate() start") );
 #endif
-  if (!m_mainWin) {
+  if (!rtApplication::instance().getMainWinHandle()) {
     rtMessage::instance().warning(__LINE__, __FILE__, QString("rtTimeManager::planeUpdate() Main window pointer is NULL. Update skipped. ") );
     return;
   }
-  m_mainWin->update2DViews();
+  rtApplication::instance().getMainWinHandle()->update2DViews();
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtMessage::instance().debug( QString("rtTimeManager::planeUpdate() end") );
 #endif

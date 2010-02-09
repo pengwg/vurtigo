@@ -383,7 +383,7 @@ void rtCathDataObject::useSNRSizeChanged(int status) {
 
 
 void rtCathDataObject::tableCellChanged(int row, int col) {
-
+std::cout << "-1" << std::endl;
   // Is it one of the check boxes?
   if(col == 0) {
     QTableWidgetItem* item = m_cathGuiSetup.pointsTable->item(row, col);
@@ -393,13 +393,10 @@ void rtCathDataObject::tableCellChanged(int row, int col) {
 
     int id;
     bool ok;
-
     id = itemID->text().toInt(&ok);
-
     if ( ok ) {
       if (item->checkState()==Qt::Checked) {
         item->setText("ON");
-
         // Get from the discard pile...
         if(m_discardCoilList.contains(id)) {
           m_coilList.insert(id, m_discardCoilList.take(id));
@@ -485,5 +482,5 @@ void rtCathDataObject::updateCoilTable() {
     tempItem->setText(QString::number(dat.SNR));
     m_cathGuiSetup.pointsTable->setItem(ix1, 6, tempItem);
   }
-  m_cathGuiSetup.pointsTable->sortItems( 1, Qt::AscendingOrder );
+  //m_cathGuiSetup.pointsTable->sortItems( 1, Qt::AscendingOrder );
 }

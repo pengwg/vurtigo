@@ -33,6 +33,8 @@
 #include <sstream>
 #include <cstdio>
 
+#include "rtApplication.h"
+
 #include "rtMainWindow.h"
 #include "rtObjectManager.h"
 #include "rtTimeManager.h"
@@ -54,18 +56,9 @@ int main(int argc, char *argv[])
     bool runVurtigo = true;
     int exitCode = 0;
 
-    // Setup the message stream.
-    // This defaults to standard out.
-    QTextStream stream(stdout, QIODevice::WriteOnly);
-    rtMessage::instance().setStream(&stream);
+    rtApplication::instance().displayCopyright();
+    rtApplication::instance().initApp();
 
-    stream << "Vurtigo Copyright (C) 2009 Sunnybrook Health Sciences Centre. ";
-    stream << "This program comes with ABSOLUTELY NO WARRANTY; ";
-    stream << "This is free software, and you are welcome to redistribute it under certain conditions; ";
-    stream << "See COPYING and COPYING.LESSER for details.\n\n";
-    stream.flush();
-
-    rtMainWindow mainWin;
     QStringList args = app.arguments();
 
     // Start at 1 since the first element is the name of the program
@@ -81,10 +74,10 @@ int main(int argc, char *argv[])
     // Check if the user wants Vurtigo to run and if the config file was loaded properly.
     if (runVurtigo) {
       rtConfigOptions::instance(); // Reead the config file before anything...
-      rtTimeManager::instance().startRenderTimer(&mainWin, 40);
-      rtObjectManager::instance().setMainWinHandle(&mainWin);
+      rtTimeManager::instance().startRenderTimer(40);
+      rtObjectManager::instance().setMainWinHandle(rtApplication::instance().getMainWinHandle());
       rtBaseHandle::instance(); // Important to create the object in THIS THREAD.
-      mainWin.setupHelpFiles();
+      rtApplication::instance().getMainWinHandle()->setupHelpFiles();
 
       // Load default plugins
       QList<QString> pluginList;
@@ -112,7 +105,7 @@ int main(int argc, char *argv[])
 #ifdef DEBUG_VERBOSE_MODE_ON
       rtMessage::instance().debug( QString("main() Show Window") );
 #endif
-      mainWin.show();
+      rtApplication::instance().getMainWinHandle()->show();
 #ifdef DEBUG_VERBOSE_MODE_ON
       rtMessage::instance().debug( QString("main() Before call to app.exec()") );
 #endif

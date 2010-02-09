@@ -27,7 +27,6 @@
 
 class QTimer;
 
-class rtMainWindow;
 class rtRenderObject;
 
 //! Controls timing for the base and all plugins. [Singleton]
@@ -44,7 +43,7 @@ class rtTimeManager : public QObject {
 
   static rtTimeManager& instance();
 
-  void startRenderTimer(rtMainWindow* mainWin, int delay=34);
+  void startRenderTimer(int delay=34);
 
   void addToWatchList(rtRenderObject* obj);
   bool isInWatchList(rtRenderObject* obj);
@@ -64,9 +63,6 @@ class rtTimeManager : public QObject {
 
   //! The timer that services the renderer.
   QTimer *m_renderTime;
-
-  //! Handle to the main window.
-  rtMainWindow* m_mainWin;
 
   //! Objects that are updated at every iteration.
   QList<rtRenderObject*> m_watchList;
