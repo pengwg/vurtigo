@@ -23,6 +23,7 @@
 #include "rtRenderObject.h"
 #include "rtPluginLoader.h"
 #include "rtMainWindow.h"
+#include "rtApplication.h"
 
 #include <QCoreApplication>
 
@@ -194,9 +195,9 @@ bool rtBaseHandle::watchClick(int pluginID, bool watch) {
   bool res;
 
   if (watch) {
-    res = rtPluginLoader::instance().addToClickWatch(pluginID);
+    res = rtApplication::instance().getPluginLoader()->addToClickWatch(pluginID);
   } else {
-    res = rtPluginLoader::instance().removeFromClickWatch(pluginID);
+    res = rtApplication::instance().getPluginLoader()->removeFromClickWatch(pluginID);
   }
   return res;
 }

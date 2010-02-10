@@ -20,19 +20,23 @@
 #include "rtApplication.h"
 #include "rtMessage.h"
 #include "rtMainWindow.h"
+#include "rtPluginLoader.h"
 
+#include <QCoreApplication>
 
 #include <QTextStream>
 
 rtApplication::rtApplication() {
   // This defaults to standard out.
   m_stream = new QTextStream(stdout, QIODevice::WriteOnly);
+  m_pluginLoader = NULL;
   m_mainWindow = NULL;
+
+  connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(cleanupApp()));
 }
 
 rtApplication::~rtApplication() {
   if(m_stream) delete m_stream;
-  if(m_mainWindow) delete m_mainWindow;
 }
 
 rtApplication& rtApplication::instance() {
@@ -49,8 +53,13 @@ void rtApplication::displayCopyright() {
 }
 
 void rtApplication::initApp() {
-
   // setup the messaging
   rtMessage::instance().setStream(m_stream);
   m_mainWindow = new rtMainWindow();
+  m_pluginLoader = new rtPluginLoader();
+}
+
+void rtApplication::cleanupApp() {
+  if(m_mainWindow) delete m_mainWindow;
+  if(m_pluginLoader) delete m_pluginLoader;
 }

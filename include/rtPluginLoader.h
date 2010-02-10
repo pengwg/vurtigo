@@ -31,20 +31,14 @@
 
 
 
-//! Tries to load all of the plugins. [Singleton]
+//! Tries to load all of the plugins.
 /*!
   The plugins will be listed in an XML file. That file will be read and an attempt will be made to load each plugin. Plugins that cannot be loaded will be ignored and will not appear in the plugin list later. 
   This is a singleton class so to obtain access to this class use the instance() function. 
  */
 class rtPluginLoader {
  public:
-
-  //! Get the instance of this class.
-  /*! 
-    There should only be one instance of a class that does loading of plugins. Therefore, this is a singleton class. This function will always return the same instance of this class.
-  */
-  static rtPluginLoader& instance();
-
+  rtPluginLoader();
   ~rtPluginLoader();
 
   bool loadPluginsFromConfig(QFile *file);
@@ -70,8 +64,6 @@ class rtPluginLoader {
   int getNextFreeID();
 
  private:
-  //! Private constructor since this is a singleton.
-  rtPluginLoader();
   //! Private copy-constructor
   rtPluginLoader(const rtPluginLoader&);
   rtPluginLoader& operator=(const rtPluginLoader&);

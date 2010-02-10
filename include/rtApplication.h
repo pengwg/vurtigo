@@ -21,14 +21,17 @@
 #define RTAPPLICATION_H
 
 #include <QTextStream>
+#include <QObject>
 
 class rtMainWindow;
+class rtPluginLoader;
 
 //! The main application class [singleton]
 /*!
   */
-class rtApplication
+class rtApplication : public QObject
 {
+  Q_OBJECT
 public:
   ~rtApplication();
 
@@ -37,12 +40,16 @@ public:
   void displayCopyright();
   void initApp();
 
+  rtPluginLoader* const getPluginLoader() { return m_pluginLoader; }
   rtMainWindow* const getMainWinHandle() { return m_mainWindow; }
+
+public slots:
+  void cleanupApp();
 
 protected:
   QTextStream* m_stream;
+  rtPluginLoader* m_pluginLoader;
   rtMainWindow* m_mainWindow;
-
 
 private:
   rtApplication();

@@ -14,6 +14,7 @@ set (RTCONTROL_MOC_FILES
   ${CMAKE_HOME_DIRECTORY}/include/rtObjectManager.h
   ${CMAKE_HOME_DIRECTORY}/include/rtCameraControl.h
   ${CMAKE_HOME_DIRECTORY}/include/rtHelpManager.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtApplication.h
   CACHE INTERNAL "rtControl Files to be processed by Qt first"
 )
 

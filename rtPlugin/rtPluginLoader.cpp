@@ -55,10 +55,6 @@ rtPluginLoader::~rtPluginLoader() {
   }
 }
 
-rtPluginLoader& rtPluginLoader::instance() {
-  static rtPluginLoader loader;
-  return loader;
-}
 
 //! Load plugins from the specified config file.
 /*!

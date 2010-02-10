@@ -173,7 +173,7 @@ void rtTimeManager::pluginUpdate() {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtMessage::instance().debug( QString("rtTimeManager::pluginUpdate() start") );
 #endif
-  rtPluginLoader::instance().updatePlugins();
+  rtApplication::instance().getPluginLoader()->updatePlugins();
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtMessage::instance().debug( QString("rtTimeManager::pluginUpdate() end") );
 #endif

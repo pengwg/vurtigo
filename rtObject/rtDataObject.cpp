@@ -19,6 +19,7 @@
 *******************************************************************************/
 #include "rtDataObject.h"
 #include "rtPluginLoader.h"
+#include "rtApplication.h"
 
 rtDataObject::rtDataObject() {
   m_readOnly = false;
@@ -59,7 +60,7 @@ void rtDataObject::setObjectType(rtConstants::rtObjectType ot) {
 //! The object was just modified. Adjust the time.
 void rtDataObject::Modified() {
   m_modifyTime=QDateTime::currentDateTime();
-  rtPluginLoader::instance().objectModified(m_objId);
+  rtApplication::instance().getPluginLoader()->objectModified(m_objId);
   emit objectChanged(m_objId);
 }
 

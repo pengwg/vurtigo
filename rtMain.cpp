@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
           rtMessage::instance().error(__LINE__, __FILE__, QString("File not found: ").append(pluginList[ix1]));
           continue;
         }
-        if (!rtPluginLoader::instance().loadPluginsFromConfig(&file)) {
+        if (!rtApplication::instance().getPluginLoader()->loadPluginsFromConfig(&file)) {
           rtMessage::instance().error(__LINE__, __FILE__, QString("Failed to load plugins from: ").append(pluginList[ix1]));
         }
       }

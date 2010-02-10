@@ -39,6 +39,7 @@
 #include "rtConfigOptions.h"
 #include "buildParam.h"
 #include "rtHelpManager.h"
+#include "rtApplication.h"
 
 #define USE_NEW_MESSAGES
 
@@ -333,6 +334,7 @@ void rtMainWindow::clearPluginList() {
   }
 
   while (pluginTree->takeTopLevelItem(0));
+
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtMessage::instance().debug( QString("rtMainWindow::clearPluginList() end") );
 #endif
@@ -560,7 +562,7 @@ void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem 
     return;
   }
 
-  plugWidget = rtPluginLoader::instance().getPluginWithID(id)->getWidget();
+  plugWidget = rtApplication::instance().getPluginLoader()->getPluginWithID(id)->getWidget();
   m_currentPluginWidget = plugWidget;
   if (plugWidget) {
     m_pluginWidgetLayout.addWidget(plugWidget);
@@ -963,7 +965,7 @@ void rtMainWindow::loadPluginFile() {
     return;
   }
 
-  if (!rtPluginLoader::instance().loadPluginsFromConfig(&file)) {
+  if (!rtApplication::instance().getPluginLoader()->loadPluginsFromConfig(&file)) {
     rtMessage::instance().warning(__LINE__, __FILE__, QString("rtMainWindow::loadPluginFile() Failed to load plugins from: ").append(fName) );
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
