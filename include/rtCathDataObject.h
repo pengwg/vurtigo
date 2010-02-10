@@ -102,6 +102,9 @@ public:
 
   void tableCellChanged(int row, int col);
 
+  void updateCoilTable();
+signals:
+  void updateCoilTableSignal();
  protected:
   // Functions
   void setupGUI();
@@ -109,7 +112,7 @@ public:
   
   int getNewCoilID();
 
-  void updateCoilTable();
+
 
   //! A hash of coild ID with the coil data
   QHash<int, CathCoilData> m_coilList;
@@ -120,6 +123,8 @@ public:
   //! A hash with coil location and coil ID. Only contains the locations for visible coils.
   QMultiMap<int, int> m_coilLocations;
 
+  //! A list of all the coil IDs. This includes visible and not visible coils...
+  QList<int> m_coilIDList;
 
   vtkProperty* m_splineProperty;
   vtkProperty* m_pointProperty;

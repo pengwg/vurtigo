@@ -50,7 +50,7 @@ rtPluginLoader::~rtPluginLoader() {
     m_pluginHash.take(currKey)->cleanup();
     if (tempLoader) {
       tempLoader->unload();
-      delete tempLoader;
+      tempLoader->deleteLater();
     }
   }
 }
