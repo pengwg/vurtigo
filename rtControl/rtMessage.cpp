@@ -48,12 +48,6 @@ rtMessage::~rtMessage() {
   m_log = false;
 }
 
-
-rtMessage& rtMessage::instance() {
-  static rtMessage handle;
-  return handle;
-}
-
 void rtMessage::error(int lineNum, std::string fileName, std::string text) {
   if (!m_err || !m_out) return;
   (*m_out) << "ERROR: On line: " << lineNum << " in " << fileName.c_str() << "\n";

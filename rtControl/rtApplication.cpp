@@ -35,6 +35,7 @@ rtApplication::rtApplication() {
   m_mainWindow = NULL;
   m_configOptions = NULL;
   m_timeManager = NULL;
+  m_message = NULL;
 
   connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(cleanupApp()));
 }
@@ -58,12 +59,13 @@ void rtApplication::displayCopyright() {
 
 void rtApplication::initApp() {
   // setup the messaging
-  rtMessage::instance().setStream(m_stream);
+  m_message = new rtMessage();
+  m_message->setStream(m_stream);
+
   m_configOptions = new rtConfigOptions();
   m_mainWindow = new rtMainWindow();
   m_pluginLoader = new rtPluginLoader();
   m_timeManager = new rtTimeManager();
-
   m_timeManager->startRenderTimer(40);
 }
 
@@ -72,4 +74,5 @@ void rtApplication::cleanupApp() {
   if(m_pluginLoader) delete m_pluginLoader;
   if(m_configOptions) delete m_configOptions;
   if(m_timeManager) delete m_timeManager;
+  if(m_message) delete m_message;
 }

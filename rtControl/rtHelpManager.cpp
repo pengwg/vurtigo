@@ -44,7 +44,7 @@ rtHelpManager::rtHelpManager() {
   if (!m_helpSourceEngine->setupData()) {     
     std::stringstream msg;
     msg << "Help Source File not Found at: " << rtApplication::instance().getConfigOptions()->getSourceCodeHelpFileName().toStdString();
-    rtMessage::instance().error(__LINE__, __FILE__, msg.str());
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, msg.str());
   }
 
   m_helpSourceBrowser = new rtHelpTextBrowser(m_helpSourceEngine);

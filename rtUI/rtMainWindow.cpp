@@ -46,7 +46,7 @@
 rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::rtMainWindow() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::rtMainWindow() start") );
 #endif
 
   setupUi(this);
@@ -140,7 +140,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   setupObjectTree();
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::rtMainWindow() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::rtMainWindow() end") );
 #endif
 }
 
@@ -183,7 +183,7 @@ rtMainWindow::~rtMainWindow() {
 
 void rtMainWindow::setupHelpFiles() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::setupHelpFiles() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::setupHelpFiles() start") );
 #endif
 
   // The help engine
@@ -195,20 +195,20 @@ void rtMainWindow::setupHelpFiles() {
   connect(actionAbout, SIGNAL(triggered()), m_helpManager, SLOT(showHelpAbout()));
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::setupHelpFiles() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::setupHelpFiles() end") );
 #endif
 }
 
 vtkRenderWindow* rtMainWindow::getRenderWindow() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::getRenderWindow(): ").append( QString::number((long)m_renWin3D, 16) ) );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::getRenderWindow(): ").append( QString::number((long)m_renWin3D, 16) ) );
 #endif
   return m_renWin3D;
 }
 
 vtkRenderWindowInteractor* rtMainWindow::getInteractor() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::getInteractor(): ").append( QString::number((long)m_inter3D, 16) ) );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::getInteractor(): ").append( QString::number((long)m_inter3D, 16) ) );
 #endif
   return m_inter3D;
 }
@@ -216,7 +216,7 @@ vtkRenderWindowInteractor* rtMainWindow::getInteractor() {
 //! Get the vtkRenderer object for the 3D view. 
 vtkRenderer* rtMainWindow::getRenderer() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::getRenderer(): ").append( QString::number((long)m_renderer3D, 16) ) );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::getRenderer(): ").append( QString::number((long)m_renderer3D, 16) ) );
 #endif
   return m_renderer3D;
 }
@@ -224,7 +224,7 @@ vtkRenderer* rtMainWindow::getRenderer() {
 //! Get the object tree
 QTreeWidget* rtMainWindow::getObjectTree() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::getObjectTree(): ").append( QString::number((long)objectTree, 16) ) );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::getObjectTree(): ").append( QString::number((long)objectTree, 16) ) );
 #endif
   return objectTree;
 }
@@ -232,7 +232,7 @@ QTreeWidget* rtMainWindow::getObjectTree() {
 //! Called with the newest set of render objects. 
 void rtMainWindow::updateObjectList(QHash<int, rtRenderObject*>* hash) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::updateObjectList() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::updateObjectList() start") );
 #endif
 
   QHash<int, rtRenderObject*>::iterator i;
@@ -240,7 +240,7 @@ void rtMainWindow::updateObjectList(QHash<int, rtRenderObject*>* hash) {
   bool objExists;
 
   if (!hash) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("In updateObjectList() hash pointer is NULL!") );
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("In updateObjectList() hash pointer is NULL!") );
     return;
   }
 
@@ -278,34 +278,34 @@ void rtMainWindow::updateObjectList(QHash<int, rtRenderObject*>* hash) {
       warn.append( QString::number(i.value()->getObjectType()) );
       warn.append( " for object: ");
       warn.append( QString::number((long)i.value(), 16) );
-      rtMessage::instance().warning(__LINE__, __FILE__, warn);
+      rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, warn);
     }
   }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::updateObjectList() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::updateObjectList() end") );
 #endif
 }
 
 //! Empty the object list from the GUI
 void rtMainWindow::clearObjectList() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::clearObjectList() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::clearObjectList() start") );
 #endif
   while (objectTree->takeTopLevelItem(0));
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::clearObjectList() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::clearObjectList() end") );
 #endif
 }
 
 //! Update the GUI with a new set of pligins.
 void rtMainWindow::updatePluginList(QHash<int, QTreeWidgetItem*>* hash) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::updatePluginList() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::updatePluginList() start") );
 #endif
 
    if (!hash) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("In updatePluginList() hash pointer is NULL!") );
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("In updatePluginList() hash pointer is NULL!") );
     return;
   }
 
@@ -318,32 +318,32 @@ void rtMainWindow::updatePluginList(QHash<int, QTreeWidgetItem*>* hash) {
   }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::updatePluginList() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::updatePluginList() end") );
 #endif
 }
 
 //! Empty the plugin list from the GUI.
 void rtMainWindow::clearPluginList() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::clearPluginList() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::clearPluginList() start") );
 #endif
 
   if (!pluginTree) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("In clearPluginList() pluginTree pointer is NULL!") );
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("In clearPluginList() pluginTree pointer is NULL!") );
     return;
   }
 
   while (pluginTree->takeTopLevelItem(0));
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::clearPluginList() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::clearPluginList() end") );
 #endif
 }
 
 //! This slot is called every time a new object is selected in the tree. 
 void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::currItemChanged() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::currItemChanged() start") );
 #endif
 
   rtRenderObject *temp=NULL;
@@ -351,7 +351,7 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
 
   if (!current) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-    rtMessage::instance().debug( QString("rtMainWindow::currItemChanged() no current item ignore call") );
+    rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::currItemChanged() no current item ignore call") );
 #endif
     return;
   }
@@ -364,7 +364,7 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
       m_currentObjectWidget = NULL;
     }
 #ifdef DEBUG_VERBOSE_MODE_ON
-    rtMessage::instance().debug( QString("rtMainWindow::currItemChanged() current item is heading ignore call") );
+    rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::currItemChanged() current item is heading ignore call") );
 #endif
     return;
   }
@@ -378,7 +378,7 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
   baseWid = temp->getDataObject()->getBaseWidget();
 
   if (!baseWid) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("In currItemChanged() baseWid pointer is NULL!") );
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("In currItemChanged() baseWid pointer is NULL!") );
     return;
   }
 
@@ -386,7 +386,7 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
   m_currentObjectWidget = baseWid;
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::currItemChanged() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::currItemChanged() end") );
 #endif
 }
 
@@ -396,14 +396,14 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
   */
 void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::itemChanged() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::itemChanged() start") );
 #endif
 
   rtRenderObject *temp=NULL;
 
   if (!current) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-    rtMessage::instance().debug( QString("rtMainWindow::itemChanged() no current item ignore call") );
+    rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::itemChanged() no current item ignore call") );
 #endif
     return;
   }
@@ -411,7 +411,7 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   // Check for a heading. 
   if (current->columnCount() == 1) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-    rtMessage::instance().debug( QString("rtMainWindow::itemChanged() current item is heading ignore call") );
+    rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::itemChanged() current item is heading ignore call") );
 #endif
     return;
   }
@@ -431,7 +431,7 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::itemChanged() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::itemChanged() end") );
 #endif
 }
 
@@ -440,20 +440,20 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   */
 void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::centerOnObject() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::centerOnObject() start") );
 #endif
 
   rtRenderObject *temp;
 
   if (!item) {
-    rtMessage::instance().warning(__LINE__, __FILE__, QString("rtMainWindow::centerOnObject() item to center on is NULL"));
+    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("rtMainWindow::centerOnObject() item to center on is NULL"));
     return;
   }
 
   // Check for a heading.
   if (item->columnCount() == 1) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-    rtMessage::instance().debug( QString("rtMainWindow::centerOnObject() item is heading. Ignored.") );
+    rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::centerOnObject() item is heading. Ignored.") );
 #endif
     return;
   }
@@ -472,7 +472,7 @@ void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
   }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::centerOnObject() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::centerOnObject() end") );
 #endif
 }
 
@@ -482,10 +482,10 @@ void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
  */
 void rtMainWindow::addRenderItem(vtkProp* prop) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::addRenderItem() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::addRenderItem() start") );
 #endif
   if (!prop) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("addRenderItem() Prop to add is NULL. Not Added."));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("addRenderItem() Prop to add is NULL. Not Added."));
     return;
   }
 
@@ -494,7 +494,7 @@ void rtMainWindow::addRenderItem(vtkProp* prop) {
     m_renderFlag3D = true;
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::addRenderItem() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::addRenderItem() end") );
 #endif
 }
 
@@ -504,11 +504,11 @@ void rtMainWindow::addRenderItem(vtkProp* prop) {
  */
 void rtMainWindow::removeRenderItem(vtkProp* prop) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::removeRenderItem() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::removeRenderItem() start") );
 #endif
 
   if (!prop) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("removeRenderItem() Prop to remove is NULL. Not Added."));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("removeRenderItem() Prop to remove is NULL. Not Added."));
     return;
   }
 
@@ -517,7 +517,7 @@ void rtMainWindow::removeRenderItem(vtkProp* prop) {
     m_renderFlag3D = true;
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::removeRenderItem() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::removeRenderItem() end") );
 #endif
 }
 
@@ -535,7 +535,7 @@ void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem 
   QWidget* plugWidget=NULL;
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::pluginItemChanged() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::pluginItemChanged() start") );
 #endif
 
   // Empty the layout.
@@ -549,7 +549,7 @@ void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem 
   // Check if there is a new item to use.
   if (!current) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-    rtMessage::instance().debug( QString("rtMainWindow::pluginItemChanged() current tree item is NULL. Ignore.") );
+    rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::pluginItemChanged() current tree item is NULL. Ignore.") );
 #endif
     return;
   }
@@ -558,7 +558,7 @@ void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem 
   id = current->text(0).toInt(&convOK, 10);
 
   if (!convOK) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("rtMainWindow::pluginItemChanged() failed to convert string to integer ID: ").append(current->text(0)));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::pluginItemChanged() failed to convert string to integer ID: ").append(current->text(0)));
     return;
   }
 
@@ -570,7 +570,7 @@ void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem 
   }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::pluginItemChanged() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::pluginItemChanged() end") );
 #endif
 }
 
@@ -580,21 +580,21 @@ void rtMainWindow::pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem 
  */
 void rtMainWindow::tryRender3D() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::tryRender3D() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::tryRender3D() start") );
 #endif
   if (m_renderFlag3D && m_renderLock.tryAcquire()) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::tryRender3D() about to render") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::tryRender3D() about to render") );
 #endif
     m_renWin3D->Render();
     m_renderFlag3D = false;
     m_renderLock.release();
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::tryRender3D() render finished lock released.") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::tryRender3D() render finished lock released.") );
 #endif
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::tryRender3D() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::tryRender3D() end") );
 #endif
 }
 
@@ -604,7 +604,7 @@ void rtMainWindow::tryRender3D() {
   */
 void rtMainWindow::update2DViews() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::update2DViews() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::update2DViews() start") );
 #endif
   QList<int> keyL;
   rtRenderObject* renObj=NULL;
@@ -625,13 +625,13 @@ void rtMainWindow::update2DViews() {
     }
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::update2DViews() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::update2DViews() end") );
 #endif
 }
 
 bool rtMainWindow::cameraMoving() {
   if (!m_cameraControl) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("rtMainWindow::cameraMoving() cameraControl is NULL: "));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::cameraMoving() cameraControl is NULL: "));
     return false;
   }
   return m_cameraControl->cameraMoving();
@@ -643,7 +643,7 @@ double rtMainWindow::getCameraDistance() {
 
 void rtMainWindow::getCameraUp(double val[3]) {
   if (!m_cameraControl) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("rtMainWindow::getCameraUp() cameraControl is NULL: "));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::getCameraUp() cameraControl is NULL: "));
     return;
   }
   m_cameraControl->getUpDirection(val);
@@ -651,7 +651,7 @@ void rtMainWindow::getCameraUp(double val[3]) {
 
 void rtMainWindow::getCameraRight(double val[3]) {
   if (!m_cameraControl) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("rtMainWindow::getCameraRight() cameraControl is NULL: "));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::getCameraRight() cameraControl is NULL: "));
     return;
   }
   m_cameraControl->getRightDirection(val);
@@ -659,7 +659,7 @@ void rtMainWindow::getCameraRight(double val[3]) {
 
 void rtMainWindow::getCameraForward(double val[3]) {
   if (!m_cameraControl) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("rtMainWindow::getCameraForward() cameraControl is NULL: "));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::getCameraForward() cameraControl is NULL: "));
     return;
   }
   m_cameraControl->getForwardDirection(val);
@@ -667,7 +667,7 @@ void rtMainWindow::getCameraForward(double val[3]) {
 
 vtkProp* rtMainWindow::getSelectedProp() {
   if (!m_render3DVTKWidget) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("rtMainWindow::getSelectedProp() 3D render widget pointer is NULL: "));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::getSelectedProp() 3D render widget pointer is NULL: "));
     return NULL;
   }
   return m_render3DVTKWidget->getChosenProp();
@@ -676,7 +676,7 @@ vtkProp* rtMainWindow::getSelectedProp() {
 //! Connect the menu actions to the functions that handle them.
 void rtMainWindow::connectSignals() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::connectSignals() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::connectSignals() start") );
 #endif
 
   // File Menu
@@ -722,13 +722,13 @@ void rtMainWindow::connectSignals() {
   connect(actionPlacement_Mode, SIGNAL(toggled(bool)), this, SLOT(placeModeToggled(bool)));
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::connectSignals() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::connectSignals() end") );
 #endif
 }
 
 void rtMainWindow::setupObjectTree() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::setupObjectTree() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::setupObjectTree() start") );
 #endif
 
   QHash<rtConstants::rtObjectType, QString>::iterator i;
@@ -745,7 +745,7 @@ void rtMainWindow::setupObjectTree() {
   objectTree->setColumnWidth(1, 60);
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::setupObjectTree() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::setupObjectTree() end") );
 #endif
 }
 
@@ -755,7 +755,7 @@ void rtMainWindow::setupObjectTree() {
 */
 void rtMainWindow::populateObjectTypeNames() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::populateObjectTypeNames() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::populateObjectTypeNames() start") );
 #endif
   m_rtObjectTypeNames.insert(rtConstants::OT_3DObject, "3D Object");
   m_rtObjectTypeNames.insert(rtConstants::OT_2DObject, "2D Object");
@@ -769,14 +769,14 @@ void rtMainWindow::populateObjectTypeNames() {
   m_rtObjectTypeNames.insert(rtConstants::OT_3DPointBuffer, "3D Point Buffer");
   m_rtObjectTypeNames.insert(rtConstants::OT_TextLabel, "Text Label");
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::populateObjectTypeNames() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::populateObjectTypeNames() end") );
 #endif
 }
 
 //! Change the view to mixed mode where both the 2D and 3D windows are visible.
 void rtMainWindow::viewChangedMixed() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::viewChangedMixed() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::viewChangedMixed() start") );
 #endif
   if (actionMixed->isChecked()) {
     stackedWidget->setCurrentIndex(0);
@@ -789,14 +789,14 @@ void rtMainWindow::viewChangedMixed() {
     actionMixed->setChecked(true);
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::viewChangedMixed() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::viewChangedMixed() end") );
 #endif
 }
 
 //! Make only the 3D render window visible.
 void rtMainWindow::viewChanged3DOnly() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::viewChanged3DOnly() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::viewChanged3DOnly() start") );
 #endif
   if (action3D_Only->isChecked()) {
     stackedWidget->setCurrentIndex(1);
@@ -808,14 +808,14 @@ void rtMainWindow::viewChanged3DOnly() {
     action3D_Only->setChecked(true);
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::viewChanged3DOnly() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::viewChanged3DOnly() start") );
 #endif
 }
 
 //! Make only the 2D window visible
 void rtMainWindow::viewChanged2DOnly() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::viewChanged2DOnly() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::viewChanged2DOnly() start") );
 #endif
   if (action2D_Only->isChecked()) {
     stackedWidget->setCurrentIndex(2);
@@ -827,14 +827,14 @@ void rtMainWindow::viewChanged2DOnly() {
     action2D_Only->setChecked(true);
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::viewChanged2DOnly() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::viewChanged2DOnly() end") );
 #endif
 }
 
 //! Update  the lists for all the 2D windows.
 void rtMainWindow::update2DWindowLists(QMultiHash<int, QString>* hash) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::update2DWindowLists() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::update2DWindowLists() start") );
 #endif
   QList<int> keyL;
   keyL = m_view2DHash.keys();
@@ -842,7 +842,7 @@ void rtMainWindow::update2DWindowLists(QMultiHash<int, QString>* hash) {
     m_view2DHash[keyL[ix1]]->setStringList(hash);
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::update2DWindowLists() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::update2DWindowLists() end") );
 #endif
 }
 
@@ -851,10 +851,10 @@ void rtMainWindow::update2DWindowLists(QMultiHash<int, QString>* hash) {
 //! Bring up the dialog that gives the options for the axes widget
 void rtMainWindow::showAxesOptions() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::showAxesOptions() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::showAxesOptions() start") );
 #endif
   if (!m_axesProperties) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("rtMainWindow::showAxesOptions() m_axesProperties is NULL: "));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::showAxesOptions() m_axesProperties is NULL: "));
     return;
   }
 
@@ -863,34 +863,34 @@ void rtMainWindow::showAxesOptions() {
     setCoordType( m_axesProperties->getCoordType() );
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::showAxesOptions() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::showAxesOptions() end") );
 #endif
 }
 
 void rtMainWindow::textError(bool t) {
-  rtMessage::instance().m_err = t;
+  rtApplication::instance().getMessageHandle()->m_err = t;
 }
 
 void rtMainWindow::textWarning(bool t) {
-  rtMessage::instance().m_warn = t;
+  rtApplication::instance().getMessageHandle()->m_warn = t;
 }
 
 void rtMainWindow::textDebug(bool t) {
-  rtMessage::instance().m_debug = t;
+  rtApplication::instance().getMessageHandle()->m_debug = t;
 }
 
 void rtMainWindow::textBenchmark(bool t) {
-  rtMessage::instance().m_bench = t;
+  rtApplication::instance().getMessageHandle()->m_bench = t;
 }
 
 void rtMainWindow::textLog(bool t) {
-  rtMessage::instance().m_log = t;
+  rtApplication::instance().getMessageHandle()->m_log = t;
 }
 
 //! Display the render options dialog box.
 void rtMainWindow::showRenderOptions() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::showRenderOptions() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::showRenderOptions() start") );
 #endif
 
   rtRenderOptions renOpt;
@@ -935,7 +935,7 @@ void rtMainWindow::showRenderOptions() {
   }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::showRenderOptions() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::showRenderOptions() end") );
 #endif
 }
 
@@ -953,7 +953,7 @@ void rtMainWindow::cameraRobotArmView() {
 //! Load a plugin based on an XML file the user chooses. 
 void rtMainWindow::loadPluginFile() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::loadPluginFile() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::loadPluginFile() start") );
 #endif
   QString fName;
 
@@ -961,15 +961,15 @@ void rtMainWindow::loadPluginFile() {
 
   QFile file(fName);
   if (!file.exists()) {
-    rtMessage::instance().warning(__LINE__, __FILE__, QString("rtMainWindow::loadPluginFile() File does not exist: ").append(fName) );
+    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("rtMainWindow::loadPluginFile() File does not exist: ").append(fName) );
     return;
   }
 
   if (!rtApplication::instance().getPluginLoader()->loadPluginsFromConfig(&file)) {
-    rtMessage::instance().warning(__LINE__, __FILE__, QString("rtMainWindow::loadPluginFile() Failed to load plugins from: ").append(fName) );
+    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("rtMainWindow::loadPluginFile() Failed to load plugins from: ").append(fName) );
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::loadPluginFile() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::loadPluginFile() end") );
 #endif
 }
 
@@ -977,7 +977,7 @@ void rtMainWindow::loadPluginFile() {
 //! Add an object of a particular type.
 void rtMainWindow::addNewObject() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::addNewObject() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::addNewObject() start") );
 #endif
 
   QDialog *objDlg = new QDialog(this);
@@ -996,13 +996,13 @@ void rtMainWindow::addNewObject() {
   }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::addNewObject() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::addNewObject() end") );
 #endif
 }
 
 void rtMainWindow::loadObject() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::loadObject() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::loadObject() start") );
 #endif
 
   QFile file;
@@ -1026,7 +1026,7 @@ void rtMainWindow::loadObject() {
         }
       }
       if (reader.hasError()) {
-        rtMessage::instance().error(__LINE__, __FILE__, QString("rtMainWindow::loadObject() QXmlStreamReader reports an error: ").append(reader.errorString()) );
+        rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::loadObject() QXmlStreamReader reports an error: ").append(reader.errorString()) );
       }
 
       if (objType != rtConstants::OT_None) typeRead = true;
@@ -1047,13 +1047,13 @@ void rtMainWindow::loadObject() {
     }
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::loadObject() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::loadObject() end") );
 #endif
 }
 
 void rtMainWindow::saveObject() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::saveObject() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::saveObject() start") );
 #endif
 
   QTreeWidgetItem* current=NULL;
@@ -1079,14 +1079,14 @@ void rtMainWindow::saveObject() {
     temp->saveFile(&file);
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::saveObject() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::saveObject() end") );
 #endif
 }
 
 //! Remove the currently selected item.
 void rtMainWindow::removeSelectedObject() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::removeSelectedObject() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::removeSelectedObject() start") );
 #endif
 
   QTreeWidgetItem* current=NULL;
@@ -1107,7 +1107,7 @@ void rtMainWindow::removeSelectedObject() {
   m_renderFlag3D = true;
   rtObjectManager::instance().removeObject(current->text(1).toInt());
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::removeSelectedObject() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::removeSelectedObject() end") );
 #endif
 }
 
@@ -1192,7 +1192,7 @@ void rtMainWindow::placeModeToggled(bool toggle) {
   */
 int rtMainWindow::createNew2DWidget() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::createNew2DWidget() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::createNew2DWidget() start") );
 #endif
   int currID = -1;
   rtOptions2DView* view=NULL;
@@ -1210,7 +1210,7 @@ int rtMainWindow::createNew2DWidget() {
   }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::createNew2DWidget() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::createNew2DWidget() end") );
 #endif
   return currID;
 }
@@ -1222,11 +1222,11 @@ int rtMainWindow::createNew2DWidget() {
   */
 bool rtMainWindow::remove2DWidget(int id) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::remove2DWidget() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::remove2DWidget() start") );
 #endif
 
   if (!m_view2DHash.contains(id)) {
-    rtMessage::instance().warning( __LINE__, __FILE__, QString("rtMainWindow::remove2DWidget() No 2D widget with id: ").append(QString::number(id)) );
+    rtApplication::instance().getMessageHandle()->warning( __LINE__, __FILE__, QString("rtMainWindow::remove2DWidget() No 2D widget with id: ").append(QString::number(id)) );
     return false;
   }
 
@@ -1236,7 +1236,7 @@ bool rtMainWindow::remove2DWidget(int id) {
   delete view;
   return true;
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::remove2DWidget() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::remove2DWidget() end") );
 #endif
 }
 
@@ -1253,7 +1253,7 @@ rtOptions2DView* rtMainWindow::get2DWidget(int id) {
 //! A function that will do the cleanup for all the 2D widgets.
 void rtMainWindow::view2DHashCleanup() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::view2DHashCleanup() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::view2DHashCleanup() start") );
 #endif
   QList<int> keyList;
 
@@ -1262,25 +1262,25 @@ void rtMainWindow::view2DHashCleanup() {
     remove2DWidget(keyList.takeFirst());
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::view2DHashCleanup() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::view2DHashCleanup() end") );
 #endif
 }
 
 //! Called when the add button is pressed
 void rtMainWindow::add2DFrame() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::add2DFrame() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::add2DFrame() start") );
 #endif
 
   int res;
   res = createNew2DWidget();
 
   if (res == -1) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("rtMainWindow::add2DFrame() Could not create new 2D widget.") );
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::add2DFrame() Could not create new 2D widget.") );
   }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::add2DFrame() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::add2DFrame() end") );
 #endif
 }
 
@@ -1290,7 +1290,7 @@ void rtMainWindow::add2DFrame() {
   */
 void rtMainWindow::remove2DFrame() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::remove2DFrame() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::remove2DFrame() start") );
 #endif
   QList<int> keyList;
 
@@ -1302,14 +1302,14 @@ void rtMainWindow::remove2DFrame() {
     }
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::remove2DFrame() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::remove2DFrame() end") );
 #endif
 }
 
 //! Called when the remove all button is pressed.
 void rtMainWindow::removeAll2DFrame() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::removeAll2DFrame() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::removeAll2DFrame() start") );
 #endif
   QList<int> keyList;
 
@@ -1319,6 +1319,6 @@ void rtMainWindow::removeAll2DFrame() {
     remove2DWidget(keyList.at(ix1));
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtMainWindow::removeAll2DFrame() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::removeAll2DFrame() end") );
 #endif
 }

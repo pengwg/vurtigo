@@ -27,6 +27,7 @@
 #include "Converter.h"
 #include "rt2dSliceDataObject.h"
 #include "rtMessage.h"
+#include "rtApplication.h"
 
 using namespace std;
 
@@ -85,7 +86,7 @@ void GenericMode::runMode() {
 
   std::stringstream msg;
   msg << "Re-size image data array: " << tt.elapsed();
-  rtMessage::instance().bench(msg.str());
+  rtApplication::instance().getMessageHandle()->bench(msg.str());
 
   // Read all the relevant planes
   for (int ix1=0; ix1<m_planeList.count(); ix1++) {
@@ -116,7 +117,7 @@ void GenericMode::runMode() {
     }
 
     msg << " final: " << tt.elapsed();
-    rtMessage::instance().bench(msg.str());
+    rtApplication::instance().getMessageHandle()->bench(msg.str());
   }
 
   m_planeListLock.release();
@@ -145,7 +146,7 @@ void GenericMode::runMode() {
 
     std::stringstream msg;
     msg << "Catheter with ID: " << ix1 << " takes " << tt.elapsed();
-    rtMessage::instance().bench(msg.str());
+    rtApplication::instance().getMessageHandle()->bench(msg.str());
   }
   m_cathListLock.release();
 

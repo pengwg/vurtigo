@@ -21,6 +21,7 @@
 #include "rtObjectManager.h"
 #include "rtRenderObject.h"
 #include "rtMessage.h"
+#include "rtApplication.h"
 
 #include <QBoxLayout>
 #include <QSizePolicy>
@@ -200,12 +201,12 @@ void rtOptions2DView::comboIndexChanged(int index) {
   splitter = comboText.split(" ");
 
   if (splitter.size() <= 1) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("Could not separate value from name in 2D widget: ").append(comboText));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not separate value from name in 2D widget: ").append(comboText));
     return;
   }
   id = splitter.takeFirst().toInt(&convOK);
   if (!convOK) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("First Value not an Integer: ").append(comboText));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("First Value not an Integer: ").append(comboText));
     return;
   }
 
@@ -229,7 +230,7 @@ void rtOptions2DView::comboIndexChanged(int index) {
   }
 
   if (!m_currRenObj->viewWithNameExists(name)) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("No view with the name of: ").append(name));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("No view with the name of: ").append(name));
     return;
   }
   m_currRenObj->tryUpdate();

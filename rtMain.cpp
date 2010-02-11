@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
       if (args.at(ix1) == "--version" || args.at(ix1) == "-v") {
         std::stringstream msg;
         msg << "Vurtigo Version: " << VURTIGO_MAJOR_VERSION << "." << VURTIGO_MINOR_VERSION;
-        rtMessage::instance().log(msg.str());
+        rtApplication::instance().getMessageHandle()->log(msg.str());
         runVurtigo = false; // Just checking the version no need to run the software.
       }
     }
@@ -81,30 +81,30 @@ int main(int argc, char *argv[])
       pluginList = rtApplication::instance().getConfigOptions()->getPluginList();
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-      rtMessage::instance().debug( QString("main() Processing Plugin List") );
+      rtApplication::instance().getMessageHandle()->debug( QString("main() Processing Plugin List") );
 #endif
 
       for (int ix1=0; ix1<pluginList.size(); ix1++) {
         QFile file(pluginList[ix1]);
         if (!file.exists()) {
-          rtMessage::instance().error(__LINE__, __FILE__, QString("File not found: ").append(pluginList[ix1]));
+          rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("File not found: ").append(pluginList[ix1]));
           continue;
         }
         if (!rtApplication::instance().getPluginLoader()->loadPluginsFromConfig(&file)) {
-          rtMessage::instance().error(__LINE__, __FILE__, QString("Failed to load plugins from: ").append(pluginList[ix1]));
+          rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to load plugins from: ").append(pluginList[ix1]));
         }
       }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-      rtMessage::instance().debug( QString("main() Setup Origin") );
+      rtApplication::instance().getMessageHandle()->debug( QString("main() Setup Origin") );
 #endif
       setupOrigin();
 #ifdef DEBUG_VERBOSE_MODE_ON
-      rtMessage::instance().debug( QString("main() Show Window") );
+      rtApplication::instance().getMessageHandle()->debug( QString("main() Show Window") );
 #endif
       rtApplication::instance().getMainWinHandle()->show();
 #ifdef DEBUG_VERBOSE_MODE_ON
-      rtMessage::instance().debug( QString("main() Before call to app.exec()") );
+      rtApplication::instance().getMessageHandle()->debug( QString("main() Before call to app.exec()") );
 #endif
       exitCode = app.exec();
     }

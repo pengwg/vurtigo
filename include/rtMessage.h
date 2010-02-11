@@ -28,9 +28,8 @@
 
 class rtMessage {
  public:
+  rtMessage();
   ~rtMessage();
-
-  static rtMessage& instance();
 
   inline void setStream(QTextStream *stream) { m_out = stream; }
 
@@ -59,7 +58,6 @@ class rtMessage {
   QTextStream* m_out;
  
  private:
-  rtMessage();
   rtMessage(const rtMessage&);
   rtMessage& operator=(const rtMessage&);
 };

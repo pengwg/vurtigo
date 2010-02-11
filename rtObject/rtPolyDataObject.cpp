@@ -19,6 +19,7 @@
 *******************************************************************************/
 #include "rtPolyDataObject.h"
 #include "rtMessage.h"
+#include "rtApplication.h"
 
 #include <QHash>
 #include <QColor>
@@ -93,19 +94,19 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
 	
   // Check that the pointers are valid. 
   if (!pts || !links) {
-  	rtMessage::instance().error(__LINE__, __FILE__, QString("Pointers to new geometry are NULL."));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Pointers to new geometry are NULL."));
   	return false;
   }
   
   // Check that both lists have something in them.
   if (pts->empty() || links->empty()) {
-  	rtMessage::instance().error(__LINE__, __FILE__, QString("At least one new geometry list is empty."));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("At least one new geometry list is empty."));
   	return false;
   }
   
   // Check that trigger delay is within bounds. 
   if (trigDelay < 0) {
-  	rtMessage::instance().error(__LINE__, __FILE__, QString("Invalid trigger delay value: ").append(QString::number(trigDelay)));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Invalid trigger delay value: ").append(QString::number(trigDelay)));
   	return false;
   }
   
@@ -128,7 +129,7 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
   
   addIndex = m_trigDelayList.indexOf(trigDelay);
   if (addIndex == -1) {
-  	rtMessage::instance().error(__LINE__, __FILE__, QString("Failed to add index for a new trigger delay!"));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to add index for a new trigger delay!"));
   	return false;
   }
   

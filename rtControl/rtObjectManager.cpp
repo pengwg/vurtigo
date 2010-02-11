@@ -43,14 +43,14 @@
 
 rtObjectManager::rtObjectManager() {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtObjectManager::rtObjectManager() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtObjectManager::rtObjectManager() start") );
 #endif
   m_max_object = 10000;
   m_objectHash.clear();
   m_list2DHash.clear();
   m_list2DHash.insert(-1, "NONE");
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtObjectManager::rtObjectManager() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtObjectManager::rtObjectManager() end") );
 #endif
 }
 
@@ -73,7 +73,7 @@ rtObjectManager& rtObjectManager::instance() {
  */
 rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objType, QString objName) {
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtObjectManager::addObjectOfType() start") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtObjectManager::addObjectOfType() start") );
 #endif
 
   rtRenderObject* temp = NULL;
@@ -84,7 +84,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   // Try to get a valid ID. 
   nextID = getNextID();
   if (nextID == -1) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("Could not find a valid ID for a new object! "));
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not find a valid ID for a new object! "));
     return NULL;
   }
 
@@ -92,7 +92,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   switch(objType) {
   case rtConstants::OT_None:
     temp=new rtNoneRenderObject();   
-    rtMessage::instance().warning(__LINE__, __FILE__, QString("Warning: None Object Requested. "));
+    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("Warning: None Object Requested. "));
     break;
   case rtConstants::OT_3DObject:
     temp=new rt3DVolumeRenderObject();
@@ -129,7 +129,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     break;
   default:
     msg << "No object of type " << objType;
-    rtMessage::instance().warning(__LINE__, __FILE__,msg.str());
+    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__,msg.str());
     temp=NULL;
     break;
   }
@@ -139,7 +139,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     // Push the new object creation to the log.
     msg.str(" ");
     msg << "Created Object with ID: " << nextID;
-    rtMessage::instance().log(msg.str());
+    rtApplication::instance().getMessageHandle()->log(msg.str());
 
     dataO = temp->getDataObject();
     dataO->setId(nextID);
@@ -161,7 +161,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
-  rtMessage::instance().debug( QString("rtObjectManager::addObjectOfType() end") );
+  rtApplication::instance().getMessageHandle()->debug( QString("rtObjectManager::addObjectOfType() end") );
 #endif
   return temp;
 }

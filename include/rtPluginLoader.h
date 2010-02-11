@@ -33,8 +33,8 @@
 
 //! Tries to load all of the plugins.
 /*!
-  The plugins will be listed in an XML file. That file will be read and an attempt will be made to load each plugin. Plugins that cannot be loaded will be ignored and will not appear in the plugin list later. 
-  This is a singleton class so to obtain access to this class use the instance() function. 
+  The plugins will be listed in an XML file. That file will be read and an attempt will be made to load each plugin.
+  Plugins that cannot be loaded will be ignored and will not appear in the plugin list later.
  */
 class rtPluginLoader {
  public:
