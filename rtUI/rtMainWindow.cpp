@@ -309,6 +309,11 @@ void rtMainWindow::updatePluginList(QHash<int, QTreeWidgetItem*>* hash) {
     return;
   }
 
+  if (!pluginTree) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("In updatePluginList() pluginTree pointer is NULL!") );
+    return;
+  }
+
   QHash<int, QTreeWidgetItem*>::iterator i;
 
   while (pluginTree->takeTopLevelItem(0));

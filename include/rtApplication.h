@@ -22,6 +22,7 @@
 
 #include <QTextStream>
 #include <QObject>
+#include <QStringList>
 
 class rtMainWindow;
 class rtPluginLoader;
@@ -42,7 +43,10 @@ public:
   static rtApplication& instance();
 
   void displayCopyright();
-  void initApp();
+  void initApp(QStringList args);
+
+  //! Returns true if Vurtigo will run.
+  bool runVurtigo() { return m_runVurtigo; }
 
   rtPluginLoader* const getPluginLoader() { return m_pluginLoader; }
   rtMainWindow* const getMainWinHandle() { return m_mainWindow; }
@@ -56,12 +60,18 @@ public slots:
 
 protected:
   QTextStream* m_stream;
+  bool m_runVurtigo;
+
   rtPluginLoader* m_pluginLoader;
   rtMainWindow* m_mainWindow;
   rtConfigOptions* m_configOptions;
   rtTimeManager* m_timeManager;
   rtMessage* m_message;
   rtObjectManager* m_objManager;
+
+  //! Parse the command line arguments.
+  void parseArgs(QStringList args);
+  void setupOrigin();
 
 private:
   rtApplication();
