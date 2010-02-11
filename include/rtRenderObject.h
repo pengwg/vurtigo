@@ -61,9 +61,6 @@ Q_OBJECT
   QTreeWidgetItem* getTreeItem() { return m_treeItem; }
   virtual void updateTreeItem();
 
-  void setMainWindow(rtMainWindow* mainWin) { m_mainWin = mainWin; }
-
-
   void setVisible3D(bool v);
   bool getVisible3D(){ return m_visible3D; }
 
@@ -136,7 +133,6 @@ Q_OBJECT
   QHash<QString, vtkProp*> m_pipe2D;
 
   QTreeWidgetItem* m_treeItem;
-  rtMainWindow* m_mainWin;
 
   //! True if the variable is being rendered in the 3D window.
   bool m_visible3D;

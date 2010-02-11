@@ -21,6 +21,7 @@
 #include "pluginConfigHandler.h"
 #include "rtObjectManager.h"
 #include "rtMainWindow.h"
+#include "rtApplication.h"
 
 #include <QApplication>
 #include <QDir>
@@ -123,7 +124,7 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
           tempPlugin->setUniqueID(nextID);
           tempPlugin->init();
 
-          rtObjectManager::instance().getMainWinHandle()->updatePluginList(&m_widgetItemHash);
+          rtApplication::instance().getMainWinHandle()->updatePluginList(&m_widgetItemHash);
 
           ok = true;
         } else if (tempLoader) {

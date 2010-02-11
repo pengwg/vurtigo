@@ -20,6 +20,7 @@
 #include "rt2dSliceRenderObject.h"
 #include "rt2dSliceDataObject.h"
 #include "rtObjectManager.h"
+#include "rtApplication.h"
 #include "rtMainWindow.h"
 
 #include "vtkRenderWindow.h"
@@ -95,8 +96,8 @@ void rt2DSliceRenderObject::update() {
   m_imgMap->SetZSlice(1);
   m_imgMap->SetCustomDisplayExtents(extents);
 
-  if ( m_mainWin ) {
-    m_mainWin->setRenderFlag3D(true);
+  if ( rtApplication::instance().getMainWinHandle() ) {
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
 
@@ -121,7 +122,7 @@ bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren) {
   }
 
   customQVTKWidget* renWid;
-  renWid = rtObjectManager::instance().getMainWinHandle()->getRenderWidget();
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
   // Connect mouse actions
   connect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
   connect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
@@ -147,7 +148,7 @@ bool rt2DSliceRenderObject::removeFromRenderer(vtkRenderer* ren) {
   }
 
   customQVTKWidget* renWid;
-  renWid = rtObjectManager::instance().getMainWinHandle()->getRenderWidget();
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
 
   // Disconnect mouse actions
   disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
@@ -191,7 +192,7 @@ void rt2DSliceRenderObject::mouseReleaseEvent(QMouseEvent* event) {
 void rt2DSliceRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
   vtkProp* temp;
 
-  temp = rtObjectManager::instance().getMainWinHandle()->getSelectedProp();
+  temp = rtApplication::instance().getMainWinHandle()->getSelectedProp();
   m_selectedProp = NULL;
 
   if (m_control.isShowing())

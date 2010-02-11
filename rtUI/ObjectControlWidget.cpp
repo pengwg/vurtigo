@@ -1,8 +1,8 @@
 #include "ObjectControlWidget.h"
 
-#include "rtObjectManager.h"
 #include "rtMainWindow.h"
 #include "rtCameraControl.h"
+#include "rtApplication.h"
 
 #include <vtkRenderer.h>
 #include <vtkProperty.h>
@@ -73,9 +73,9 @@ ObjectControlWidget::ObjectControlWidget() {
 
   m_currProp = NULL;
 
-  connect( rtObjectManager::instance().getMainWinHandle(), SIGNAL(cameraModeSignal(bool)), this, SLOT(cameraMode(bool)) );
-  connect( rtObjectManager::instance().getMainWinHandle(), SIGNAL(interactionModeSignal(bool)), this, SLOT(interactionMode(bool)) );
-  connect( rtObjectManager::instance().getMainWinHandle(), SIGNAL(placeModeSignal(bool)), this, SLOT(placeMode(bool)) );
+  connect( rtApplication::instance().getMainWinHandle(), SIGNAL(cameraModeSignal(bool)), this, SLOT(cameraMode(bool)) );
+  connect( rtApplication::instance().getMainWinHandle(), SIGNAL(interactionModeSignal(bool)), this, SLOT(interactionMode(bool)) );
+  connect( rtApplication::instance().getMainWinHandle(), SIGNAL(placeModeSignal(bool)), this, SLOT(placeMode(bool)) );
 }
 
 ObjectControlWidget::~ObjectControlWidget() {
@@ -138,7 +138,7 @@ void ObjectControlWidget::show() {
   if(m_showing) return;
   m_showing = true;
 
-  vtkRenderer* ren = rtObjectManager::instance().getMainWinHandle()->getRenderer();
+  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
   updateWidgetPosition();
 
   ren->AddViewProp(m_pointActor);
@@ -148,14 +148,14 @@ void ObjectControlWidget::show() {
     ren->AddViewProp(m_diskActor[ix1]);
   }
   // Make the window 'dirty' so that it is rerendered
-  rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
+  rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
 void ObjectControlWidget::hide() {
   if(!m_showing) return;
   m_showing = false;
 
-  vtkRenderer* ren = rtObjectManager::instance().getMainWinHandle()->getRenderer();
+  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
 
   ren->RemoveViewProp(m_pointActor);
   ren->RemoveViewProp(m_boxOutline.getActor());
@@ -164,7 +164,7 @@ void ObjectControlWidget::hide() {
     ren->RemoveViewProp(m_diskActor[ix1]);
   }
   // Make the window 'dirty' so that it is rerendered
-  rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
+  rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
 bool ObjectControlWidget::isShowing() {
@@ -185,7 +185,7 @@ void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
   if(!m_showing) return;
 
   if (event->button() == Qt::LeftButton && !m_currProp) {
-    QSize winSize = rtObjectManager::instance().getMainWinHandle()->getRenderWidget()->size();
+    QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
     int X = event->x();
     int Y = winSize.height()-event->y();
 
@@ -194,7 +194,7 @@ void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
 
     vtkPropCollection* col = vtkPropCollection::New();
     vtkPropPicker* pick = vtkPropPicker::New();
-    vtkRenderer* ren = rtObjectManager::instance().getMainWinHandle()->getRenderer();
+    vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
     
     col->AddItem(m_pointActor);
     col->AddItem(m_diskActor[0]);
@@ -245,7 +245,7 @@ void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
 void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
   if(!m_showing || !event || !m_currProp) return;
 
-  QSize winSize = rtObjectManager::instance().getMainWinHandle()->getRenderWidget()->size();
+  QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
   int X = event->x();
   int Y = winSize.height()-event->y();
 
@@ -254,9 +254,9 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
   double cameraForward[3];
   double normalDirectionT[3];
 
-  rtObjectManager::instance().getMainWinHandle()->getCameraRight(cameraRight);
-  rtObjectManager::instance().getMainWinHandle()->getCameraUp(cameraUp);
-  rtObjectManager::instance().getMainWinHandle()->getCameraForward(cameraForward);
+  rtApplication::instance().getMainWinHandle()->getCameraRight(cameraRight);
+  rtApplication::instance().getMainWinHandle()->getCameraUp(cameraUp);
+  rtApplication::instance().getMainWinHandle()->getCameraForward(cameraForward);
 
   normalDirectionT[0] = m_positiveDirectionT[0]-m_clickPosition[0];
   normalDirectionT[1] = m_positiveDirectionT[1]-m_clickPosition[1];
@@ -275,14 +275,14 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
   double viewZ[3];
   for (int ix1=0; ix1<3; ix1++) viewZ[ix1] = m_convertedLocations[4][ix1];
   m_userTransform->TransformPoint(viewZ, viewZ);
-  rtObjectManager::instance().getMainWinHandle()->getRenderer()->WorldToView(viewZ[0], viewZ[1], viewZ[2]);
+  rtApplication::instance().getMainWinHandle()->getRenderer()->WorldToView(viewZ[0], viewZ[1], viewZ[2]);
   desiredPoint[2] = viewZ[2];
 
-  rtObjectManager::instance().getMainWinHandle()->getRenderer()->DisplayToNormalizedDisplay(desiredPoint[0], desiredPoint[1]);
-  rtObjectManager::instance().getMainWinHandle()->getRenderer()->NormalizedDisplayToViewport(desiredPoint[0], desiredPoint[1]);
-  rtObjectManager::instance().getMainWinHandle()->getRenderer()->ViewportToNormalizedViewport(desiredPoint[0], desiredPoint[1]);
-  rtObjectManager::instance().getMainWinHandle()->getRenderer()->NormalizedViewportToView(desiredPoint[0], desiredPoint[1], desiredPoint[2]);
-  rtObjectManager::instance().getMainWinHandle()->getRenderer()->ViewToWorld(desiredPoint[0], desiredPoint[1], desiredPoint[2]);
+  rtApplication::instance().getMainWinHandle()->getRenderer()->DisplayToNormalizedDisplay(desiredPoint[0], desiredPoint[1]);
+  rtApplication::instance().getMainWinHandle()->getRenderer()->NormalizedDisplayToViewport(desiredPoint[0], desiredPoint[1]);
+  rtApplication::instance().getMainWinHandle()->getRenderer()->ViewportToNormalizedViewport(desiredPoint[0], desiredPoint[1]);
+  rtApplication::instance().getMainWinHandle()->getRenderer()->NormalizedViewportToView(desiredPoint[0], desiredPoint[1], desiredPoint[2]);
+  rtApplication::instance().getMainWinHandle()->getRenderer()->ViewToWorld(desiredPoint[0], desiredPoint[1], desiredPoint[2]);
 
   m_userTransform->Inverse();
   m_userTransform->TransformPoint(desiredPoint, desiredPoint);
@@ -313,7 +313,7 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
     mouseDirec[1] = (Y-m_oldY);
     mouseDirec[2] = 0.0f;
 
-    tempMatrix->DeepCopy(rtObjectManager::instance().getMainWinHandle()->getCameraControl()->getViewMatrix());
+    tempMatrix->DeepCopy(rtApplication::instance().getMainWinHandle()->getCameraControl()->getViewMatrix());
     tempMatrix->SetElement(0, 3, 0.0f);
     tempMatrix->SetElement(1, 3, 0.0f);
     tempMatrix->SetElement(2, 3, 0.0f);
@@ -424,7 +424,7 @@ void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
 
   double cameraDirec[3];
   double dotP=0.0f;
-  rtObjectManager::instance().getMainWinHandle()->getCameraForward(cameraDirec);
+  rtApplication::instance().getMainWinHandle()->getCameraForward(cameraDirec);
 
   m_userTransform->MultiplyPoint(cameraDirec, cameraDirec);
 

@@ -209,7 +209,7 @@ bool rtBaseHandle::watchClick(int pluginID, bool watch) {
 vtkImageData* rtBaseHandle::grabScreenshot() {
   vtkRenderWindow* temp;
 
-  temp = rtObjectManager::instance().getMainWinHandle()->getRenderWindow();
+  temp = rtApplication::instance().getMainWinHandle()->getRenderWindow();
 
   vtkWindowToImageFilter* filter = vtkWindowToImageFilter::New();
   filter->SetInput(temp);
@@ -233,7 +233,7 @@ The use of the vtkRenderWindow object in a thread other than the main Vurtigo re
 vtkRenderWindow* rtBaseHandle::getRenderWindow() {
   vtkRenderWindow* temp;
 
-  temp = rtObjectManager::instance().getMainWinHandle()->getRenderWindow();
+  temp = rtApplication::instance().getMainWinHandle()->getRenderWindow();
   return temp;
 }
 

@@ -20,6 +20,7 @@
 #include "rt2dSliceDataObject.h"
 #include "rtObjectManager.h"
 #include "rtMainWindow.h"
+#include "rtApplication.h"
 #include "buildParam.h"
 #include <cmath>
 
@@ -217,7 +218,7 @@ void rt2DSliceDataObject::pushPlaneBy(double amt, bool asUser) {
 
   double cameraDirec[3];
   double dotP=0.0f;
-  rtObjectManager::instance().getMainWinHandle()->getCameraForward(cameraDirec);
+  rtApplication::instance().getMainWinHandle()->getCameraForward(cameraDirec);
   dotP = zDirec[0]*cameraDirec[0]+zDirec[1]*cameraDirec[1]+zDirec[2]*cameraDirec[2];
   if (dotP > 0) {
     dotP = 1.0f;
@@ -255,7 +256,7 @@ void rt2DSliceDataObject::spinLeftBy(double amt, bool asUser) {
 
   double cameraDirec[3];
   double dotP=0.0f;
-  rtObjectManager::instance().getMainWinHandle()->getCameraForward(cameraDirec);
+  rtApplication::instance().getMainWinHandle()->getCameraForward(cameraDirec);
   dotP = zDirec[0]*cameraDirec[0]+zDirec[1]*cameraDirec[1]+zDirec[2]*cameraDirec[2];
   if (dotP > 0) {
     dotP = 1.0f;
@@ -285,7 +286,7 @@ void rt2DSliceDataObject::rotateUpBy(double amt, bool asUser) {
   double dotP1=0.0f;
   double dotP2=0.0f;
   double dotP3=0.0f;
-  rtObjectManager::instance().getMainWinHandle()->getCameraRight(cameraDirec);
+  rtApplication::instance().getMainWinHandle()->getCameraRight(cameraDirec);
   dotP1 = mat->GetElement(0, 0)*cameraDirec[0]+mat->GetElement(1, 0)*cameraDirec[1]+mat->GetElement(2, 0)*cameraDirec[2];
   dotP2 = mat->GetElement(0, 1)*cameraDirec[0]+mat->GetElement(1, 1)*cameraDirec[1]+mat->GetElement(2, 1)*cameraDirec[2];
   dotP3 = mat->GetElement(0, 2)*cameraDirec[0]+mat->GetElement(1, 2)*cameraDirec[1]+mat->GetElement(2, 2)*cameraDirec[2];
@@ -324,7 +325,7 @@ void rt2DSliceDataObject::rotateLeftBy(double amt, bool asUser) {
   double dotP1=0.0f;
   double dotP2=0.0f;
   double dotP3=0.0f;
-  rtObjectManager::instance().getMainWinHandle()->getCameraUp(cameraDirec);
+  rtApplication::instance().getMainWinHandle()->getCameraUp(cameraDirec);
   dotP1 = mat->GetElement(0, 0)*cameraDirec[0]+mat->GetElement(1, 0)*cameraDirec[1]+mat->GetElement(2, 0)*cameraDirec[2];
   dotP2 = mat->GetElement(0, 1)*cameraDirec[0]+mat->GetElement(1, 1)*cameraDirec[1]+mat->GetElement(2, 1)*cameraDirec[2];
   dotP3 = mat->GetElement(0, 2)*cameraDirec[0]+mat->GetElement(1, 2)*cameraDirec[1]+mat->GetElement(2, 2)*cameraDirec[2];

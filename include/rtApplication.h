@@ -25,6 +25,7 @@
 
 class rtMainWindow;
 class rtPluginLoader;
+class rtConfigOptions;
 
 //! The main application class [singleton]
 /*!
@@ -42,7 +43,7 @@ public:
 
   rtPluginLoader* const getPluginLoader() { return m_pluginLoader; }
   rtMainWindow* const getMainWinHandle() { return m_mainWindow; }
-
+  rtConfigOptions* const getConfigOptions() { return m_configOptions; }
 public slots:
   void cleanupApp();
 
@@ -50,6 +51,7 @@ protected:
   QTextStream* m_stream;
   rtPluginLoader* m_pluginLoader;
   rtMainWindow* m_mainWindow;
+  rtConfigOptions* m_configOptions;
 
 private:
   rtApplication();

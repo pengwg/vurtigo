@@ -73,15 +73,13 @@ int main(int argc, char *argv[])
 
     // Check if the user wants Vurtigo to run and if the config file was loaded properly.
     if (runVurtigo) {
-      rtConfigOptions::instance(); // Reead the config file before anything...
       rtTimeManager::instance().startRenderTimer(40);
-      rtObjectManager::instance().setMainWinHandle(rtApplication::instance().getMainWinHandle());
       rtBaseHandle::instance(); // Important to create the object in THIS THREAD.
       rtApplication::instance().getMainWinHandle()->setupHelpFiles();
 
       // Load default plugins
       QList<QString> pluginList;
-      pluginList = rtConfigOptions::instance().getPluginList();
+      pluginList = rtApplication::instance().getConfigOptions()->getPluginList();
 
 #ifdef DEBUG_VERBOSE_MODE_ON
       rtMessage::instance().debug( QString("main() Processing Plugin List") );

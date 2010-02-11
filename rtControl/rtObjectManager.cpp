@@ -37,7 +37,7 @@
 #include "rtColorFuncRenderObject.h"
 #include "rtImageBufferRenderObject.h"
 #include "rt2dPointRenderObject.h"
-
+#include "rtApplication.h"
 #include <sstream>
 
 
@@ -47,8 +47,6 @@ rtObjectManager::rtObjectManager() {
 #endif
   m_max_object = 10000;
   m_objectHash.clear();
-  m_mainWinHandle = NULL;
-
   m_list2DHash.clear();
   m_list2DHash.insert(-1, "NONE");
 #ifdef DEBUG_VERBOSE_MODE_ON
@@ -63,30 +61,6 @@ rtObjectManager::~rtObjectManager() {
 rtObjectManager& rtObjectManager::instance() {
   static rtObjectManager handle;
   return handle;
-}
-
-//! Give the object manager the main window object.
-/*!
-  The object manager needs to communicate with the GUI so it needs to be given an instance of the handle.  
-*/
-void rtObjectManager::setMainWinHandle(rtMainWindow* mainWin) {
-  if (!mainWin) {
-    rtMessage::instance().error(__LINE__, __FILE__, QString("rtObjectManager::setMainWinHandle() Main Window Handle is NULL."));
-    return;
-  }
-
-  m_mainWinHandle = mainWin;
-  m_mainWinHandle->update2DWindowLists(&m_list2DHash);
-}
-
-
-//! Return an instance of the main window handle.
-/*!
-  Objects that make use of the object manager can get a handle to the main window through the manager. 
-  @return Instance of the main window handle or NULL if no such handle exists. 
-*/
-rtMainWindow* rtObjectManager::getMainWinHandle() {
-  return m_mainWinHandle;
 }
 
 
@@ -172,15 +146,15 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     dataO->setObjName(objName);
     dataO->update();
     m_objectHash.insert(nextID, temp);
-    if (m_mainWinHandle) m_mainWinHandle->updateObjectList(&m_objectHash);
-    temp->setMainWindow(m_mainWinHandle);
+    if ( rtApplication::instance().getMainWinHandle() )
+      rtApplication::instance().getMainWinHandle()->updateObjectList(&m_objectHash);
 
     QList<QString> twoDViews = temp->get2DViewNameList();
     for (int ix1=0; ix1<twoDViews.size(); ix1++) {
       m_list2DHash.insertMulti(nextID, twoDViews[ix1]);
     }
-    if (twoDViews.size()>0 && m_mainWinHandle) {
-      m_mainWinHandle->update2DWindowLists(&m_list2DHash);
+    if (twoDViews.size()>0 && rtApplication::instance().getMainWinHandle()) {
+      rtApplication::instance().getMainWinHandle()->update2DWindowLists(&m_list2DHash);
     }
 
     emit objectCreated(nextID);
@@ -219,8 +193,8 @@ bool rtObjectManager::removeObject(int objID) {
     temp = m_objectHash.value(objID);
     if (!temp || temp->getDataObject()->isReadOnly()) return false;
     m_objectHash.remove(objID);
-    if (m_list2DHash.remove(objID)>0 && m_mainWinHandle) {
-      m_mainWinHandle->update2DWindowLists(&m_list2DHash);
+    if (m_list2DHash.remove(objID)>0 && rtApplication::instance().getMainWinHandle()) {
+      rtApplication::instance().getMainWinHandle()->update2DWindowLists(&m_list2DHash);
     }
     delete temp;
     emit objectRemoved(objID);
@@ -242,8 +216,8 @@ bool rtObjectManager::removeReadOnly(int objID) {
     temp = m_objectHash.value(objID);
     if (!temp) return false;
     m_objectHash.remove(objID);
-    if (m_list2DHash.remove(objID)>0 && m_mainWinHandle) {
-      m_mainWinHandle->update2DWindowLists(&m_list2DHash);
+    if (m_list2DHash.remove(objID)>0 && rtApplication::instance().getMainWinHandle()) {
+      rtApplication::instance().getMainWinHandle()->update2DWindowLists(&m_list2DHash);
     }
     delete temp;
     emit objectRemoved(objID);

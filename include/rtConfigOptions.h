@@ -27,18 +27,15 @@
 //! Container class for all of the configuration options that are read from a file.
 /*!
 The purpose of this class is to load a config file and store the information contained inside.
-This is also a singleton class and so there will be only one instance of it throughout Vurtigo.
-The reason for this is to ensure that the whole program uses the same config options.
 It is recommended that the config options not be modified directly by classes within Vurtigo as all parameter changes will effect the rest of the program in unexpected ways.
   */
 class rtConfigOptions
 {
  public:
+  //! Config options constructor.
+  rtConfigOptions();
   //! Config Options Destructor
   ~rtConfigOptions();
-
-  //! Get the refernce to this object
-  static rtConfigOptions& instance();
 
   QString getWLFileName();
   QString getSourceCodeHelpFileName();
@@ -46,7 +43,6 @@ class rtConfigOptions
   QList<QString> getPluginList();
 
  protected:
-
   //! The path to the location of all of vurtigo's config details.
   QString m_configPath;
 
@@ -55,23 +51,9 @@ class rtConfigOptions
 
 
  private:
-  //! Private Constructor
-  /*!
-  Only one instance of this class is permitted. Use instance() to get a reference to this object.
-  \sa instance()
-  */
-  rtConfigOptions();
   //! Private Copy Constructor
-  /*!
-  Only one instance of this class is permitted. Use instance() to get a reference to this object.
-  \sa instance()
-  */
   rtConfigOptions(const rtConfigOptions&);
   //! Private Operator Equals
-  /*!
-  Only one instance of this class is permitted. Use instance() to get a reference to this object.
-  \sa instance()
-  */
   rtConfigOptions& operator=(const rtConfigOptions&);
 };
 

@@ -18,7 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 #include "rtOrientationMarkerWidget.h"
-#include "rtObjectManager.h"
+#include "rtApplication.h"
 #include "rtMainWindow.h"
 #include "customQVTKWidget.h"
 
@@ -82,7 +82,7 @@ void rtOrientationMarkerWidget::mousePress(QMouseEvent* ev) {
       this->OutlineActor->SetVisibility( false );
       this->Moving = 0;
     }
-    rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   } else if (ev->button() == Qt::RightButton) {
     m_rightMouseDown = true;
   } else if (ev->button() == Qt::MidButton) {
@@ -117,7 +117,7 @@ void rtOrientationMarkerWidget::mouseMove(QMouseEvent* ev) {
 
     if (this->State == vtkOrientationMarkerWidget::Outside || !this->Moving)
     {
-      rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
+      rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
       return;
     }
 
@@ -143,7 +143,7 @@ void rtOrientationMarkerWidget::mouseMove(QMouseEvent* ev) {
     }
 
     this->UpdateOutline();
-    rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
 
@@ -167,7 +167,7 @@ void rtOrientationMarkerWidget::mouseRelease(QMouseEvent* ev) {
     this->Moving = 0;
 
     this->RequestCursorShape( VTK_CURSOR_DEFAULT );
-    rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   } else if (ev->button() == Qt::RightButton) {
     m_rightMouseDown = false;
   } else if (ev->button() == Qt::MidButton) {

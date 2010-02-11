@@ -19,9 +19,9 @@
 *******************************************************************************/
 #include "customQVTKWidget.h"
 #include "rtMainWindow.h"
-#include "rtObjectManager.h"
 #include "rtRenderObject.h"
 #include "rtMainWindow.h"
+#include "rtApplication.h"
 
 #include <QMouseEvent>
 #include <QList>
@@ -60,7 +60,7 @@ void customQVTKWidget::resizeEvent(QResizeEvent* event) {
 }
 
 void customQVTKWidget::paintEvent(QPaintEvent* event) {
-  rtObjectManager::instance().getMainWinHandle()->setRenderFlag3D(true);
+  rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
 
@@ -211,7 +211,7 @@ void customQVTKWidget::selectNewProp(QMouseEvent* event) {
   int X = event->x();
   int Y = this->height()-event->y();
 
-  if(picker->PickProp(X, Y, rtObjectManager::instance().getMainWinHandle()->getRenderer())) {
+  if(picker->PickProp(X, Y, rtApplication::instance().getMainWinHandle()->getRenderer())) {
     m_propChosen = picker->GetViewProp();
   }
 

@@ -20,6 +20,7 @@
 #include "rtLabelRenderObject.h"
 #include "rtLabelDataObject.h"
 #include "rtMainWindow.h"
+#include "rtApplication.h"
 
 rtLabelRenderObject::rtLabelRenderObject() {
   setObjectType(rtConstants::OT_TextLabel);
@@ -41,8 +42,8 @@ void rtLabelRenderObject::update() {
   m_textActor2D->SetInput(dObj->getText().toStdString().c_str());
   m_textActor2D->SetTextProperty(dObj->getTextProperty());
 
-  if (m_mainWin && m_textActor2D->GetNumberOfConsumers() > 0) {
-    m_mainWin->setRenderFlag3D(true);
+  if (rtApplication::instance().getMainWinHandle() && m_textActor2D->GetNumberOfConsumers() > 0) {
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
 

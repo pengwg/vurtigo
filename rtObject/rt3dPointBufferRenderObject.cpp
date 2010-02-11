@@ -21,6 +21,7 @@
 #include "rt3dPointBufferDataObject.h"
 #include "rtObjectManager.h"
 #include "rtMainWindow.h"
+#include "rtApplication.h"
 
 rt3DPointBufferRenderObject::rt3DPointBufferRenderObject() {
   m_pipeList.clear();
@@ -48,7 +49,7 @@ void rt3DPointBufferRenderObject::update() {
   while(!m_pipeList.empty()) {
     tempPipe = m_pipeList.takeFirst();
     m_pipe3D.removeAll(tempPipe->actor);
-    if (visible) rtObjectManager::instance().getMainWinHandle()->removeRenderItem(tempPipe->actor);
+    if (visible) rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->actor);
     delete tempPipe;
   }
 
@@ -65,7 +66,7 @@ void rt3DPointBufferRenderObject::update() {
     m_pipeList.append(tempPipe);
     m_pipe3D.push_back(tempPipe->actor);
     if (visible) {
-      rtObjectManager::instance().getMainWinHandle()->addRenderItem(tempPipe->actor);
+      rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->actor);
     }
   }
 }

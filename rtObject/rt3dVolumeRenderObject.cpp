@@ -21,6 +21,7 @@
 #include "rt3dVolumeDataObject.h"
 #include "rtMainWindow.h"
 #include "rtObjectManager.h"
+#include "rtApplication.h"
 
 #include <math.h>
 
@@ -114,8 +115,8 @@ void rt3DVolumeRenderObject::update() {
     m_volumeActor->SetVisibility(0);
   }
 
-  if ( m_mainWin ) {
-    m_mainWin->setRenderFlag3D(true);
+  if ( rtApplication::instance().getMainWinHandle() ) {
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
 
@@ -319,7 +320,7 @@ void rt3DVolumeRenderObject::resetCoronalPlane() {
 }
 
 void rt3DVolumeRenderObject::setRenderQuality(double quality) {
-  if (!m_mainWin) return;
+  if (!rtApplication::instance().getMainWinHandle()) return;
   double qual;
 
   if (quality > 1.0f) qual = 1.0f;
@@ -347,7 +348,7 @@ bool rt3DVolumeRenderObject::addToRenderer(vtkRenderer* ren) {
   update3PlaneStatus();
 
   customQVTKWidget* renWid;
-  renWid = rtObjectManager::instance().getMainWinHandle()->getRenderWidget();
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
   // Connect mouse actions
   connect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
   connect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
@@ -377,7 +378,7 @@ bool rt3DVolumeRenderObject::removeFromRenderer(vtkRenderer* ren) {
   update3PlaneStatus();
 
   customQVTKWidget* renWid;
-  renWid = rtObjectManager::instance().getMainWinHandle()->getRenderWidget();
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
 
   // Disconnect mouse actions
   disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
@@ -516,7 +517,7 @@ void rt3DVolumeRenderObject::mousePressEvent(QMouseEvent* event) {
 
   if (m_planeControl[m_currentPlane].isShowing()) {
     m_planeControl[m_currentPlane].mousePressEvent(event);
-    if ( m_mainWin ) m_mainWin->setRenderFlag3D(true);
+    if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
 
@@ -524,7 +525,7 @@ void rt3DVolumeRenderObject::mouseMoveEvent(QMouseEvent* event) {
   if (!m_selectedProp || m_currentPlane == -1) return;
   if (m_planeControl[m_currentPlane].isShowing()) {
     m_planeControl[m_currentPlane].mouseMoveEvent(event);
-    if ( m_mainWin ) m_mainWin->setRenderFlag3D(true);
+    if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
 
@@ -556,7 +557,7 @@ void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
 void rt3DVolumeRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
   vtkProp* temp;
 
-  temp = rtObjectManager::instance().getMainWinHandle()->getSelectedProp();
+  temp = rtApplication::instance().getMainWinHandle()->getSelectedProp();
   m_selectedProp = NULL;
   m_currentPlane = -1;
   for (int ix1=0; ix1<3; ix1++) {
@@ -571,7 +572,7 @@ void rt3DVolumeRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
       }
     }
   }
-  if ( m_mainWin ) m_mainWin->setRenderFlag3D(true);
+  if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
 void rt3DVolumeRenderObject::keyPressEvent(QKeyEvent* event) {
@@ -597,7 +598,7 @@ void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event) {
 
     t->Delete();
 
-    if ( m_mainWin ) m_mainWin->setRenderFlag3D(true);
+    if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
 

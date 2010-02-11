@@ -27,7 +27,6 @@ rtRenderObject::rtRenderObject() {
   m_objType = rtConstants::OT_None;
   m_treeItem = new QTreeWidgetItem();
   m_treeItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-  m_mainWin = NULL;
   m_visible3D = false;
 
   // Clear the list first.

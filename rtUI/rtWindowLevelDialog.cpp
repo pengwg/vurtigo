@@ -4,6 +4,7 @@
 #include <QGraphicsItem>
 
 #include "rtConfigOptions.h"
+#include "rtApplication.h"
 
 rtWindowLevelDialog::rtWindowLevelDialog(QString fName) : c_histogramSize(50) {
   setupUi(this);
@@ -12,7 +13,7 @@ rtWindowLevelDialog::rtWindowLevelDialog(QString fName) : c_histogramSize(50) {
 
   // Check if a parameter was given
   if (fName == "") {
-    m_fName = rtConfigOptions::instance().getWLFileName();
+    m_fName = rtApplication::instance().getConfigOptions()->getWLFileName();
   } else {
     m_fName = fName;
   }

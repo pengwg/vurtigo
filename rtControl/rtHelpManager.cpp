@@ -30,20 +30,20 @@
 #include "rtConfigOptions.h"
 #include "buildParam.h"
 #include "rtMessage.h"
-
+#include "rtApplication.h"
 
 rtHelpManager::rtHelpManager() {
   m_helpSourceDialog = new QDialog();
   m_helpSourceDialog->setWindowTitle("Source Code Help");
   QHBoxLayout* helpSourceLayout = new QHBoxLayout();
   m_helpSourceDialog->setLayout(helpSourceLayout);
-  m_helpSourceEngine = new QHelpEngine(rtConfigOptions::instance().getSourceCodeHelpFileName(), m_helpSourceDialog);
+  m_helpSourceEngine = new QHelpEngine(rtApplication::instance().getConfigOptions()->getSourceCodeHelpFileName(), m_helpSourceDialog);
 
   connect(m_helpSourceEngine, SIGNAL(warning(QString)), this, SLOT(sourceEngineWarning(QString)));
 
   if (!m_helpSourceEngine->setupData()) {     
     std::stringstream msg;
-    msg << "Help Source File not Found at: " << rtConfigOptions::instance().getSourceCodeHelpFileName().toStdString();
+    msg << "Help Source File not Found at: " << rtApplication::instance().getConfigOptions()->getSourceCodeHelpFileName().toStdString();
     rtMessage::instance().error(__LINE__, __FILE__, msg.str());
   }
 
