@@ -20,6 +20,7 @@
 #include "CathTrackingUI.h"
 #include "rtObjectManager.h"
 #include "rtBaseHandle.h"
+#include "rtApplication.h"
 
 #include <QList>
 
@@ -41,8 +42,8 @@ CathTrackingUI::~CathTrackingUI() {
 }
 
 void CathTrackingUI::connectSignals() {
-  connect( &(rtObjectManager::instance()), SIGNAL(objectCreated(int)), this, SLOT(objectAdded(int)) );
-  connect( &(rtObjectManager::instance()), SIGNAL(objectRemoved(int)), this, SLOT(objectRemoved(int)) );
+  connect( rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(objectAdded(int)) );
+  connect( rtApplication::instance().getObjectManager(), SIGNAL(objectRemoved(int)), this, SLOT(objectRemoved(int)) );
 
   connect( cathComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(cathChanged(int)) );
   connect( planeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(planeChanged(int)) );

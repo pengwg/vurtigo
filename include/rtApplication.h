@@ -28,6 +28,7 @@ class rtPluginLoader;
 class rtConfigOptions;
 class rtTimeManager;
 class rtMessage;
+class rtObjectManager;
 
 //! The main application class [singleton]
 /*!
@@ -48,6 +49,8 @@ public:
   rtConfigOptions* const getConfigOptions() { return m_configOptions; }
   rtTimeManager* const getTimeManager() { return m_timeManager; }
   rtMessage* const getMessageHandle() { return m_message; }
+  rtObjectManager* const getObjectManager() { return m_objManager; }
+
 public slots:
   void cleanupApp();
 
@@ -58,6 +61,7 @@ protected:
   rtConfigOptions* m_configOptions;
   rtTimeManager* m_timeManager;
   rtMessage* m_message;
+  rtObjectManager* m_objManager;
 
 private:
   rtApplication();

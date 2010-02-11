@@ -58,11 +58,6 @@ rtObjectManager::rtObjectManager() {
 rtObjectManager::~rtObjectManager() {
 }
 
-rtObjectManager& rtObjectManager::instance() {
-  static rtObjectManager handle;
-  return handle;
-}
-
 
 //! Create and return a new object.
 /*!
@@ -128,8 +123,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     temp=new rtLabelRenderObject();
     break;
   default:
-    msg << "No object of type " << objType;
-    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__,msg.str());
+    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("No object of type: ").append(QString::number(objType)));
     temp=NULL;
     break;
   }

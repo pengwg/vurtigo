@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 
 void setupOrigin() {
   // Setup the origin.
-  rt3DPointBufferRenderObject *renObj = static_cast<rt3DPointBufferRenderObject*>(rtObjectManager::instance().addObjectOfType(rtConstants::OT_3DPointBuffer, "True Origin"));
+  rt3DPointBufferRenderObject *renObj = static_cast<rt3DPointBufferRenderObject*>(rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer, "True Origin"));
   rt3DPointBufferDataObject *datObj = static_cast<rt3DPointBufferDataObject*>(renObj->getDataObject());
   rt3DPointBufferDataObject::SimplePoint origin;
   rt3DPointBufferDataObject::SimplePoint xDir, yDir, zDir;

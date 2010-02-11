@@ -127,7 +127,7 @@ void rtTimeManager::calcFrameRate() {
   QString text = "   ";
 
   if (!m_frameRateLabel)
-    m_frameRateLabel = rtObjectManager::instance().addObjectOfType(rtConstants::OT_TextLabel, "Frame Rate");
+    m_frameRateLabel = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_TextLabel, "Frame Rate");
 
   frameRate = 1.0f/rtApplication::instance().getMainWinHandle()->getRenderer()->GetLastRenderTimeInSeconds();
   m_currentSum -= m_renderTimeBuffer[m_renderTimePosition];

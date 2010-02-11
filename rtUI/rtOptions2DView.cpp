@@ -223,7 +223,7 @@ void rtOptions2DView::comboIndexChanged(int index) {
 
   //std::cout << id << "  with  " << name.toStdString() << std::endl;
 
-  m_currRenObj = rtObjectManager::instance().getObjectWithID(id);
+  m_currRenObj = rtApplication::instance().getObjectManager()->getObjectWithID(id);
   if (!m_currRenObj) {
     std::cout << "Object with ID: " << id << " no longer exists." << std::endl;
     return;

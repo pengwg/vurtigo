@@ -374,7 +374,7 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
     m_currentObjectWidget->setParent(NULL);
   }
 
-  temp = rtObjectManager::instance().getObjectWithID(current->text(1).toInt());
+  temp = rtApplication::instance().getObjectManager()->getObjectWithID(current->text(1).toInt());
   baseWid = temp->getDataObject()->getBaseWidget();
 
   if (!baseWid) {
@@ -417,7 +417,7 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   }
 
   // Get the object
-  temp = rtObjectManager::instance().getObjectWithID(current->text(1).toInt());
+  temp = rtApplication::instance().getObjectManager()->getObjectWithID(current->text(1).toInt());
 
   // If the box is checked then add it to the renderer.
   if (current->checkState(column) == Qt::Checked) {
@@ -459,7 +459,7 @@ void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
   }
 
   // Get the object
-  temp = rtObjectManager::instance().getObjectWithID(item->text(1).toInt());
+  temp = rtApplication::instance().getObjectManager()->getObjectWithID(item->text(1).toInt());
   if (!temp->getVisible3D()) {
     // Not visible so we have nothing to center on...
     return;
@@ -989,9 +989,9 @@ void rtMainWindow::addNewObject() {
     name = setupDlg.objNameLineEdit->text();
     if (name.length() <= 0) name = "Not Named";
     if (setupDlg.objTypeCombo->currentText() == "Piecewise Function") {
-      rtObjectManager::instance().addObjectOfType(rtConstants::OT_vtkPiecewiseFunction, name);
+      rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_vtkPiecewiseFunction, name);
     } else if (setupDlg.objTypeCombo->currentText() == "Color Transfer Function") {
-      rtObjectManager::instance().addObjectOfType(rtConstants::OT_vtkColorTransferFunction, name);
+      rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_vtkColorTransferFunction, name);
     }
   }
 
@@ -1036,7 +1036,7 @@ void rtMainWindow::loadObject() {
       QFile objFile;
       // Both the type and the name have been recognized.
       if (typeRead && nameRead) {
-        obj = rtObjectManager::instance().addObjectOfType(objType, objName);
+        obj = rtApplication::instance().getObjectManager()->addObjectOfType(objType, objName);
         if (obj) {
           objFile.setFileName(names.at(ix1));
           obj->loadFile(&objFile);
@@ -1071,7 +1071,7 @@ void rtMainWindow::saveObject() {
   }
 
   // Find the object
-  temp = rtObjectManager::instance().getObjectWithID(current->text(1).toInt());
+  temp = rtApplication::instance().getObjectManager()->getObjectWithID(current->text(1).toInt());
   if (temp) {
     // Find the file name
     fName = QFileDialog::getSaveFileName(this, "Save As...");
@@ -1102,10 +1102,10 @@ void rtMainWindow::removeSelectedObject() {
   }
 
   // Get the object
-  temp = rtObjectManager::instance().getObjectWithID(current->text(1).toInt());
+  temp = rtApplication::instance().getObjectManager()->getObjectWithID(current->text(1).toInt());
   temp->removeFromRenderer(m_renderer3D);
   m_renderFlag3D = true;
-  rtObjectManager::instance().removeObject(current->text(1).toInt());
+  rtApplication::instance().getObjectManager()->removeObject(current->text(1).toInt());
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::removeSelectedObject() end") );
 #endif
@@ -1204,7 +1204,7 @@ int rtMainWindow::createNew2DWidget() {
       view->setContainer(scrollAreaWidget);
       m_scrollArea2DImagesLayout.addWidget(view);
       m_view2DHash.insert(currID, view);
-      view->setStringList(rtObjectManager::instance().get2DObjectNameHash());
+      view->setStringList(rtApplication::instance().getObjectManager()->get2DObjectNameHash());
       break;
     }
   }

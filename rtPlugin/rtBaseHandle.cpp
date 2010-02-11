@@ -81,7 +81,7 @@ int rtBaseHandle::requestNewObject(rtConstants::rtObjectType objType, QString na
     while (!m_newObjectLock.tryLock()) QCoreApplication::processEvents();
 
     rtRenderObject* temp;
-    temp = rtObjectManager::instance().addObjectOfType(objType, name);
+    temp = rtApplication::instance().getObjectManager()->addObjectOfType(objType, name);
     if (temp) {
       result = temp->getDataObject()->getId();
     }
@@ -104,7 +104,7 @@ int rtBaseHandle::requestNewObject(rtConstants::rtObjectType objType, QString na
 void rtBaseHandle::requestNewObjectSlot(rtConstants::rtObjectType objType, QString name) {
   rtRenderObject* temp;
   int result=-1;
-  temp = rtObjectManager::instance().addObjectOfType(objType, name);
+  temp = rtApplication::instance().getObjectManager()->addObjectOfType(objType, name);
   if (temp) {
     result = temp->getDataObject()->getId();
   }
@@ -123,7 +123,7 @@ void rtBaseHandle::requestNewObjectSlot(rtConstants::rtObjectType objType, QStri
 bool rtBaseHandle::removeObject(int ID) {
   bool res;
   m_newObjectLock.lock();
-  res = rtObjectManager::instance().removeObject(ID);
+  res = rtApplication::instance().getObjectManager()->removeObject(ID);
   m_newObjectLock.unlock();
   return res;
 }
@@ -136,7 +136,7 @@ bool rtBaseHandle::removeObject(int ID) {
   @return A list of IDs for all the objects of that type. Returns an empty list if there are no objects of that type. 
  */
 QList<int> rtBaseHandle::getObjectsOfType(rtConstants::rtObjectType objType) {
-  return rtObjectManager::instance().getObjectsOfType(objType);
+  return rtApplication::instance().getObjectManager()->getObjectsOfType(objType);
 }
 
 //! Get the number of objects of a particular type. 
@@ -147,7 +147,7 @@ QList<int> rtBaseHandle::getObjectsOfType(rtConstants::rtObjectType objType) {
   @return The number of objects of that type
  */
 int rtBaseHandle::getNumObjectsOfType(rtConstants::rtObjectType objType) {
-  return rtObjectManager::instance().getNumObjectsOfType(objType);
+  return rtApplication::instance().getObjectManager()->getNumObjectsOfType(objType);
 }
 
 //! Get the object that has this ID
@@ -159,7 +159,7 @@ int rtBaseHandle::getNumObjectsOfType(rtConstants::rtObjectType objType) {
 rtDataObject* const rtBaseHandle::getObjectWithID(int ID) {
   rtRenderObject* temp=NULL;
 
-  temp = rtObjectManager::instance().getObjectWithID(ID);
+  temp = rtApplication::instance().getObjectManager()->getObjectWithID(ID);
   if (temp && !temp->getDataObject()->isReadOnly()) {
     return temp->getDataObject();
   }
@@ -177,7 +177,7 @@ rtDataObject* const rtBaseHandle::getObjectWithID(int ID) {
 const rtDataObject* const rtBaseHandle::getROObjectWithID(int ID) {
   rtRenderObject* temp=NULL;
 
-  temp = rtObjectManager::instance().getObjectWithID(ID);
+  temp = rtApplication::instance().getObjectManager()->getObjectWithID(ID);
   if (temp) {
     return temp->getDataObject();
   }
@@ -246,7 +246,7 @@ vtkRenderWindow* rtBaseHandle::getRenderWindow() {
   */
 void rtBaseHandle::forceRenderUpdate(int objID) {
   rtRenderObject* temp=NULL;
-  temp = rtObjectManager::instance().getObjectWithID(objID);
+  temp = rtApplication::instance().getObjectManager()->getObjectWithID(objID);
   if (temp) {
     temp->tryUpdate();
   }

@@ -30,17 +30,16 @@ class rtDataObject;
 
 #include "vtkProp.h"
 
-//!  The Object Manager. [Singleton]
+//!  The Object Manager.
 /*!
-  This should be the only class that can create or delete rtRenderObject instances. As a result it can keep track of all such instances and hand them out to other classes when requested. 
+  Manages the creation and deletion of objects.
 */
 class rtObjectManager : public QObject {
   Q_OBJECT
 
  public:
+  rtObjectManager();
   ~rtObjectManager();
-
-  static rtObjectManager& instance();
 
   rtRenderObject* addObjectOfType(rtConstants::rtObjectType objType, QString objName="Not Named");
   rtRenderObject* addReadOnlyObject(rtConstants::rtObjectType objType, QString objName="Not Named");
@@ -75,12 +74,6 @@ class rtObjectManager : public QObject {
 
   int getNextID();
 
-  //! Object Manager constructor. Private.
-/*!
-  The class is a singleton and so the constructor is private.
-  Among other things, the constructor sets the maximum number of objects.
- */
-  rtObjectManager();
   rtObjectManager(const rtObjectManager&);
   rtObjectManager& operator=(const rtObjectManager&);
 };
