@@ -73,7 +73,6 @@ int main(int argc, char *argv[])
 
     // Check if the user wants Vurtigo to run and if the config file was loaded properly.
     if (runVurtigo) {
-      rtTimeManager::instance().startRenderTimer(40);
       rtBaseHandle::instance(); // Important to create the object in THIS THREAD.
       rtApplication::instance().getMainWinHandle()->setupHelpFiles();
 

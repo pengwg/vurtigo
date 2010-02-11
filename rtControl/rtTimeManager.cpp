@@ -83,11 +83,6 @@ rtTimeManager::~rtTimeManager() {
   }
 }
 
-rtTimeManager& rtTimeManager::instance() {
-  static rtTimeManager handle;
-  return handle;
-}
-
 //! Start the timer for the main window. Pass in the handle to the main window.
 void rtTimeManager::startRenderTimer(int delay) {
 #ifdef DEBUG_VERBOSE_MODE_ON

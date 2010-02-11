@@ -39,9 +39,8 @@ class rtTimeManager : public QObject {
   Q_OBJECT
 
  public:
+  rtTimeManager();
   ~rtTimeManager();
-
-  static rtTimeManager& instance();
 
   void startRenderTimer(int delay=34);
 
@@ -82,7 +81,6 @@ class rtTimeManager : public QObject {
   void calcFrameRate();
 
  private:
-  rtTimeManager();
   rtTimeManager(const rtTimeManager&);
   rtTimeManager& operator=(const rtTimeManager&);
 };

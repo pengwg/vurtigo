@@ -22,6 +22,7 @@
 #include "rtMainWindow.h"
 #include "rtPluginLoader.h"
 #include "rtConfigOptions.h"
+#include "rtTimeManager.h"
 
 #include <QCoreApplication>
 
@@ -33,6 +34,7 @@ rtApplication::rtApplication() {
   m_pluginLoader = NULL;
   m_mainWindow = NULL;
   m_configOptions = NULL;
+  m_timeManager = NULL;
 
   connect(QCoreApplication::instance(), SIGNAL(aboutToQuit()), this, SLOT(cleanupApp()));
 }
@@ -60,10 +62,14 @@ void rtApplication::initApp() {
   m_configOptions = new rtConfigOptions();
   m_mainWindow = new rtMainWindow();
   m_pluginLoader = new rtPluginLoader();
+  m_timeManager = new rtTimeManager();
+
+  m_timeManager->startRenderTimer(40);
 }
 
 void rtApplication::cleanupApp() {
   if(m_mainWindow) delete m_mainWindow;
   if(m_pluginLoader) delete m_pluginLoader;
   if(m_configOptions) delete m_configOptions;
+  if(m_timeManager) delete m_timeManager;
 }

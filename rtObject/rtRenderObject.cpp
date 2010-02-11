@@ -20,6 +20,7 @@
 #include "rtRenderObject.h"
 #include "rtTimeManager.h"
 #include "rtDataObject.h"
+#include "rtApplication.h"
 
 rtRenderObject::rtRenderObject() {
   m_dataObj = NULL;
@@ -112,12 +113,14 @@ void rtRenderObject::updateTreeItem() {
 }
 
 void rtRenderObject::setVisible3D(bool v) {
+  if( !rtApplication::instance().getTimeManager() ) return;
+
   m_visible3D = v;
   if (v) {
     tryUpdate();
-    rtTimeManager::instance().addToWatchList(this);
+    rtApplication::instance().getTimeManager()->addToWatchList(this);
   } else {
-    rtTimeManager::instance().removeFromWatchList(this);
+    rtApplication::instance().getTimeManager()->removeFromWatchList(this);
   }
 }
 
