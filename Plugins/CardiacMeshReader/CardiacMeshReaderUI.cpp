@@ -82,6 +82,7 @@ void CardiacMeshReaderUI::newDirectory() {
     infoBrowser->clear();
     if (ok) {
       infoBrowser->append(m_customReader.getComments());
+      m_customReader.createVolume(m_customReader.getDICOMImageData());
       p1FinishButton->setEnabled(true);
       p1NextButton->setEnabled(true);
       m_meshReader.setNumPhases(m_customReader.getImageData()->GetNumberOfScalarComponents());

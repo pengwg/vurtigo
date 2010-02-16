@@ -62,7 +62,11 @@ public:
 
   void cleanupImageData();
   
+  //! Get the list of trigger delays.
   QList<double>* getTriggerList() { return &m_triggerList; }
+
+  //! Get the list as DICOM image data.
+  QList<DICOMImageData*>* getDICOMImageData() { return &m_imgData; }
 
 protected:
   QList<QString> m_fileList;

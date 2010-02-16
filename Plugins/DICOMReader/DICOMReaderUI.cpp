@@ -57,6 +57,10 @@ void DICOMReaderUI::newDirectory() {
     infoBrowser->clear();
     if (ok) {
       infoBrowser->append(m_customReader.getComments());
+
+      // Try to create the volume.
+      m_customReader.createVolume(m_customReader.getDICOMImageData());
+
       createVolumeButton->setEnabled(true);
       nameLineEdit->setEnabled(true);
     } else {
