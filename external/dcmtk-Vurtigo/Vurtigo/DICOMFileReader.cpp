@@ -26,6 +26,8 @@
 #include <string>
 #include <math.h>
 
+#include <vtkMath.h>
+
 //DCMTK
 #include "osconfig.h"
 #include "dcdeftag.h"
@@ -151,7 +153,7 @@ bool DICOMFileReader::createVolume(QList<DICOMImageData*>* imgData) {
     return false;
   }
 
-  int numZSlices, numFrames;
+  int numZSlices, numFrames, numRow, numCol, volZSlices;
   int locIdx = 0; // Default is HFS.
 
   // Set up the patient position for the first file. Should be the same for all the others too!
@@ -161,128 +163,131 @@ bool DICOMFileReader::createVolume(QList<DICOMImageData*>* imgData) {
     }
   }
 
+  // Get the number of rows and columns
+  numRow = imgData->at(0)->getNumRows();
+  numCol = imgData->at(0)->getNumCols();
 
-  if (imgData->count() == 1) {
-    // Just One Slice
-    m_vtkImgData->SetScalarTypeToShort();
-    m_vtkImgData->SetDimensions(imgData->at(0)->getNumRows(), imgData->at(0)->getNumCols(), 1);
-    m_vtkImgData->AllocateScalars();
-
-    // TODO this single slice option.
-  } else if (imgData->count() > 1) {
-
-    // Chack for cine. If there are multiple images per cycle then this is a movie.
-    if ( imgData->at(0)->isCineData() ) {
-      // Check if the number of images is devisible by the number of images in one cycle.
-      if (imgData->count() % imgData->at(0)->getImagesPerCycle() != 0) {
-        std::cout << "Error: Number of images: " << imgData->count() << " Not divisible by: " << imgData->at(0)->getImagesPerCycle() << std::endl;
-        return false;
-      }
-
-      numFrames = imgData->at(0)->getImagesPerCycle();
-      numZSlices = (int) (imgData->count() / imgData->at(0)->getImagesPerCycle());
-    } else {
-      numFrames = 1;
-      numZSlices = imgData->count();
+  // Chack for cine. If there are multiple images per cycle then this is a movie.
+  if ( imgData->at(0)->isCineData() ) {
+    // Check if the number of images is devisible by the number of images in one cycle.
+    if (imgData->count() % imgData->at(0)->getImagesPerCycle() != 0) {
+      std::cout << "Error: Number of images: " << imgData->count() << " Not divisible by: " << imgData->at(0)->getImagesPerCycle() << std::endl;
+      return false;
     }
 
-    // Multiple Slices
-    m_vtkImgData->SetScalarTypeToShort();
-    m_vtkImgData->SetDimensions(imgData->at(0)->getNumRows(), imgData->at(0)->getNumCols(), numZSlices);
-    m_vtkImgData->SetNumberOfScalarComponents(numFrames);
-    m_vtkImgData->AllocateScalars();
+    numFrames = imgData->at(0)->getImagesPerCycle();
+    numZSlices = (int) (imgData->count() / imgData->at(0)->getImagesPerCycle());
+  } else {
+    numFrames = 1;
+    numZSlices = imgData->count();
+  }
 
-    double pos[3];
-    double rowOrient[3];
-    double colOrient[3];
+  // Number of Z slices in the volume is the same as in the DICOM files EXCEPT when there is only one slice.
+  // To be a valid volume the thrid dimension must be at least 2.
+  if (numZSlices == 1) {
+    volZSlices = 2;
+  } else {
+    volZSlices = numZSlices;
+  }
 
-    pos[0] = ENTRY_FLIPS[locIdx][0]*imgData->at(0)->getImagePosition(0);
-    pos[1] = ENTRY_FLIPS[locIdx][1]*imgData->at(0)->getImagePosition(1);
-    pos[2] = ENTRY_FLIPS[locIdx][2]*imgData->at(0)->getImagePosition(2);
+  // Create the image data.
+  m_vtkImgData->SetScalarTypeToShort();
+  m_vtkImgData->SetDimensions(numRow, numCol, volZSlices);
+  m_vtkImgData->SetNumberOfScalarComponents(numFrames);
+  m_vtkImgData->AllocateScalars();
 
-    rowOrient[0] = ENTRY_FLIPS[locIdx][0]*imgData->at(0)->getImageOrientation(0, 0);
-    rowOrient[1] = ENTRY_FLIPS[locIdx][1]*imgData->at(0)->getImageOrientation(0, 1);
-    rowOrient[2] = ENTRY_FLIPS[locIdx][2]*imgData->at(0)->getImageOrientation(0, 2);
+  // Get the position of the first slice.
+  double pos[3];
+  pos[0] = ENTRY_FLIPS[locIdx][0]*imgData->at(0)->getImagePosition(0);
+  pos[1] = ENTRY_FLIPS[locIdx][1]*imgData->at(0)->getImagePosition(1);
+  pos[2] = ENTRY_FLIPS[locIdx][2]*imgData->at(0)->getImagePosition(2);
 
-    colOrient[0] = ENTRY_FLIPS[locIdx][0]*imgData->at(0)->getImageOrientation(1, 0);
-    colOrient[1] = ENTRY_FLIPS[locIdx][1]*imgData->at(0)->getImageOrientation(1, 1);
-    colOrient[2] = ENTRY_FLIPS[locIdx][2]*imgData->at(0)->getImageOrientation(1, 2);
+  // Get the row and column orientations.
+  double rowOrient[3];
+  double colOrient[3];
 
-    // Calculate the z vector
-    double zVec[3];
-    zVec[0] = (rowOrient[1]*colOrient[2]-rowOrient[2]*colOrient[1]);
-    zVec[1] = (rowOrient[2]*colOrient[0]-rowOrient[0]*colOrient[2]);
-    zVec[2] = (rowOrient[0]*colOrient[1]-rowOrient[1]*colOrient[0]);
+  rowOrient[0] = ENTRY_FLIPS[locIdx][0]*imgData->at(0)->getImageOrientation(0, 0);
+  rowOrient[1] = ENTRY_FLIPS[locIdx][1]*imgData->at(0)->getImageOrientation(0, 1);
+  rowOrient[2] = ENTRY_FLIPS[locIdx][2]*imgData->at(0)->getImageOrientation(0, 2);
 
+  colOrient[0] = ENTRY_FLIPS[locIdx][0]*imgData->at(0)->getImageOrientation(1, 0);
+  colOrient[1] = ENTRY_FLIPS[locIdx][1]*imgData->at(0)->getImageOrientation(1, 1);
+  colOrient[2] = ENTRY_FLIPS[locIdx][2]*imgData->at(0)->getImageOrientation(1, 2);
 
-    // Calculate the Z direction spacing.
-    double xd, yd, zd;
-    double zspacing = 0.0;
-    double flipFlag = 0.0f;
-    double negZed = 1;
+  // Calclulate the z vector as the cross product of the row and column vectors.
+  double zVec[3];
+  vtkMath::Cross(rowOrient, colOrient, zVec);
 
-    xd = 1.0f;
-    yd = 1.0f;
-    zd = 1.0f;
+  double xd, yd, zd;
+  double zspacing = 0.0;
+  double flipFlag = 0.0f;
+  double negZed = 1;
 
-    if (imgData->count() > numFrames) {
-      // At least two Z Slices
-      xd = ENTRY_FLIPS[locIdx][0]*(imgData->at(0)->getImagePosition(0)-imgData->at(numFrames)->getImagePosition(0));
-      yd = ENTRY_FLIPS[locIdx][1]*(imgData->at(0)->getImagePosition(1)-imgData->at(numFrames)->getImagePosition(1));
-      zd = ENTRY_FLIPS[locIdx][2]*(imgData->at(0)->getImagePosition(2)-imgData->at(numFrames)->getImagePosition(2));
-      zspacing = sqrt(xd*xd + yd*yd + zd*zd);
+  xd = 1.0f;
+  yd = 1.0f;
+  zd = 1.0f;
 
-      // Check which direction to put the slices in.
-      flipFlag = zVec[0]*xd+zVec[1]*yd+zVec[2]*zd;
+  if (numZSlices > 1) {
+    // At least two Z Slices
+    xd = ENTRY_FLIPS[locIdx][0]*(imgData->at(0)->getImagePosition(0)-imgData->at(numFrames)->getImagePosition(0));
+    yd = ENTRY_FLIPS[locIdx][1]*(imgData->at(0)->getImagePosition(1)-imgData->at(numFrames)->getImagePosition(1));
+    zd = ENTRY_FLIPS[locIdx][2]*(imgData->at(0)->getImagePosition(2)-imgData->at(numFrames)->getImagePosition(2));
+    zspacing = sqrt(xd*xd + yd*yd + zd*zd);
 
-      if (flipFlag < 0) {
-        negZed = -1;
-      } else {
-        negZed = 1;
-      }
+    // Check which direction to put the slices in.
+    flipFlag = zVec[0]*xd+zVec[1]*yd+zVec[2]*zd;
+
+    if (flipFlag < 0) {
+      negZed = -1;
     } else {
-      // Only one slice so there really is no z spacing. 
-      zspacing = 1.0f;
-      negZed = 1.0f;
+      negZed = 1;
     }
+  } else {
+    // Only one slice so there really is no z spacing or z direction. Default to 1.
+    zspacing = 1.0f;
+    negZed = 1.0f;
+  }
 
-    m_vtkImgData->SetSpacing(imgData->at(0)->getPixelSpace(0), -imgData->at(0)->getPixelSpace(1), negZed*zspacing);
+  // Set the spacing for the image data.
+  m_vtkImgData->SetSpacing(imgData->at(0)->getPixelSpace(0), -imgData->at(0)->getPixelSpace(1), negZed*zspacing);
 
-    short* temp;
-    short* imgPtr;
-    // Copy and the data
-    for (int ix1=0; ix1<numZSlices; ix1++) {
-      for (int row=0; row<imgData->at(0)->getNumRows(); row++) {
-        for (int col=0; col<imgData->at(0)->getNumCols(); col++) {
-          temp = (short*)m_vtkImgData->GetScalarPointer(col, row, ix1);
-          for (int frame = 0; frame<numFrames; frame++) {
-            imgPtr = imgData->at(ix1*numFrames+frame)->getDataPtr();
-            *temp =  imgPtr[row*imgData->at(0)->getNumCols()+col];
-            temp++;
-          }
+  short* temp;
+  short* imgPtr;
+  // Copy and the data
+  for (int ix1=0; ix1<volZSlices; ix1++) {
+    for (int row=0; row<imgData->at(0)->getNumRows(); row++) {
+      for (int col=0; col<imgData->at(0)->getNumCols(); col++) {
+        temp = (short*)m_vtkImgData->GetScalarPointer(col, row, ix1);
+        for (int frame = 0; frame<numFrames; frame++) {
+          imgPtr = imgData->at( (ix1%numZSlices)*numFrames+frame )->getDataPtr();
+          *temp =  imgPtr[row*imgData->at(0)->getNumCols()+col];
+          temp++;
         }
       }
     }
-
-    // Reset the spacing.
-    m_infoFix->SetInput(m_vtkImgData);
-    m_infoFix->CenterImageOff();
-    m_infoFix->SetOutputSpacing(imgData->at(0)->getPixelSpace(0), imgData->at(0)->getPixelSpace(1), -1*negZed*zspacing);
-    m_infoFix->Update();
-
-    m_matrix->SetElement(0, 0, rowOrient[0]);
-    m_matrix->SetElement(1, 0, rowOrient[1]);
-    m_matrix->SetElement(2, 0, rowOrient[2]);
-    m_matrix->SetElement(0, 1, colOrient[0]);
-    m_matrix->SetElement(1, 1, colOrient[1]);
-    m_matrix->SetElement(2, 1, colOrient[2]);
-    m_matrix->SetElement(0, 2, zVec[0]);
-    m_matrix->SetElement(1, 2, zVec[1]);
-    m_matrix->SetElement(2, 2, zVec[2]);
-
-    m_matrix->SetElement(0, 3, pos[0]);
-    m_matrix->SetElement(1, 3, pos[1]);
-    m_matrix->SetElement(2, 3, pos[2]);
   }
+
+  // Reset the spacing.
+  m_infoFix->SetInput(m_vtkImgData);
+  m_infoFix->CenterImageOff();
+  m_infoFix->SetOutputSpacing(imgData->at(0)->getPixelSpace(0), imgData->at(0)->getPixelSpace(1), -1*negZed*zspacing);
+  m_infoFix->Update();
+
+  // Set the orientation
+  m_matrix->SetElement(0, 0, rowOrient[0]);
+  m_matrix->SetElement(1, 0, rowOrient[1]);
+  m_matrix->SetElement(2, 0, rowOrient[2]);
+  m_matrix->SetElement(0, 1, colOrient[0]);
+  m_matrix->SetElement(1, 1, colOrient[1]);
+  m_matrix->SetElement(2, 1, colOrient[2]);
+  m_matrix->SetElement(0, 2, zVec[0]);
+  m_matrix->SetElement(1, 2, zVec[1]);
+  m_matrix->SetElement(2, 2, zVec[2]);
+
+  // Set the position
+  m_matrix->SetElement(0, 3, pos[0]);
+  m_matrix->SetElement(1, 3, pos[1]);
+  m_matrix->SetElement(2, 3, pos[2]);
+
   return true;
 }
