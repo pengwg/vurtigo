@@ -46,6 +46,8 @@ public slots:
 
   void newDirectoryMesh();
   void dirChooserMesh();
+  void minSliderChanged(int);
+  void maxSliderChanged(int);
   void page2Next();
   void page2Back();
   void page2Finish();

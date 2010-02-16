@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>358</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -131,6 +131,60 @@
        </item>
        <item>
         <widget class="QTextBrowser" name="infoBrowserMesh"/>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="page2GroupBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="title">
+          <string>Slice Selection</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="1">
+           <widget class="QSlider" name="minSliceSlider">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSlider" name="maxSliceSlider">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Min Slice:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Max Slice:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="minSliceLabel">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="maxSliceLabel">
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">

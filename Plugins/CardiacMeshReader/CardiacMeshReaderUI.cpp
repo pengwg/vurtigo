@@ -58,8 +58,13 @@ void CardiacMeshReaderUI::connectSignals() {
   connect(p1FinishButton, SIGNAL(clicked()), this, SLOT(page1Finish()));
 
   // Page 2
+  minSliceSlider->setMinimum(0);
+  maxSliceSlider->setMinimum(0);
+
   connect(directoryEditMesh, SIGNAL(editingFinished()), this, SLOT(newDirectoryMesh()));
   connect(directoryChooserMesh, SIGNAL(clicked()), this, SLOT(dirChooserMesh()));
+  connect(minSliceSlider, SIGNAL(valueChanged(int)), this, SLOT(minSliderChanged(int)));
+  connect(maxSliceSlider, SIGNAL(valueChanged(int)), this, SLOT(maxSliderChanged(int)));
   connect(p2BackButton, SIGNAL(clicked()), this, SLOT(page2Back()));
   connect(p2NextButton, SIGNAL(clicked()), this, SLOT(page2Next()));
   connect(p2FinishButton, SIGNAL(clicked()), this, SLOT(page2Finish()));
@@ -138,11 +143,29 @@ void CardiacMeshReaderUI::newDirectoryMesh() {
     bool ok = m_meshReader.setDirectory(m_lastMeshDir);
     infoBrowserMesh->clear();
     if (ok) {
+
+      int numPhases=m_customReader.getTriggerList()->size();
+      int maxSlices=0;
+      for (int ix1=0; ix1<=numPhases; ix1++) {
+        MeshPointSet* currPhase=NULL;
+        currPhase = m_meshReader.getPointSet(ix1);
+        if(!currPhase) continue;
+        if (currPhase->getMaxSlice() > maxSlices) {
+          maxSlices = currPhase->getMaxSlice();
+        }
+      }
+      minSliceSlider->setMaximum(maxSlices);
+      maxSliceSlider->setMaximum(maxSlices);
+      minSliceSlider->setValue(0);
+      maxSliceSlider->setValue(maxSlices);
+
       infoBrowserMesh->append(m_meshReader.getComments());
+      page2GroupBox->setEnabled(true);
       p2FinishButton->setEnabled(true);
       p2NextButton->setEnabled(true);
     } else {
       infoBrowserMesh->append("Error!");
+      page2GroupBox->setEnabled(false);
       p2FinishButton->setEnabled(false);
       p2NextButton->setEnabled(false);
     }
@@ -160,6 +183,24 @@ void CardiacMeshReaderUI::dirChooserMesh() {
     directoryEditMesh->setText(dir);
     newDirectoryMesh();
   }
+}
+
+void CardiacMeshReaderUI::minSliderChanged(int val) {
+  if ( val == minSliceSlider->maximum () ) {
+    val = val-1;
+    minSliceSlider->setValue(val);
+  }
+  if (maxSliceSlider->value() <= val) maxSliceSlider->setValue(val+1);
+  minSliceLabel->setText(QString::number(val));
+}
+
+void CardiacMeshReaderUI::maxSliderChanged(int val) {
+  if ( val == maxSliceSlider->minimum () ) {
+    val = val+1;
+    maxSliceSlider->setValue(val);
+  }
+  if (minSliceSlider->value() >= val) minSliceSlider->setValue(val-1);
+  maxSliceLabel->setText(QString::number(val));
 }
 
 void CardiacMeshReaderUI::page2Next() {
@@ -261,8 +302,9 @@ bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPo
   vtkTransform* trans = m_customReader.getTransform();
   //vtkTransform* trans = vtkTransform::New();
   trans->Inverse();
-  // ASSUME 20 PHASES
-  int numPhases=20;
+
+  // Number of phases is the same as the size of the trigger delay list.
+  int numPhases=m_customReader.getTriggerList()->size();
   int maxSlices=0;
   for (int ix1=0; ix1<=numPhases; ix1++) {
     MeshPointSet* currPhase=NULL;
@@ -279,7 +321,7 @@ bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPo
     if(!currPhase) continue;
 
     int numVertices=0;
-    for (double curvePos=0.0; curvePos<=maxSlices; curvePos+=0.1) {
+    for (double curvePos=minSliceSlider->value(); curvePos<=maxSliceSlider->value(); curvePos+=0.1) {
       for (int ix2=0; ix2<=currPhase->getMaxPtNum(); ix2++) {
         temp.ptList[0] = currPhase->getInterpolateXValue(type, curvePos, ix2)*space[0];
         temp.ptList[1] = currPhase->getInterpolateYValue(type, curvePos, ix2)*space[1];
