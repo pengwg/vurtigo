@@ -22,11 +22,11 @@
 
 #include <QObject>
 #include <QList>
+#include <QTime>
 
 #include <vector>
 
 class QTimer;
-
 class rtRenderObject;
 
 //! Controls timing for the base and all plugins. [Singleton]
@@ -43,12 +43,22 @@ class rtTimeManager : public QObject {
   ~rtTimeManager();
 
   void startRenderTimer(int delay=34);
-
   void addToWatchList(rtRenderObject* obj);
   bool isInWatchList(rtRenderObject* obj);
   void removeFromWatchList(rtRenderObject* obj);
-
   void checkWatchList();
+
+  //! Get the number of msec elapsed since the start of the application.
+  int getSystemTime() { return m_appTime.elapsed(); }
+
+  //! Get the system time as a string as HH:MM:SS
+  QString getSystemTimeAsString() { return m_appTime.toString("hh:mm:ss"); }
+
+  //! Get the trigger delay.
+  int getTriggerDelay() { return m_appTime.elapsed() % m_cardiacCycleLength; }
+
+  //! Get the phase number given that there are n total phases.
+  int getPhaseForNumPhases(int n);
 
  public slots:
   void renderTimeout();
@@ -60,17 +70,21 @@ class rtTimeManager : public QObject {
  protected:
   unsigned int m_estimationLen;
 
+  //! The application time.
+  QTime m_appTime;
+
+  //! The length of the cardiac cycle in ms.
+  int m_cardiacCycleLength;
+
   //! The timer that services the renderer.
   QTimer *m_renderTime;
+  //! Timer to check the plugins for updates
+  QTimer *m_pluginUpdateTime;
+  //! Timer to check the 2D planes for updates.
+  QTimer *m_planeUpdateTime;
 
   //! Objects that are updated at every iteration.
   QList<rtRenderObject*> m_watchList;
-
-  //! Timer to check the plugins for updates
-  QTimer *m_pluginUpdateTime;
-
-  //! Timer to check the 2D planes for updates.
-  QTimer *m_planeUpdateTime;
 
   // Render Time Estimation
   std::vector<double> m_renderTimeBuffer;

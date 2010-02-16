@@ -116,6 +116,9 @@ public:
     */
   bool copyNewTransform(vtkTransform* temp);
 
+  //! Set the trigger delay list.
+  void copyTriggerDelayList(QList<double> *trigDelay) { m_triggerList = (*trigDelay); }
+
   //! Check if the volume should be rendered.
   bool getRenderRayTraceVolume() { return m_optionsWidget.groupRayCastVolume->isChecked(); }
 
@@ -228,6 +231,7 @@ public:
   //! The level value
   double m_level;
 
+  QList<double> m_triggerList;
   vtkSmartPointer<vtkImageExtractComponents> m_subImg;
   int m_visibleComponent;
   QTimer *m_cineFrame;

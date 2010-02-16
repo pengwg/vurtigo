@@ -65,6 +65,9 @@ rtTimeManager::rtTimeManager() {
   m_renderTimePosition = 0;
   m_frameRateLabel = NULL;
 
+  m_cardiacCycleLength = 800;
+
+  m_appTime.start();
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtTimeManager::rtTimeManager() end") );
 #endif
@@ -254,4 +257,10 @@ void rtTimeManager::planeUpdate() {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtTimeManager::planeUpdate() end") );
 #endif
+}
+
+int rtTimeManager::getPhaseForNumPhases(int n) {
+  double phaseTime = ((double)m_cardiacCycleLength)/((double)n);
+  int phase = (m_appTime.elapsed() % m_cardiacCycleLength)/phaseTime;
+  return phase;
 }

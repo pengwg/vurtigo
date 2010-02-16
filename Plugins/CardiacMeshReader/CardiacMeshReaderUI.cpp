@@ -122,6 +122,7 @@ void CardiacMeshReaderUI::page1Finish() {
       ptObj->lock();
       ptObj->copyNewTransform(m_customReader.getTransform());
       ptObj->copyNewImageData(m_customReader.getImageData());
+      ptObj->copyTriggerDelayList(m_customReader.getTriggerList());
       ptObj->Modified();
       ptObj->unlock();
     }
@@ -202,8 +203,8 @@ void CardiacMeshReaderUI::page3Finish() {
     if (ptObj) {
       ptObj->lock();
       ptObj->copyNewTransform(m_customReader.getTransform());
-      //ptObj->copyNewTransform(vtkTransform::New());
       ptObj->copyNewImageData(m_customReader.getImageData());
+      ptObj->copyTriggerDelayList(m_customReader.getTriggerList());
       ptObj->Modified();
       ptObj->unlock();
     }
@@ -302,7 +303,7 @@ bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPo
     }
 
     data->lock();
-    data->setNewGeometry(&pointList, &pointListLink, ix1);
+    data->setNewGeometry( &pointList, &pointListLink, m_customReader.getTriggerList()->at(ix1) );
     data->Modified();
     data->unlock();
 

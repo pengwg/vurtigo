@@ -91,6 +91,7 @@ void DICOMReaderUI::saveAsVolume() {
       ptObj->lock();
       ptObj->copyNewTransform(m_customReader.getTransform());
       ptObj->copyNewImageData(m_customReader.getImageData());
+      ptObj->copyTriggerDelayList(m_customReader.getTriggerList());
       ptObj->Modified();
       ptObj->unlock();
     }

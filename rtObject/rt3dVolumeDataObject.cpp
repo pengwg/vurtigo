@@ -27,6 +27,7 @@
 #include "rtColorFuncRenderObject.h"
 #include "rtPieceFuncDataObject.h"
 #include "rtApplication.h"
+#include "rtTimeManager.h"
 
 rt3DVolumeDataObject::rt3DVolumeDataObject() {
   setObjectType(rtConstants::OT_3DObject);
@@ -499,26 +500,32 @@ void rt3DVolumeDataObject::setVisibleComponent(int c) {
   }
   m_subImg->SetComponents(m_visibleComponent);
   m_subImg->Update();
+  m_optionsWidget.frameSlider->setValue(m_visibleComponent);
   Modified();
 }
 
 void rt3DVolumeDataObject::nextVisibleComponent() {
   if (!m_imgDataValid) return;
   int numComp = m_imgUShortCast->GetOutput()->GetNumberOfScalarComponents();
-  m_visibleComponent = (m_visibleComponent + 1) % numComp;
-  m_subImg->SetComponents(m_visibleComponent);
 
-  m_optionsWidget.frameSlider->setValue(m_visibleComponent);
+  int trigDelay = rtApplication::instance().getTimeManager()->getTriggerDelay();
 
-  m_subImg->Update();
-  Modified();
+  int phase;
+  double diff=10000;
+  for (int ix1=0; ix1<m_triggerList.size(); ix1++) {
+    if (fabs(m_triggerList[ix1]-(double)trigDelay) < diff) {
+      diff = fabs(m_triggerList[ix1]-(double)trigDelay);
+      phase = ix1;
+    }
+  }
+  if (m_visibleComponent != phase) setVisibleComponent(phase);
 }
 
 
 void rt3DVolumeDataObject::cineLoop(bool cine) {
 
   if (cine) {
-    m_cineFrame->start(100);
+    m_cineFrame->start(20);
   } else if (m_cineFrame->isActive()) {
     m_cineFrame->stop();
   }

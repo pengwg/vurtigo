@@ -20,6 +20,7 @@
 #include "rtPolyDataObject.h"
 #include "rtMessage.h"
 #include "rtApplication.h"
+#include "rtTimeManager.h"
 
 #include <QHash>
 #include <QColor>
@@ -197,18 +198,26 @@ bool rtPolyDataObject::setCurrTrigDelay(double trigDelay) {
   double diff = (m_trigDelayList[0] - trigDelay)*(m_trigDelayList[0] - trigDelay);
   int phase = 0;
   for (int ix1=1; ix1<m_trigDelayList.count(); ix1++) {
-  	if ( diff > (m_trigDelayList[ix1] - trigDelay)*(m_trigDelayList[ix1] - trigDelay) ) {
+    if ( diff > (m_trigDelayList[ix1] - trigDelay)*(m_trigDelayList[ix1] - trigDelay) ) {
   		diff = (m_trigDelayList[ix1] - trigDelay)*(m_trigDelayList[ix1] - trigDelay);
   		phase = ix1;
   	}
   }
-  m_currentPhase = phase;
+  if (m_currentPhase != phase) {
+    m_currentPhase = phase;
+    m_optionsWidget.frameSlider->setValue(m_currentPhase);
+    Modified();
+  }
   return true;
 }
 
 bool rtPolyDataObject::setCurrPhase(int phase) {
   if (phase < 0 || phase >= m_trigDelayList.count()) return false;
-  m_currentPhase = phase;
+  if (m_currentPhase != phase) {
+    m_currentPhase = phase;
+    m_optionsWidget.frameSlider->setValue(m_currentPhase);
+    Modified();
+  }
   return true;
 }
   
@@ -243,22 +252,24 @@ void rtPolyDataObject::meshCheckBoxChanged(int state) {
   Modified();
 }
 
-void rtPolyDataObject::setVisibleComponent(int comp) {
-  m_currentPhase = comp;
-  Modified();
+void rtPolyDataObject::setVisibleComponent(int phase) {
+  if (m_currentPhase != phase) {
+    m_currentPhase = phase;
+    m_optionsWidget.frameSlider->setValue(m_currentPhase);
+    Modified();
+  }
 }
 
 
 void rtPolyDataObject::nextVisibleComponent() {
   if( m_trigDelayList.count() <= 1) return;
-  m_currentPhase = (m_currentPhase + 1) % m_trigDelayList.count();
-  m_optionsWidget.frameSlider->setValue(m_currentPhase);
-  Modified();
+  int trig = rtApplication::instance().getTimeManager()->getTriggerDelay();
+  setCurrTrigDelay(trig);
 }
 
 void rtPolyDataObject::cineLoop(bool cine) {
   if (cine) {
-    m_cineFrame->start(100);
+    m_cineFrame->start(20);
   } else if (m_cineFrame->isActive()) {
     m_cineFrame->stop();
   }
