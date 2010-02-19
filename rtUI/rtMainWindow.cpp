@@ -40,6 +40,7 @@
 #include "buildParam.h"
 #include "rtHelpManager.h"
 #include "rtApplication.h"
+#include "rtTimeManager.h"
 
 #define USE_NEW_MESSAGES
 
@@ -707,6 +708,7 @@ void rtMainWindow::connectSignals() {
   connect(action3D_Render_Options, SIGNAL(triggered()), this, SLOT(showRenderOptions()));
   connect(actionDefault_View, SIGNAL(triggered()), this , SLOT(cameraDefaultView()));
   connect(actionRobot_Arm, SIGNAL(triggered()), this, SLOT(cameraRobotArmView()));
+  connect(actionTimer_Options, SIGNAL(triggered()), this, SLOT(showTimeOptionsDialog()));
 
   // 2D View controls
   connect(add2DFrameBtn, SIGNAL(clicked()), this, SLOT(add2DFrame()));
@@ -953,6 +955,11 @@ void rtMainWindow::cameraDefaultView() {
 void rtMainWindow::cameraRobotArmView() {
   m_cameraControl->setToRobotArmPosition();
   m_renderFlag3D = true;
+}
+
+void rtMainWindow::showTimeOptionsDialog() {
+  if (rtApplication::instance().getTimeManager())
+    rtApplication::instance().getTimeManager()->showTimeOptionsDialog();
 }
 
 //! Load a plugin based on an XML file the user chooses. 

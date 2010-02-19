@@ -42,17 +42,14 @@ rtTimeManager::rtTimeManager() {
   m_pluginUpdateTime = new QTimer();
   m_planeUpdateTime = new QTimer();
 
+  m_dialogOptions.setupUi(&m_timeDialog);
+
   m_estimationLen = 50;
   m_renderTimeBuffer.reserve(m_estimationLen);
   m_renderTimeBuffer.resize(m_estimationLen, 0.0f);
 
-  // Fire every 40 mils or 25 fps.
   m_renderTime->setInterval(10);
-
-  // About 40 fps
   m_pluginUpdateTime->setInterval(10);
-
-  // About 30 fps.
   m_planeUpdateTime->setInterval(10);
 
   connect(m_pluginUpdateTime, SIGNAL(timeout()), this, SLOT(pluginUpdate()));
@@ -65,9 +62,17 @@ rtTimeManager::rtTimeManager() {
   m_renderTimePosition = 0;
   m_frameRateLabel = NULL;
 
+  m_useSimulatedTrigger = true;
+  m_cardiacCycleSlowdown = 1.0f;
   m_cardiacCycleLength = 800;
+  m_globalTriggerDelay = 0;
 
   m_appTime.start();
+
+  // Setup some of the default GUI parameters.
+  setupUI();
+
+
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtTimeManager::rtTimeManager() end") );
 #endif
@@ -121,50 +126,7 @@ void rtTimeManager::renderTimeout() {
 #endif
 }
 
-//! Do the frame rate calculations.
-void rtTimeManager::calcFrameRate() {
-  double frameRate;
-  double avgFrameRate;
-  double tempSum;
-  double stdev;
-  QString text = "   ";
 
-  if (!m_frameRateLabel)
-    m_frameRateLabel = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_TextLabel, "Frame Rate");
-
-  frameRate = 1.0f/rtApplication::instance().getMainWinHandle()->getRenderer()->GetLastRenderTimeInSeconds();
-  m_currentSum -= m_renderTimeBuffer[m_renderTimePosition];
-  m_currentSum += frameRate;
-  m_renderTimeBuffer[m_renderTimePosition] = frameRate;
-  m_renderTimePosition = (m_renderTimePosition+1) % m_estimationLen;
-
-  // Update only every nth.
-  if (m_renderTimePosition == 0) {
-    avgFrameRate = m_currentSum/((double)m_estimationLen);
-
-    tempSum = 0.0f;
-    for (int ix1=0; ix1<m_estimationLen; ix1++) {
-      tempSum += (avgFrameRate-m_renderTimeBuffer[ix1])*(avgFrameRate-m_renderTimeBuffer[ix1]);
-    }
-    tempSum = tempSum / ((double)m_estimationLen);
-    stdev = sqrt(tempSum);
-
-    text.append(QString::number(avgFrameRate));
-    text.append("  (+ or -)  ");
-    text.append(QString::number(stdev));
-    text.append(" FPS ");
-
-    rtLabelDataObject* labelObj;
-    labelObj = static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject());
-    if (labelObj) {
-      labelObj->setText(text);
-      labelObj->getTextProperty()->SetLineOffset(4);
-      labelObj->Modified();
-    } else {
-      rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtTimeManager::calcFrameRate() Frame Rate Label is NULL.") );
-    }
-  }
-}
 
 //! Function called by a timer to update the plugins that need to be updated.
 void rtTimeManager::pluginUpdate() {
@@ -259,8 +221,125 @@ void rtTimeManager::planeUpdate() {
 #endif
 }
 
+int rtTimeManager::getTriggerDelay() {
+  if (m_useSimulatedTrigger) {
+    int slowdownLength;
+    slowdownLength = ceil(((double)m_cardiacCycleLength)*m_cardiacCycleSlowdown);
+    return ((double)(m_appTime.elapsed() % slowdownLength) )/m_cardiacCycleSlowdown;
+  } else {
+    return m_globalTriggerDelay;
+  }
+}
+
 int rtTimeManager::getPhaseForNumPhases(int n) {
   double phaseTime = ((double)m_cardiacCycleLength)/((double)n);
-  int phase = (m_appTime.elapsed() % m_cardiacCycleLength)/phaseTime;
+  int phase = getTriggerDelay()/phaseTime;
   return phase;
+}
+
+void rtTimeManager::renderTimeChanged(int t) {
+  m_dialogOptions.renderUpdateSlider->setValue(t);
+  m_dialogOptions.renderUpdateLabel->setText(QString::number(t).append(" ms"));
+  m_renderTime->setInterval(t);
+}
+
+void rtTimeManager::pluginTimeChanged(int t) {
+  m_dialogOptions.pluginUpdateSlider->setValue(t);
+  m_dialogOptions.pluginUpdateLabel->setText(QString::number(t).append(" ms"));
+  m_pluginUpdateTime->setInterval(t);
+}
+
+void rtTimeManager::planeTimeChanged(int t) {
+  m_dialogOptions.planeUpdateSlider->setValue(t);
+  m_dialogOptions.planeUpdateLabel->setText(QString::number(t).append(" ms"));
+  m_planeUpdateTime->setInterval(t);
+}
+
+void rtTimeManager::triggerTimeSourceChanged(bool src) {
+  m_useSimulatedTrigger = src;
+  m_dialogOptions.triggerTimesGroupBox->setChecked(m_useSimulatedTrigger);
+}
+
+void rtTimeManager::cycleLengthChanged(int len) {
+  m_dialogOptions.cycleLengthSlider->setValue(len);
+  m_dialogOptions.cycleLengthLabel->setText(QString::number(len).append(" ms"));
+  m_cardiacCycleLength = len;
+}
+
+void rtTimeManager::cycleSlowdownChanged(int len) {
+  double factor;
+  factor = (double)len / 1000.0f;
+
+  m_dialogOptions.cycleSlowdownSlider->setValue(len);
+  m_dialogOptions.cycleSlowdownLabel->setText(QString::number(factor).append(" "));
+  m_cardiacCycleSlowdown = factor;
+}
+
+////////////////
+// Protected Functions
+/////////////////
+void rtTimeManager::setupUI() {
+
+  m_timeDialog.setModal(true);
+
+  renderTimeChanged(m_renderTime->interval());
+  pluginTimeChanged(m_pluginUpdateTime->interval());
+  planeTimeChanged(m_planeUpdateTime->interval());
+
+  triggerTimeSourceChanged(m_useSimulatedTrigger);
+
+  cycleLengthChanged(m_cardiacCycleLength);
+  cycleSlowdownChanged(m_cardiacCycleSlowdown*1000.0f);
+
+  connect(m_dialogOptions.renderUpdateSlider, SIGNAL(valueChanged(int)), this, SLOT(renderTimeChanged(int)));
+  connect(m_dialogOptions.pluginUpdateSlider, SIGNAL(valueChanged(int)), this, SLOT(pluginTimeChanged(int)));
+  connect(m_dialogOptions.planeUpdateSlider, SIGNAL(valueChanged(int)), this, SLOT(planeTimeChanged(int)));
+  connect(m_dialogOptions.triggerTimesGroupBox, SIGNAL(clicked(bool)), this, SLOT(triggerTimeSourceChanged(bool)));
+  connect(m_dialogOptions.cycleLengthSlider, SIGNAL(valueChanged(int)), this, SLOT(cycleLengthChanged(int)));
+  connect(m_dialogOptions.cycleSlowdownSlider, SIGNAL(valueChanged(int)), this, SLOT(cycleSlowdownChanged(int)));
+}
+
+
+void rtTimeManager::calcFrameRate() {
+  double frameRate;
+  double avgFrameRate;
+  double tempSum;
+  double stdev;
+  QString text = "   ";
+
+  if (!m_frameRateLabel)
+    m_frameRateLabel = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_TextLabel, "Frame Rate");
+
+  frameRate = 1.0f/rtApplication::instance().getMainWinHandle()->getRenderer()->GetLastRenderTimeInSeconds();
+  m_currentSum -= m_renderTimeBuffer[m_renderTimePosition];
+  m_currentSum += frameRate;
+  m_renderTimeBuffer[m_renderTimePosition] = frameRate;
+  m_renderTimePosition = (m_renderTimePosition+1) % m_estimationLen;
+
+  // Update only every nth.
+  if (m_renderTimePosition == 0) {
+    avgFrameRate = m_currentSum/((double)m_estimationLen);
+
+    tempSum = 0.0f;
+    for (int ix1=0; ix1<m_estimationLen; ix1++) {
+      tempSum += (avgFrameRate-m_renderTimeBuffer[ix1])*(avgFrameRate-m_renderTimeBuffer[ix1]);
+    }
+    tempSum = tempSum / ((double)m_estimationLen);
+    stdev = sqrt(tempSum);
+
+    text.append(QString::number(avgFrameRate));
+    text.append("  (+ or -)  ");
+    text.append(QString::number(stdev));
+    text.append(" FPS ");
+
+    rtLabelDataObject* labelObj;
+    labelObj = static_cast<rtLabelDataObject*>(m_frameRateLabel->getDataObject());
+    if (labelObj) {
+      labelObj->setText(text);
+      labelObj->getTextProperty()->SetLineOffset(4);
+      labelObj->Modified();
+    } else {
+      rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtTimeManager::calcFrameRate() Frame Rate Label is NULL.") );
+    }
+  }
 }

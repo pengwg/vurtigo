@@ -26,6 +26,8 @@
 
 #include <vector>
 
+#include "ui_rtTimeOptionsDialog.h"
+
 class QTimer;
 class rtRenderObject;
 
@@ -54,27 +56,78 @@ class rtTimeManager : public QObject {
   //! Get the system time as a string as HH:MM:SS
   QString getSystemTimeAsString() { return m_appTime.toString("hh:mm:ss"); }
 
+  //! Sets the global trigger delay.
+  /*! This delay will be ignored if the simulation delay is running.
+    \sa m_useSimulatedTrigger
+    */
+  void setGlobalTriggerDelay(int delay) { m_globalTriggerDelay=delay; }
+
   //! Get the trigger delay.
-  int getTriggerDelay() { return m_appTime.elapsed() % m_cardiacCycleLength; }
+  /*!
+    The value returned depends if the mode is in simulated mode [default] or in real mode.
+If the m_useSimulatedTrigger is true then the simulated mode is run otherwise in real mode the value of m_globalTriggerDelay is returned.
+\sa m_useSimulatedTrigger
+\sa m_globalTriggerDelay
+\sa setGlobalTriggerDelay
+    */
+  int getTriggerDelay();
 
   //! Get the phase number given that there are n total phases.
   int getPhaseForNumPhases(int n);
 
  public slots:
+  //! Time to update the render window.
   void renderTimeout();
+
+  //! Time to update plugins
   void pluginUpdate();
 
   //! Update the 2D views.
   void planeUpdate();
 
+  //! Show the dialog with all the options for the time manager.
+  void showTimeOptionsDialog() { m_timeDialog.show(); }
+
+  void renderTimeChanged(int);
+  void pluginTimeChanged(int);
+  void planeTimeChanged(int);
+  void triggerTimeSourceChanged(bool);
+  void cycleLengthChanged(int);
+  void cycleSlowdownChanged(int);
  protected:
+
+  //! setup the UI when the object is created.
+  void setupUI();
+
+  //! Do the frame rate calculations.
+  void calcFrameRate();
+
   unsigned int m_estimationLen;
+
+  //! The options dialog for the time manager
+  Ui::rtTimeOptionsDialog m_dialogOptions;
+  QDialog m_timeDialog;
+
+  int m_globalTriggerDelay;
 
   //! The application time.
   QTime m_appTime;
 
   //! The length of the cardiac cycle in ms.
   int m_cardiacCycleLength;
+
+  //! A slowdown factor for the cardiac simulation cycle.
+  /*!
+    A slowdown factor in the range (0, 1) increases the speed of the cardiac cycle.
+    A slowdown factor of 1.0 maintains the speed of the cycle at real time. [default]
+    Any factor greater than 1.0 slows the rate down.
+    For example, for a factor of 2.0, a cardiac cycle of 800 ms will be played out in 1600 ms but the trigger delays will still range over [0, 800].
+This is useful for recording of videos after an experiment when the renderer cannot keep up with the processing required to record one frame every phase.
+    */
+  double m_cardiacCycleSlowdown;
+
+  //! Use the simulated trigger times.
+  bool m_useSimulatedTrigger;
 
   //! The timer that services the renderer.
   QTimer *m_renderTime;
@@ -90,9 +143,9 @@ class rtTimeManager : public QObject {
   std::vector<double> m_renderTimeBuffer;
   double m_currentSum;
   int m_renderTimePosition;
-  rtRenderObject* m_frameRateLabel;
 
-  void calcFrameRate();
+  //! Text label used to display the frame rate.
+  rtRenderObject* m_frameRateLabel;
 
  private:
   rtTimeManager(const rtTimeManager&);

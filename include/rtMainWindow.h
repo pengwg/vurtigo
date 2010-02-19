@@ -158,6 +158,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void cameraDefaultView();
   void cameraRobotArmView();
 
+  void showTimeOptionsDialog();
+
   void add2DFrame();
   void remove2DFrame();
   void removeAll2DFrame();
