@@ -108,3 +108,9 @@ add_library(DCMTKVurtigo SHARED
   ${DCMTK_DCMDATA_SRC} 
   ${DCMTK_VURTIGO_SRC}
 )
+target_link_libraries (DCMTKVurtigo
+  ${QT_LIBRARIES}
+  vtkFiltering
+  vtkCommon
+  vtkRendering
+)

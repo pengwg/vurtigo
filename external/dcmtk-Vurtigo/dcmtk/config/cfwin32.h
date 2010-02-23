@@ -19,13 +19,6 @@
 /* Compiling for windows */
 #define windows 1
 #define WIN32 1
-
-/* Define if you have the <windows.h> header file.  */
-#define HAVE_WINDOWS_H 1
-
-/* Define if you have the <winsock.h> header file.  */
-#define HAVE_WINSOCK_H 1
-
 /* MinGW needs some special handling because it is a mixture of WIN32 and Posix. 
  * The following settings are not tested by configure but need to be set for MinGW.
  */
@@ -33,6 +26,11 @@
 #define HAVE_WINDOWS_H
 #define HAVE_WINSOCK_H
 #define NO_IOS_BASE_ASSIGN
+#else
+/* Define if you have the <windows.h> header file.  */
+#define HAVE_WINDOWS_H 1
+/* Define if you have the <winsock.h> header file.  */
+//#define HAVE_WINSOCK_H 1
 #endif
 
 /* Define the canonical host system type as a string constant */
@@ -114,7 +112,8 @@
 
 /* Define if your system has a declaration for std::ios_base::openmode in
    iostream.h */
-/* #undef  HAVE_DECLARATION_STD__IOS_BASE__OPENMODE */
+//#undef  HAVE_DECLARATION_STD__IOS_BASE__OPENMODE 
+#define HAVE_DECLARATION_STD__IOS_BASE__OPENMODE 1
 
 /* Define if your system has a declaration for struct utimbuf in sys/types.h
    utime.h sys/utime.h */
@@ -234,13 +233,13 @@
 #define HAVE_IOMANIP 1
 
 /* Define to 1 if you have the <iomanip.h> header file. */
-#define HAVE_IOMANIP_H 1
+//#define HAVE_IOMANIP_H 1
 
 /* Define to 1 if you have the <iostream> header file. */
 #define HAVE_IOSTREAM 1
 
 /* Define to 1 if you have the <iostream.h> header file. */
-#define HAVE_IOSTREAM_H 1
+//#define HAVE_IOSTREAM_H 1
 
 /* Define if your system defines ios::nocreate in iostream.h */
 /* defined below */
@@ -775,7 +774,7 @@ typedef unsigned short ushort;
 /* #undef  TM_IN_SYS_TIME */
 
 /* Define if ANSI standard C++ includes are used */
-/* #undef  USE_STD_CXX_INCLUDES */
+// #undef  USE_STD_CXX_INCLUDES
 
 /* Define if we are compiling with libpng support */
 /* #undef  WITH_LIBPNG */
@@ -813,17 +812,7 @@ typedef unsigned short ushort;
 /* #undef __CHAR_UNSIGNED__ */
 #endif
 
-/* Platform specific settings for Visual C++
- * By default, enable ANSI standard C++ includes on Visual C++ 6 and newer 
- *   _MSC_VER == 1100 on Microsoft Visual C++ 5.0 
- *   _MSC_VER == 1200 on Microsoft Visual C++ 6.0 
- *   _MSC_VER == 1300 on Microsoft Visual C++ 7.0 
- */
-#ifdef _MSC_VER
-#if _MSC_VER >= 1200
 #define USE_STD_CXX_INCLUDES
-#endif
-#endif
 
 #ifdef USE_STD_CXX_INCLUDES
 
@@ -834,7 +823,7 @@ typedef unsigned short ushort;
 #define HAVE_STD_NAMESPACE 1
 
 /* Define if it is not possible to assign stream objects */
-#define NO_IOS_BASE_ASSIGN 1
+//#define NO_IOS_BASE_ASSIGN 1
 
 /* Define if the compiler supports std::nothrow */
 #define HAVE_STD__NOTHROW 1
