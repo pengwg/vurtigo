@@ -543,10 +543,24 @@ void rt3DVolumeDataObject::isoValueChanged(int v) {
 void rt3DVolumeDataObject::updateInfoText() {
   QString infoText;
   QTextStream ts(&infoText, QIODevice::WriteOnly);
+
+  double rangeP[2];
+  m_imgUShortCast->GetOutput()->GetScalarRange(rangeP);
+
+  int dims[3];
+  m_imgUShortCast->GetOutput()->GetDimensions( dims );
+
+  double spacing[3];
+  m_imgUShortCast->GetOutput()->GetSpacing(spacing);
+
   m_optionsWidget.volumeInfoTextEdit->clear();
   ts << this->getObjName() << "\n";
   ts << "-------------------------------------------------\n";
-  ts << "Range: [0, " << m_window << "] \n";
+  ts << "Scalar Range: [" << rangeP[0] <<", " << rangeP[1] << "] \n";
+  ts << "Volume Size: [" << dims[0] << ", " << dims[1] << ", " << dims[2] << "] \n";
+  ts << "Number of Frames: " << m_imgUShortCast->GetOutput()->GetNumberOfScalarComponents() << " \n";
+  ts << "Memory Used: " << m_imgUShortCast->GetOutput()->GetActualMemorySize() << " kB \n";
+  ts << "Slice Spacing: [" << spacing[0] << ", " << spacing[1] << ", " << spacing[2] << "] \n";
   ts.flush();
 
   m_optionsWidget.volumeInfoTextEdit->setPlainText(infoText);
