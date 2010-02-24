@@ -37,6 +37,7 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
 
   m_imgUShortCast = vtkImageShiftScale::New();
   m_imgData = vtkImageData::New();
+  m_imgClip = vtkImageClip::New();
   m_dataTransform = vtkTransform::New();
   m_pieceFuncDefault = vtkPiecewiseFunction::New();
   m_colorTransFuncDefault = vtkColorTransferFunction::New();
@@ -50,9 +51,12 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   m_piecewiseFuncID = -1;
   m_colorFuncID = -1;
 
+  m_imgClip->SetInput(m_imgData);
+  m_imgClip->ClipDataOn ();
+
   m_volumeProperty->SetScalarOpacity(m_pieceFunc);
   m_volumeProperty->SetColor(m_colorTransFunc);
-  m_imgUShortCast->SetInput(m_imgData);
+  m_imgUShortCast->SetInput(m_imgClip->GetOutput());
   m_imgUShortCast->SetOutputScalarTypeToUnsignedShort();
 
   m_compositeFunc = vtkVolumeRayCastCompositeFunction::New();
@@ -94,6 +98,7 @@ rt3DVolumeDataObject::~rt3DVolumeDataObject() {
 
   m_imgUShortCast->Delete();
   m_imgData->Delete();
+  m_imgClip->Delete();
   m_dataTransform->Delete();
   m_pieceFuncDefault->Delete();
   m_colorTransFuncDefault->Delete();
@@ -193,6 +198,40 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
   if (!temp) return false;
 
   double rangeI[2], rangeP[2];
+  int wholeExtent[6];
+
+  temp->GetWholeExtent(wholeExtent);
+  m_imgClip->SetOutputWholeExtent(wholeExtent[0], wholeExtent[1], wholeExtent[2], wholeExtent[3], wholeExtent[4], wholeExtent[5]);
+
+  m_optionsWidget.xminSlider->setMinimum(wholeExtent[0]);
+  m_optionsWidget.xminSlider->setMaximum(wholeExtent[1]);
+  m_optionsWidget.xminSlider->setValue(wholeExtent[0]);
+  m_optionsWidget.xminLabel->setText(QString::number(wholeExtent[0]));
+
+  m_optionsWidget.xmaxSlider->setMinimum(wholeExtent[0]);
+  m_optionsWidget.xmaxSlider->setMaximum(wholeExtent[1]);
+  m_optionsWidget.xmaxSlider->setValue(wholeExtent[1]);
+  m_optionsWidget.xmaxLabel->setText(QString::number(wholeExtent[1]));
+
+  m_optionsWidget.yminSlider->setMinimum(wholeExtent[2]);
+  m_optionsWidget.yminSlider->setMaximum(wholeExtent[3]);
+  m_optionsWidget.yminSlider->setValue(wholeExtent[2]);
+  m_optionsWidget.yminLabel->setText(QString::number(wholeExtent[2]));
+
+  m_optionsWidget.ymaxSlider->setMinimum(wholeExtent[2]);
+  m_optionsWidget.ymaxSlider->setMaximum(wholeExtent[3]);
+  m_optionsWidget.ymaxSlider->setValue(wholeExtent[3]);
+  m_optionsWidget.ymaxLabel->setText(QString::number(wholeExtent[3]));
+
+  m_optionsWidget.zminSlider->setMinimum(wholeExtent[4]);
+  m_optionsWidget.zminSlider->setMaximum(wholeExtent[5]);
+  m_optionsWidget.zminSlider->setValue(wholeExtent[4]);
+  m_optionsWidget.zminLabel->setText(QString::number(wholeExtent[4]));
+
+  m_optionsWidget.zmaxSlider->setMinimum(wholeExtent[4]);
+  m_optionsWidget.zmaxSlider->setMaximum(wholeExtent[5]);
+  m_optionsWidget.zmaxSlider->setValue(wholeExtent[5]);
+  m_optionsWidget.zmaxLabel->setText(QString::number(wholeExtent[5]));
 
   m_imgData->DeepCopy(temp);
   m_imgData->GetScalarRange(rangeI);
@@ -229,6 +268,8 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
   m_optionsWidget.isoValueSlider->setMinimum(0);
   m_optionsWidget.isoValueSlider->setMaximum(m_window);
   m_optionsWidget.isoValueSlider->setValue(m_level);
+
+
 
   m_imgDataValid = true;
   emit newImageData();
@@ -281,6 +322,17 @@ void rt3DVolumeDataObject::setDirectionCosinesXY(float* dirCos) {
 //! Set the GUI widgets.
 void rt3DVolumeDataObject::setupGUI() {
   m_optionsWidget.setupUi(getBaseWidget());
+
+  // Volume Crop.
+  m_optionsWidget.cropVolumeGroupBox->setChecked(true);
+
+  connect(m_optionsWidget.cropVolumeGroupBox, SIGNAL(clicked(bool)), this, SLOT(cropStatusChanged(bool)));
+  connect(m_optionsWidget.xminSlider, SIGNAL(valueChanged(int)), this, SLOT(xminSliderChanged(int)));
+  connect(m_optionsWidget.xmaxSlider, SIGNAL(valueChanged(int)), this, SLOT(xmaxSliderChanged(int)));
+  connect(m_optionsWidget.yminSlider, SIGNAL(valueChanged(int)), this, SLOT(yminSliderChanged(int)));
+  connect(m_optionsWidget.ymaxSlider, SIGNAL(valueChanged(int)), this, SLOT(ymaxSliderChanged(int)));
+  connect(m_optionsWidget.zminSlider, SIGNAL(valueChanged(int)), this, SLOT(zminSliderChanged(int)));
+  connect(m_optionsWidget.zmaxSlider, SIGNAL(valueChanged(int)), this, SLOT(zmaxSliderChanged(int)));
 
   // Window Level
   connect(m_optionsWidget.wlButton, SIGNAL(clicked()), this, SLOT(showWindowLevel()));
@@ -564,4 +616,117 @@ void rt3DVolumeDataObject::updateInfoText() {
   ts.flush();
 
   m_optionsWidget.volumeInfoTextEdit->setPlainText(infoText);
+}
+
+void rt3DVolumeDataObject::cropStatusChanged(bool status) {
+  int ext[6];
+  if (status) {
+    ext[0] = m_optionsWidget.xminSlider->value();
+    ext[1] = m_optionsWidget.xmaxSlider->value();
+    ext[2] = m_optionsWidget.yminSlider->value();
+    ext[3] = m_optionsWidget.ymaxSlider->value();
+    ext[4] = m_optionsWidget.zminSlider->value();
+    ext[5] = m_optionsWidget.zmaxSlider->value();
+    m_imgClip->SetOutputWholeExtent(ext);
+  } else {
+    m_imgData->GetWholeExtent(ext);
+    m_imgClip->SetOutputWholeExtent(ext);
+  }
+  Modified();
+}
+
+void rt3DVolumeDataObject::xminSliderChanged(int val) {
+  // Adjust the max to fit be at least the min.
+  if (m_optionsWidget.xmaxSlider->value() < val) {
+    m_optionsWidget.xmaxSlider->setValue(val);
+  }
+
+  int ext[6];
+  m_imgClip->GetOutputWholeExtent(ext);
+  if (ext[0] != val) {
+    ext[0] = val;
+    m_optionsWidget.xminLabel->setText(QString::number(val));
+    m_imgClip->SetOutputWholeExtent(ext);
+    Modified();
+  }
+}
+
+void rt3DVolumeDataObject::xmaxSliderChanged(int val) {
+  // Adjust the min to fit the max.
+  if (m_optionsWidget.xminSlider->value() > val) {
+    m_optionsWidget.xminSlider->setValue(val);
+  }
+
+  int ext[6];
+  m_imgClip->GetOutputWholeExtent(ext);
+  if (ext[1] != val) {
+    ext[1] = val;
+    m_optionsWidget.xmaxLabel->setText(QString::number(val));
+    m_imgClip->SetOutputWholeExtent(ext);
+    Modified();
+  }
+}
+
+void rt3DVolumeDataObject::yminSliderChanged(int val) {
+  // Adjust the max to fit be at least the min.
+  if (m_optionsWidget.ymaxSlider->value() < val) {
+    m_optionsWidget.ymaxSlider->setValue(val);
+  }
+
+  int ext[6];
+  m_imgClip->GetOutputWholeExtent(ext);
+  if (ext[2] != val) {
+    ext[2] = val;
+    m_optionsWidget.yminLabel->setText(QString::number(val));
+    m_imgClip->SetOutputWholeExtent(ext);
+    Modified();
+  }
+}
+
+void rt3DVolumeDataObject::ymaxSliderChanged(int val) {
+  // Adjust the min to fit the max.
+  if (m_optionsWidget.yminSlider->value() > val) {
+    m_optionsWidget.yminSlider->setValue(val);
+  }
+
+  int ext[6];
+  m_imgClip->GetOutputWholeExtent(ext);
+  if (ext[3] != val) {
+    ext[3] = val;
+    m_optionsWidget.ymaxLabel->setText(QString::number(val));
+    m_imgClip->SetOutputWholeExtent(ext);
+    Modified();
+  }
+}
+
+void rt3DVolumeDataObject::zminSliderChanged(int val) {
+  // Adjust the max to fit be at least the min.
+  if (m_optionsWidget.zmaxSlider->value() < val) {
+    m_optionsWidget.zmaxSlider->setValue(val);
+  }
+
+  int ext[6];
+  m_imgClip->GetOutputWholeExtent(ext);
+  if (ext[4] != val) {
+    ext[4] = val;
+    m_optionsWidget.zminLabel->setText(QString::number(val));
+    m_imgClip->SetOutputWholeExtent(ext);
+    Modified();
+  }
+}
+
+void rt3DVolumeDataObject::zmaxSliderChanged(int val) {
+  // Adjust the min to fit the max.
+  if (m_optionsWidget.zminSlider->value() > val) {
+    m_optionsWidget.zminSlider->setValue(val);
+  }
+
+  int ext[6];
+  m_imgClip->GetOutputWholeExtent(ext);
+  if (ext[5] != val) {
+    ext[5] = val;
+    m_optionsWidget.zmaxLabel->setText(QString::number(val));
+    m_imgClip->SetOutputWholeExtent(ext);
+    Modified();
+  }
 }

@@ -33,9 +33,10 @@
 #include "vtkImageShiftScale.h"
 #include "vtkImageExtractComponents.h"
 
-#include "vtkVolumeRayCastCompositeFunction.h"
-#include "vtkVolumeRayCastIsosurfaceFunction.h"
-#include "vtkVolumeRayCastMIPFunction.h"
+#include <vtkVolumeRayCastCompositeFunction.h>
+#include <vtkVolumeRayCastIsosurfaceFunction.h>
+#include <vtkVolumeRayCastMIPFunction.h>
+#include <vtkImageClip.h>
 
 #include <QTimer>
 
@@ -194,6 +195,14 @@ public:
 
   void updateInfoText();
 
+  void cropStatusChanged(bool);
+  void xminSliderChanged(int);
+  void xmaxSliderChanged(int);
+  void yminSliderChanged(int);
+  void ymaxSliderChanged(int);
+  void zminSliderChanged(int);
+  void zmaxSliderChanged(int);
+
  signals:
   void newImageData();
 
@@ -212,6 +221,7 @@ public:
   // Variables
   ///////////////
   vtkImageData* m_imgData;
+  vtkImageClip* m_imgClip;
   vtkTransform* m_dataTransform;
   vtkPiecewiseFunction* m_pieceFunc;
   vtkColorTransferFunction* m_colorTransFunc;
