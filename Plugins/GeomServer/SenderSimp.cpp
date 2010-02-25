@@ -28,9 +28,6 @@ void SenderSimp::setSenderDefaults() {
   args.hostname = NULL;
   SenderSimp::copyString(&args.hostname, hostname);
   args.port = 1777;
-  args.cathFile = new char[1];
-  args.dicomFile = new char[1];
-
 }
 
 SenderSimp::SenderSimp() {
@@ -45,9 +42,6 @@ SenderSimp::SenderSimp() {
 
 SenderSimp::~SenderSimp() {
   delete [] args.hostname;
-  delete [] args.cathFile;
-  delete [] args.dicomFile;
-
   delete (GenericMode *) readMode;
 }
 

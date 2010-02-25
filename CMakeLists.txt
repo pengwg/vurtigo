@@ -4,7 +4,7 @@ project (Vurtigo)
 # The version number.
 set (Vurtigo_VERSION_MAJOR 1)
 set (Vurtigo_VERSION_MINOR 0)
-set (Vurtigo_VERSION_REVISION 0)
+set (Vurtigo_VERSION_REVISION 3)
 
 set ( Vurtigo_PROJECT_VERSION "${Vurtigo_VERSION_MAJOR}.${Vurtigo_VERSION_MINOR}.${Vurtigo_VERSION_REVISION}"  )
 

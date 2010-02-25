@@ -29,8 +29,6 @@ struct arguments
 {
   char * hostname;
   int port;
-  char* cathFile;
-  char* dicomFile;
 };
 
 struct IMAGEDATA {

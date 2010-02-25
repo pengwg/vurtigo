@@ -51,6 +51,11 @@ Q_OBJECT
 public:
 
   //! Different types of ray cast functions
+  /*!
+    Composite - Render the voxles based on the tracing rays to the first visible voxel and rendering that.
+    Isosurface - Create a surface based on a threshold value.
+    MIP - Maximum intensity projection also based on tracing rays through the volume and rendering the voxel of highest intensity.
+    */
   enum RayCastFunction {
     RCF_COMPOSITE,
     RCF_ISOSURFACE,
@@ -123,14 +128,22 @@ public:
   //! Check if the volume should be rendered.
   bool getRenderRayTraceVolume() { return m_optionsWidget.groupRayCastVolume->isChecked(); }
 
+  //! Check if the 3D axial slice is being shown
   bool getAxial3D() { return m_optionsWidget.checkAxial3D->isChecked(); }
+  //! Check if the 3D sagittal slice is being shown
   bool getSagittal3D() { return m_optionsWidget.checkSagittal3D->isChecked(); }
+  //! Check if the 3D coronal slice is being shown
   bool getCoronal3D() { return m_optionsWidget.checkCoronal3D->isChecked(); }
 
+  //! Check if valid data exists in the data object.
+  /*!
+    When the data obejct is created the data is not valid. When new image data is copied into the data object then it becomes valid.
+    */
   bool isDataValid() { return m_imgDataValid; }
 
   //! Translate the data object
   void translateData(double x, double y, double z);
+  //! Scale the data object
   void scaleData(double x, double y, double z);
   void setDirectionCosinesXY(float* dirCos);
 
@@ -189,13 +202,19 @@ public:
   //! The window level has been changed by WL dialog.
   void wlChanged(int w, int l);
 
+  //! The button was pressed to reset the plane to the axial position
   void axialResetSlot();
+  //! The button was pressed to reset the plane to the sagittal position
   void sagittalResetSlot();
+  //! The button was pressed to reset the plane to the coronal position
   void coronalResetSlot();
 
+  //! Update the info in the GUI text box for this volume object.
   void updateInfoText();
 
+  //! Turn the cropping feature on or off
   void cropStatusChanged(bool);
+
   void xminSliderChanged(int);
   void xmaxSliderChanged(int);
   void yminSliderChanged(int);

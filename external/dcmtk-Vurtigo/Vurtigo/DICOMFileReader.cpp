@@ -218,24 +218,23 @@ bool DICOMFileReader::createVolume(QList<DICOMImageData*>* imgData) {
   double zVec[3];
   vtkMath::Cross(rowOrient, colOrient, zVec);
 
-  double xd, yd, zd;
   double zspacing = 0.0;
-  double flipFlag = 0.0f;
   double negZed = 1;
 
-  xd = 1.0f;
-  yd = 1.0f;
-  zd = 1.0f;
-
   if (numZSlices > 1) {
+    double xd, yd, zd;
+
     // At least two Z Slices
     xd = ENTRY_FLIPS[locIdx][0]*(imgData->at(0)->getImagePosition(0)-imgData->at(numFrames)->getImagePosition(0));
     yd = ENTRY_FLIPS[locIdx][1]*(imgData->at(0)->getImagePosition(1)-imgData->at(numFrames)->getImagePosition(1));
     zd = ENTRY_FLIPS[locIdx][2]*(imgData->at(0)->getImagePosition(2)-imgData->at(numFrames)->getImagePosition(2));
     zspacing = sqrt(xd*xd + yd*yd + zd*zd);
 
+    // Check for a sane spacing...
+    if (zspacing < 0.001) zspacing = 0.5;
+
     // Check which direction to put the slices in.
-    flipFlag = zVec[0]*xd+zVec[1]*yd+zVec[2]*zd;
+    double flipFlag = zVec[0]*xd+zVec[1]*yd+zVec[2]*zd;
 
     if (flipFlag < 0) {
       negZed = -1;
