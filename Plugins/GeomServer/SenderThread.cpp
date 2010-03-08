@@ -19,24 +19,21 @@
 *******************************************************************************/
 #include "SenderThread.h"
 #include "SenderSimp.h"
-#include <QMetaType>
-#include <iostream>
+//#include <QMetaType>
+//#include <iostream>
 
-SenderThread::SenderThread() {
-  sender = NULL;
-  calledDestructor = false;
+SenderThread::SenderThread() : sender(NULL), m_calledDestructor(false) {
 }
 
 SenderThread::~SenderThread() {
-  calledDestructor = true;
+  m_calledDestructor = true;
   objLock.lock();
   if(sender) delete sender;
   this->quit();
-  while(!this->wait());
+  this->wait();
   objLock.unlock();
 }
 
-//! The thread actions, which connects the signals and slots for the new thread
 void SenderThread::run() {
   sender = new SenderSimp();
   connect(this, SIGNAL(connectSignal()), sender, SLOT(connectAndMessage()), Qt::QueuedConnection);
@@ -46,7 +43,6 @@ void SenderThread::run() {
   exec();
 }
 
-//! Method to check if the "sender" is NULL before doing actions
 void SenderThread::checkObjects() {
   if (sender == NULL) {
     objLock.lock();
@@ -55,7 +51,6 @@ void SenderThread::checkObjects() {
   }
 }
 
-//! Read from Geometry Server and set data in Vurtigo
 void SenderThread::readAndSetData() {
   checkObjects();
   // Must allocate a signal before sending it.
@@ -65,23 +60,20 @@ void SenderThread::readAndSetData() {
   }
 }
 
-//! Connect and print to console
 void SenderThread::serverConnect() {
-  if (!calledDestructor) {
+  if (!m_calledDestructor) {
     checkObjects();
     emit connectSignal();
   }
 }
 
-
 void SenderThread::serverDisconnect() {
-  if (!calledDestructor) {
+  if (!m_calledDestructor) {
     checkObjects();
     emit disconnectSignal();
   }
 }
 
-//! Returns sender settings (hostname, port, etc.)
 arguments * SenderThread::getArgs() {
   checkObjects();
   return sender->getArgs();

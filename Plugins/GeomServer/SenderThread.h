@@ -54,13 +54,20 @@ class SenderThread : public QThread {
 
   SenderThread();
   ~SenderThread();
+
+  //! Function to start the thread.
   void run();
 
-  // Sender actions
+  //! Read from Geometry Server and set data in Vurtigo
   void readAndSetData();
+
+  //! Connect the the geom server
   void serverConnect();
+
+  //! Disconnect from the server
   void serverDisconnect();
 
+  //! Returns sender settings (hostname, port, etc.)
   arguments * getArgs();
 
   //! Get the handle to the sender object.
@@ -70,13 +77,16 @@ protected:
   //! To communicate geometry server
   SenderSimp *sender;
 
-  // Ensures that "threadObj" above is not null when actions are done
+  //! Locks until the SenderSimp object is no longer NULL
   QMutex objLock;
+  //! Stops waiting when the SenderSimp object is no longer NULL
   QWaitCondition objCV;
+
+  //! Method to check if the "sender" is NULL before doing actions
   void checkObjects();
 
-  //! true when destructor is called, helps ensure that the thread is not running when being destroyed
-  bool calledDestructor;
+  //! true when destructor is called and flase otherwise, helps ensure that the thread is not running when being destroyed
+  bool m_calledDestructor;
 
 signals:
   // Sender signals for multithreading
