@@ -20,6 +20,8 @@
 #ifndef GEOM_SERVER_PLUGIN_H
 #define GEOM_SERVER_PLUGIN_H
 
+#include <QMutex>
+
 #include "rtPluginInterface.h"
 #include "SenderThread.h"
 #include "SenderSimp.h"
@@ -46,6 +48,9 @@ class GeomServerPlugin : public QObject, public DataInterface {
  private:
   //! Thread for GeomServerPlugin::readAndSetData()
   SenderThread senderThread;
+
+  //! A lock to ensure that the update call is not flooded.
+  QMutex m_singleUpdate;
 };
 
 #endif

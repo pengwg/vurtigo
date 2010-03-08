@@ -20,6 +20,7 @@
 #include "SenderThread.h"
 #include "SenderSimp.h"
 #include <QMetaType>
+#include <iostream>
 
 SenderThread::SenderThread() {
   sender = NULL;
@@ -57,7 +58,11 @@ void SenderThread::checkObjects() {
 //! Read from Geometry Server and set data in Vurtigo
 void SenderThread::readAndSetData() {
   checkObjects();
-  emit readAndSetDataSignal();
+  // Must allocate a signal before sending it.
+  // Do not want to overwhelm the other thread.
+  if (sender->allocateNewSignal()) {
+    emit readAndSetDataSignal();
+  }
 }
 
 //! Connect and print to console

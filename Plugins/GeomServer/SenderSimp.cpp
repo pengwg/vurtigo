@@ -30,7 +30,7 @@ void SenderSimp::setSenderDefaults() {
   args.port = 1777;
 }
 
-SenderSimp::SenderSimp() {
+SenderSimp::SenderSimp() : m_signalsAvailable(2) {
   readMode = new GenericMode();
   tempConnect = false;
 
@@ -81,12 +81,16 @@ void SenderSimp::disconnect() {
 //! Reads the information
 void SenderSimp::runReadMode() {
   // Check that the connection has been made.
-  if (!isConnected()) return;
+  if (!isConnected()) {
+    m_signalsAvailable.release();
+    return;
+  }
 
   if (runLock.tryAcquire()) {
     readMode->runMode();
     runLock.release();
   }
+  m_signalsAvailable.release();
 }
 
 //! Prints the information read

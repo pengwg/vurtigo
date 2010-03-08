@@ -32,6 +32,7 @@
 class SenderSimp : public QObject {
   Q_OBJECT
 
+protected:
   //! Sends info, needed by Generic Mode
   GeometrySender sender;
   //! Config information for connecting
@@ -45,6 +46,8 @@ class SenderSimp : public QObject {
   QSemaphore runLock;
 
   void setSenderDefaults();
+
+  QSemaphore m_signalsAvailable;
 
   public:
     //! File types for text files (currenly not used)
@@ -60,7 +63,10 @@ class SenderSimp : public QObject {
 
     GenericMode* getReaderHandle() { return readMode; }
 
-  public slots:
+    //! Check is a new signal can be sent.
+    bool allocateNewSignal() { return m_signalsAvailable.tryAcquire(); }
+
+   public slots:
     bool connectAndMessage();
     void disconnect();
 

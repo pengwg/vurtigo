@@ -137,7 +137,7 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
   vtkPoints *pointList = vtkPoints::New();
   vtkIntArray *scalars = vtkIntArray::New();
   vtkCellArray *surf = vtkCellArray::New();
-  int tempLine[3];
+  vtkIdType tempLine[3];
 
   QHash<QString, int> colorTable;
   QColor temp;
