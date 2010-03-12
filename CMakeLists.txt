@@ -15,13 +15,13 @@ set(DEBUG_VERBOSE_MODE OFF CACHE BOOL "Build in Debug Verbose Mode. Slower but p
 ####################
 # Determine the OS
 ####################
-if (UNIX)
-  message(STATUS "Linux Found!")
-elseif (APPLE)
+if (APPLE)
   message(STATUS "Mac Found!")
+elseif (UNIX)
+  message(STATUS "Linux Found!")
 elseif (WIN32)
   message(STATUS "Windows Found!")
-endif (UNIX)
+endif (APPLE)
 
 ####################
 # Setup for Qt
@@ -61,13 +61,12 @@ include("TargetDoc.cmake" OPTIONAL)
 ####################
 
 
-message("Build Type: " ${CMAKE_BUILD_TYPE})
-
-message("Debug Build Flags: " ${CMAKE_C_FLAGS_DEBUG})
-message("Release Build Flags: " ${CMAKE_C_FLAGS_RELEASE})
+message(STATUS "Build Type: " ${CMAKE_BUILD_TYPE})
+message(STATUS "Debug Build Flags: " ${CMAKE_C_FLAGS_DEBUG})
+message(STATUS "Release Build Flags: " ${CMAKE_C_FLAGS_RELEASE})
 
 set(QT_DEFINITIONS ${QT_DEFINITIONS} " " -DQT_NO_DEBUG_OUTPUT)
-message("Qt Flags: " ${QT_DEFINITIONS})
+message(STATUS "Qt Flags: " ${QT_DEFINITIONS})
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
@@ -123,8 +122,6 @@ add_subdirectory(rtControl)
 add_subdirectory(rtPlugin)
 
 qt4_wrap_cpp(MOC_FILES_OUT ${RTOBJECT_MOC_FILES} ${RTCONTROL_MOC_FILES} ${RTUI_MOC_FILES} ${RTPLUGIN_MOC_FILES})
-
-#message(STATUS "Moc Files: " ${MOC_FILES})
 
 set (MAIN_SRC_FILES
   rtMain.cpp
