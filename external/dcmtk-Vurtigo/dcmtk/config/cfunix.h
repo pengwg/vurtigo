@@ -759,28 +759,28 @@ typedef unsigned short ushort;
 #define USE_STD_CXX_INCLUDES 
 
 /* Define if we are compiling with libpng support */
-#define WITH_LIBPNG 
+//#define WITH_LIBPNG 
 
 /* Define if we are compiling with libtiff support */
-#define WITH_LIBTIFF 
+//#define WITH_LIBTIFF 
 
 /* Define if we are compiling with libxml support */
-#define WITH_LIBXML 
+//#define WITH_LIBXML 
 
 /* Define if we are compiling with OpenSSL support */
-#define WITH_OPENSSL 
+//#define WITH_OPENSSL 
 
 /* Define if we are compiling for built-in private tag dictionary */
 /* #undef WITH_PRIVATE_TAGS */
 
 /* Define if we are compiling with libwrap (TCP wrapper) support */
-#define WITH_TCPWRAPPER 
+//#define WITH_TCPWRAPPER 
 
 /* Define if we are compiling with any type of Multi-thread support */
-#define WITH_THREADS 
+//#define WITH_THREADS 
 
 /* Define if we are compiling with zlib support */
-#define WITH_ZLIB 
+//#define WITH_ZLIB 
 
 /* Define to 1 if on AIX 3.
    System headers sometimes define this.
