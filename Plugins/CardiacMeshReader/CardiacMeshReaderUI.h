@@ -59,7 +59,7 @@ public slots:
 protected:
   void connectSignals();
 
-  bool loadPolyDataFromPoints(rtPolyDataObject* data, MeshPointSet::PointType type);
+  bool loadPolyDataFromPoints(rtPolyDataObject* data, MeshPointSet::PointType type, double smoothStep=1.0);
 
   QString m_lastDir;
   QString m_lastMeshDir;
@@ -73,8 +73,14 @@ protected:
   //! The ID of the poly data icontour
   int m_icontour;
 
+  //! The ID of the non smooth icontour
+  int m_icontourNoSmooth;
+
   //! The ID of the poly data ocontour
   int m_ocontour;
+
+  //! The ID of the non smooth ocontour
+  int m_ocontourNoSmooth;
 };
 
 #endif

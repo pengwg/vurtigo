@@ -80,14 +80,17 @@ Points should be joined into triangles to be rendered.
   Long computations are performed in this function so resetting of the geometry should not be done all the time.
   @return True if the replacement was a success.
   */
-  bool setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink> *links, double trigDelay=0);
+  bool setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink> *links, int trigDelay=0);
   bool copyPolyData(vtkPolyData*);
   bool copyLookupTable(vtkColorTransferFunction*);
 
-  bool setCurrTrigDelay(double trigDelay);
+  bool setCurrTrigDelay(int trigDelay);
   bool setCurrPhase(int phase);
   
   int getCurrPhase() { return m_currentPhase; }
+
+  virtual bool saveFile(QFile *file);
+  virtual bool loadFile(QFile *file);
 public slots:
   void opacityChanged(int);
   void meshCheckBoxChanged(int);
@@ -101,10 +104,12 @@ public slots:
   void setupGUI();
   void cleanupGUI();
   
+  bool readNewPhaseFromFile(QXmlStreamReader* reader, int pahse, int trigger);
+
   //! The widget for the options for this object
   Ui::polyDataOptions m_optionsWidget;
 
-  QList<double> m_trigDelayList;
+  QList<int> m_trigDelayList;
   QList<vtkPolyData*> m_polyData;
   QList<vtkProperty*> m_polyProperty;
   QList<vtkColorTransferFunction*> m_colorLookup;

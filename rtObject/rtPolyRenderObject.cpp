@@ -20,6 +20,9 @@
 #include "rtPolyRenderObject.h"
 #include "rtPolyDataObject.h"
 
+#include "rtApplication.h"
+#include "rtMessage.h"
+
 rtPolyRenderObject::rtPolyRenderObject() {
   setObjectType(rtConstants::OT_vtkPolyData);
   setName("Poly Renderer");
@@ -30,14 +33,19 @@ rtPolyRenderObject::rtPolyRenderObject() {
 
 rtPolyRenderObject::~rtPolyRenderObject() {
   m_actor->Delete();
+  m_actor = NULL;
   m_mapper->Delete();
+  m_mapper = NULL;
 }
 
 //! Take info from the data object. 
 void rtPolyRenderObject::update() {
   rtPolyDataObject *dObj = static_cast<rtPolyDataObject*>(m_dataObj);
 
-  if (!dObj) return;
+  if (!dObj) {
+    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("Update fialed! Data object is NULL."));
+    return;
+  }
 
   dObj->getPolyData()->Update();
 
@@ -49,7 +57,11 @@ void rtPolyRenderObject::update() {
 
 //! Add this object to the given renderer.
 bool rtPolyRenderObject::addToRenderer(vtkRenderer* ren) {
-  if (!ren) return false;
+  if (!ren) {
+    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("addToRenderer failed! Renderer object is NULL."));
+    return false;
+  }
+
   setVisible3D(true);
   if (!ren->HasViewProp(m_actor)) {
     ren->AddViewProp(m_actor);
@@ -77,25 +89,24 @@ void rtPolyRenderObject::setupDataObject() {
 
 //! Create the part of the pipeline that is done first. 
 void rtPolyRenderObject::setupPipeline() {
-  rtPolyDataObject *dObj = static_cast<rtPolyDataObject*>(m_dataObj);
   m_actor = vtkActor::New();
   m_mapper = vtkPolyDataMapper::New();
 
   m_actor->SetMapper(m_mapper);
-  m_actor->SetProperty(dObj->getProperty());
 
-  m_mapper->SetInput(dObj->getPolyData());
   m_mapper->SetScalarModeToUsePointData();
   m_mapper->UseLookupTableScalarRangeOn();\
   m_mapper->SetColorModeToMapScalars();
-  m_mapper->SetLookupTable(dObj->getColorTable());
 
   m_pipe3D.push_back(m_actor);
 }
 
 
 bool rtPolyRenderObject::getObjectLocation(double loc[6]) {
-  if (!m_actor) return false;
+  if (!m_actor) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not get object location. Object actor is NULL."));
+    return false;
+  }
 
   m_actor->GetBounds(loc);
   return true;

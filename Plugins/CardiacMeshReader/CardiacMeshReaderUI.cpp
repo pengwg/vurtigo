@@ -253,25 +253,36 @@ void CardiacMeshReaderUI::page3Finish() {
   }
 
   m_icontour = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text());
+  m_icontourNoSmooth = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text().append(" (No Smoothing) ") );
   m_ocontour = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text());
+  m_ocontourNoSmooth = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text().append(" (No Smoothing) ") );
 
   if (m_icontour>=0) {
     rtPolyDataObject* iContourObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_icontour));
     if(iContourObj) {
-      loadPolyDataFromPoints(iContourObj, MeshPointSet::PT_ICONTOUR);
+      loadPolyDataFromPoints(iContourObj, MeshPointSet::PT_ICONTOUR, 0.1);
+    }
+
+    iContourObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_icontourNoSmooth));
+    if(iContourObj) {
+      loadPolyDataFromPoints(iContourObj, MeshPointSet::PT_ICONTOUR, 1.0);
     }
   }
 
   if (m_ocontour>=0) {
     rtPolyDataObject* oContourObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_ocontour));
     if(oContourObj) {
-      loadPolyDataFromPoints(oContourObj, MeshPointSet::PT_OCONTOUR);
+      loadPolyDataFromPoints(oContourObj, MeshPointSet::PT_OCONTOUR, 0.1);
+    }
+    oContourObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_ocontourNoSmooth));
+    if(oContourObj) {
+      loadPolyDataFromPoints(oContourObj, MeshPointSet::PT_OCONTOUR, 1.0);
     }
   }
 
 }
 
-bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPointSet::PointType type) {
+bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPointSet::PointType type, double smoothStep) {
   if (!data) return false;
 
   rtPolyDataObject::PolyPoint temp;
@@ -321,7 +332,7 @@ bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPo
     if(!currPhase) continue;
 
     int numVertices=0;
-    for (double curvePos=minSliceSlider->value(); curvePos<=maxSliceSlider->value(); curvePos+=0.1) {
+    for (double curvePos=minSliceSlider->value(); curvePos<=maxSliceSlider->value(); curvePos+=smoothStep) {
       for (int ix2=0; ix2<=currPhase->getMaxPtNum(); ix2++) {
         temp.ptList[0] = currPhase->getInterpolateXValue(type, curvePos, ix2)*space[0];
         temp.ptList[1] = currPhase->getInterpolateYValue(type, curvePos, ix2)*space[1];

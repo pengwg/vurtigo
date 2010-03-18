@@ -36,10 +36,8 @@
 rtPolyDataObject::rtPolyDataObject() {
   setObjectType(rtConstants::OT_vtkPolyData);
 
-
   m_cineFrame = new QTimer(this);
   connect( m_cineFrame,SIGNAL(timeout()), this, SLOT(nextVisibleComponent()) );
-
 
   setupGUI();
 
@@ -62,17 +60,26 @@ rtPolyDataObject::~rtPolyDataObject() {
 }
   
 vtkPolyData* rtPolyDataObject::getPolyData() { 
-  if (m_currentPhase==-1) return NULL;
+  if (m_currentPhase==-1) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not get poly data. Current phase is -1."));
+    return NULL;
+  }
   return m_polyData[m_currentPhase];
 }
 
 vtkProperty* rtPolyDataObject::getProperty() { 
-  if (m_currentPhase==-1) return NULL;
+  if (m_currentPhase==-1) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not get property. Current phase is -1."));
+    return NULL;
+  }
   return m_polyProperty[m_currentPhase]; 
 }
 
 vtkColorTransferFunction* rtPolyDataObject::getColorTable() { 
-  if (m_currentPhase==-1) return NULL;
+  if (m_currentPhase==-1) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not get color table. Current phase is -1."));
+    return NULL;
+  }
   return m_colorLookup[m_currentPhase]; 
 }
   
@@ -91,7 +98,7 @@ void rtPolyDataObject::clearAllData() {
 }
   
 
-bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink> *links, double trigDelay) {
+bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink> *links, int trigDelay) {
 	
   // Check that the pointers are valid. 
   if (!pts || !links) {
@@ -118,7 +125,6 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
   if (addIndex == -1) {
     // No such delay. So add it.
     m_trigDelayList.append(trigDelay);
-    if (m_currentPhase == -1) m_currentPhase = 0;
     m_polyData.append( vtkPolyData::New() );
     vtkProperty* pr = vtkProperty::New();
     m_polyProperty.append( pr );
@@ -128,6 +134,8 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
     if(m_optionsWidget.frameSlider) m_optionsWidget.frameSlider->setMaximum(m_trigDelayList.count()-1);
   }
   
+  if (m_currentPhase == -1) m_currentPhase = 0;
+
   addIndex = m_trigDelayList.indexOf(trigDelay);
   if (addIndex == -1) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to add index for a new trigger delay!"));
@@ -157,7 +165,6 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
     }
     m_colorLookup[addIndex]->AddRGBPoint(colorTable.value(temp.name()), ((double)temp.red())/255.0f, ((double)temp.green())/255.0f, ((double)temp.blue())/255.0f );
     scalars->SetTupleValue(ix1, &colorTable[temp.name()]);
-
   }
 
   m_polyData[addIndex]->Reset();
@@ -181,20 +188,29 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
 
 //! Copy a new poly data object. The old data is replaced.
 bool rtPolyDataObject::copyPolyData(vtkPolyData* polyData) {
-  if (!polyData) return false;
+  if (!polyData) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not copy poly data. Pointer is NULL."));
+    return false;
+  }
   m_polyData[m_currentPhase]->DeepCopy(polyData);
   return true;
 }
 
 //! Copy a new lookup table. The old table is replaced.
 bool rtPolyDataObject::copyLookupTable(vtkColorTransferFunction* lookupTable) {
-  if (!lookupTable) return false;
+  if (!lookupTable) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not copy poly data. Pointer is NULL."));
+    return false;
+  }
   m_colorLookup[m_currentPhase]->DeepCopy(lookupTable);
   return true;
 }
   
-bool rtPolyDataObject::setCurrTrigDelay(double trigDelay) {
-  if (trigDelay < 0 || m_trigDelayList.count() == 0) return false;
+bool rtPolyDataObject::setCurrTrigDelay(int trigDelay) {
+  if (trigDelay < 0 || m_trigDelayList.count() == 0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not set trigger delay. Delay is negative or the list is empty."));
+    return false;
+  }
   double diff = (m_trigDelayList[0] - trigDelay)*(m_trigDelayList[0] - trigDelay);
   int phase = 0;
   for (int ix1=1; ix1<m_trigDelayList.count(); ix1++) {
@@ -212,7 +228,11 @@ bool rtPolyDataObject::setCurrTrigDelay(double trigDelay) {
 }
 
 bool rtPolyDataObject::setCurrPhase(int phase) {
-  if (phase < 0 || phase >= m_trigDelayList.count()) return false;
+  if (phase < 0 || phase >= m_trigDelayList.count()) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not set phase. Parameter is negative or phase falls otside the trigger list."));
+    return false;
+  }
+
   if (m_currentPhase != phase) {
     m_currentPhase = phase;
     m_optionsWidget.frameSlider->setValue(m_currentPhase);
@@ -224,6 +244,156 @@ bool rtPolyDataObject::setCurrPhase(int phase) {
 //! Send the info to the GUI
 void rtPolyDataObject::update() {
 
+}
+
+bool rtPolyDataObject::saveFile(QFile *file) {
+  if (!file->open(QIODevice::WriteOnly)) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to open file for writing. Error Code: ").append(QString::number(file->error())));
+    return false;
+  }
+
+  QXmlStreamWriter writer(file);
+  writer.setAutoFormatting(true);
+  writer.writeStartDocument();
+  writer.writeStartElement("VurtigoFile");
+  rtDataObject::saveHeader(&writer, getObjectType(), getObjName());
+  writer.writeTextElement("numPhases", QString::number(m_trigDelayList.size()));
+
+  double pt[3], color[3];
+  for (int ix1=0; ix1<m_trigDelayList.size(); ix1++) {
+    writer.writeStartElement("Phase");
+    writer.writeAttribute( "Number", QString::number(ix1) );
+    writer.writeAttribute( "Trigger", QString::number(m_trigDelayList.at(ix1)) );
+
+    writer.writeStartElement("PointList");
+    for (int ix2=0; ix2<m_polyData.at(ix1)->GetNumberOfPoints(); ix2++) {
+      m_polyData.at(ix1)->GetPoint(ix2, pt);
+      double tupleValue;
+      m_polyData.at(ix1)->GetPointData()->GetScalars()->GetTuple(ix2, &tupleValue);
+      m_colorLookup.at(ix1)->GetColor(tupleValue, color);
+      writer.writeStartElement("Point");
+      writer.writeAttribute( "X", QString::number(pt[0]) );
+      writer.writeAttribute( "Y", QString::number(pt[1]) );
+      writer.writeAttribute( "Z", QString::number(pt[2]) );
+      writer.writeAttribute( "R", QString::number(color[0]) );
+      writer.writeAttribute( "G", QString::number(color[1]) );
+      writer.writeAttribute( "B", QString::number(color[2]) );
+      writer.writeAttribute( "ID", QString::number(ix2) );
+      writer.writeEndElement();
+    }
+    writer.writeEndElement(); // End of PointList
+
+    writer.writeStartElement("CellList");
+    for (int ix2=0; ix2<m_polyData.at(ix1)->GetNumberOfCells(); ix2++) {
+
+      // Check that there are truly three points in this polygon.
+      if (m_polyData.at(ix1)->GetCell(ix2)->GetNumberOfPoints() != 3) continue;
+
+      writer.writeStartElement("CellPoint");
+      writer.writeAttribute( "Cell", QString::number( ix2 ) );
+      writer.writeAttribute( "P0", QString::number( m_polyData.at(ix1)->GetCell(ix2)->GetPointId(0) ) );
+      writer.writeAttribute( "P1", QString::number( m_polyData.at(ix1)->GetCell(ix2)->GetPointId(1) ) );
+      writer.writeAttribute( "P2", QString::number( m_polyData.at(ix1)->GetCell(ix2)->GetPointId(2) ) );
+      writer.writeEndElement();
+
+    }
+    writer.writeEndElement(); // End of CellList
+    writer.writeEndElement(); // End of Phase
+  }
+
+  writer.writeEndElement(); // VurtigoFile
+  writer.writeEndDocument();
+
+  file->close();
+  return true;
+}
+
+bool rtPolyDataObject::loadFile(QFile *file) {
+  if (!file->open(QIODevice::ReadOnly)) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to open file for reading. Error Code: ").append(QString::number(file->error())));
+    return false;
+  }
+
+  QXmlStreamReader reader(file);
+  QXmlStreamAttributes attrib;
+  rtConstants::rtObjectType objType;
+  QString objName="";
+  bool valueOK;
+
+  int phaseNumber;
+  int triggerDelay;
+
+  clearAllData();
+
+  while (!reader.atEnd()) {
+    if (reader.readNext() == QXmlStreamReader::StartElement ) {
+      if (reader.name() == "FileInfo") {
+        rtDataObject::loadHeader(&reader, objType, objName);
+      } else if (reader.name() == "Phase") {
+        attrib = reader.attributes();
+        phaseNumber = attrib.value("Number").toString().toInt(&valueOK);
+        triggerDelay = attrib.value("Trigger").toString().toInt(&valueOK);
+        readNewPhaseFromFile(&reader, phaseNumber, triggerDelay);
+      }
+    }
+
+  }
+  if (reader.hasError()) {
+    return false;
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("XML Reader Failed. Error: ").append(reader.errorString()));
+  }
+  Modified();
+  return true;
+}
+
+bool rtPolyDataObject::readNewPhaseFromFile(QXmlStreamReader* reader, int phase, int trigger) {
+  if (!reader) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not read phase info from file. Reader pointer is NULL."));
+    return false;
+  }
+
+  QXmlStreamAttributes attrib;
+  bool valueOK;
+
+  int id;
+  QList<PolyPoint> pts;
+  PolyPoint tempPT;
+  QList<PolyPointLink> links;
+  PolyPointLink tempLINK;
+
+  // Start reading
+  while (!reader->atEnd()) {
+    if (reader->readNext() == QXmlStreamReader::StartElement ) {
+      if(reader->name() == "Point") {
+        attrib = reader->attributes();
+        id = attrib.value("ID").toString().toInt(&valueOK);
+        tempPT.ptList[0] =  attrib.value("X").toString().toDouble(&valueOK);
+        tempPT.ptList[1] =  attrib.value("Y").toString().toDouble(&valueOK);
+        tempPT.ptList[2] =  attrib.value("Z").toString().toDouble(&valueOK);
+        tempPT.color[0] = attrib.value("R").toString().toDouble(&valueOK) * 255.0f;
+        tempPT.color[1] = attrib.value("G").toString().toDouble(&valueOK) * 255.0f;
+        tempPT.color[2] = attrib.value("B").toString().toDouble(&valueOK) * 255.0f;
+        pts.insert(id, tempPT);
+      } else if (reader->name() == "CellPoint") {
+        attrib = reader->attributes();
+        id = attrib.value("Cell").toString().toInt(&valueOK);
+        tempLINK.threeVertex[0] = attrib.value("P0").toString().toInt(&valueOK);
+        tempLINK.threeVertex[1] = attrib.value("P1").toString().toInt(&valueOK);
+        tempLINK.threeVertex[2] = attrib.value("P2").toString().toInt(&valueOK);
+        links.insert(id, tempLINK);
+      }
+    } else if (reader->isEndElement() && reader->name() == "Phase") {
+      // End of this phase!
+      break;
+    }
+  }
+  if (reader->hasError()) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("XML Reader Failed. Error: ").append(reader->errorString()));
+    return false;
+  }
+  setNewGeometry(&pts, &links, trigger);
+
+  return true;
 }
 
 /////////////////
