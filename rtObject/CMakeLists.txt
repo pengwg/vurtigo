@@ -28,6 +28,8 @@ set ( RTOBJECT_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rt2dPointRenderObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtBox2DOutline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtTexture2DPlane.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtEPDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtEPRenderObject.cpp
   CACHE INTERNAL "Vurtigo rtObject Source Files"
 )
 
@@ -43,6 +45,7 @@ set (RTOBJECT_MOC_FILES
   ${CMAKE_HOME_DIRECTORY}/include/rt2dSliceDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtMatrixDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtPolyDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rtEPDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtPieceFuncDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtColorFuncDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtImageBufferDataObject.h

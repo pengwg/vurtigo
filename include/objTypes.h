@@ -37,7 +37,8 @@ class rtConstants {
     OT_ImageBuffer,
     OT_2DPointBuffer,
     OT_3DPointBuffer,
-    OT_TextLabel
+    OT_TextLabel,
+    OT_EPMesh
   };
 
   //! Convert the object type into an int.
@@ -69,6 +70,7 @@ class rtConstants {
       case OT_2DPointBuffer:
       case OT_3DPointBuffer:
       case OT_TextLabel:
+      case OT_EPMesh:
       result = (rtObjectType)type;
       break;
       default:

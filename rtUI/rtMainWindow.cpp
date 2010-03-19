@@ -775,6 +775,7 @@ void rtMainWindow::populateObjectTypeNames() {
   m_rtObjectTypeNames.insert(rtConstants::OT_2DPointBuffer, "2D Point Buffer");
   m_rtObjectTypeNames.insert(rtConstants::OT_3DPointBuffer, "3D Point Buffer");
   m_rtObjectTypeNames.insert(rtConstants::OT_TextLabel, "Text Label");
+  m_rtObjectTypeNames.insert(rtConstants::OT_EPMesh, "EP Mesh");
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::populateObjectTypeNames() end") );
 #endif

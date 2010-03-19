@@ -83,6 +83,7 @@ void rtHelpManager::showHelpAbout() {
 
   setup.setupUi(&aboutD);
   setup.versionLabel->setText( ver );
+  connect(setup.aboutCloseButton, SIGNAL(clicked()), &aboutD, SLOT(accept()));
   aboutD.exec();
 }
 

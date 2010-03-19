@@ -37,6 +37,7 @@
 #include "rtColorFuncRenderObject.h"
 #include "rtImageBufferRenderObject.h"
 #include "rt2dPointRenderObject.h"
+#include "rtEPRenderObject.h"
 #include "rtApplication.h"
 #include <sstream>
 
@@ -121,6 +122,9 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     break;
   case rtConstants::OT_TextLabel:
     temp=new rtLabelRenderObject();
+    break;
+  case rtConstants::OT_EPMesh:
+    temp = new rtEPRenderObject();
     break;
   default:
     rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("No object of type: ").append(QString::number(objType)));
