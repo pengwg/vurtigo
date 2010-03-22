@@ -23,6 +23,10 @@ elseif (WIN32)
   message(STATUS "Windows Found!")
 endif (APPLE)
 
+
+add_definitions ( -Wall -g )
+
+
 ####################
 # Setup for Qt
 ####################

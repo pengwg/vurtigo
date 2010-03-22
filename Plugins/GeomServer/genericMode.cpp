@@ -84,20 +84,38 @@ void GenericMode::runMode() {
     m_imgDataArray.push_back(imgData);
   }
 
+  QString resizeTime;
+  resizeTime.append("Re-size image data array: ");
+  resizeTime.append(QString::number(tt.elapsed()));
+  rtApplication::instance().getMessageHandle()->bench(resizeTime);
+
+  /*
   std::stringstream msg;
   msg << "Re-size image data array: " << tt.elapsed();
   rtApplication::instance().getMessageHandle()->bench(msg.str());
+*/
 
   // Read all the relevant planes
   for (int ix1=0; ix1<m_planeList.count(); ix1++) {
+    QString planeTime;
+    planeTime.clear();
+    planeTime.append("Image Plane with ID: ");
+    planeTime.append(QString::number(m_planeID));
+    planeTime.append(" takes ");
+
+    /*
     std::stringstream msg;
     msg << "Image Plane with ID: " << m_planeID << " takes ";
-
+    */
     tt.restart();
     m_planeID = ix1;
     if (m_planeList[ix1].act == SenderThread::OBJ_READ) {
       receivePlaneAndPosition(m_planeID);
-      msg << " plane and position received: " << tt.elapsed();
+
+      //msg << " plane and position received: " << tt.elapsed();
+      planeTime.append(" plane and position received: ");
+      planeTime.append(QString::number(tt.elapsed()));
+
       localImage = converter->getLocalImage(ix1, m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].numChannels);
       if (!localImage) continue;
       converter->setLocalImage(m_imgDataArray[ix1], localImage);
@@ -106,7 +124,11 @@ void GenericMode::runMode() {
       converter->setRemoteImageTransform(this->getImages());
       receivePlane(m_planeID);
       sendPlanePosition(m_planeID);
-      msg << " plane received and position sent: " << tt.elapsed();
+
+      //msg << " plane received and position sent: " << tt.elapsed();
+      planeTime.append(" plane received and position sent: ");
+      planeTime.append(QString::number(tt.elapsed()));
+
       localImage = converter->getLocalImage(ix1, m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].numChannels);
       if (!localImage) continue;
       converter->setLocalImageOnly(m_imgDataArray[ix1], localImage);
@@ -116,8 +138,13 @@ void GenericMode::runMode() {
       // Do nothing
     }
 
+    /*
     msg << " final: " << tt.elapsed();
     rtApplication::instance().getMessageHandle()->bench(msg.str());
+    */
+    planeTime.append(" final: ");
+    planeTime.append(QString::number(tt.elapsed()));
+    rtApplication::instance().getMessageHandle()->bench(planeTime);
   }
 
   m_planeListLock.release();
@@ -144,9 +171,18 @@ void GenericMode::runMode() {
       // Do nothing
     }
 
+    QString cathTime;
+    cathTime.clear();
+    cathTime.append("Catheter with ID: ");
+    cathTime.append(QString::number(ix1));
+    cathTime.append(" takes ");
+    cathTime.append(QString::number(tt.elapsed()));
+    rtApplication::instance().getMessageHandle()->bench(cathTime);
+    /*
     std::stringstream msg;
     msg << "Catheter with ID: " << ix1 << " takes " << tt.elapsed();
     rtApplication::instance().getMessageHandle()->bench(msg.str());
+    */
   }
   m_cathListLock.release();
 
