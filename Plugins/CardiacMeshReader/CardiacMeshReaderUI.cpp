@@ -27,6 +27,7 @@
 
 #include "rt3dVolumeDataObject.h"
 #include "rtPolyDataObject.h"
+#include "rtEPDataObject.h"
 #include "rtBaseHandle.h"
 #include "DICOMFileReader.h"
 
@@ -252,10 +253,11 @@ void CardiacMeshReaderUI::page3Finish() {
     }
   }
 
-  m_icontour = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text());
+  m_icontour = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text().append(" Inner Contour"));
   m_icontourNoSmooth = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text().append(" (No Smoothing) ") );
-  m_ocontour = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text());
+  m_ocontour = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text().append(" Outer Contour"));
   m_ocontourNoSmooth = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text().append(" (No Smoothing) ") );
+  m_icontourEPMesh = rtBaseHandle::instance().requestNewObject(rtConstants::OT_EPMesh, meshNameLineEdit->text().append(" Inner Contour"));
 
   if (m_icontour>=0) {
     rtPolyDataObject* iContourObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_icontour));
@@ -277,6 +279,14 @@ void CardiacMeshReaderUI::page3Finish() {
     oContourObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_ocontourNoSmooth));
     if(oContourObj) {
       loadPolyDataFromPoints(oContourObj, MeshPointSet::PT_OCONTOUR, 1.0);
+    }
+  }
+
+  if(m_icontourEPMesh >= 0) {
+    rtEPDataObject* epData = static_cast<rtEPDataObject*>(rtBaseHandle::instance().getObjectWithID(m_icontourEPMesh));
+    if(epData) {
+      // Load the points into the data.
+      loadEPMeshFromPoints(epData, MeshPointSet::PT_ICONTOUR);
     }
   }
 
@@ -366,4 +376,52 @@ bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPo
     pointListLink.clear();
   }
 trans->Inverse();
+return true;
+}
+
+bool CardiacMeshReaderUI::loadEPMeshFromPoints(rtEPDataObject* data, MeshPointSet::PointType type) {
+  if(!data) return false;
+
+  int numPhases=m_customReader.getTriggerList()->size();
+  rtEPDataObject::EPPoint tempPT;
+
+  double space[3];
+  double pt[3];
+  m_customReader.getImageData()->GetSpacing(space);
+
+  vtkTransform* trans = m_customReader.getTransform();
+  data->lock();
+  data->setTransform(trans);
+  data->unlock();
+
+  trans->Inverse();
+
+  data->lock();
+  for (int ix1=0; ix1<numPhases; ix1++) {
+    MeshPointSet* currPhase=NULL;
+    currPhase = m_meshReader.getPointSet(ix1);
+    if(!currPhase) continue;
+
+    data->setTriggerDelay(ix1, m_customReader.getTriggerList()->at(ix1));
+
+    for (double curvePos=minSliceSlider->value(); curvePos<=maxSliceSlider->value(); curvePos++) {
+      for (int ix2=0; ix2<=currPhase->getMaxPtNum(); ix2++) {
+        tempPT.loc = ix2;
+
+        pt[0] = (currPhase->getInterpolateXValue(type, curvePos, ix2)-1)*space[0];
+        pt[1] = (currPhase->getInterpolateYValue(type, curvePos, ix2)-1)*space[1];
+        pt[2] = (curvePos*space[2]+0.0f*space[2]);
+
+        trans->TransformPoint(pt, pt);
+        tempPT.x = pt[0];
+        tempPT.y = pt[1];
+        tempPT.z = pt[2];
+
+        data->addPoint(ix1, curvePos, tempPT);
+      }
+    }
+  }
+  data->unlock();
+  trans->Inverse();
+  return true;
 }

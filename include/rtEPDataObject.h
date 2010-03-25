@@ -55,21 +55,15 @@ public:
     int triggerDelay;
     //! Point list sorted and mapped by slice.
     QMultiMap <int, EPPoint> pointList;
-    //! The vtk Point List. Not sorted in any wawy.
-    vtkPoints* pointSet;
     //! Poly data representing the points.
     vtkPolyData* pointData;
     bool pointDataUpdate;
 
-    //! Splines by slice.
-    QMap <int, vtkKochanekSpline*> sliceSplineX;
-    QMap <int, vtkKochanekSpline*> sliceSplineY;
-    QMap <int, vtkKochanekSpline*> sliceSplineZ;
+    //! Splines by slice. Ordered x, y, z
+    QMap <int, vtkKochanekSpline*> sliceSpline[3];
 
-    //! Splines by position.
-    QMap <int, vtkKochanekSpline*> posSplineX;
-    QMap <int, vtkKochanekSpline*> posSplineY;
-    QMap <int, vtkKochanekSpline*> posSplineZ;
+    //! Splines by position. Ordered x, y, z
+    QMap <double, vtkKochanekSpline*> posSpline[3];
 
     //! Poy data to show the mesh.
     vtkPolyData* meshData;
@@ -143,6 +137,11 @@ public:
   void setupGUI();
   void cleanupGUI();
 
+  //! Properly remove all elements from the slice spline list
+  void cleanupSliceSpline(PhaseData* data);
+  //! Properly remove all elements from the position spline list.
+  void cleanupPositionSpline(PhaseData* data);
+
   //! Update the renderable point object
   void updatePointData();
   //! Update the renderable mesh data
@@ -156,6 +155,8 @@ public:
 
   //! Transform for the mesh and points.
   vtkTransform* m_objTransform;
+
+  double m_inPlaneInterval, m_crossPlaneInterval;
 };
 
 #endif 

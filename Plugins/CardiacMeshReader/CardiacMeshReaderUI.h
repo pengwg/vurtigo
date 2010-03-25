@@ -29,6 +29,7 @@
 #include "MeshPointSet.h"
 
 class rtPolyDataObject;
+class rtEPDataObject;
 
 class CardiacMeshReaderUI : public QWidget, public Ui::CardiacMeshReader
 {
@@ -60,6 +61,7 @@ protected:
   void connectSignals();
 
   bool loadPolyDataFromPoints(rtPolyDataObject* data, MeshPointSet::PointType type, double smoothStep=1.0);
+  bool loadEPMeshFromPoints(rtEPDataObject* data, MeshPointSet::PointType type);
 
   QString m_lastDir;
   QString m_lastMeshDir;
@@ -81,6 +83,9 @@ protected:
 
   //! The ID of the non smooth ocontour
   int m_ocontourNoSmooth;
+
+  //! The ID of the EP mesh for the icontour
+  int m_icontourEPMesh;
 };
 
 #endif

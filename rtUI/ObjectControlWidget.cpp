@@ -406,6 +406,9 @@ void ObjectControlWidget::keyReleaseEvent(QKeyEvent* event) {
 void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   if(!m_showing) return;
   int numSteps = event->delta() / 32;
+  double increment = 1.0;
+
+  if (event->modifiers() & Qt::ShiftModifier)  increment = 0.1;
 
   vtkTransform *truePos = vtkTransform::New();
   vtkMatrix4x4 *mat = vtkMatrix4x4::New();
@@ -436,7 +439,7 @@ void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   }
 
   for (int ix1=0; ix1<3; ix1++) {
-    mat->SetElement( ix1, 3, mat->GetElement(ix1, 3) + (dotP*numSteps*zDirec[ix1]/sumSq) );
+    mat->SetElement( ix1, 3, mat->GetElement(ix1, 3) + (increment*dotP*numSteps*zDirec[ix1]/sumSq) );
   }
   m_transform->SetMatrix(mat);
 

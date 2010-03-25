@@ -51,7 +51,10 @@ class rtEPRenderObject : public rtRenderObject {
   void update();
 
  private:
-
+  vtkPolyDataMapper* m_pointMapper;
+  vtkPolyDataMapper* m_meshMapper;
+  vtkActor* m_pointActor;
+  vtkActor* m_meshActor;
 };
 
 #endif

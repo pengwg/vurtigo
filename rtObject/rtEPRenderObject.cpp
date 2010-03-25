@@ -23,16 +23,39 @@
 #include "rtApplication.h"
 #include "rtMessage.h"
 
-rtEPRenderObject::rtEPRenderObject() {
+rtEPRenderObject::rtEPRenderObject()
+    : m_pointMapper(0), m_meshMapper(0), m_pointActor(0), m_meshActor(0)
+{
   setObjectType(rtConstants::OT_EPMesh);
   setName("EP Renderer");
+
+  m_pointMapper = vtkPolyDataMapper::New();
+  m_meshMapper = vtkPolyDataMapper::New();
+  m_pointActor = vtkActor::New();
+  m_meshActor = vtkActor::New();
+
   setupDataObject();
   setupPipeline();
 }
 
 
 rtEPRenderObject::~rtEPRenderObject() {
-
+  if(m_pointMapper) {
+    m_pointMapper->Delete();
+    m_pointMapper = NULL;
+  }
+  if(m_meshMapper) {
+    m_meshMapper->Delete();
+    m_meshMapper = NULL;
+  }
+  if(m_pointActor) {
+    m_pointActor->Delete();
+    m_pointActor = NULL;
+  }
+  if(m_meshActor) {
+    m_meshActor->Delete();
+    m_meshActor = NULL;
+  }
 }
 
 //! Take info from the data object. 
@@ -44,7 +67,15 @@ void rtEPRenderObject::update() {
     return;
   }
 
+  if (dObj->getPointData()) {
+    dObj->getPointData()->Update();
+    m_pointMapper->SetInput(dObj->getPointData());
+  }
 
+  if (dObj->getMeshData()) {
+    dObj->getMeshData()->Update();
+    m_meshMapper->SetInput(dObj->getMeshData());
+  }
 
 }
 
@@ -55,9 +86,15 @@ bool rtEPRenderObject::addToRenderer(vtkRenderer* ren) {
     return false;
   }
 
+  if (!ren->HasViewProp(m_pointActor)) {
+    ren->AddViewProp(m_pointActor);
+  }
+
+  if (!ren->HasViewProp(m_meshActor)) {
+    ren->AddViewProp(m_meshActor);
+  }
+
   setVisible3D(true);
-
-
   return true;
 }
 
@@ -65,6 +102,14 @@ bool rtEPRenderObject::addToRenderer(vtkRenderer* ren) {
 bool rtEPRenderObject::removeFromRenderer(vtkRenderer* ren) {
   if (!ren) return false;
   setVisible3D(false);
+
+  if (ren->HasViewProp(m_pointActor)) {
+    ren->RemoveViewProp(m_pointActor);
+  }
+
+  if (ren->HasViewProp(m_meshActor)) {
+    ren->RemoveViewProp(m_meshActor);
+  }
 
   return true;
 }
@@ -77,19 +122,29 @@ void rtEPRenderObject::setupDataObject() {
 
 //! Create the part of the pipeline that is done first. 
 void rtEPRenderObject::setupPipeline() {
+  m_pointActor->SetMapper(m_pointMapper);
+  m_meshActor->SetMapper(m_meshMapper);
 
+  m_pointMapper->SetScalarModeToUsePointData();
+  m_pointMapper->UseLookupTableScalarRangeOn();
+  m_pointMapper->SetColorModeToMapScalars();
+
+  m_meshMapper->SetScalarModeToUsePointData();
+  m_meshMapper->UseLookupTableScalarRangeOn();
+  m_meshMapper->SetColorModeToMapScalars();
+
+  m_pipe3D.push_back(m_pointActor);
+  m_pipe3D.push_back(m_meshActor);
 }
 
 
 bool rtEPRenderObject::getObjectLocation(double loc[6]) {
+  if (!m_pointActor) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not get object location. Object actor is NULL."));
+    return false;
+  }
 
-  loc[0] = 0.0;
-  loc[1] = 0.0;
-  loc[2] = 0.0;
-  loc[3] = 0.0;
-  loc[4] = 0.0;
-  loc[5] = 0.0;
-
+  m_pointActor->GetBounds(loc);
   return true;
 }
 
