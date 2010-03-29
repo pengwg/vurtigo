@@ -25,6 +25,8 @@
 #include <QHash>
 #include <QColor>
 #include <QString>
+#include <QThread>
+#include <QThreadPool>
 
 #include <vtkPoints.h>
 #include <vtkIntArray.h>
@@ -41,6 +43,9 @@ rtEPDataObject::rtEPDataObject()
   m_phaseDataList.clear();
 
   m_objTransform = vtkTransform::New();
+
+  m_threadCount = QThread::idealThreadCount();
+  if (m_threadCount == -1) m_threadCount = 1;
 
   setupGUI();
 }
@@ -414,6 +419,9 @@ void rtEPDataObject::updateMeshData() {
       int maxSlice = 0;
       int maxPos = 0;
 
+      // Cleaup the old position spline.
+      cleanupPositionSpline(&(m_phaseDataList[m_currentPhase]));
+
       // Populate the slice splines first.
       for (int ix1=0; ix1<slices.size(); ix1++) {
         tempPT = m_phaseDataList[m_currentPhase].pointList.values(slices[ix1]);
@@ -441,24 +449,11 @@ void rtEPDataObject::updateMeshData() {
         }
       }
 
-      // Cleaup the old position spline.
-      cleanupPositionSpline(&(m_phaseDataList[m_currentPhase]));
-
-      // Now create the position splines based on the slice splines.
-      for (double pos=0; pos<=maxPos; pos+=m_inPlaneInterval) {
-
-        for (int coord=0; coord<3; coord++) {
-          tempSpline[coord] = vtkKochanekSpline::New();
-          m_phaseDataList[m_currentPhase].posSpline[coord].insert(pos, tempSpline[coord]);
-        }
-
-        for (int ix1=0; ix1<slices.size(); ix1++) {
-          tempSpline[0]->AddPoint(ix1, m_phaseDataList[m_currentPhase].sliceSpline[0].value(slices[ix1])->Evaluate(pos) );
-          tempSpline[1]->AddPoint(ix1, m_phaseDataList[m_currentPhase].sliceSpline[1].value(slices[ix1])->Evaluate(pos) );
-          tempSpline[2]->AddPoint(ix1, m_phaseDataList[m_currentPhase].sliceSpline[2].value(slices[ix1])->Evaluate(pos) );
-        }
+      for (int coord=0; coord<3; coord++) {
+        CreatePositionSplinesTask* temp = new CreatePositionSplinesTask( &m_phaseDataList[m_currentPhase], coord, maxPos, m_inPlaneInterval, &slices);
+        QThreadPool::globalInstance()->start(temp);
       }
-
+      QThreadPool::globalInstance()->waitForDone();
 
       vtkPoints* pts = vtkPoints::New();
       vtkCellArray* cells = vtkCellArray::New();

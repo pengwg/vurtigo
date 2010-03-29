@@ -28,6 +28,7 @@
 #include <QMap>
 #include <QList>
 #include <QTimer>
+#include <QRunnable>
 
 #include <vtkPolyData.h>
 #include <vtkProperty.h>
@@ -199,6 +200,42 @@ public:
 
   //! The representation for the mesh
   EPSurfaceRep m_rep;
+
+  int m_threadCount;
+
+
+  //! Task that can create the position splines
+  class CreatePositionSplinesTask : public QRunnable {
+    public:
+      CreatePositionSplinesTask(PhaseData* phase, int coord, double maxPosition, double planeInterval, QList<int>* slices) {
+        m_phase = phase;
+        m_coord = coord;
+        m_maxPosition = maxPosition;
+        m_planeInterval = planeInterval;
+        m_slices = slices;
+      }
+
+      void run() {
+        vtkKochanekSpline *tempSpline[3];
+        for (double pos=0; pos<=m_maxPosition; pos+=m_planeInterval) {
+          tempSpline[m_coord] = vtkKochanekSpline::New();
+          m_phase->posSpline[m_coord].insert(pos, tempSpline[m_coord]);
+
+          for (int ix1=0; ix1<m_slices->size(); ix1++) {
+            tempSpline[m_coord]->AddPoint(ix1, m_phase->sliceSpline[m_coord].value(m_slices->at(ix1))->Evaluate(pos) );
+          }
+        }
+      }
+
+    protected:
+      PhaseData* m_phase;
+      QList<int>* m_slices;
+      int m_coord;
+      double m_maxPosition, m_planeInterval;
+  };
+
+
+
 };
 
 #endif 
