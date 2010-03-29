@@ -33,7 +33,9 @@
 #include <vtkPolyDataWriter.h>
 
 //! Constructor
-rtEPDataObject::rtEPDataObject() : m_currentPhase(-1),  m_objTransform(0), m_inPlaneInterval(1.0), m_crossPlaneInterval(1.0) {
+rtEPDataObject::rtEPDataObject()
+    : m_currentPhase(-1),  m_objTransform(0), m_inPlaneInterval(1.0), m_crossPlaneInterval(1.0), m_surfaceOpacity(1.0), m_pointsOpacity(1.0)
+{
   setObjectType(rtConstants::OT_EPMesh);
 
   m_phaseDataList.clear();
@@ -74,6 +76,7 @@ bool rtEPDataObject::setTriggerDelay(int phase, int trigger) {
   // Create the phase if it does not exist.
   if (!phaseExists(phase)) createPhase(phase);
   m_phaseDataList[phase].triggerDelay = trigger;
+  m_cineWidget.addTrigger(trigger);
   Modified();
   return true;
 }
@@ -120,6 +123,8 @@ void rtEPDataObject::createPhase(int phaseNum) {
   dat.triggerDelay = 0;
   dat.pointList.clear();
   dat.pointData = vtkPolyData::New();
+  dat.pointProperty = vtkProperty::New();
+
   dat.pointDataUpdate = true;
 
   for (int ix1=0; ix1<3; ix1++) {
@@ -128,6 +133,7 @@ void rtEPDataObject::createPhase(int phaseNum) {
   }
 
   dat.meshData = vtkPolyData::New();
+  dat.meshProperty = vtkProperty::New();
   dat.meshDataUpdate = true;
 
   m_phaseDataList.insert(phaseNum, dat);
@@ -147,6 +153,11 @@ void rtEPDataObject::deletePhase(int phaseNum) {
     dat.pointData = NULL;
   }
 
+  if(dat.pointProperty) {
+    dat.pointProperty->Delete();
+    dat.pointProperty = NULL;
+  }
+
   dat.pointDataUpdate = false; // no need for updates
 
   cleanupSliceSpline(&dat);
@@ -156,6 +167,12 @@ void rtEPDataObject::deletePhase(int phaseNum) {
     dat.meshData->Delete();
     dat.meshData = NULL;
   }
+
+  if(dat.meshProperty) {
+    dat.meshProperty->Delete();
+    dat.meshProperty = NULL;
+  }
+
   dat.meshDataUpdate = false; // no need for updates
   Modified();
 }
@@ -193,10 +210,28 @@ vtkPolyData* rtEPDataObject::getPointData() {
   }
 }
 
+vtkProperty* rtEPDataObject::getPointProperty() {
+  if (phaseExists(m_currentPhase)) {
+    updatePointProperty();
+    return m_phaseDataList.value(m_currentPhase).pointProperty;
+  } else {
+    return NULL;
+  }
+}
+
 vtkPolyData* rtEPDataObject::getMeshData() {
   if (phaseExists(m_currentPhase)) {
     updateMeshData();
     return m_phaseDataList.value(m_currentPhase).meshData;
+  } else {
+    return NULL;
+  }
+}
+
+vtkProperty* rtEPDataObject::getMeshProperty() {
+  if (phaseExists(m_currentPhase)) {
+    updateMeshProperty();
+    return m_phaseDataList.value(m_currentPhase).meshProperty;
   } else {
     return NULL;
   }
@@ -226,11 +261,56 @@ bool rtEPDataObject::loadFile(QFile *file) {
   return true;
 }
 
+///////////////
+// Slots
+///////////////
+void rtEPDataObject::surfaceOpacityChanged(int val) {
+  m_optionsWidget.surfaceOpacityLabel->setText(QString::number(val).append(" %"));
+  m_surfaceOpacity = ((double)val)/100.0f;
+  Modified();
+}
+
+void rtEPDataObject::pointsOpacityChanged(int val) {
+  m_optionsWidget.pointsOpacityLabel->setText(QString::number(val).append(" %"));
+  m_pointsOpacity = ((double)val)/100.0f;
+  Modified();
+}
+
+void rtEPDataObject::triggerChanged(int trig) {
+  QList<int> k = m_phaseDataList.keys();
+  QList<PhaseData> v = m_phaseDataList.values();
+
+  int dist = abs(trig-v[0].triggerDelay);
+  int phase = k[0];
+  for (int ix1=1; ix1<v.size(); ix1++) {
+    if (abs(trig-v[ix1].triggerDelay) < dist) {
+      dist = abs(trig-v[ix1].triggerDelay);
+      phase = k[ix1];
+    }
+  }
+  setCurrPhase(phase);
+  Modified();
+}
+
 ////////////////
 // Protected
 ////////////////
 //! Set the GUI widgets.
 void rtEPDataObject::setupGUI() {
+  m_optionsWidget.setupUi(getBaseWidget());
+
+  getBaseWidget()->layout()->addWidget(&m_cineWidget);
+
+  m_optionsWidget.surfaceOpacitySlider->setValue(100);
+  m_optionsWidget.pointsOpacitySlider->setValue(100);
+
+  m_optionsWidget.surfaceOpacityLabel->setText("100 %");
+  m_optionsWidget.pointsOpacityLabel->setText("100 %");
+
+  connect(m_optionsWidget.surfaceOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(surfaceOpacityChanged(int)));
+  connect(m_optionsWidget.pointsOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(pointsOpacityChanged(int)));
+
+  connect(&m_cineWidget, SIGNAL(triggerChanged(int)), this, SLOT(triggerChanged(int)));
 
 }
 
@@ -392,5 +472,17 @@ void rtEPDataObject::updateMeshData() {
 
       m_phaseDataList[m_currentPhase].meshDataUpdate = false;
     }
+  }
+}
+
+void rtEPDataObject::updatePointProperty() {
+  if (phaseExists(m_currentPhase)) {
+    m_phaseDataList[m_currentPhase].pointProperty->SetOpacity(m_pointsOpacity);
+  }
+}
+
+void rtEPDataObject::updateMeshProperty() {
+  if (phaseExists(m_currentPhase)) {
+    m_phaseDataList[m_currentPhase].meshProperty->SetOpacity(m_surfaceOpacity);
   }
 }

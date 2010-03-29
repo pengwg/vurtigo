@@ -446,6 +446,8 @@ void rt3DVolumeRenderObject::setupPipeline() {
   m_rayMapper = vtkVolumeRayCastMapper::New();
   m_volumeActor = vtkVolume::New();
 
+  //m_rayMapper->SetNumberOfThreads(16);
+
   m_outline = vtkOutlineFilter::New();
   m_outlineMapper = vtkPolyDataMapper::New();
   m_outlineActor = vtkActor::New();

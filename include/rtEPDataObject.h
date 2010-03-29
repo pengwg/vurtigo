@@ -21,6 +21,8 @@
 #define RT_EP_DATA_OBJECT_H
 
 #include "rtDataObject.h"
+#include "ui_EPOptions.h"
+#include "cineWidget.h"
 
 #include <QMultiMap>
 #include <QMap>
@@ -57,6 +59,7 @@ public:
     QMultiMap <int, EPPoint> pointList;
     //! Poly data representing the points.
     vtkPolyData* pointData;
+    vtkProperty* pointProperty;
     bool pointDataUpdate;
 
     //! Splines by slice. Ordered x, y, z
@@ -67,6 +70,7 @@ public:
 
     //! Poy data to show the mesh.
     vtkPolyData* meshData;
+    vtkProperty* meshProperty;
     bool meshDataUpdate;
   };
 
@@ -100,8 +104,14 @@ public:
     */
   vtkPolyData* getPointData();
 
+  //! Get the property for the current phase of points.
+  vtkProperty* getPointProperty();
+
   //! Get the mesh data for the current phase
   vtkPolyData* getMeshData();
+
+  //! Get the property for the current phase of points.
+  vtkProperty* getMeshProperty();
 
   //! Set the trigger delay.
   /*!
@@ -132,6 +142,11 @@ public:
 
   virtual bool saveFile(QFile *file);
   virtual bool loadFile(QFile *file);
+ public slots:
+  void surfaceOpacityChanged(int);
+  void pointsOpacityChanged(int);
+  void triggerChanged(int);
+
  protected:
   // Functions
   void setupGUI();
@@ -147,6 +162,11 @@ public:
   //! Update the renderable mesh data
   void updateMeshData();
 
+  //! Update the renderable point object
+  void updatePointProperty();
+  //! Update the renderable mesh data
+  void updateMeshProperty();
+
   //! The current phase
   int m_currentPhase;
 
@@ -157,6 +177,16 @@ public:
   vtkTransform* m_objTransform;
 
   double m_inPlaneInterval, m_crossPlaneInterval;
+
+  //! The widget for the options for this object
+  Ui::EPOptions m_optionsWidget;
+
+  CineWidget m_cineWidget;
+
+  //! The user defined opacity for the surface
+  double m_surfaceOpacity;
+  //! The user defined opacity for the points
+  double m_pointsOpacity;
 };
 
 #endif 

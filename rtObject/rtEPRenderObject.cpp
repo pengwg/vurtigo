@@ -71,6 +71,11 @@ void rtEPRenderObject::update() {
     dObj->getPointData()->Update();
     m_pointMapper->SetInput(dObj->getPointData());
   }
+  vtkProperty *temp;
+  temp = dObj->getPointProperty();
+  if (temp) m_pointActor->SetProperty(temp);
+  temp = dObj->getMeshProperty();
+  if (temp) m_meshActor->SetProperty(temp);
 
   if (dObj->getMeshData()) {
     dObj->getMeshData()->Update();

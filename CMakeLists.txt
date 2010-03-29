@@ -112,6 +112,8 @@ set (UI_FILES
   rtUI/rtWindowLevelDialog.ui
   rtUI/polyDataOptions.ui
   rtUI/rtTimeOptionsDialog.ui
+  rtUI/EPOptions.ui
+  rtUI/cineWidget.ui
 )
 
 
