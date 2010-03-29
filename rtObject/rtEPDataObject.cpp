@@ -34,7 +34,7 @@
 
 //! Constructor
 rtEPDataObject::rtEPDataObject()
-    : m_currentPhase(-1),  m_objTransform(0), m_inPlaneInterval(1.0), m_crossPlaneInterval(1.0), m_surfaceOpacity(1.0), m_pointsOpacity(1.0)
+    : m_currentPhase(-1),  m_objTransform(0), m_inPlaneInterval(1.0), m_crossPlaneInterval(1.0), m_surfaceOpacity(1.0), m_pointsOpacity(1.0), m_rep(EP_SURFACE)
 {
   setObjectType(rtConstants::OT_EPMesh);
 
@@ -292,6 +292,27 @@ void rtEPDataObject::triggerChanged(int trig) {
   Modified();
 }
 
+void rtEPDataObject::representationChanged(int val) {
+  if(val == -1) return;
+
+  EPSurfaceRep oldRep = m_rep;
+
+  switch (val) {
+    case EP_SURFACE:
+    m_rep = EP_SURFACE;
+    break;
+    case EP_WIREFRAME:
+    m_rep = EP_WIREFRAME;
+    break;
+    case EP_POINTS:
+    m_rep = EP_POINTS;
+    break;
+    default:
+    break;
+  }
+  if (oldRep != m_rep) Modified();
+}
+
 ////////////////
 // Protected
 ////////////////
@@ -307,10 +328,18 @@ void rtEPDataObject::setupGUI() {
   m_optionsWidget.surfaceOpacityLabel->setText("100 %");
   m_optionsWidget.pointsOpacityLabel->setText("100 %");
 
+  m_optionsWidget.repComboBox->insertItem(EP_SURFACE, "Surface");
+  m_optionsWidget.repComboBox->insertItem(EP_WIREFRAME, "Wireframe");
+  m_optionsWidget.repComboBox->insertItem(EP_POINTS, "Points");
+  m_optionsWidget.repComboBox->setCurrentIndex(EP_SURFACE);
+
   connect(m_optionsWidget.surfaceOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(surfaceOpacityChanged(int)));
   connect(m_optionsWidget.pointsOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(pointsOpacityChanged(int)));
 
+  connect(m_optionsWidget.repComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(representationChanged(int)));
+
   connect(&m_cineWidget, SIGNAL(triggerChanged(int)), this, SLOT(triggerChanged(int)));
+
 
 }
 
@@ -483,6 +512,21 @@ void rtEPDataObject::updatePointProperty() {
 
 void rtEPDataObject::updateMeshProperty() {
   if (phaseExists(m_currentPhase)) {
+
+    switch (m_rep) {
+    case EP_SURFACE:
+      m_phaseDataList[m_currentPhase].meshProperty->SetRepresentationToSurface();
+      break;
+    case EP_WIREFRAME:
+      m_phaseDataList[m_currentPhase].meshProperty->SetRepresentationToWireframe();
+      break;
+    case EP_POINTS:
+      m_phaseDataList[m_currentPhase].meshProperty->SetRepresentationToPoints();
+      break;
+    default:
+      break;
+    }
+
     m_phaseDataList[m_currentPhase].meshProperty->SetOpacity(m_surfaceOpacity);
   }
 }

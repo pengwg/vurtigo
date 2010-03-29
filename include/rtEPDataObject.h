@@ -74,6 +74,12 @@ public:
     bool meshDataUpdate;
   };
 
+  enum EPSurfaceRep{
+    EP_SURFACE=0,
+    EP_WIREFRAME,
+    EP_POINTS
+  };
+
   //! Constructor
   rtEPDataObject();
 
@@ -147,6 +153,8 @@ public:
   void pointsOpacityChanged(int);
   void triggerChanged(int);
 
+  void representationChanged(int);
+
  protected:
   // Functions
   void setupGUI();
@@ -185,8 +193,12 @@ public:
 
   //! The user defined opacity for the surface
   double m_surfaceOpacity;
+
   //! The user defined opacity for the points
   double m_pointsOpacity;
+
+  //! The representation for the mesh
+  EPSurfaceRep m_rep;
 };
 
 #endif 
