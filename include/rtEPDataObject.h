@@ -154,6 +154,10 @@ public:
   void pointsOpacityChanged(int);
   void triggerChanged(int);
 
+  void minSliceChanged(int);
+  void maxSliceChanged(int);
+  void updateObjectNow();
+
   void representationChanged(int);
 
  protected:
@@ -167,14 +171,17 @@ public:
   void cleanupPositionSpline(PhaseData* data);
 
   //! Update the renderable point object
-  void updatePointData();
+  void updatePointData(int);
   //! Update the renderable mesh data
-  void updateMeshData();
+  void updateMeshData(int);
 
   //! Update the renderable point object
   void updatePointProperty();
   //! Update the renderable mesh data
   void updateMeshProperty();
+
+  //! Set the flag for all the data pieces to modified.
+  void setModifyFlagForAll();
 
   //! The current phase
   int m_currentPhase;
@@ -201,18 +208,25 @@ public:
   //! The representation for the mesh
   EPSurfaceRep m_rep;
 
+  //! Number of threads that can be used.
   int m_threadCount;
 
+  //! Minimum slice number
+  int m_minSliceNum;
+  //! Maximum slice number
+  int m_maxSliceNum;
 
   //! Task that can create the position splines
   class CreatePositionSplinesTask : public QRunnable {
     public:
-      CreatePositionSplinesTask(PhaseData* phase, int coord, double maxPosition, double planeInterval, QList<int>* slices) {
+      CreatePositionSplinesTask(PhaseData* phase, int coord, double maxPosition, double planeInterval, QList<int>* slices, int minSlice, int maxSlice) {
         m_phase = phase;
         m_coord = coord;
         m_maxPosition = maxPosition;
         m_planeInterval = planeInterval;
         m_slices = slices;
+        m_minSlice = minSlice;
+        m_maxSlice = maxSlice;
       }
 
       void run() {
@@ -222,7 +236,8 @@ public:
           m_phase->posSpline[m_coord].insert(pos, tempSpline[m_coord]);
 
           for (int ix1=0; ix1<m_slices->size(); ix1++) {
-            tempSpline[m_coord]->AddPoint(ix1, m_phase->sliceSpline[m_coord].value(m_slices->at(ix1))->Evaluate(pos) );
+            if (m_slices->at(ix1) < m_minSlice || m_slices->at(ix1) > m_maxSlice) continue;
+            tempSpline[m_coord]->AddPoint( ix1, m_phase->sliceSpline[m_coord].value(m_slices->at(ix1))->Evaluate(pos) );
           }
         }
       }
@@ -232,6 +247,7 @@ public:
       QList<int>* m_slices;
       int m_coord;
       double m_maxPosition, m_planeInterval;
+      int m_minSlice, m_maxSlice;
   };
 
 

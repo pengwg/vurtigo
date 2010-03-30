@@ -27,6 +27,7 @@
 #include <QString>
 #include <QThread>
 #include <QThreadPool>
+#include <QApplication>
 
 #include <vtkPoints.h>
 #include <vtkIntArray.h>
@@ -36,7 +37,8 @@
 
 //! Constructor
 rtEPDataObject::rtEPDataObject()
-    : m_currentPhase(-1),  m_objTransform(0), m_inPlaneInterval(1.0), m_crossPlaneInterval(1.0), m_surfaceOpacity(1.0), m_pointsOpacity(1.0), m_rep(EP_SURFACE)
+    : m_currentPhase(-1),  m_objTransform(0), m_inPlaneInterval(1.0), m_crossPlaneInterval(1.0), m_surfaceOpacity(1.0), m_pointsOpacity(1.0), m_rep(EP_SURFACE),
+    m_minSliceNum(0), m_maxSliceNum(0)
 {
   setObjectType(rtConstants::OT_EPMesh);
 
@@ -191,6 +193,20 @@ void rtEPDataObject::update() {
 bool rtEPDataObject::addPoint(int phase, int slice, rtEPDataObject::EPPoint pt) {
   if(phase < 0 || slice < 0) return false;
 
+  if (slice < m_minSliceNum) {
+    m_minSliceNum = slice;
+    m_optionsWidget.minSliceSlider->setMinimum(m_minSliceNum);
+    m_optionsWidget.maxSliceSlider->setMinimum(m_minSliceNum);
+    m_optionsWidget.minSliceSlider->setValue(m_minSliceNum);
+  }
+
+  if (slice > m_maxSliceNum) {
+    m_maxSliceNum = slice;
+    m_optionsWidget.minSliceSlider->setMaximum(m_maxSliceNum);
+    m_optionsWidget.maxSliceSlider->setMaximum(m_maxSliceNum);
+    m_optionsWidget.maxSliceSlider->setValue(m_maxSliceNum);
+  }
+
   // Create the phase if it does not exist.
   if (!phaseExists(phase)) createPhase(phase);
 
@@ -208,7 +224,7 @@ QList<rtEPDataObject::EPPoint> rtEPDataObject::getPoints(int phase, int slice) {
 
 vtkPolyData* rtEPDataObject::getPointData() {
   if (phaseExists(m_currentPhase)) {
-    updatePointData();
+    updatePointData(m_currentPhase);
     return m_phaseDataList.value(m_currentPhase).pointData;
   } else {
     return NULL;
@@ -226,7 +242,7 @@ vtkProperty* rtEPDataObject::getPointProperty() {
 
 vtkPolyData* rtEPDataObject::getMeshData() {
   if (phaseExists(m_currentPhase)) {
-    updateMeshData();
+    updateMeshData(m_currentPhase);
     return m_phaseDataList.value(m_currentPhase).meshData;
   } else {
     return NULL;
@@ -297,6 +313,39 @@ void rtEPDataObject::triggerChanged(int trig) {
   Modified();
 }
 
+void rtEPDataObject::minSliceChanged(int val) {
+  m_optionsWidget.minSliceLabel->setText(QString::number(val));
+  if (m_optionsWidget.maxSliceSlider->value() < val)
+    m_optionsWidget.maxSliceSlider->setValue(val);
+
+  setModifyFlagForAll();
+  Modified();
+}
+
+void rtEPDataObject::maxSliceChanged(int val) {
+  m_optionsWidget.maxSliceLabel->setText(QString::number(val));
+  if (m_optionsWidget.minSliceSlider->value() > val)
+    m_optionsWidget.minSliceSlider->setValue(val);
+
+  setModifyFlagForAll();
+  Modified();
+}
+
+void rtEPDataObject::updateObjectNow() {
+  QList<int> phaseList = m_phaseDataList.keys();
+
+  m_optionsWidget.applyProgressBar->setRange(0, phaseList.size());
+  m_optionsWidget.applyProgressBar->reset();
+  QApplication::instance()->processEvents();
+  for (int ix1=0; ix1<phaseList.size(); ix1++) {
+    updateMeshData(phaseList.at(ix1));
+    updatePointData(phaseList.at(ix1));
+    m_optionsWidget.applyProgressBar->setValue(ix1);
+    QApplication::instance()->processEvents();
+  }
+  m_optionsWidget.applyProgressBar->setValue(phaseList.size());
+}
+
 void rtEPDataObject::representationChanged(int val) {
   if(val == -1) return;
 
@@ -343,6 +392,10 @@ void rtEPDataObject::setupGUI() {
 
   connect(m_optionsWidget.repComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(representationChanged(int)));
 
+  connect(m_optionsWidget.minSliceSlider, SIGNAL(valueChanged(int)), this, SLOT(minSliceChanged(int)));
+  connect(m_optionsWidget.maxSliceSlider, SIGNAL(valueChanged(int)), this, SLOT(maxSliceChanged(int)));
+  connect(m_optionsWidget.applyAllNow, SIGNAL(clicked()), this, SLOT(updateObjectNow()));
+
   connect(&m_cineWidget, SIGNAL(triggerChanged(int)), this, SLOT(triggerChanged(int)));
 
 
@@ -381,28 +434,30 @@ void rtEPDataObject::cleanupPositionSpline(PhaseData* data) {
   }
 }
 
-void rtEPDataObject::updatePointData() {
+void rtEPDataObject::updatePointData(int updatePhase) {
 
-  if (phaseExists(m_currentPhase)) {
-    if (m_phaseDataList[m_currentPhase].pointDataUpdate) {
+  if (phaseExists(updatePhase)) {
+    if (m_phaseDataList[updatePhase].pointDataUpdate) {
       vtkPoints* pts = vtkPoints::New();
       vtkCellArray* cells = vtkCellArray::New();
       QList<EPPoint> tempPT;
       vtkIdType pID;
 
-      QList<int> slices = m_phaseDataList.value(m_currentPhase).pointList.uniqueKeys();
+      QList<int> slices = m_phaseDataList.value(updatePhase).pointList.uniqueKeys();
 
       for (int ix1=0; ix1<slices.size(); ix1++) {
-        tempPT = m_phaseDataList.value(m_currentPhase).pointList.values(slices[ix1]);
+        if (slices[ix1] < m_optionsWidget.minSliceSlider->value() || slices[ix1] > m_optionsWidget.maxSliceSlider->value()) continue;
+
+        tempPT = m_phaseDataList.value(updatePhase).pointList.values(slices[ix1]);
         for (int ix2=0; ix2<tempPT.size(); ix2++) {
           pID = pts->InsertNextPoint(tempPT.at(ix2).x, tempPT.at(ix2).y, tempPT.at(ix2).z);
           cells->InsertNextCell(1, &pID);
         }
       }
 
-      m_phaseDataList[m_currentPhase].pointData->SetPoints(pts);
-      m_phaseDataList[m_currentPhase].pointData->SetVerts(cells);
-      m_phaseDataList[m_currentPhase].pointDataUpdate = false;
+      m_phaseDataList[updatePhase].pointData->SetPoints(pts);
+      m_phaseDataList[updatePhase].pointData->SetVerts(cells);
+      m_phaseDataList[updatePhase].pointDataUpdate = false;
 
       pts->Delete();
       cells->Delete();
@@ -410,32 +465,33 @@ void rtEPDataObject::updatePointData() {
   }
 }
 
-void rtEPDataObject::updateMeshData() {
-  if (phaseExists(m_currentPhase)) {
-    if (m_phaseDataList[m_currentPhase].meshDataUpdate) {
+void rtEPDataObject::updateMeshData(int updatePhase) {
+  if (phaseExists(updatePhase)) {
+    if (m_phaseDataList[updatePhase].meshDataUpdate) {
       QList<EPPoint> tempPT, tempPT2;
-      QList<int> slices = m_phaseDataList.value(m_currentPhase).pointList.uniqueKeys();
+      QList<int> slices = m_phaseDataList.value(updatePhase).pointList.uniqueKeys();
       vtkKochanekSpline *tempSpline[3];
       int maxSlice = 0;
       int maxPos = 0;
 
       // Cleaup the old position spline.
-      cleanupPositionSpline(&(m_phaseDataList[m_currentPhase]));
+      cleanupPositionSpline(&(m_phaseDataList[updatePhase]));
 
       // Populate the slice splines first.
       for (int ix1=0; ix1<slices.size(); ix1++) {
-        tempPT = m_phaseDataList[m_currentPhase].pointList.values(slices[ix1]);
+        if (slices[ix1] < m_optionsWidget.minSliceSlider->value() || slices[ix1] > m_optionsWidget.maxSliceSlider->value()) continue;
+        tempPT = m_phaseDataList[updatePhase].pointList.values(slices[ix1]);
 
         // Determine the maximum slice.
         if(slices[ix1] > maxSlice) maxSlice = slices[ix1];
 
         for (int coord=0; coord<3; coord++) {
-          if (m_phaseDataList[m_currentPhase].sliceSpline[coord].contains(slices[ix1])) {
-            tempSpline[coord] = m_phaseDataList[m_currentPhase].sliceSpline[coord].value(slices[ix1]);
+          if (m_phaseDataList[updatePhase].sliceSpline[coord].contains(slices[ix1])) {
+            tempSpline[coord] = m_phaseDataList[updatePhase].sliceSpline[coord].value(slices[ix1]);
             tempSpline[coord]->RemoveAllPoints();
           } else {
             tempSpline[coord] = vtkKochanekSpline::New();
-            m_phaseDataList[m_currentPhase].sliceSpline[coord].insert(slices[ix1], tempSpline[coord]);
+            m_phaseDataList[updatePhase].sliceSpline[coord].insert(slices[ix1], tempSpline[coord]);
           }
         }
 
@@ -450,7 +506,7 @@ void rtEPDataObject::updateMeshData() {
       }
 
       for (int coord=0; coord<3; coord++) {
-        CreatePositionSplinesTask* temp = new CreatePositionSplinesTask( &m_phaseDataList[m_currentPhase], coord, maxPos, m_inPlaneInterval, &slices);
+        CreatePositionSplinesTask* temp = new CreatePositionSplinesTask( &m_phaseDataList[updatePhase], coord, maxPos, m_inPlaneInterval, &slices, m_optionsWidget.minSliceSlider->value(), m_optionsWidget.maxSliceSlider->value());
         QThreadPool::globalInstance()->start(temp);
       }
       QThreadPool::globalInstance()->waitForDone();
@@ -462,24 +518,24 @@ void rtEPDataObject::updateMeshData() {
       double xyzCoords[3];
       for (double height=0.0; height<=maxSlice-m_crossPlaneInterval; height+=m_crossPlaneInterval) {
         for (double pos=0.0; pos<=maxPos-m_inPlaneInterval; pos+=m_inPlaneInterval) {
-          xyzCoords[0] = m_phaseDataList[m_currentPhase].posSpline[0].value(pos)->Evaluate(height);
-          xyzCoords[1] = m_phaseDataList[m_currentPhase].posSpline[1].value(pos)->Evaluate(height);
-          xyzCoords[2] = m_phaseDataList[m_currentPhase].posSpline[2].value(pos)->Evaluate(height);
+          xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos)->Evaluate(height);
+          xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos)->Evaluate(height);
+          xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos)->Evaluate(height);
           pID[0] = pts->InsertNextPoint(xyzCoords);
 
-          xyzCoords[0] = m_phaseDataList[m_currentPhase].posSpline[0].value(pos)->Evaluate(height+m_crossPlaneInterval);
-          xyzCoords[1] = m_phaseDataList[m_currentPhase].posSpline[1].value(pos)->Evaluate(height+m_crossPlaneInterval);
-          xyzCoords[2] = m_phaseDataList[m_currentPhase].posSpline[2].value(pos)->Evaluate(height+m_crossPlaneInterval);
+          xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos)->Evaluate(height+m_crossPlaneInterval);
+          xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos)->Evaluate(height+m_crossPlaneInterval);
+          xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos)->Evaluate(height+m_crossPlaneInterval);
           pID[1] = pts->InsertNextPoint(xyzCoords);
 
-          xyzCoords[0] = m_phaseDataList[m_currentPhase].posSpline[0].value(pos+m_inPlaneInterval)->Evaluate(height+m_crossPlaneInterval);
-          xyzCoords[1] = m_phaseDataList[m_currentPhase].posSpline[1].value(pos+m_inPlaneInterval)->Evaluate(height+m_crossPlaneInterval);
-          xyzCoords[2] = m_phaseDataList[m_currentPhase].posSpline[2].value(pos+m_inPlaneInterval)->Evaluate(height+m_crossPlaneInterval);
+          xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos+m_inPlaneInterval)->Evaluate(height+m_crossPlaneInterval);
+          xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos+m_inPlaneInterval)->Evaluate(height+m_crossPlaneInterval);
+          xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos+m_inPlaneInterval)->Evaluate(height+m_crossPlaneInterval);
           pID[2] = pts->InsertNextPoint(xyzCoords);
 
-          xyzCoords[0] = m_phaseDataList[m_currentPhase].posSpline[0].value(pos+m_inPlaneInterval)->Evaluate(height);
-          xyzCoords[1] = m_phaseDataList[m_currentPhase].posSpline[1].value(pos+m_inPlaneInterval)->Evaluate(height);
-          xyzCoords[2] = m_phaseDataList[m_currentPhase].posSpline[2].value(pos+m_inPlaneInterval)->Evaluate(height);
+          xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos+m_inPlaneInterval)->Evaluate(height);
+          xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos+m_inPlaneInterval)->Evaluate(height);
+          xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos+m_inPlaneInterval)->Evaluate(height);
           pID[3] = pts->InsertNextPoint(xyzCoords);
 
           cells->InsertNextCell(4, pID);
@@ -487,14 +543,14 @@ void rtEPDataObject::updateMeshData() {
       }
 
       // Finally, create the mesh
-      m_phaseDataList[m_currentPhase].meshData->SetPoints(pts);
-      m_phaseDataList[m_currentPhase].meshData->SetPolys(cells);
+      m_phaseDataList[updatePhase].meshData->SetPoints(pts);
+      m_phaseDataList[updatePhase].meshData->SetPolys(cells);
 
       delete[] pID;
       pts->Delete();
       cells->Delete();
 
-      m_phaseDataList[m_currentPhase].meshDataUpdate = false;
+      m_phaseDataList[updatePhase].meshDataUpdate = false;
     }
   }
 }
@@ -524,4 +580,17 @@ void rtEPDataObject::updateMeshProperty() {
 
     m_phaseDataList[m_currentPhase].meshProperty->SetOpacity(m_surfaceOpacity);
   }
+}
+
+void rtEPDataObject::setModifyFlagForAll() {
+  QList<int> phaseList = m_phaseDataList.keys();
+
+  for (int ix1=0; ix1<phaseList.size(); ix1++) {
+    m_phaseDataList[phaseList.at(ix1)].meshDataUpdate = true;
+    m_phaseDataList[phaseList.at(ix1)].pointDataUpdate = true;
+  }
+
+  // Reset the progress bar.
+  m_optionsWidget.applyProgressBar->setRange(0, phaseList.size());
+  m_optionsWidget.applyProgressBar->reset();
 }
