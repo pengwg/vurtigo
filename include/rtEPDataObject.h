@@ -160,6 +160,9 @@ public:
 
   void representationChanged(int);
 
+  void inSliceValueChanged(double);
+  void betweenSliceValueChanged(double);
+
  protected:
   // Functions
   void setupGUI();
@@ -231,7 +234,9 @@ public:
 
       void run() {
         vtkKochanekSpline *tempSpline[3];
-        for (double pos=0; pos<=m_maxPosition; pos+=m_planeInterval) {
+        double pos = 0.0;
+
+        for (pos=0.0; pos<=m_maxPosition;) {
           tempSpline[m_coord] = vtkKochanekSpline::New();
           m_phase->posSpline[m_coord].insert(pos, tempSpline[m_coord]);
 
@@ -239,6 +244,13 @@ public:
             if (m_slices->at(ix1) < m_minSlice || m_slices->at(ix1) > m_maxSlice) continue;
             tempSpline[m_coord]->AddPoint( ix1, m_phase->sliceSpline[m_coord].value(m_slices->at(ix1))->Evaluate(pos) );
           }
+
+          if (pos < m_maxPosition && (pos+m_planeInterval) > m_maxPosition) {
+            pos = m_maxPosition;
+          } else {
+            pos+=m_planeInterval;
+          }
+
         }
       }
 

@@ -367,6 +367,19 @@ void rtEPDataObject::representationChanged(int val) {
   if (oldRep != m_rep) Modified();
 }
 
+void rtEPDataObject::inSliceValueChanged(double val) {
+  m_inPlaneInterval = val;
+  setModifyFlagForAll();
+  Modified();
+}
+
+void rtEPDataObject::betweenSliceValueChanged(double val) {
+  m_crossPlaneInterval = val;
+  setModifyFlagForAll();
+  Modified();
+}
+
+
 ////////////////
 // Protected
 ////////////////
@@ -398,6 +411,8 @@ void rtEPDataObject::setupGUI() {
 
   connect(&m_cineWidget, SIGNAL(triggerChanged(int)), this, SLOT(triggerChanged(int)));
 
+  connect(m_optionsWidget.inSliceSpace, SIGNAL(valueChanged(double)), this, SLOT(inSliceValueChanged(double)));
+  connect(m_optionsWidget.betweenSliceSpace, SIGNAL(valueChanged(double)), this, SLOT(betweenSliceValueChanged(double)));
 
 }
 
@@ -516,30 +531,50 @@ void rtEPDataObject::updateMeshData(int updatePhase) {
       vtkIdType* pID = new vtkIdType[4];
 
       double xyzCoords[3];
-      for (double height=0.0; height<=maxSlice-m_crossPlaneInterval; height+=m_crossPlaneInterval) {
-        for (double pos=0.0; pos<=maxPos-m_inPlaneInterval; pos+=m_inPlaneInterval) {
+      double height = 0.0;
+      double pos = 0.0;
+      for (height=0.0; height<maxSlice; height += m_crossPlaneInterval) {
+
+        double crossInterval;
+        if (height+m_crossPlaneInterval > maxSlice) {
+          crossInterval = maxSlice - height;
+        } else {
+          crossInterval = m_crossPlaneInterval;
+        }
+
+        for (pos=0.0; pos<maxPos; pos+=m_inPlaneInterval) {
+
+          double planeInterval;
+          if (pos+m_inPlaneInterval > maxPos) {
+            planeInterval = maxPos - pos;
+          } else {
+            planeInterval = m_inPlaneInterval;
+          }
+
           xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos)->Evaluate(height);
           xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos)->Evaluate(height);
           xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos)->Evaluate(height);
           pID[0] = pts->InsertNextPoint(xyzCoords);
 
-          xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos)->Evaluate(height+m_crossPlaneInterval);
-          xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos)->Evaluate(height+m_crossPlaneInterval);
-          xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos)->Evaluate(height+m_crossPlaneInterval);
+          xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos)->Evaluate(height+crossInterval);
+          xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos)->Evaluate(height+crossInterval);
+          xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos)->Evaluate(height+crossInterval);
           pID[1] = pts->InsertNextPoint(xyzCoords);
 
-          xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos+m_inPlaneInterval)->Evaluate(height+m_crossPlaneInterval);
-          xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos+m_inPlaneInterval)->Evaluate(height+m_crossPlaneInterval);
-          xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos+m_inPlaneInterval)->Evaluate(height+m_crossPlaneInterval);
+          xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos+planeInterval)->Evaluate(height+crossInterval);
+          xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos+planeInterval)->Evaluate(height+crossInterval);
+          xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos+planeInterval)->Evaluate(height+crossInterval);
           pID[2] = pts->InsertNextPoint(xyzCoords);
 
-          xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos+m_inPlaneInterval)->Evaluate(height);
-          xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos+m_inPlaneInterval)->Evaluate(height);
-          xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos+m_inPlaneInterval)->Evaluate(height);
+          xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos+planeInterval)->Evaluate(height);
+          xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos+planeInterval)->Evaluate(height);
+          xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos+planeInterval)->Evaluate(height);
           pID[3] = pts->InsertNextPoint(xyzCoords);
 
           cells->InsertNextCell(4, pID);
         }
+
+
       }
 
       // Finally, create the mesh
