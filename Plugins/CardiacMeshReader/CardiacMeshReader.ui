@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>358</height>
+    <width>364</width>
+    <height>359</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -88,7 +88,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>Select Mesh Directory</string>
+          <string>Select Contour Directory</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>

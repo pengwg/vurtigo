@@ -24,7 +24,7 @@
   <lib libname="CartoReader" libpath="@VURTIGO_BIN_DIR@"/>
 </plugin>
 <plugin>
-  <name title="Cardiac Mesh Reader" version="1.0"/>
+  <name title="LV Contour Reader" version="1.0"/>
   <lib libname="CardiacMeshReader" libpath="@VURTIGO_BIN_DIR@"/>
 </plugin>
 </PluginList>

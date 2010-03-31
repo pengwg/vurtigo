@@ -253,33 +253,19 @@ void CardiacMeshReaderUI::page3Finish() {
     }
   }
 
-  m_icontour = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text().append(" Inner Contour"));
   m_icontourNoSmooth = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text().append(" (No Smoothing) ") );
-  m_ocontour = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text().append(" Outer Contour"));
   m_ocontourNoSmooth = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPolyData, meshNameLineEdit->text().append(" (No Smoothing) ") );
   m_icontourEPMesh = rtBaseHandle::instance().requestNewObject(rtConstants::OT_EPMesh, meshNameLineEdit->text().append(" Inner Contour"));
+  m_ocontourEPMesh = rtBaseHandle::instance().requestNewObject(rtConstants::OT_EPMesh, meshNameLineEdit->text().append(" Outer Contour"));
 
-  if (m_icontour>=0) {
-    rtPolyDataObject* iContourObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_icontour));
-    if(iContourObj) {
-      loadPolyDataFromPoints(iContourObj, MeshPointSet::PT_ICONTOUR, 0.1);
-    }
-
-    iContourObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_icontourNoSmooth));
-    if(iContourObj) {
-      loadPolyDataFromPoints(iContourObj, MeshPointSet::PT_ICONTOUR, 1.0);
-    }
+  rtPolyDataObject* iContourObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_icontourNoSmooth));
+  if(iContourObj) {
+    loadPolyDataFromPoints(iContourObj, MeshPointSet::PT_ICONTOUR, 1.0);
   }
 
-  if (m_ocontour>=0) {
-    rtPolyDataObject* oContourObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_ocontour));
-    if(oContourObj) {
-      loadPolyDataFromPoints(oContourObj, MeshPointSet::PT_OCONTOUR, 0.1);
-    }
-    oContourObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_ocontourNoSmooth));
-    if(oContourObj) {
-      loadPolyDataFromPoints(oContourObj, MeshPointSet::PT_OCONTOUR, 1.0);
-    }
+  rtPolyDataObject* oContourObj = static_cast<rtPolyDataObject*>(rtBaseHandle::instance().getObjectWithID(m_ocontourNoSmooth));
+  if(oContourObj) {
+    loadPolyDataFromPoints(oContourObj, MeshPointSet::PT_OCONTOUR, 1.0);
   }
 
   if(m_icontourEPMesh >= 0) {
@@ -289,6 +275,15 @@ void CardiacMeshReaderUI::page3Finish() {
       loadEPMeshFromPoints(epData, MeshPointSet::PT_ICONTOUR);
     }
   }
+
+  if (m_ocontourEPMesh >= 0) {
+    rtEPDataObject* epData = static_cast<rtEPDataObject*>(rtBaseHandle::instance().getObjectWithID(m_ocontourEPMesh));
+    if(epData) {
+      // Load the points into the data.
+      loadEPMeshFromPoints(epData, MeshPointSet::PT_OCONTOUR);
+    }
+  }
+
 
 }
 

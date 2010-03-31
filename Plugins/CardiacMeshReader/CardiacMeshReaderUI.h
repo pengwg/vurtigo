@@ -72,20 +72,17 @@ protected:
   //! The ID of the newest volume
   int m_vol;
 
-  //! The ID of the poly data icontour
-  int m_icontour;
-
   //! The ID of the non smooth icontour
   int m_icontourNoSmooth;
-
-  //! The ID of the poly data ocontour
-  int m_ocontour;
 
   //! The ID of the non smooth ocontour
   int m_ocontourNoSmooth;
 
   //! The ID of the EP mesh for the icontour
   int m_icontourEPMesh;
+
+  //! The ID of the EP mesh for the ocontour
+  int m_ocontourEPMesh;
 };
 
 #endif
