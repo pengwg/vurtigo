@@ -314,18 +314,30 @@ void rtEPDataObject::triggerChanged(int trig) {
 }
 
 void rtEPDataObject::minSliceChanged(int val) {
+
+  if(val == m_optionsWidget.minSliceSlider->maximum()) {
+    m_optionsWidget.minSliceSlider->setValue(val-1);
+    return;
+  }
+
   m_optionsWidget.minSliceLabel->setText(QString::number(val));
-  if (m_optionsWidget.maxSliceSlider->value() < val)
-    m_optionsWidget.maxSliceSlider->setValue(val);
+  if (m_optionsWidget.maxSliceSlider->value() <= val)
+    m_optionsWidget.maxSliceSlider->setValue(val+1);
 
   setModifyFlagForAll();
   Modified();
 }
 
 void rtEPDataObject::maxSliceChanged(int val) {
+
+  if (val == m_optionsWidget.maxSliceSlider->minimum()) {
+    m_optionsWidget.maxSliceSlider->setValue(val+1);
+    return;
+  }
+
   m_optionsWidget.maxSliceLabel->setText(QString::number(val));
-  if (m_optionsWidget.minSliceSlider->value() > val)
-    m_optionsWidget.minSliceSlider->setValue(val);
+  if (m_optionsWidget.minSliceSlider->value() >= val)
+    m_optionsWidget.minSliceSlider->setValue(val-1);
 
   setModifyFlagForAll();
   Modified();
@@ -387,7 +399,10 @@ void rtEPDataObject::betweenSliceValueChanged(double val) {
 void rtEPDataObject::setupGUI() {
   m_optionsWidget.setupUi(getBaseWidget());
 
-  getBaseWidget()->layout()->addWidget(&m_cineWidget);
+  //getBaseWidget()->layout()->addWidget(&m_cineWidget);
+
+  // The cine widget
+  m_optionsWidget.epTabs->widget(1)->layout()->addWidget(&m_cineWidget);
 
   m_optionsWidget.surfaceOpacitySlider->setValue(100);
   m_optionsWidget.pointsOpacitySlider->setValue(100);
