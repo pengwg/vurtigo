@@ -20,6 +20,7 @@
 #include "rtDataObject.h"
 #include "rtPluginLoader.h"
 #include "rtApplication.h"
+#include "rtMessage.h"
 
 rtDataObject::rtDataObject() {
   m_readOnly = false;
@@ -88,7 +89,10 @@ void rtDataObject::saveHeader(QXmlStreamWriter *writer, rtConstants::rtObjectTyp
 void rtDataObject::loadHeader(QXmlStreamReader *reader, rtConstants::rtObjectType &type, QString &name) {
   bool intOK;
 
-  if ( !(reader->name()=="FileInfo" || reader->isStartElement()) ) return;
+  if ( !(reader->name()=="FileInfo" || reader->isStartElement()) ) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to load file header."));
+    return;
+  }
 
   while ( reader->name() != "FileInfo" || !reader->isEndElement() ) {
     if(reader->readNext() == QXmlStreamReader::StartElement) {
@@ -101,5 +105,5 @@ void rtDataObject::loadHeader(QXmlStreamReader *reader, rtConstants::rtObjectTyp
 
     }
   }
-
+  rtApplication::instance().getMessageHandle()->log(QString("Finished reading file header."));
 }

@@ -30,6 +30,7 @@ set ( RTOBJECT_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rtTexture2DPlane.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtEPDataObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtEPRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtEPInfoObject.cpp
   CACHE INTERNAL "Vurtigo rtObject Source Files"
 )
 

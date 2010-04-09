@@ -50,6 +50,28 @@ rtEPDataObject::rtEPDataObject()
   if (m_threadCount == -1) m_threadCount = 1;
 
   setupGUI();
+
+
+  ///// TEST ///////////
+  rtEPInfoObject::InfoPoint p;
+  p.location[0] = -9.5;
+  p.location[1] = -38.0;
+  p.location[2] = 84.2;
+  p.property = 15;
+  m_EPInfoObject.addInfoPoint(p);
+
+  p.location[0] = -9.5;
+  p.location[1] = -38.0;
+  p.location[2] = 85.2;
+  p.property = 15;
+  m_EPInfoObject.addInfoPoint(p);
+
+  p.location[0] = -9.5;
+  p.location[1] = -38.0;
+  p.location[2] = 89.2;
+  p.property = 5;
+  m_EPInfoObject.addInfoPoint(p);
+  ////////// END TEST ///////////
 }
 
 //! Destructor
@@ -67,10 +89,15 @@ rtEPDataObject::~rtEPDataObject() {
   }
 }
 
-
-
 bool rtEPDataObject::setTransform(vtkTransform* t) {
-  if (!t || !m_objTransform) return false;
+  if (!t) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("The new transform t is NULL."));
+    return false;
+  }
+  if (!m_objTransform) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("The object transform m_objTransform is NULL."));
+    return false;
+  }
 
   m_objTransform->DeepCopy(t);
   Modified();
@@ -89,7 +116,10 @@ bool rtEPDataObject::setTriggerDelay(int phase, int trigger) {
 }
 
 bool rtEPDataObject::setCurrTrigDelay(int trigDelay) {
-  if (trigDelay < 0) return false;
+  if (trigDelay < 0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Cannot set a negative trigger delay."));
+    return false;
+  }
 
   QList<int> listKeys = m_phaseDataList.keys();
 
@@ -109,8 +139,15 @@ bool rtEPDataObject::setCurrTrigDelay(int trigDelay) {
 }
 
 bool rtEPDataObject::setCurrPhase(int phase) {
-  if(phase < 0) return false;
-  if(!m_phaseDataList.contains(phase)) return false;
+  if(phase < 0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Cannot set a negative phase."));
+    return false;
+  }
+
+  if(!m_phaseDataList.contains(phase)) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Phase list does not contain this phase."));
+    return false;
+  }
 
   m_currentPhase = phase;
   Modified();
@@ -123,13 +160,20 @@ bool rtEPDataObject::phaseExists(int phaseNum) {
 }
 
 void rtEPDataObject::createPhase(int phaseNum) {
-  if (phaseExists(phaseNum)) return;
+  if (phaseNum<0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Cannot create a negative phase."));
+    return;
+  }
+
+  rtApplication::instance().getMessageHandle()->debug(QString("Creating phase number: ").append(QString::number(phaseNum)) );
 
   PhaseData dat;
 
   dat.triggerDelay = 0;
   dat.pointList.clear();
   dat.pointData = vtkPolyData::New();
+  dat.pointData->SetPoints(vtkPoints::New());
+  dat.pointData->SetPolys(vtkCellArray::New());
   dat.pointProperty = vtkProperty::New();
 
   dat.pointDataUpdate = true;
@@ -140,6 +184,8 @@ void rtEPDataObject::createPhase(int phaseNum) {
   }
 
   dat.meshData = vtkPolyData::New();
+  dat.meshData->SetPoints(vtkPoints::New());
+  dat.meshData->SetPolys(vtkCellArray::New());
   dat.meshProperty = vtkProperty::New();
   dat.meshDataUpdate = true;
 
@@ -147,10 +193,19 @@ void rtEPDataObject::createPhase(int phaseNum) {
 
   if(m_currentPhase < 0) m_currentPhase = phaseNum;
 
+  rtApplication::instance().getMessageHandle()->debug(QString("Finished creating phase number: ").append(QString::number(phaseNum)) );
+
   Modified();
 }
 
 void rtEPDataObject::deletePhase(int phaseNum) {
+  if (phaseNum<0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Cannot delete a negative phase."));
+    return;
+  }
+
+  rtApplication::instance().getMessageHandle()->debug(QString("Deleting phase number: ").append(QString::number(phaseNum)) );
+
   PhaseData dat = m_phaseDataList.take(phaseNum);
 
   dat.triggerDelay = 0;
@@ -181,6 +236,9 @@ void rtEPDataObject::deletePhase(int phaseNum) {
   }
 
   dat.meshDataUpdate = false; // no need for updates
+
+  rtApplication::instance().getMessageHandle()->debug(QString("Finished deleting phase number: ").append(QString::number(phaseNum)) );
+
   Modified();
 }
 
@@ -399,8 +457,6 @@ void rtEPDataObject::betweenSliceValueChanged(double val) {
 void rtEPDataObject::setupGUI() {
   m_optionsWidget.setupUi(getBaseWidget());
 
-  //getBaseWidget()->layout()->addWidget(&m_cineWidget);
-
   // The cine widget
   m_optionsWidget.epTabs->widget(1)->layout()->addWidget(&m_cineWidget);
 
@@ -466,43 +522,56 @@ void rtEPDataObject::cleanupPositionSpline(PhaseData* data) {
 
 void rtEPDataObject::updatePointData(int updatePhase) {
 
-  if (phaseExists(updatePhase)) {
-    if (m_phaseDataList[updatePhase].pointDataUpdate) {
-      vtkPoints* pts = vtkPoints::New();
-      vtkCellArray* cells = vtkCellArray::New();
-      QList<EPPoint> tempPT;
-      vtkIdType pID;
-
-      QList<int> slices = m_phaseDataList.value(updatePhase).pointList.uniqueKeys();
-
-      for (int ix1=0; ix1<slices.size(); ix1++) {
-        if (slices[ix1] < m_optionsWidget.minSliceSlider->value() || slices[ix1] > m_optionsWidget.maxSliceSlider->value()) continue;
-
-        tempPT = m_phaseDataList.value(updatePhase).pointList.values(slices[ix1]);
-        for (int ix2=0; ix2<tempPT.size(); ix2++) {
-          pID = pts->InsertNextPoint(tempPT.at(ix2).x, tempPT.at(ix2).y, tempPT.at(ix2).z);
-          cells->InsertNextCell(1, &pID);
-        }
-      }
-
-      m_phaseDataList[updatePhase].pointData->SetPoints(pts);
-      m_phaseDataList[updatePhase].pointData->SetVerts(cells);
-      m_phaseDataList[updatePhase].pointDataUpdate = false;
-
-      pts->Delete();
-      cells->Delete();
-    }
+  if (!phaseExists(updatePhase)) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Cannot update point data. Phase does not exist: ").append(QString::number(updatePhase)));
+    return;
   }
+
+  rtApplication::instance().getMessageHandle()->debug(QString("Start Updating Point Data"));
+  if (m_phaseDataList[updatePhase].pointDataUpdate) {
+    vtkPoints* pts = m_phaseDataList[updatePhase].pointData->GetPoints();
+    vtkCellArray* cells = m_phaseDataList[updatePhase].pointData->GetVerts();
+    QList<EPPoint> tempPT;
+    vtkIdType pID;
+
+    // Clear the previous lists.
+    pts->Reset();
+    cells->Reset();
+
+    QList<int> slices = m_phaseDataList.value(updatePhase).pointList.uniqueKeys();
+
+    for (int ix1=0; ix1<slices.size(); ix1++) {
+      if (slices[ix1] < m_optionsWidget.minSliceSlider->value() || slices[ix1] > m_optionsWidget.maxSliceSlider->value()) continue;
+
+      tempPT = m_phaseDataList.value(updatePhase).pointList.values(slices[ix1]);
+      for (int ix2=0; ix2<tempPT.size(); ix2++) {
+        pID = pts->InsertNextPoint(tempPT.at(ix2).x, tempPT.at(ix2).y, tempPT.at(ix2).z);
+        cells->InsertNextCell(1, &pID);
+      }
+    }
+
+    m_phaseDataList[updatePhase].pointData->SetPoints(pts);
+    m_phaseDataList[updatePhase].pointData->SetVerts(cells);
+    m_phaseDataList[updatePhase].pointDataUpdate = false;
+  }
+  rtApplication::instance().getMessageHandle()->debug(QString("Finished Updating Point Data"));
 }
 
 void rtEPDataObject::updateMeshData(int updatePhase) {
-  if (phaseExists(updatePhase)) {
+
+  if (!phaseExists(updatePhase)) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Cannot update mesh data. Phase does not exist: ").append(QString::number(updatePhase)));
+    return;
+  }
+
+  rtApplication::instance().getMessageHandle()->debug(QString("Start Updating Mesh Data"));
+
     if (m_phaseDataList[updatePhase].meshDataUpdate) {
       QList<EPPoint> tempPT, tempPT2;
       QList<int> slices = m_phaseDataList.value(updatePhase).pointList.uniqueKeys();
       vtkKochanekSpline *tempSpline[3];
       int maxSlice = 0;
-      int maxPos = 0;
+      unsigned int maxPos = 0;
 
       // Cleaup the old position spline.
       cleanupPositionSpline(&(m_phaseDataList[updatePhase]));
@@ -541,10 +610,15 @@ void rtEPDataObject::updateMeshData(int updatePhase) {
       }
       QThreadPool::globalInstance()->waitForDone();
 
-      vtkPoints* pts = vtkPoints::New();
-      vtkCellArray* cells = vtkCellArray::New();
+      vtkPoints* pts = m_phaseDataList[updatePhase].meshData->GetPoints();
+      vtkCellArray* cells = m_phaseDataList[updatePhase].meshData->GetPolys();
+
+      pts->Reset();
+      cells->Reset();
+
       vtkIdType* pID = new vtkIdType[4];
 
+      unsigned int cellCount=0;
       double xyzCoords[3];
       double height = 0.0;
       double pos = 0.0;
@@ -571,38 +645,62 @@ void rtEPDataObject::updateMeshData(int updatePhase) {
           xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos)->Evaluate(height);
           pID[0] = pts->InsertNextPoint(xyzCoords);
 
+          if (pID[0] < 0) {
+            rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to insert next point at 0: ").append(QString::number(pos)));
+          }
+
           xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos)->Evaluate(height+crossInterval);
           xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos)->Evaluate(height+crossInterval);
           xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos)->Evaluate(height+crossInterval);
           pID[1] = pts->InsertNextPoint(xyzCoords);
+
+          if (pID[1] < 0) {
+            rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to insert next point at 1: ").append(QString::number(pos)));
+          }
 
           xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos+planeInterval)->Evaluate(height+crossInterval);
           xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos+planeInterval)->Evaluate(height+crossInterval);
           xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos+planeInterval)->Evaluate(height+crossInterval);
           pID[2] = pts->InsertNextPoint(xyzCoords);
 
+          if (pID[2] < 0) {
+            rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to insert next point at 2: ").append(QString::number(pos)));
+          }
+
           xyzCoords[0] = m_phaseDataList[updatePhase].posSpline[0].value(pos+planeInterval)->Evaluate(height);
           xyzCoords[1] = m_phaseDataList[updatePhase].posSpline[1].value(pos+planeInterval)->Evaluate(height);
           xyzCoords[2] = m_phaseDataList[updatePhase].posSpline[2].value(pos+planeInterval)->Evaluate(height);
           pID[3] = pts->InsertNextPoint(xyzCoords);
 
+          if (pID[3] < 0) {
+            rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to insert next point at 3: ").append(QString::number(pos)));
+          }
+
           cells->InsertNextCell(4, pID);
+          cellCount++;
+          if (cellCount >= 8190 && cellCount <= 8190) {
+            std::cout << pID[0] << " " << pID[1] << " " << pID[2] << " " << pID[3] << std::endl;
+          }
         }
-
-
       }
+
+
+      rtApplication::instance().getMessageHandle()->debug(QString("Mesh Data Number of Points: ").append(QString::number(pts->GetNumberOfPoints())));
+      rtApplication::instance().getMessageHandle()->debug(QString("Mesh Data Number of Cells: ").append(QString::number(cells->GetNumberOfCells())));
+      rtApplication::instance().getMessageHandle()->debug(QString("Max Cell ID is: ").append(QString::number(cells->GetData()->GetMaxId())));
 
       // Finally, create the mesh
       m_phaseDataList[updatePhase].meshData->SetPoints(pts);
       m_phaseDataList[updatePhase].meshData->SetPolys(cells);
 
       delete[] pID;
-      pts->Delete();
-      cells->Delete();
+
+      // Update the scalar values to have the colors take effect.
+      m_EPInfoObject.updateScalars(m_phaseDataList[updatePhase].meshData);
 
       m_phaseDataList[updatePhase].meshDataUpdate = false;
     }
-  }
+  rtApplication::instance().getMessageHandle()->debug(QString("Finished Updating Mesh Data"));
 }
 
 void rtEPDataObject::updatePointProperty() {
@@ -633,6 +731,9 @@ void rtEPDataObject::updateMeshProperty() {
 }
 
 void rtEPDataObject::setModifyFlagForAll() {
+
+  rtApplication::instance().getMessageHandle()->debug(QString("Setting Modify Flag for all phases."));
+
   QList<int> phaseList = m_phaseDataList.keys();
 
   for (int ix1=0; ix1<phaseList.size(); ix1++) {
@@ -643,4 +744,6 @@ void rtEPDataObject::setModifyFlagForAll() {
   // Reset the progress bar.
   m_optionsWidget.applyProgressBar->setRange(0, phaseList.size());
   m_optionsWidget.applyProgressBar->reset();
+
+  rtApplication::instance().getMessageHandle()->debug(QString("All phases modified."));
 }

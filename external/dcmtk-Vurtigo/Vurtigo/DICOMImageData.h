@@ -51,7 +51,10 @@ public:
   QString getModality();
   QString getManufacturer();
 
+  //! Get the number of rows in one image
   unsigned short getNumRows() { return m_numRows; }
+
+  //! Get the number of columns in one image
   unsigned short getNumCols() { return m_numCols; }
 
   //! Get the pixel spacing for x or y.

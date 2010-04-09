@@ -21,6 +21,7 @@
 #define RT_EP_DATA_OBJECT_H
 
 #include "rtDataObject.h"
+#include "rtEPInfoObject.h"
 #include "ui_EPOptions.h"
 #include "cineWidget.h"
 
@@ -120,6 +121,9 @@ public:
   //! Get the property for the current phase of points.
   vtkProperty* getMeshProperty();
 
+  //! Get the color function for this mesh.
+  vtkColorTransferFunction* getColorFunction() { return m_EPInfoObject.getColorFunction(); }
+
   //! Set the trigger delay.
   /*!
     The phase will be calculated from the trigger delay and the current phase will be stored.
@@ -218,6 +222,9 @@ public:
   int m_minSliceNum;
   //! Maximum slice number
   int m_maxSliceNum;
+
+  //! Object to hold all of the points that have EP info.
+  rtEPInfoObject m_EPInfoObject;
 
   //! Task that can create the position splines
   class CreatePositionSplinesTask : public QRunnable {

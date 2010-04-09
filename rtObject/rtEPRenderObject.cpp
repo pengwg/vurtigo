@@ -82,6 +82,10 @@ void rtEPRenderObject::update() {
     m_meshMapper->SetInput(dObj->getMeshData());
   }
 
+  if (dObj->getColorFunction()) {
+    m_meshMapper->SetLookupTable(dObj->getColorFunction());
+  }
+
 }
 
 //! Add this object to the given renderer.

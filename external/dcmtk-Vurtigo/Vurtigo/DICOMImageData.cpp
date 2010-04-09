@@ -83,6 +83,7 @@ bool DICOMImageData::readFile(QString fName) {
       result = readPhilips_MR(datSet) && result;
     } else {
       std::cout << "Not able to read DICOM files of type: " << m_modality.c_str() <<  " from " << m_manufacturer.c_str() << std::endl;
+      result = false;
     }
   }
 
@@ -95,7 +96,6 @@ double DICOMImageData::getTriggerFromFile(QString fName) {
   DcmFileFormat dcmFile;
   OFCondition status;
   DcmDataset* datSet;
-  bool result=true;
 
   // Load the DICOM file.
   status = dcmFile.loadFile(fName.toStdString().c_str());
@@ -118,9 +118,11 @@ QString DICOMImageData::getPatientName() {
 }
 
 QDate DICOMImageData::getStudyDate() {
+  return QDate::fromString(QString(m_studyDate.c_str()), "yyyymmdd");
 }
 
 QTime DICOMImageData::getStudyTime() {
+  return QTime::fromString(QString(m_studyTime.c_str()), "hhmmss");
 }
 
 QString DICOMImageData::getPatientPosition() {
@@ -194,7 +196,7 @@ bool DICOMImageData::readGE_MR(DcmDataset* datSet) {
   datSet->findAndGetUint32(DCM_PixelDataGroupLength, m_pixelGroupLen).good();
   datSet->findAndGetUint16Array(DCM_PixelData, temp, &m_numElements, false).good();
 
-  if (m_numElements != m_numRows* m_numCols && m_numElements > 0) {
+  if (m_numElements != (unsigned long)(m_numRows*m_numCols) && m_numElements > 0) {
     std::cout << "Error: Problem reading all of the dicom pixel data." << std::endl;
     return false;
   }
@@ -232,7 +234,7 @@ bool DICOMImageData::readPhilips_MR(DcmDataset* datSet) {
   datSet->findAndGetUint32(DCM_PixelDataGroupLength, m_pixelGroupLen).good();
   datSet->findAndGetUint16Array(DCM_PixelData, temp, &m_numElements, false).good();
 
-  if (m_numElements != m_numRows* m_numCols && m_numElements > 0) {
+  if (m_numElements != (unsigned long)(m_numRows*m_numCols) && m_numElements > 0) {
     std::cout << "Error: Problem reading all of the dicom pixel data." << std::endl;
     return false;
   }
