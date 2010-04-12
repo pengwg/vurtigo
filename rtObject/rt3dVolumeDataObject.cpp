@@ -558,8 +558,6 @@ void rt3DVolumeDataObject::setVisibleComponent(int c) {
 
 void rt3DVolumeDataObject::nextVisibleComponent() {
   if (!m_imgDataValid) return;
-  int numComp = m_imgUShortCast->GetOutput()->GetNumberOfScalarComponents();
-
   int trigDelay = rtApplication::instance().getTimeManager()->getTriggerDelay();
 
   int phase;

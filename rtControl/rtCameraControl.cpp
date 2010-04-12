@@ -22,6 +22,7 @@
 
 #include "rtCameraControl.h"
 #include "rtApplication.h"
+#include "rtMessage.h"
 #include "rtMainWindow.h"
 #include "customQVTKWidget.h"
 
@@ -98,18 +99,6 @@ void rtCameraControl::setToRobotArmPosition() {
 //////////////
 // PUBLIC SLOTS
 ///////////////
-void rtCameraControl::connectEvents() {
-  if (!m_eventWidget) return;
-  connect(m_eventWidget, SIGNAL(cameraMousePress(QMouseEvent*)), this, SLOT(mousePress(QMouseEvent*)));
-  connect(m_eventWidget, SIGNAL(cameraMouseMove(QMouseEvent*)), this, SLOT(mouseMove(QMouseEvent*)));
-  connect(m_eventWidget, SIGNAL(cameraMouseRelease(QMouseEvent*)), this, SLOT(mouseRelease(QMouseEvent*)));
-  connect(m_eventWidget, SIGNAL(cameraMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClick(QMouseEvent*)));
-  connect(m_eventWidget, SIGNAL(cameraKeyPress(QKeyEvent*)), this, SLOT(keyPress(QKeyEvent*)));
-  connect(m_eventWidget, SIGNAL(cameraKeyRelease(QKeyEvent*)), this, SLOT(keyRelease(QKeyEvent*)));
-  connect(m_eventWidget, SIGNAL(cameraWheel(QWheelEvent*)), this, SLOT(wheel(QWheelEvent*)));
-}
-
-
 void rtCameraControl::mousePress(QMouseEvent* ev) {
   if (ev->button() == Qt::LeftButton) {
     m_leftMouseDown = true;
@@ -216,4 +205,21 @@ void rtCameraControl::wheel(QWheelEvent* ev) {
   m_camera->OrthogonalizeViewUp();
   rtApplication::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
   rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+}
+
+/////////////////
+// Protected Functions
+/////////////////
+void rtCameraControl::connectEvents() {
+  if (!m_eventWidget) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not connect events. QVTK widget pointer is NULL."));
+    return;
+  }
+  connect(m_eventWidget, SIGNAL(cameraMousePress(QMouseEvent*)), this, SLOT(mousePress(QMouseEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraMouseMove(QMouseEvent*)), this, SLOT(mouseMove(QMouseEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraMouseRelease(QMouseEvent*)), this, SLOT(mouseRelease(QMouseEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClick(QMouseEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraKeyPress(QKeyEvent*)), this, SLOT(keyPress(QKeyEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraKeyRelease(QKeyEvent*)), this, SLOT(keyRelease(QKeyEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraWheel(QWheelEvent*)), this, SLOT(wheel(QWheelEvent*)));
 }

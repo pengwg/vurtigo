@@ -568,7 +568,15 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@ \
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/main.cpp \
+                         @CMAKE_CURRENT_SOURCE_DIR@/Plugins \
+                         @CMAKE_CURRENT_SOURCE_DIR@/include \
+                         @CMAKE_CURRENT_SOURCE_DIR@/rtConfig \
+                         @CMAKE_CURRENT_SOURCE_DIR@/rtControl \
+                         @CMAKE_CURRENT_SOURCE_DIR@/rtObject \
+                         @CMAKE_CURRENT_SOURCE_DIR@/rtPlugin \
+                         @CMAKE_CURRENT_SOURCE_DIR@/rtUI \
+                         @CMAKE_CURRENT_SOURCE_DIR@/external/dcmtk-Vurtigo/Vurtigo \
                          @CMAKE_CURRENT_BINARY_DIR@
 
 # This tag can be used to specify the character encoding of the source files

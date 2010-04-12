@@ -58,13 +58,11 @@ set (DCMTK_DCMDATA_SRC
   dcmdata/dcrlecce.cc  
   dcmdata/dcvras.cc    
   dcmdata/dcvrpn.cc    
-  ##dcmdata/mkdeftag.cc
   dcmdata/dcdicdir.cc  
   dcmdata/dcitem.cc    
   dcmdata/dcrlecp.cc   
   dcmdata/dcvrat.cc    
   dcmdata/dcvrpobw.cc  
-  ##dcmdata/mkdictbi.cc
   dcmdata/dcdicent.cc  
   dcmdata/dclist.cc    
   dcmdata/dcrledrg.cc  
@@ -80,7 +78,6 @@ set (DCMTK_DCMDATA_SRC
   dcmdata/dcrlerp.cc   
   dcmdata/dcvrda.cc    
   dcmdata/dcvrss.cc
-  ##dcmdata/dcdictzz.cc  
   dcmdata/dcostrma.cc  
   dcmdata/dcsequen.cc  
   dcmdata/dcvrds.cc    

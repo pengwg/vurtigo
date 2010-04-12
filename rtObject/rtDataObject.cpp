@@ -58,14 +58,12 @@ void rtDataObject::setObjectType(rtConstants::rtObjectType ot) {
   m_objType = ot;
 }
 
-//! The object was just modified. Adjust the time.
 void rtDataObject::Modified() {
   m_modifyTime=QDateTime::currentDateTime();
   rtApplication::instance().getPluginLoader()->objectModified(m_objId);
   emit objectChanged(m_objId);
 }
 
-//! Get the last time the object was modified.
 QDateTime rtDataObject::getModified() {
   return m_modifyTime;
 }
@@ -89,16 +87,28 @@ void rtDataObject::saveHeader(QXmlStreamWriter *writer, rtConstants::rtObjectTyp
 void rtDataObject::loadHeader(QXmlStreamReader *reader, rtConstants::rtObjectType &type, QString &name) {
   bool intOK;
 
+  if (!reader) {
+    type = rtConstants::OT_None;
+    name = "";
+    return;
+  }
+
   if ( !(reader->name()=="FileInfo" || reader->isStartElement()) ) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to load file header."));
     return;
   }
 
+  name = "";
   while ( reader->name() != "FileInfo" || !reader->isEndElement() ) {
     if(reader->readNext() == QXmlStreamReader::StartElement) {
 
       if(reader->name() == "type") {
-        type = rtConstants::intToObjectType(reader->readElementText().toInt(&intOK));
+        int objType = reader->readElementText().toInt(&intOK);
+        if (intOK) {
+          type = rtConstants::intToObjectType(objType);
+        } else {
+          type = rtConstants::OT_None;
+        }
       } else if (reader->name() == "name") {
         name = reader->readElementText();
       }

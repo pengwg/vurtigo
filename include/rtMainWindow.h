@@ -54,6 +54,9 @@ class rtHelpManager;
 #include "rtOrientationMarkerWidget.h"
 
 //! Object that controls the visible Qt widgets. 
+/*!
+  The class that takes care of the main window object in Vurtigo.
+  */
 class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 {
   Q_OBJECT
@@ -73,8 +76,16 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   */
   ~rtMainWindow();
 
+  //! Get the pointer to the render window
   vtkRenderWindow* getRenderWindow();
+
+  //! Get the interactor for the render window
+  /*!
+    The vtk style interactor is not widely used in Vurtigo.
+    */
   vtkRenderWindowInteractor* getInteractor();
+
+  //! Get the pointer to the renderer
   vtkRenderer* getRenderer();
   QTreeWidget* getObjectTree();
   vtkCellPicker* getGlobalCellPicker() { return m_cellPicker; }
@@ -179,8 +190,11 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   double getStillQuality() { return m_stillQuality; }
 
 signals:
+  //! Emited when the interaction mode in Vurtigo is switched to camera mode.
   void cameraModeSignal(bool);
+  //! Emited when the interaction mode in Vurtigo is switched to interactive mode.
   void interactionModeSignal(bool);
+  //! Emited when the interaction mode in Vurtigo is switched to placement mode.
   void placeModeSignal(bool);
 
  protected:

@@ -32,8 +32,6 @@
 using namespace std;
 
 GenericMode::GenericMode():m_sender(0) {
-  int ix1=0; 
-
   converter = new Converter();
 
   m_imgDataArray.clear();
@@ -243,7 +241,6 @@ bool GenericMode::receivePlanePosition(int id) {
 bool GenericMode::receivePlane(int id) {
   IMAGEDATA* currImg;
   unsigned char * image;
-  int ix1;
   bool res = false;
 
   // The gometry plane.

@@ -37,6 +37,10 @@
 class rtDataObject;
 class rtMainWindow;
 
+//! Render object base class [abstract class]
+/*!
+  All render type objects are derived from this class. Render objects construct VTK pipelines to visualize the object info in 2D or 3D.
+  */
 class rtRenderObject : public QObject {
 
 Q_OBJECT
@@ -45,10 +49,28 @@ Q_OBJECT
   //! Destructor
   ~rtRenderObject();
 
+  //! Get the list of 3D props available.
+  /*!
+    \return The list of 3D props.
+    */
   virtual QList<vtkProp*>* get3DPipeline();
   virtual QHash<QString, vtkProp*>* get2DPipeline();
+
+  //! Get the pointer to the data object
+  /*!
+    Each render object has a data object that it is paired with. This function will retrieve the pointer the the data object that corresponds to this render object.
+    \return Pointer to the data object.
+    */
   rtDataObject* getDataObject();
+
+  //! Get the name of this render object.
   QString getName();
+
+  //! Get the type of this render object.
+  /*!
+    \return The type of this object
+    \sa rtConstants::rtObjectType
+    */
   rtConstants::rtObjectType getObjectType();
 
   QList<QString> get2DViewNameList() { return m_pipe2D.keys(); }
@@ -56,6 +78,8 @@ Q_OBJECT
   vtkProp* get2DViewWithName(QString name) { return m_pipe2D.value(name); }
 
   void setDataObject(rtDataObject* dataObj);
+
+  //! Set the name for this data object
   void setName(QString renName);
 
   QTreeWidgetItem* getTreeItem() { return m_treeItem; }
@@ -92,9 +116,13 @@ Q_OBJECT
   virtual bool loadFile(QFile* file);
 
  public slots:
+  //! Called when one of the mouse buttons is pressed.
   virtual void mousePressEvent(QMouseEvent* event) {  }
+  //! Called when the mouse position changes and at least one button is pressed. (See QMouseEvent)
   virtual void mouseMoveEvent(QMouseEvent* event) {  }
+  //! Called when a mouse button is released
   virtual void mouseReleaseEvent(QMouseEvent* event) {  }
+  //! Called when the mouse button is double clicked.
   virtual void mouseDoubleClickEvent(QMouseEvent* event) {  }
   //! Called when a key is pressed.
   virtual void keyPressEvent(QKeyEvent* event) {}
@@ -103,11 +131,6 @@ Q_OBJECT
   //! The mouse wheel was moved.
   virtual void wheelEvent(QWheelEvent* event) {}
 
-  virtual void newDataAvailable() { }
-
-  virtual void resetAxialPlane() { }
-  virtual void resetSagittalPlane() { }
-  virtual void resetCoronalPlane() { }
  protected:
   //! The rtRenderObject constructor.
   /*!
@@ -115,6 +138,11 @@ Q_OBJECT
   */
   rtRenderObject();
 
+  //! Set the type for this render object
+  /*!
+    \param objType The type of object to use
+    \sa rtConstants::rtObjectType
+    */
   void setObjectType(rtConstants::rtObjectType objType);
 
   //! Apply changes from the modified data object.
@@ -146,7 +174,9 @@ Q_OBJECT
   QDateTime m_lastUpdate;
 
  private:
+  //! The name of the render object
   QString m_renderName;
+  //! The type of the render object
   rtConstants::rtObjectType m_objType;
 };
 
