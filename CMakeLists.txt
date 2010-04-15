@@ -78,12 +78,7 @@ include_directories(include rtMessage ${CMAKE_BINARY_DIR})
 # Include the DCMTK Vurtigo bridge code. 
 include_directories(
   external/dcmtk-Vurtigo/
-#  external/dcmtk-Vurtigo/dcmtk/config
-#  external/dcmtk-Vurtigo/dcmtk/dcmdata
-#  external/dcmtk-Vurtigo/dcmtk/ofstd
-  external/dcmtk-Vurtigo/Vurtigo
 )
-
 
 set (UI_FILES 
   rtUI/rtMainWindow.ui

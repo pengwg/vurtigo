@@ -1,112 +1,39 @@
 
-set (DCMTK_OFSTD_SRC 
-  ofstd/ofcmdln.cc   
-  ofstd/ofconfig.cc  
-  ofstd/ofdate.cc    
-  ofstd/oflist.cc    
-  ofstd/ofstring.cc
-  ofstd/ofconapp.cc  
-  ofstd/ofconsol.cc  
-  ofstd/ofdatime.cc  
-  ofstd/oflogfil.cc  
-  ofstd/ofthread.cc
-  ofstd/ofcond.cc    
-  ofstd/ofcrc32.cc   
-  ofstd/offname.cc   
-  ofstd/ofstd.cc
-  ofstd/oftime.cc
+#############
+# Find DCMTK
+#############
+set(TEMP_PATH ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+SET( DCMTK_DIR "" CACHE PATH "Root of DCMTK source tree." )
+MARK_AS_ADVANCED( CLEAR DCMTK_DIR )
+
+IF ( NOT DCMTK_DIR )
+message(STATUS "Warning: DCMTK_DIR has not been set. Checking default file paths...")
+ENDIF ( NOT DCMTK_DIR )
+
+find_package(DCMTK REQUIRED)
+set(CMAKE_MODULE_PATH ${TEMP_PATH})
+
+include_directories(
+  ${DCMTK_INCLUDE_DIR}
 )
 
-set (DCMTK_DCMDATA_SRC
-  dcmdata/cmdlnarg.cc  
-  dcmdata/dcerror.cc   
-  dcmdata/dcostrmz.cc  
-  dcmdata/dctag.cc     
-  dcmdata/dcvrfl.cc    
-  dcmdata/dcvrul.cc
-  dcmdata/dcbytstr.cc  
-  dcmdata/dcfilefo.cc  
-  dcmdata/dcpcache.cc  
-  dcmdata/dctagkey.cc  
-  dcmdata/dcvris.cc    
-  dcmdata/dcvrulup.cc
-  dcmdata/dcchrstr.cc  
-  dcmdata/dchashdi.cc  
-  dcmdata/dcpixel.cc   
-  dcmdata/dctypes.cc   
-  dcmdata/dcvrlo.cc    
-  dcmdata/dcvrus.cc
-  dcmdata/dccodec.cc   
-  dcmdata/dcistrma.cc  
-  dcmdata/dcpixseq.cc  
-  dcmdata/dcuid.cc     
-  dcmdata/dcvrlt.cc    
-  dcmdata/dcvrut.cc
-  dcmdata/dcdatset.cc  
-  dcmdata/dcistrmb.cc  
-  dcmdata/dcpxitem.cc  
-  dcmdata/dcvm.cc      
-  dcmdata/dcvrobow.cc  
-  dcmdata/dcxfer.cc
-  dcmdata/dcddirif.cc  
-  dcmdata/dcistrmf.cc  
-  dcmdata/dcrleccd.cc  
-  dcmdata/dcvrae.cc    
-  dcmdata/dcvrof.cc
-  dcmdata/dcdebug.cc   
-  dcmdata/dcistrmz.cc 
-  dcmdata/dcrlecce.cc  
-  dcmdata/dcvras.cc    
-  dcmdata/dcvrpn.cc    
-  dcmdata/dcdicdir.cc  
-  dcmdata/dcitem.cc    
-  dcmdata/dcrlecp.cc   
-  dcmdata/dcvrat.cc    
-  dcmdata/dcvrpobw.cc  
-  dcmdata/dcdicent.cc  
-  dcmdata/dclist.cc    
-  dcmdata/dcrledrg.cc  
-  dcmdata/dcvr.cc      
-  dcmdata/dcvrsh.cc    
-  dcmdata/dcdictbi.cc  
-  dcmdata/dcmetinf.cc  
-  dcmdata/dcrleerg.cc  
-  dcmdata/dcvrcs.cc    
-  dcmdata/dcvrsl.cc
-  dcmdata/dcdict.cc    
-  dcmdata/dcobject.cc  
-  dcmdata/dcrlerp.cc   
-  dcmdata/dcvrda.cc    
-  dcmdata/dcvrss.cc
-  dcmdata/dcostrma.cc  
-  dcmdata/dcsequen.cc  
-  dcmdata/dcvrds.cc    
-  dcmdata/dcvrst.cc
-  dcmdata/dcdirrec.cc  
-  dcmdata/dcostrmb.cc  
-  dcmdata/dcstack.cc   
-  dcmdata/dcvrdt.cc    
-  dcmdata/dcvrtm.cc
-  dcmdata/dcelem.cc    
-  dcmdata/dcostrmf.cc  
-  dcmdata/dcswap.cc    
-  dcmdata/dcvrfd.cc    
-  dcmdata/dcvrui.cc
-)
-
+###########
+# Vurtigo Component
+###########
 
 set ( DCMTK_VURTIGO_SRC
-  Vurtigo/DICOMFileReader.cpp
-  Vurtigo/DICOMImageData.cpp
+  DICOMFileReader.cpp
+  DICOMImageData.cpp
 )
 
 add_library(DCMTKVurtigo SHARED 
-  ${DCMTK_OFSTD_SRC} 
-  ${DCMTK_DCMDATA_SRC} 
   ${DCMTK_VURTIGO_SRC}
 )
 target_link_libraries (DCMTKVurtigo
   ${QT_LIBRARIES}
+  ${DCMTK_LIBRARIES}
   vtkFiltering
   vtkCommon
   vtkRendering
