@@ -1,7 +1,6 @@
 set ( RTCONTROL_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rtObjectManager.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtTimeManager.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rtMessage.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtCameraControl.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtConfigOptions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtHelpManager.cpp

@@ -4,7 +4,7 @@ project (Vurtigo)
 # The version number.
 set (Vurtigo_VERSION_MAJOR 1)
 set (Vurtigo_VERSION_MINOR 0)
-set (Vurtigo_VERSION_REVISION 3)
+set (Vurtigo_VERSION_REVISION 4)
 
 set ( Vurtigo_PROJECT_VERSION "${Vurtigo_VERSION_MAJOR}.${Vurtigo_VERSION_MINOR}.${Vurtigo_VERSION_REVISION}"  )
 
@@ -25,7 +25,7 @@ endif (APPLE)
 
 
 add_definitions ( -Wall -g )
-
+##add_definitions ( -Wall -O2 )
 
 ####################
 # Setup for Qt
@@ -64,14 +64,6 @@ include("TargetDoc.cmake" OPTIONAL)
 # Start Building
 ####################
 
-
-message(STATUS "Build Type: " ${CMAKE_BUILD_TYPE})
-message(STATUS "Debug Build Flags: " ${CMAKE_C_FLAGS_DEBUG})
-message(STATUS "Release Build Flags: " ${CMAKE_C_FLAGS_RELEASE})
-
-set(QT_DEFINITIONS ${QT_DEFINITIONS} " " -DQT_NO_DEBUG_OUTPUT)
-message(STATUS "Qt Flags: " ${QT_DEFINITIONS})
-
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
@@ -81,14 +73,14 @@ file(APPEND ${CMAKE_BINARY_DIR}/buildParam.h "#define VURTIGO_MINOR_VERSION " ${
 file(APPEND ${CMAKE_BINARY_DIR}/buildParam.h "#define VURTIGO_REVISION_VERSION " ${Vurtigo_VERSION_REVISION} "\n" )
 file(APPEND ${CMAKE_BINARY_DIR}/buildParam.h "#define DEBUG_VERBOSE_MODE_" ${DEBUG_VERBOSE_MODE} "\n" )
 
-include_directories(include ${CMAKE_BINARY_DIR})
+include_directories(include rtMessage ${CMAKE_BINARY_DIR})
 
 # Include the DCMTK Vurtigo bridge code. 
 include_directories(
-  external/dcmtk-Vurtigo/ 
-  external/dcmtk-Vurtigo/dcmtk/config
-  external/dcmtk-Vurtigo/dcmtk/dcmdata
-  external/dcmtk-Vurtigo/dcmtk/ofstd
+  external/dcmtk-Vurtigo/
+#  external/dcmtk-Vurtigo/dcmtk/config
+#  external/dcmtk-Vurtigo/dcmtk/dcmdata
+#  external/dcmtk-Vurtigo/dcmtk/ofstd
   external/dcmtk-Vurtigo/Vurtigo
 )
 
@@ -118,9 +110,9 @@ set (UI_FILES
 
 
 qt4_wrap_ui(UI_FILES_OUT ${UI_FILES})
-message(STATUS "UI Files: " ${UI_FILES_OUT})
 add_custom_target(UIFirst DEPENDS ${UI_FILES_OUT})
 
+add_subdirectory(rtMessage)
 add_subdirectory(external)
 add_subdirectory(rtUI)
 add_subdirectory(rtObject)
@@ -135,6 +127,7 @@ set (MAIN_SRC_FILES
 
 add_library(VurtigoBase SHARED ${RTOBJECT_SRC_FILES} ${RTCONTROL_SRC_FILES} ${RTUI_SRC_FILES} ${RTPLUGIN_SRC_FILES} ${MOC_FILES_OUT})
 target_link_libraries(VurtigoBase
+  rtMessage
   ${QT_LIBRARIES}
   vtkFiltering
   vtkCommon 
