@@ -26,7 +26,9 @@
 #include "rtColorFuncDataObject.h"
 #include "rtColorFuncRenderObject.h"
 #include "rtPieceFuncDataObject.h"
+#include "rtPieceFuncRenderObject.h"
 #include "rtApplication.h"
+#include "rtMessage.h"
 #include "rtTimeManager.h"
 
 rt3DVolumeDataObject::rt3DVolumeDataObject() {
@@ -130,7 +132,7 @@ void rt3DVolumeDataObject::surfaceFunctionChanged() {
   }
 }
 
-//! Send the info to the GUI
+
 void rt3DVolumeDataObject::update() {
   switch(m_rayCastFunction) {
     case (RCF_COMPOSITE):
@@ -294,7 +296,6 @@ void rt3DVolumeDataObject::scaleData(double x, double y, double z) {
   m_dataTransform->Scale(x,y,z);
 }
 
-//! Set the direction cosines for X and Y. The Z will be calculated from there. This function must be called FIRST.
 void rt3DVolumeDataObject::setDirectionCosinesXY(float* dirCos) {
   vtkMatrix4x4* mat = vtkMatrix4x4::New();
 
@@ -319,79 +320,6 @@ void rt3DVolumeDataObject::setDirectionCosinesXY(float* dirCos) {
 }
 
 
-//! Set the GUI widgets.
-void rt3DVolumeDataObject::setupGUI() {
-  m_optionsWidget.setupUi(getBaseWidget());
-
-  // Volume Crop.
-  m_optionsWidget.cropVolumeGroupBox->setChecked(true);
-
-  connect(m_optionsWidget.cropVolumeGroupBox, SIGNAL(clicked(bool)), this, SLOT(cropStatusChanged(bool)));
-  connect(m_optionsWidget.xminSlider, SIGNAL(valueChanged(int)), this, SLOT(xminSliderChanged(int)));
-  connect(m_optionsWidget.xmaxSlider, SIGNAL(valueChanged(int)), this, SLOT(xmaxSliderChanged(int)));
-  connect(m_optionsWidget.yminSlider, SIGNAL(valueChanged(int)), this, SLOT(yminSliderChanged(int)));
-  connect(m_optionsWidget.ymaxSlider, SIGNAL(valueChanged(int)), this, SLOT(ymaxSliderChanged(int)));
-  connect(m_optionsWidget.zminSlider, SIGNAL(valueChanged(int)), this, SLOT(zminSliderChanged(int)));
-  connect(m_optionsWidget.zmaxSlider, SIGNAL(valueChanged(int)), this, SLOT(zmaxSliderChanged(int)));
-
-  // Window Level
-  connect(m_optionsWidget.wlButton, SIGNAL(clicked()), this, SLOT(showWindowLevel()));
-
-  // Interpolation Type.
-  connect(m_optionsWidget.interpolateComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(interpolationChanged(int)));
-
-  // Global ray cast volume switch
-  connect(m_optionsWidget.groupRayCastVolume, SIGNAL(toggled(bool)), this, SLOT(Modified()));
-
-  // Surface functions.
-  connect(m_optionsWidget.radioComposite, SIGNAL(toggled(bool)), this, SLOT(surfaceFunctionChanged()));
-  connect(m_optionsWidget.radioIsosurface, SIGNAL(toggled(bool)), this, SLOT(surfaceFunctionChanged()));
-  connect(m_optionsWidget.radioMIP, SIGNAL(toggled(bool)), this, SLOT(surfaceFunctionChanged()));
-
-  // 2D plane check boxes
-  connect(m_optionsWidget.checkAxial3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
-  connect(m_optionsWidget.checkSagittal3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
-  connect(m_optionsWidget.checkCoronal3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
-
-  // 2D plane reset
-  connect(m_optionsWidget.axialResetButton, SIGNAL(clicked()), this, SLOT(axialResetSlot()));
-  connect(m_optionsWidget.sagittalResetButton, SIGNAL(clicked()), this, SLOT(sagittalResetSlot()));
-  connect(m_optionsWidget.coronalResetButton, SIGNAL(clicked()), this, SLOT(coronalResetSlot()));
-
-  // Watch for new objects to update the lists.
-  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(newObjectCreated(int)));
-  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(oldObjectRemoved(int)));
-
-  // The combo boxes for the CTF and PWF.
-  connect(m_optionsWidget.comboCTFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(colorTransferChangedGUI(QString)));
-  connect(m_optionsWidget.comboPieceFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(piecewiseChangedGUI(QString)));
-
-  // Iso Value
-  connect(m_optionsWidget.isoValueSlider, SIGNAL(valueChanged(int)), this, SLOT(isoValueChanged(int)));
-
-  // Cine
-  connect(m_optionsWidget.frameSlider, SIGNAL(valueChanged(int)), this, SLOT(setVisibleComponent(int)));
-  connect(m_optionsWidget.cineLoopPushButton, SIGNAL(toggled(bool)), this, SLOT(cineLoop(bool)));
-
-  m_optionsWidget.comboPieceFunc->clear();
-  m_optionsWidget.comboPieceFunc->addItem("Default");
-  QList<int> pieceFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_vtkPiecewiseFunction);
-  for (int ix1=0; ix1<pieceFuncs.count() ; ix1++) {
-    m_optionsWidget.comboPieceFunc->addItem(QString::number(pieceFuncs.at(ix1)));
-  }
-
-  m_optionsWidget.comboCTFunc->clear();
-  m_optionsWidget.comboCTFunc->addItem("Default");
-  QList<int> colorFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_vtkColorTransferFunction);
-  for (int ix1=0; ix1<colorFuncs.count() ; ix1++) {
-    m_optionsWidget.comboCTFunc->addItem(QString::number(colorFuncs.at(ix1)));
-  }
-
-  m_optionsWidget.interpolateComboBox->setCurrentIndex(m_interpolationType);
-
-}
-
-//! Slot is called when Vurtigo creates a new object.
 void rt3DVolumeDataObject::newObjectCreated(int id) {
   rtRenderObject * temp = rtApplication::instance().getObjectManager()->getObjectWithID(id);
   if (temp) {
@@ -462,7 +390,6 @@ void rt3DVolumeDataObject::colorTransferChanged(int id) {
   }
 }
 
-//! A new piecewise function was chosen through the GUI
 void rt3DVolumeDataObject::piecewiseChangedGUI(QString id) {
   bool ok;
   int idInt;
@@ -528,12 +455,6 @@ void rt3DVolumeDataObject::coronalResetSlot() {
   Modified();
 }
 
-//! Clean the GUI widgets.
-void rt3DVolumeDataObject::cleanupGUI() {
-
-}
-
-//! Change how the interpolation is done.
 void rt3DVolumeDataObject::interpolationChanged(int interp) {
   m_interpolationType = interp;
   Modified();
@@ -727,4 +648,161 @@ void rt3DVolumeDataObject::zmaxSliderChanged(int val) {
     m_imgClip->SetOutputWholeExtent(ext);
     Modified();
   }
+}
+
+
+void rt3DVolumeDataObject::createNewPWF() {
+  rtObjectManager* oManage = rtApplication::instance().getObjectManager();
+  rtPieceFuncRenderObject* pieceFunc=NULL;
+  rtPieceFuncDataObject* datObj=NULL;
+  int place;
+
+  // Check the object manager poiner
+  if (!oManage) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Object Manager pointer is NULL!"));
+    return;
+  }
+
+  pieceFunc = static_cast<rtPieceFuncRenderObject*>(oManage->addObjectOfType(rtConstants::OT_vtkPiecewiseFunction, this->getObjName().append("_PWF")));
+  if (!pieceFunc) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to create piecewise function. Action aborted."));
+    return;
+  }
+
+  datObj = static_cast<rtPieceFuncDataObject*>(pieceFunc->getDataObject());
+  if(!datObj) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to get piecewise function data. Action aborted."));
+    return;
+  }
+
+  if (!datObj->setPiecewiseFunction(m_pieceFuncDefault)) {
+    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("Piecewise function default was not set."));
+  }
+
+  // Set the drop down too.
+  place = m_optionsWidget.comboPieceFunc->findText(QString::number(datObj->getId()));
+  if (place!=-1) {
+    m_optionsWidget.comboPieceFunc->setCurrentIndex(place);
+  }
+
+}
+
+
+void rt3DVolumeDataObject::createNewCTF() {
+  rtObjectManager* oManage = rtApplication::instance().getObjectManager();
+  rtColorFuncRenderObject* colorFunc=NULL;
+  rtColorFuncDataObject* datObj=NULL;
+  int place;
+
+  // Check the object manager poiner
+  if (!oManage) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Object Manager pointer is NULL!"));
+    return;
+  }
+
+  colorFunc = static_cast<rtColorFuncRenderObject*>(oManage->addObjectOfType(rtConstants::OT_vtkColorTransferFunction, this->getObjName().append("_CTF")));
+  if (!colorFunc) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to create color function. Action aborted."));
+    return;
+  }
+
+  datObj = static_cast<rtColorFuncDataObject*>(colorFunc->getDataObject());
+  if(!datObj) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to get color function data. Action aborted."));
+    return;
+  }
+
+  if (!datObj->setColorFunction(m_colorTransFuncDefault)) {
+    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("Color function default was not set."));
+  }
+
+  // Set the drop down too.
+  place = m_optionsWidget.comboCTFunc->findText(QString::number(datObj->getId()));
+  if (place!=-1) {
+    m_optionsWidget.comboCTFunc->setCurrentIndex(place);
+  }
+
+}
+
+///////////////////
+// Protected Functions
+///////////////////
+
+
+void rt3DVolumeDataObject::setupGUI() {
+  m_optionsWidget.setupUi(getBaseWidget());
+
+  // Volume Crop.
+  m_optionsWidget.cropVolumeGroupBox->setChecked(true);
+
+  connect(m_optionsWidget.cropVolumeGroupBox, SIGNAL(clicked(bool)), this, SLOT(cropStatusChanged(bool)));
+  connect(m_optionsWidget.xminSlider, SIGNAL(valueChanged(int)), this, SLOT(xminSliderChanged(int)));
+  connect(m_optionsWidget.xmaxSlider, SIGNAL(valueChanged(int)), this, SLOT(xmaxSliderChanged(int)));
+  connect(m_optionsWidget.yminSlider, SIGNAL(valueChanged(int)), this, SLOT(yminSliderChanged(int)));
+  connect(m_optionsWidget.ymaxSlider, SIGNAL(valueChanged(int)), this, SLOT(ymaxSliderChanged(int)));
+  connect(m_optionsWidget.zminSlider, SIGNAL(valueChanged(int)), this, SLOT(zminSliderChanged(int)));
+  connect(m_optionsWidget.zmaxSlider, SIGNAL(valueChanged(int)), this, SLOT(zmaxSliderChanged(int)));
+
+  // Window Level
+  connect(m_optionsWidget.wlButton, SIGNAL(clicked()), this, SLOT(showWindowLevel()));
+
+  // Interpolation Type.
+  connect(m_optionsWidget.interpolateComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(interpolationChanged(int)));
+
+  // Global ray cast volume switch
+  connect(m_optionsWidget.groupRayCastVolume, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+
+  // Surface functions.
+  connect(m_optionsWidget.radioComposite, SIGNAL(toggled(bool)), this, SLOT(surfaceFunctionChanged()));
+  connect(m_optionsWidget.radioIsosurface, SIGNAL(toggled(bool)), this, SLOT(surfaceFunctionChanged()));
+  connect(m_optionsWidget.radioMIP, SIGNAL(toggled(bool)), this, SLOT(surfaceFunctionChanged()));
+
+  // 2D plane check boxes
+  connect(m_optionsWidget.checkAxial3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+  connect(m_optionsWidget.checkSagittal3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+  connect(m_optionsWidget.checkCoronal3D, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+
+  // 2D plane reset
+  connect(m_optionsWidget.axialResetButton, SIGNAL(clicked()), this, SLOT(axialResetSlot()));
+  connect(m_optionsWidget.sagittalResetButton, SIGNAL(clicked()), this, SLOT(sagittalResetSlot()));
+  connect(m_optionsWidget.coronalResetButton, SIGNAL(clicked()), this, SLOT(coronalResetSlot()));
+
+  // Watch for new objects to update the lists.
+  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(newObjectCreated(int)));
+  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(oldObjectRemoved(int)));
+
+  // The combo boxes for the CTF and PWF.
+  connect(m_optionsWidget.comboCTFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(colorTransferChangedGUI(QString)));
+  connect(m_optionsWidget.comboPieceFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(piecewiseChangedGUI(QString)));
+
+  // Creating new CTF and PWF
+  connect(m_optionsWidget.newCTF, SIGNAL(clicked()), this, SLOT(createNewCTF()));
+  connect(m_optionsWidget.newPWF, SIGNAL(clicked()), this, SLOT(createNewPWF()));
+
+  // Iso Value
+  connect(m_optionsWidget.isoValueSlider, SIGNAL(valueChanged(int)), this, SLOT(isoValueChanged(int)));
+
+  // Cine
+  connect(m_optionsWidget.frameSlider, SIGNAL(valueChanged(int)), this, SLOT(setVisibleComponent(int)));
+  connect(m_optionsWidget.cineLoopPushButton, SIGNAL(toggled(bool)), this, SLOT(cineLoop(bool)));
+
+  m_optionsWidget.comboPieceFunc->clear();
+  m_optionsWidget.comboPieceFunc->addItem("Default");
+  QList<int> pieceFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_vtkPiecewiseFunction);
+  for (int ix1=0; ix1<pieceFuncs.count() ; ix1++) {
+    m_optionsWidget.comboPieceFunc->addItem(QString::number(pieceFuncs.at(ix1)));
+  }
+
+  m_optionsWidget.comboCTFunc->clear();
+  m_optionsWidget.comboCTFunc->addItem("Default");
+  QList<int> colorFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_vtkColorTransferFunction);
+  for (int ix1=0; ix1<colorFuncs.count() ; ix1++) {
+    m_optionsWidget.comboCTFunc->addItem(QString::number(colorFuncs.at(ix1)));
+  }
+  m_optionsWidget.interpolateComboBox->setCurrentIndex(m_interpolationType);
+}
+
+
+void rt3DVolumeDataObject::cleanupGUI() {
+
 }

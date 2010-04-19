@@ -42,7 +42,7 @@
 
 //! 3D Volume Data Object
 /*!
-  Data object that represents a 3D object.
+  Data object that represents a 3D object. This object is also capable of playing back 4D (3D+time) cine volumes.
   */
 class rt3DVolumeDataObject : public rtDataObject
 {
@@ -145,10 +145,17 @@ public:
   void translateData(double x, double y, double z);
   //! Scale the data object
   void scaleData(double x, double y, double z);
+  //! Set the direction cosines for X and Y. The Z will be calculated from there. This function must be called FIRST.
   void setDirectionCosinesXY(float* dirCos);
 
+  //! Get the type of interpolation used.
+  /*!
+    The three types possible are: Nearest Neighbour = 0, Linear = 1, Cubic = 2
+    \return The interpolation value as an integer.
+    */
   int getInterpolation() { return m_interpolationType; }
 
+  //! Send the info to the GUI
   void update();
 
   int getVisibleComponent() { return m_visibleComponent; }
@@ -172,9 +179,13 @@ public:
   }
 
  public slots:
+  //! Slot called when the user changes the surface function.
   void surfaceFunctionChanged();
 
+  //! Slot is called when Vurtigo creates a new object.
   void newObjectCreated(int id);
+
+  //! Slot is called when Vurtigo deletes an existing object.
   void oldObjectRemoved(int id);
 
   //! A new color transfer function was chosen through the GUI
@@ -184,10 +195,14 @@ public:
 
   //! A new piecewise function has been chosen from the GUI
   void piecewiseChangedGUI(QString id);
-  //! The piecewise function has changed
+  //! The piecewise function has changed from the GUI
   void piecewiseChanged(int);
 
   //! The user has changed the intrpolation type from the GUI
+  /*!
+    The three types possible are: Nearest Neighbour = 0, Linear = 1, Cubic = 2
+    \param interp The interpolation value.
+    */
   void interpolationChanged(int interp);
 
   void setVisibleComponent(int c);
@@ -197,6 +212,7 @@ public:
 
   void cineLoop(bool);
 
+  //! Show the window level dialog
   void showWindowLevel();
 
   //! The window level has been changed by WL dialog.
@@ -215,14 +231,26 @@ public:
   //! Turn the cropping feature on or off
   void cropStatusChanged(bool);
 
+  //! The slider for the min x value has changed
   void xminSliderChanged(int);
+  //! The slider for the max x value has changed
   void xmaxSliderChanged(int);
+  //! The slider for the min y value has changed
   void yminSliderChanged(int);
+  //! The slider for the max y value has changed
   void ymaxSliderChanged(int);
+  //! The slider for the min z value has changed
   void zminSliderChanged(int);
+  //! The slider for the max z value has changed
   void zmaxSliderChanged(int);
 
+  //! Create a new piecewisefunction and select it for the rendering
+  void createNewPWF();
+  //! Create a new color transfer function and select that for rendering.
+  void createNewCTF();
+
  signals:
+  //! The volume has received new image data
   void newImageData();
 
   void axialResetSignal();
@@ -233,7 +261,9 @@ public:
   /////////////
   // Functions
   /////////////
+  //! Set the GUI widgets.
   void setupGUI();
+  //! Cleanup the GUI widgets.
   void cleanupGUI();
 
   ////////////////

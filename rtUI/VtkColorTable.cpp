@@ -269,10 +269,15 @@ void VtkColorTable::updateClamp(int state) {
 
 void VtkColorTable::newPoint() {
     Point point;
-
+    int currentRow = mainTable->currentRow();
     //copy the current highlighted point
     if (mainTable->rowCount() > 0) {
-        const Point & currPoint = points.at(mainTable->currentRow());
+
+        // Check if there is a current row.
+        if(currentRow == -1)
+          currentRow = mainTable->rowCount()-1;
+
+        const Point & currPoint = points.at(currentRow);
         point.scalarValue = currPoint.scalarValue;
         point.color = currPoint.color;
     }
@@ -291,7 +296,7 @@ void VtkColorTable::newPoint() {
                                point.color.green()/255.0f, point.color.blue()/255.0f);
 
     //update table
-    int currentRow = points.lastIndexOf(point);
+    currentRow = points.lastIndexOf(point);
     addTableRow(currentRow, point);
     mainTable->setCurrentCell(currentRow, 0);
 
@@ -300,6 +305,13 @@ void VtkColorTable::newPoint() {
 
 void VtkColorTable::delPoint() {
     int currentRow = mainTable->currentRow();
+
+    // Ensure that there is at least one row to remove.
+    if (mainTable->rowCount() <= 0) return;
+
+    // Set the current row if none exists
+    if(currentRow == -1)
+          currentRow = mainTable->rowCount()-1;
 
     removeCheckDupe(points.at(currentRow).scalarValue);
 
@@ -366,4 +378,5 @@ bool VtkColorTable::setColorFunction(vtkColorTransferFunction * const func) {
 
     updateFromPoints();
     emit functionUpdated();
+    return true;
 }
