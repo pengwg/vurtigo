@@ -53,24 +53,24 @@ rtEPDataObject::rtEPDataObject()
 
 
   ///// TEST ///////////
-  rtEPInfoObject::InfoPoint p;
+  rtEPPropertyPointList::InfoPoint p;
   p.location[0] = -9.5;
   p.location[1] = -38.0;
   p.location[2] = 84.2;
   p.property = 15;
-  m_EPInfoObject.addInfoPoint(p);
+  m_EPInfoObject.addInfoPoint(p, "TEST");
 
   p.location[0] = -9.5;
   p.location[1] = -38.0;
   p.location[2] = 85.2;
   p.property = 15;
-  m_EPInfoObject.addInfoPoint(p);
+  m_EPInfoObject.addInfoPoint(p, "TEST");
 
   p.location[0] = -9.5;
   p.location[1] = -38.0;
   p.location[2] = 89.2;
   p.property = 5;
-  m_EPInfoObject.addInfoPoint(p);
+  m_EPInfoObject.addInfoPoint(p, "TEST");
   ////////// END TEST ///////////
 }
 
@@ -105,7 +105,15 @@ bool rtEPDataObject::setTransform(vtkTransform* t) {
 }
 
 bool rtEPDataObject::setTriggerDelay(int phase, int trigger) {
-  if(phase < 0 || trigger < 0) return false;
+  if(phase < 0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Phase is negative."));
+    return false;
+  }
+
+  if(trigger < 0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Trigger is negative."));
+    return false;
+  }
 
   // Create the phase if it does not exist.
   if (!phaseExists(phase)) createPhase(phase);

@@ -33,8 +33,10 @@
 class rtEPRenderObject : public rtRenderObject {
 
  public:
-
+  //! Constructor
   rtEPRenderObject();
+
+  //! Destructor
   ~rtEPRenderObject();
 
   //! Add this object to the given renderer.

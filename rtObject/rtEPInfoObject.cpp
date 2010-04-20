@@ -24,67 +24,79 @@
 #include <vtkMath.h>
 
 rtEPInfoObject::rtEPInfoObject()
-    : m_maxPropValue(-1), m_minPropValue(-1)
 {
   m_defaultColorFunc = vtkColorTransferFunction::New();
   m_defaultColorFunc->AddRGBPoint(0.0, 0.0, 0.0, 1.0);
   m_defaultColorFunc->AddRGBPoint(0.5, 0.5, 0.5, 0.5);
   m_defaultColorFunc->AddRGBPoint(1.0, 1.0, 0.0, 0.0);
 
-  m_infoList.clear();
+  m_currentPropertyName = "";
 }
 
 rtEPInfoObject::~rtEPInfoObject() {
-
   m_defaultColorFunc->Delete();
-  m_infoList.clear();
+
+  cleanupHash();
 }
 
 
-void rtEPInfoObject::addInfoPoint(InfoPoint p) {
-  if (m_infoList.empty()) {
-    m_maxPropValue = p.property;
-    m_minPropValue = p.property;
-    m_infoList.append(p);
+void rtEPInfoObject::addInfoPoint(rtEPPropertyPointList::InfoPoint p, QString propName) {
+  if (m_pointLists.isEmpty()) {
+    rtEPPropertyPointList* temp = new rtEPPropertyPointList(propName);
+    m_pointLists.insert(propName, temp);
+    temp->addPointToList(p);
+    m_currentPropertyName = propName;
+  } else if(m_pointLists.contains(propName)) {
+    m_pointLists.value(propName)->addPointToList(p);
   } else {
-    m_infoList.append(p);
-    if (p.property > m_maxPropValue) m_maxPropValue = p.property;
-    if (p.property < m_minPropValue) m_minPropValue = p.property;
+    rtEPPropertyPointList* temp = new rtEPPropertyPointList(propName);
+    m_pointLists.insert(propName, temp);
+    temp->addPointToList(p);
   }
 }
 
-bool rtEPInfoObject::getInfoPoint(double x, double y, double z, InfoPoint &p) {
-  bool found=false;
-  for (int ix1=0; ix1<m_infoList.size(); ix1++) {
-    if (m_infoList.at(ix1).location[0] == x && m_infoList.at(ix1).location[1] == y && m_infoList.at(ix1).location[2] == z) {
-      p = m_infoList.at(ix1);
-      found = true;
-    }
+bool rtEPInfoObject::getInfoPoint(double x, double y, double z, rtEPPropertyPointList::InfoPoint &p, QString propName) {
+  if(m_pointLists.contains(propName)) {
+    return m_pointLists.value(propName)->getInfoPoint(x, y, z, p);
+  } else {
+    return false;
   }
-  return found;
 }
 
-void rtEPInfoObject::clearPointList() {
-  m_infoList.clear();
-  m_maxPropValue = -1;
-  m_minPropValue = -1;
+bool rtEPInfoObject::removeInfoPoint(double x, double y, double z, rtEPPropertyPointList::InfoPoint &p, QString propName) {
+  if(m_pointLists.contains(propName)) {
+    return m_pointLists.value(propName)->removeInfoPoint(x, y, z, p);
+  } else {
+    return false;
+  }
+}
+
+void rtEPInfoObject::clearPointList(QString propName) {
+  if(m_pointLists.contains(propName)) {
+    m_pointLists.value(propName)->clearPointList();
+  }
 }
 
 bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
   if (!data) return false;
+  if (m_currentPropertyName=="") return false;
+  if (!m_pointLists.contains(m_currentPropertyName)) return false;
+
+  // Get the correct list
+  rtEPPropertyPointList* ptList = m_pointLists.value(m_currentPropertyName);
 
   // There must be at least TWO points of info for this to work.
-  if (m_infoList.size() < 2) return true;
+  if (ptList->getNumPoints() < 2) return true;
 
   // If the max and the min are equal then there is no point in doing this.
-  if (m_maxPropValue == m_minPropValue) return true;
+  if (ptList->getMaxValue() == ptList->getMinValue()) return true;
 
   float val;
   vtkIdType numPts;
   unsigned int proximalPoints;
   double tempPT[3];
   double currDist;
-  double propValueDiff = m_maxPropValue-m_minPropValue;
+  double propValueDiff = ptList->getMaxValue()-ptList->getMinValue();
 
   numPts = data->GetNumberOfPoints();
   vtkFloatArray * scalars = vtkFloatArray::New();
@@ -94,10 +106,11 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
     val = 0.5;
     data->GetPoint(currID, tempPT);
 
-    for (int ix1=0; ix1<m_infoList.size(); ix1++) {
-      currDist = vtkMath::Distance2BetweenPoints(tempPT, m_infoList[ix1].location);
+    for (int ix1=0; ix1<ptList->getNumPoints(); ix1++) {
+      rtEPPropertyPointList::InfoPoint pt = ptList->getPointAt(ix1);
+      currDist = vtkMath::Distance2BetweenPoints(tempPT, pt.location);
       if (currDist < 20.0) {
-        val += ((double)(m_infoList[ix1].property - m_minPropValue))/propValueDiff;
+        val += ((double)(pt.property - ptList->getMinValue()))/propValueDiff;
         proximalPoints++;
       }
     }
@@ -109,4 +122,17 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
   scalars->Delete();
 
   return true;
+}
+
+//////////////////////
+// Protected Functions
+//////////////////////
+void rtEPInfoObject::cleanupHash() {
+  if (m_pointLists.isEmpty()) return;
+
+  QHash<QString, rtEPPropertyPointList*>::const_iterator i = m_pointLists.constBegin();
+  while (i != m_pointLists.constEnd()) {
+    if(i.value()) delete i.value();
+    ++i;
+  }
 }

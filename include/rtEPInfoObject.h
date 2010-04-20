@@ -20,21 +20,15 @@
 #ifndef RTEPINFOOBJECT_H
 #define RTEPINFOOBJECT_H
 
-#include <QList>
+#include <QHash>
+#include <vtkColorTransferFunction.h>
+#include <vtkPolyData.h>
 
-#include "vtkColorTransferFunction.h"
-#include "vtkPolyData.h"
+#include "rtEPPropertyPointList.h"
 
 class rtEPInfoObject
 {
   public:
-
-  //! Structure that contains some kind of EP info at a certain point.
-    struct InfoPoint{
-      double location[3];
-      int property;
-    };
-
     rtEPInfoObject();
     ~rtEPInfoObject();
 
@@ -42,24 +36,28 @@ class rtEPInfoObject
     vtkColorTransferFunction* getColorFunction() { return m_defaultColorFunc; }
 
     //! Add an EP info point to the list of saved points.
-    void addInfoPoint(InfoPoint p);
+    void addInfoPoint(rtEPPropertyPointList::InfoPoint p, QString propName);
 
-    bool getInfoPoint(double,double,double,InfoPoint&);
-    void clearPointList();
+    bool getInfoPoint(double,double,double,rtEPPropertyPointList::InfoPoint&, QString propName);
+    bool removeInfoPoint(double,double,double,rtEPPropertyPointList::InfoPoint&, QString propName);
+    void clearPointList(QString propName);
+
     bool updateScalars(vtkPolyData*);
 
   protected:
 
+    void cleanupHash();
+
     //! The default color transfer function
     vtkColorTransferFunction* m_defaultColorFunc;
 
-    //! List of points that hold EP info
-    QList<InfoPoint> m_infoList;
+    //! Hash table for the different properties.
+    /*!
+      Each property has its own point list.
+      */
+    QHash<QString, rtEPPropertyPointList*> m_pointLists;
 
-    //! Max value of the property
-    int m_maxPropValue;
-    //! Minimum value of the property
-    int m_minPropValue;
+    QString m_currentPropertyName;
 };
 
 #endif // RTEPINFOOBJECT_H
