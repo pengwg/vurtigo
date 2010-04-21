@@ -84,6 +84,7 @@ void rtEPRenderObject::update() {
 
   if (dObj->getColorFunction()) {
     m_meshMapper->SetLookupTable(dObj->getColorFunction());
+    m_pointMapper->SetLookupTable(dObj->getColorFunction());
   }
 
 }

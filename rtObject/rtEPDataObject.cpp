@@ -181,7 +181,7 @@ void rtEPDataObject::createPhase(int phaseNum) {
   dat.pointList.clear();
   dat.pointData = vtkPolyData::New();
   dat.pointData->SetPoints(vtkPoints::New());
-  dat.pointData->SetPolys(vtkCellArray::New());
+  dat.pointData->SetVerts(vtkCellArray::New());
   dat.pointProperty = vtkProperty::New();
 
   dat.pointDataUpdate = true;
@@ -613,7 +613,7 @@ void rtEPDataObject::updateMeshData(int updatePhase) {
       }
 
       for (int coord=0; coord<3; coord++) {
-        CreatePositionSplinesTask* temp = new CreatePositionSplinesTask( &m_phaseDataList[updatePhase], coord, maxPos, m_inPlaneInterval, &slices, m_optionsWidget.minSliceSlider->value(), m_optionsWidget.maxSliceSlider->value());
+        CreatePositionSplinesTask* temp = new CreatePositionSplinesTask(&m_phaseDataList[updatePhase], coord, maxPos, m_inPlaneInterval, &slices, m_optionsWidget.minSliceSlider->value(), m_optionsWidget.maxSliceSlider->value());
         QThreadPool::globalInstance()->start(temp);
       }
       QThreadPool::globalInstance()->waitForDone();
@@ -626,7 +626,6 @@ void rtEPDataObject::updateMeshData(int updatePhase) {
 
       vtkIdType* pID = new vtkIdType[4];
 
-      unsigned int cellCount=0;
       double xyzCoords[3];
       double height = 0.0;
       double pos = 0.0;
@@ -685,10 +684,6 @@ void rtEPDataObject::updateMeshData(int updatePhase) {
           }
 
           cells->InsertNextCell(4, pID);
-          cellCount++;
-          if (cellCount >= 8190 && cellCount <= 8190) {
-            std::cout << pID[0] << " " << pID[1] << " " << pID[2] << " " << pID[3] << std::endl;
-          }
         }
       }
 
