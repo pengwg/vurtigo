@@ -31,8 +31,10 @@ rtEPRenderObject::rtEPRenderObject()
 
   m_pointMapper = vtkPolyDataMapper::New();
   m_meshMapper = vtkPolyDataMapper::New();
+  m_infoMapper = vtkPolyDataMapper::New();
   m_pointActor = vtkActor::New();
   m_meshActor = vtkActor::New();
+  m_infoActor = vtkActor::New();
 
   setupDataObject();
   setupPipeline();
@@ -48,6 +50,10 @@ rtEPRenderObject::~rtEPRenderObject() {
     m_meshMapper->Delete();
     m_meshMapper = NULL;
   }
+  if(m_infoMapper) {
+    m_infoMapper->Delete();
+    m_infoMapper = NULL;
+  }
   if(m_pointActor) {
     m_pointActor->Delete();
     m_pointActor = NULL;
@@ -55,6 +61,10 @@ rtEPRenderObject::~rtEPRenderObject() {
   if(m_meshActor) {
     m_meshActor->Delete();
     m_meshActor = NULL;
+  }
+  if (m_infoActor) {
+    m_infoActor->Delete();
+    m_infoActor = NULL;
   }
 }
 
@@ -85,6 +95,14 @@ void rtEPRenderObject::update() {
   if (dObj->getColorFunction()) {
     m_meshMapper->SetLookupTable(dObj->getColorFunction());
     m_pointMapper->SetLookupTable(dObj->getColorFunction());
+    m_infoMapper->SetLookupTable(dObj->getColorFunction());
+  }
+
+  if (dObj->showInfoPoints()) {
+    m_infoMapper->SetInput(dObj->getInfoPolyData());
+    m_infoActor->VisibilityOn();
+  } else {
+    m_infoActor->VisibilityOff();
   }
 
 }
@@ -104,6 +122,10 @@ bool rtEPRenderObject::addToRenderer(vtkRenderer* ren) {
     ren->AddViewProp(m_meshActor);
   }
 
+  if (!ren->HasViewProp(m_infoActor)) {
+    ren->AddViewProp(m_infoActor);
+  }
+
   setVisible3D(true);
   return true;
 }
@@ -121,6 +143,10 @@ bool rtEPRenderObject::removeFromRenderer(vtkRenderer* ren) {
     ren->RemoveViewProp(m_meshActor);
   }
 
+  if (ren->HasViewProp(m_infoActor)) {
+    ren->RemoveViewProp(m_infoActor);
+  }
+
   return true;
 }
 
@@ -134,6 +160,7 @@ void rtEPRenderObject::setupDataObject() {
 void rtEPRenderObject::setupPipeline() {
   m_pointActor->SetMapper(m_pointMapper);
   m_meshActor->SetMapper(m_meshMapper);
+  m_infoActor->SetMapper(m_infoMapper);
 
   m_pointMapper->SetScalarModeToUsePointData();
   m_pointMapper->UseLookupTableScalarRangeOn();
@@ -143,8 +170,13 @@ void rtEPRenderObject::setupPipeline() {
   m_meshMapper->UseLookupTableScalarRangeOn();
   m_meshMapper->SetColorModeToMapScalars();
 
+  m_infoMapper->SetScalarModeToUsePointData();
+  m_infoMapper->UseLookupTableScalarRangeOn();
+  m_infoMapper->SetColorModeToMapScalars();
+
   m_pipe3D.push_back(m_pointActor);
   m_pipe3D.push_back(m_meshActor);
+  m_pipe3D.push_back(m_infoActor);
 }
 
 

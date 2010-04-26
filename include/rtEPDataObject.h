@@ -151,6 +151,15 @@ public:
   //! Delete a phase that exists.
   void deletePhase(int phaseNum);
 
+  //! Add a point with related EP info
+  void addInfoPoint(rtEPPropertyPointList::InfoPoint point, QString name);
+
+  //! Check if the info points should be shown
+  bool showInfoPoints() { return m_showInfoPoints; }
+
+  //! The the poly data for the info points.
+  vtkPolyData* getInfoPolyData() { return m_EPInfoObject.getPointPolyData(); }
+
   virtual bool saveFile(QFile *file);
   virtual bool loadFile(QFile *file);
  public slots:
@@ -166,6 +175,12 @@ public:
 
   void inSliceValueChanged(double);
   void betweenSliceValueChanged(double);
+
+  void colorByPropertyChanged(int);
+
+  void effectSizeChanged(int);
+
+  void showPointsChanged(bool);
 
  protected:
   // Functions
@@ -225,6 +240,9 @@ public:
 
   //! Object to hold all of the points that have EP info.
   rtEPInfoObject m_EPInfoObject;
+
+  //! Boolean to determine if the EP info points are shown
+  bool m_showInfoPoints;
 
   //! Task that can create the position splines
   class CreatePositionSplinesTask : public QRunnable {

@@ -23,6 +23,8 @@
 #include <QHash>
 #include <vtkColorTransferFunction.h>
 #include <vtkPolyData.h>
+#include <vtkAppendPolyData.h>
+#include <vtkSphereSource.h>
 
 #include "rtEPPropertyPointList.h"
 
@@ -44,9 +46,24 @@ class rtEPInfoObject
 
     bool updateScalars(vtkPolyData*);
 
+    void setCurrentPropName(QString prop) { if(m_pointLists.contains(prop)) m_currentPropertyName = prop; }
+    QString getCurrentPropName() { return m_currentPropertyName; }
+
+    void setEffectRadius(unsigned int r) { if (r!=0) m_radius = r; }
+    unsigned int getEffectRadius() { return m_radius; }
+
+    vtkPolyData* getPointPolyData();
+
   protected:
 
+    //! Cleanup the hash data structure.
     void cleanupHash();
+
+    //! Cleanup the list of sphere objects
+    void cleanupSphereList();
+
+    //! Update the poly data object based on the points in the current property.
+    void updatePointPolyData();
 
     //! The default color transfer function
     vtkColorTransferFunction* m_defaultColorFunc;
@@ -58,6 +75,15 @@ class rtEPInfoObject
     QHash<QString, rtEPPropertyPointList*> m_pointLists;
 
     QString m_currentPropertyName;
+
+    //! The effect radius for each sampled point.
+    unsigned int m_radius;
+
+    //! The poly data for the point set.
+    vtkAppendPolyData* m_pointPolyData;
+
+    //! List of sphere objects currently used as the point set.
+    QList<vtkSphereSource*> m_sphereList;
 };
 
 #endif // RTEPINFOOBJECT_H

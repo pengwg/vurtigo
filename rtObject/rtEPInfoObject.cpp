@@ -24,6 +24,7 @@
 #include <vtkMath.h>
 
 rtEPInfoObject::rtEPInfoObject()
+    : m_radius(25)
 {
   m_defaultColorFunc = vtkColorTransferFunction::New();
   m_defaultColorFunc->AddRGBPoint(0.0, 0.0, 0.0, 1.0);
@@ -31,12 +32,18 @@ rtEPInfoObject::rtEPInfoObject()
   m_defaultColorFunc->AddRGBPoint(1.0, 1.0, 0.0, 0.0);
 
   m_currentPropertyName = "";
+
+  m_pointPolyData = vtkAppendPolyData::New();
+  m_pointPolyData->UserManagedInputsOn();
+  m_pointPolyData->RemoveAllInputs();
+  cleanupSphereList();
 }
 
 rtEPInfoObject::~rtEPInfoObject() {
   m_defaultColorFunc->Delete();
-
+  m_pointPolyData->Delete();
   cleanupHash();
+  cleanupSphereList();
 }
 
 
@@ -93,7 +100,7 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
 
   float val;
   vtkIdType numPts;
-  unsigned int proximalPoints;
+  double weightSum=0.0;
   double tempPT[3];
   double currDist;
   double propValueDiff = ptList->getMaxValue()-ptList->getMinValue();
@@ -102,19 +109,20 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
   vtkFloatArray * scalars = vtkFloatArray::New();
 
   for (vtkIdType currID=0; currID<numPts; currID++) {
-    proximalPoints = 1;
+    weightSum = 1.0;
     val = 0.5;
     data->GetPoint(currID, tempPT);
 
     for (int ix1=0; ix1<ptList->getNumPoints(); ix1++) {
       rtEPPropertyPointList::InfoPoint pt = ptList->getPointAt(ix1);
       currDist = vtkMath::Distance2BetweenPoints(tempPT, pt.location);
-      if (currDist < 20.0) {
-        val += ((double)(pt.property - ptList->getMinValue()))/propValueDiff;
-        proximalPoints++;
+      if (currDist < 0.01) currDist = 0.01;
+      if (currDist < m_radius) {
+        val += (((double)(pt.property - ptList->getMinValue()))/propValueDiff)*(m_radius/currDist);
+        weightSum += (m_radius/currDist);
       }
     }
-    val = val/((float)proximalPoints);
+    val = val/weightSum;
     scalars->InsertTuple(currID, &val);
 
   }
@@ -122,6 +130,11 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
   scalars->Delete();
 
   return true;
+}
+
+vtkPolyData* rtEPInfoObject::getPointPolyData() {
+  updatePointPolyData();
+  return m_pointPolyData->GetOutput();
 }
 
 //////////////////////
@@ -134,5 +147,37 @@ void rtEPInfoObject::cleanupHash() {
   while (i != m_pointLists.constEnd()) {
     if(i.value()) delete i.value();
     ++i;
+  }
+}
+
+void rtEPInfoObject::cleanupSphereList() {
+  while(!m_sphereList.empty()) {
+    vtkSphereSource* temp = m_sphereList.takeFirst();
+    if(temp) temp->Delete();
+  }
+}
+
+void rtEPInfoObject::updatePointPolyData() {
+  if (m_currentPropertyName=="") return;
+  if (!m_pointLists.contains(m_currentPropertyName)) return;
+
+  // Get the correct list
+  rtEPPropertyPointList* ptList = m_pointLists.value(m_currentPropertyName);
+
+  double propValueDiff = ptList->getMaxValue()-ptList->getMinValue();
+
+  // Remove the old spheres from the list.
+  cleanupSphereList();
+  vtkSphereSource* temp;
+
+  // Remove the previous inputs.
+  m_pointPolyData->RemoveAllInputs();
+
+  for (int ix1=0; ix1<ptList->getNumPoints(); ix1++) {
+    rtEPPropertyPointList::InfoPoint pt = ptList->getPointAt(ix1);
+    temp = vtkSphereSource::New();
+    m_sphereList.append(temp);
+    temp->SetCenter(pt.location);
+    m_pointPolyData->SetInputByNumber(ix1, temp->GetOutput());
   }
 }

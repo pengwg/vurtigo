@@ -38,7 +38,7 @@
 //! Constructor
 rtEPDataObject::rtEPDataObject()
     : m_currentPhase(-1),  m_objTransform(0), m_inPlaneInterval(1.0), m_crossPlaneInterval(1.0), m_surfaceOpacity(1.0), m_pointsOpacity(1.0), m_rep(EP_SURFACE),
-    m_minSliceNum(0), m_maxSliceNum(0)
+    m_minSliceNum(0), m_maxSliceNum(0), m_showInfoPoints(false)
 {
   setObjectType(rtConstants::OT_EPMesh);
 
@@ -58,19 +58,25 @@ rtEPDataObject::rtEPDataObject()
   p.location[1] = -38.0;
   p.location[2] = 84.2;
   p.property = 15;
-  m_EPInfoObject.addInfoPoint(p, "TEST");
+  addInfoPoint(p, "TEST");
 
   p.location[0] = -9.5;
   p.location[1] = -38.0;
   p.location[2] = 85.2;
   p.property = 15;
-  m_EPInfoObject.addInfoPoint(p, "TEST");
+  addInfoPoint(p, "TEST");
 
   p.location[0] = -9.5;
   p.location[1] = -38.0;
   p.location[2] = 89.2;
   p.property = 5;
-  m_EPInfoObject.addInfoPoint(p, "TEST");
+  addInfoPoint(p, "TEST");
+
+  p.location[0] = -10.5;
+  p.location[1] = -38.0;
+  p.location[2] = 87.2;
+  p.property = 7;
+  addInfoPoint(p, "TEST");
   ////////// END TEST ///////////
 }
 
@@ -324,6 +330,20 @@ vtkProperty* rtEPDataObject::getMeshProperty() {
   }
 }
 
+
+void rtEPDataObject::addInfoPoint(rtEPPropertyPointList::InfoPoint point, QString name) {
+  m_EPInfoObject.addInfoPoint(point, name);
+  int numElem = m_optionsWidget.colorByComboBox->count();
+  bool found = false;
+
+  // Check if the item exists
+  for (int ix1=0; ix1<numElem; ix1++) {
+    if (m_optionsWidget.colorByComboBox->itemText(ix1) == name) found = true;
+  }
+  // Add it if the item does not exist.
+  if (!found) m_optionsWidget.colorByComboBox->insertItem(numElem, name);
+}
+
 bool rtEPDataObject::saveFile(QFile *file) {
   if (!file->open(QIODevice::WriteOnly)) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to open file for writing. Error Code: ").append(QString::number(file->error())));
@@ -457,6 +477,24 @@ void rtEPDataObject::betweenSliceValueChanged(double val) {
   Modified();
 }
 
+void rtEPDataObject::colorByPropertyChanged(int comboLoc) {
+  // Check that an option is actually selected.
+  if (comboLoc == -1) return;
+
+  m_EPInfoObject.setCurrentPropName(m_optionsWidget.colorByComboBox->itemText(comboLoc));
+}
+
+void rtEPDataObject::effectSizeChanged(int effect) {
+  if (effect <= 0 ) return;
+  m_EPInfoObject.setEffectRadius((unsigned int)effect);
+  setModifyFlagForAll();
+  Modified();
+}
+
+void rtEPDataObject::showPointsChanged(bool show) {
+  m_showInfoPoints = show;
+  Modified();
+}
 
 ////////////////
 // Protected
@@ -492,6 +530,10 @@ void rtEPDataObject::setupGUI() {
 
   connect(m_optionsWidget.inSliceSpace, SIGNAL(valueChanged(double)), this, SLOT(inSliceValueChanged(double)));
   connect(m_optionsWidget.betweenSliceSpace, SIGNAL(valueChanged(double)), this, SLOT(betweenSliceValueChanged(double)));
+
+  connect(m_optionsWidget.colorByComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(colorByPropertyChanged(int)));
+  connect(m_optionsWidget.effectSlider, SIGNAL(valueChanged(int)), this, SLOT(effectSizeChanged(int)));
+  connect(m_optionsWidget.showPointsCheckBox, SIGNAL(toggled(bool)), this, SLOT(showPointsChanged(bool)));
 
 }
 
@@ -545,7 +587,7 @@ void rtEPDataObject::updatePointData(int updatePhase) {
     // Clear the previous lists.
     pts->Reset();
     cells->Reset();
-
+    rtApplication::instance().getMessageHandle()->debug(QString("Cleared Previous Point Data Lists"));
     QList<int> slices = m_phaseDataList.value(updatePhase).pointList.uniqueKeys();
 
     for (int ix1=0; ix1<slices.size(); ix1++) {
@@ -560,6 +602,7 @@ void rtEPDataObject::updatePointData(int updatePhase) {
 
     m_phaseDataList[updatePhase].pointData->SetPoints(pts);
     m_phaseDataList[updatePhase].pointData->SetVerts(cells);
+    m_phaseDataList[updatePhase].pointData->Modified();
     m_phaseDataList[updatePhase].pointDataUpdate = false;
   }
   rtApplication::instance().getMessageHandle()->debug(QString("Finished Updating Point Data"));
@@ -695,6 +738,7 @@ void rtEPDataObject::updateMeshData(int updatePhase) {
       // Finally, create the mesh
       m_phaseDataList[updatePhase].meshData->SetPoints(pts);
       m_phaseDataList[updatePhase].meshData->SetPolys(cells);
+      m_phaseDataList[updatePhase].meshData->Modified();
 
       delete[] pID;
 
