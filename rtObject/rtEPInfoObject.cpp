@@ -37,6 +37,7 @@ rtEPInfoObject::rtEPInfoObject()
   m_pointPolyData->UserManagedInputsOn();
   m_pointPolyData->RemoveAllInputs();
   cleanupSphereList();
+  cleanupSphereScalarList();
 }
 
 rtEPInfoObject::~rtEPInfoObject() {
@@ -44,6 +45,7 @@ rtEPInfoObject::~rtEPInfoObject() {
   m_pointPolyData->Delete();
   cleanupHash();
   cleanupSphereList();
+  cleanupSphereScalarList();
 }
 
 
@@ -157,6 +159,13 @@ void rtEPInfoObject::cleanupSphereList() {
   }
 }
 
+void rtEPInfoObject::cleanupSphereScalarList() {
+  while(!m_sphereScalarList.empty()) {
+    vtkDataArray* temp = m_sphereScalarList.takeFirst();
+    if(temp) temp->Delete();
+  }
+}
+
 void rtEPInfoObject::updatePointPolyData() {
   if (m_currentPropertyName=="") return;
   if (!m_pointLists.contains(m_currentPropertyName)) return;
@@ -168,16 +177,31 @@ void rtEPInfoObject::updatePointPolyData() {
 
   // Remove the old spheres from the list.
   cleanupSphereList();
-  vtkSphereSource* temp;
+  cleanupSphereScalarList();
 
+  vtkSphereSource* temp;
+  vtkPolyData* poly;
+  vtkDataArray* scalars;
+  double scalarValue;
   // Remove the previous inputs.
   m_pointPolyData->RemoveAllInputs();
 
   for (int ix1=0; ix1<ptList->getNumPoints(); ix1++) {
     rtEPPropertyPointList::InfoPoint pt = ptList->getPointAt(ix1);
     temp = vtkSphereSource::New();
+    scalars = vtkDataArray::CreateDataArray(VTK_DOUBLE);
     m_sphereList.append(temp);
+    m_sphereScalarList.append(scalars);
     temp->SetCenter(pt.location);
-    m_pointPolyData->SetInputByNumber(ix1, temp->GetOutput());
+    poly = temp->GetOutput();
+    poly->Update();
+
+    scalarValue = ((double)(pt.property - ptList->getMinValue()))/propValueDiff;
+    for (int ptNum=0; ptNum < poly->GetNumberOfPoints(); ptNum++) {
+      scalars->InsertNextTuple(&scalarValue);
+    }
+    poly->GetPointData()->SetScalars(scalars);
+
+    m_pointPolyData->SetInputByNumber(ix1, poly);
   }
 }

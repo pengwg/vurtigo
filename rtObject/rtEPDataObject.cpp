@@ -263,7 +263,15 @@ void rtEPDataObject::update() {
 }
 
 bool rtEPDataObject::addPoint(int phase, int slice, rtEPDataObject::EPPoint pt) {
-  if(phase < 0 || slice < 0) return false;
+  if(phase < 0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Phase is negative: ").append(QString::number(phase)));
+    return false;
+  }
+
+  if (slice < 0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Slice is negative: ").append(QString::number(slice)));
+    return false;
+  }
 
   if (slice < m_minSliceNum) {
     m_minSliceNum = slice;
@@ -290,6 +298,18 @@ bool rtEPDataObject::addPoint(int phase, int slice, rtEPDataObject::EPPoint pt) 
 }
 
 QList<rtEPDataObject::EPPoint> rtEPDataObject::getPoints(int phase, int slice) {
+  QList<rtEPDataObject::EPPoint> errorList;
+  errorList.clear();
+  if(phase < 0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Phase is negative: ").append(QString::number(phase)));
+    return errorList;
+  }
+
+  if (slice < 0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Slice is negative: ").append(QString::number(slice)));
+    return errorList;
+  }
+
   return m_phaseDataList.value(phase).pointList.values(slice);
 }
 
@@ -299,6 +319,7 @@ vtkPolyData* rtEPDataObject::getPointData() {
     updatePointData(m_currentPhase);
     return m_phaseDataList.value(m_currentPhase).pointData;
   } else {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Phase does not exist: ").append(QString::number(m_currentPhase)));
     return NULL;
   }
 }
@@ -308,6 +329,7 @@ vtkProperty* rtEPDataObject::getPointProperty() {
     updatePointProperty();
     return m_phaseDataList.value(m_currentPhase).pointProperty;
   } else {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Phase does not exist: ").append(QString::number(m_currentPhase)));
     return NULL;
   }
 }
@@ -317,6 +339,7 @@ vtkPolyData* rtEPDataObject::getMeshData() {
     updateMeshData(m_currentPhase);
     return m_phaseDataList.value(m_currentPhase).meshData;
   } else {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Phase does not exist: ").append(QString::number(m_currentPhase)));
     return NULL;
   }
 }
@@ -326,6 +349,7 @@ vtkProperty* rtEPDataObject::getMeshProperty() {
     updateMeshProperty();
     return m_phaseDataList.value(m_currentPhase).meshProperty;
   } else {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Phase does not exist: ").append(QString::number(m_currentPhase)));
     return NULL;
   }
 }
@@ -466,12 +490,20 @@ void rtEPDataObject::representationChanged(int val) {
 }
 
 void rtEPDataObject::inSliceValueChanged(double val) {
+  if (val <= 0.0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Negative in slice value: ").append(QString::number(val)));
+    return;
+  }
   m_inPlaneInterval = val;
   setModifyFlagForAll();
   Modified();
 }
 
 void rtEPDataObject::betweenSliceValueChanged(double val) {
+  if (val <= 0.0) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Negative between slice value: ").append(QString::number(val)));
+    return;
+  }
   m_crossPlaneInterval = val;
   setModifyFlagForAll();
   Modified();
@@ -485,15 +517,21 @@ void rtEPDataObject::colorByPropertyChanged(int comboLoc) {
 }
 
 void rtEPDataObject::effectSizeChanged(int effect) {
-  if (effect <= 0 ) return;
+  if ( effect <= 0 ) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Effect size must be greater than zero: ").append(QString::number(effect)));
+    return;
+  }
   m_EPInfoObject.setEffectRadius((unsigned int)effect);
   setModifyFlagForAll();
   Modified();
 }
 
 void rtEPDataObject::showPointsChanged(bool show) {
-  m_showInfoPoints = show;
-  Modified();
+  // Only call modified if the value changes
+  if (m_showInfoPoints != show) {
+    m_showInfoPoints = show;
+    Modified();
+  }
 }
 
 ////////////////
@@ -543,7 +581,10 @@ void rtEPDataObject::cleanupGUI() {
 }
 
 void rtEPDataObject::cleanupSliceSpline(PhaseData* data) {
-  if (!data) return;
+  if (!data) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Phase data pointer is NULL."));
+    return;
+  }
 
   QList<vtkKochanekSpline*> tempList;
   for (int coord = 0; coord<3; coord++) {
@@ -557,7 +598,10 @@ void rtEPDataObject::cleanupSliceSpline(PhaseData* data) {
 }
 
 void rtEPDataObject::cleanupPositionSpline(PhaseData* data) {
-  if (!data) return;
+  if (!data) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Phase data pointer is NULL."));
+    return;
+  }
 
   QList<vtkKochanekSpline*> tempList;
   for (int coord = 0; coord<3; coord++) {

@@ -62,6 +62,9 @@ class rtEPInfoObject
     //! Cleanup the list of sphere objects
     void cleanupSphereList();
 
+    //! Cleanup the list of scalars for the sphere list.
+    void cleanupSphereScalarList();
+
     //! Update the poly data object based on the points in the current property.
     void updatePointPolyData();
 
@@ -84,6 +87,9 @@ class rtEPInfoObject
 
     //! List of sphere objects currently used as the point set.
     QList<vtkSphereSource*> m_sphereList;
+
+    //! List of scalars that go with the spheres to define colors.
+    QList<vtkDataArray*> m_sphereScalarList;
 };
 
 #endif // RTEPINFOOBJECT_H
