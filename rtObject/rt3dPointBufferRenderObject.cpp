@@ -23,11 +23,18 @@
 #include "rtMainWindow.h"
 #include "rtApplication.h"
 
-rt3DPointBufferRenderObject::rt3DPointBufferRenderObject() {
-  m_pipeList.clear();
+//VTK
+#include "vtkSphereSource.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkActor.h"
+#include "vtkProperty.h"
 
+rt3DPointBufferRenderObject::rt3DPointBufferRenderObject() {
   setObjectType(rtConstants::OT_3DPointBuffer);
   setName("Simple 3D Point Renderer");
+
+  // Clean the pipe list before the pipeline is set up.
+  cleanupPipeList();
   setupDataObject();
   setupPipeline();
 }
@@ -40,33 +47,24 @@ rt3DPointBufferRenderObject::~rt3DPointBufferRenderObject() {
 //! Take info from the data object. 
 void rt3DPointBufferRenderObject::update() {
   rt3DPointBufferDataObject *dObj = dynamic_cast<rt3DPointBufferDataObject*>(m_dataObj);
-  SinglePointPipeline *tempPipe;
-  bool visible = false;
+  rtSingle3DPointPipeline *tempPipe;
 
-  if (getVisible3D()) visible = true;
-
-  // Clean the previous list.
-  while(!m_pipeList.empty()) {
-    tempPipe = m_pipeList.takeFirst();
-    m_pipe3D.removeAll(tempPipe->actor);
-    if (visible) rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->actor);
-    delete tempPipe;
-  }
+  // Cleaup the old list.
+  cleanupPipeList();
 
   // Get the new list
   QList<rt3DPointBufferDataObject::SimplePoint>* pointList = dObj->getPointList();
   for (int ix1=0; ix1<pointList->size(); ix1++) {
-    tempPipe = new SinglePointPipeline();
-    tempPipe->sphere->SetThetaResolution(20);
-    tempPipe->sphere->SetPhiResolution(20);
-    tempPipe->sphere->SetRadius(pointList->at(ix1).pSize);
-    tempPipe->sphere->SetCenter(pointList->at(ix1).px, pointList->at(ix1).py, pointList->at(ix1).pz);
-    tempPipe->actor->SetProperty(pointList->at(ix1).pProp);
+    tempPipe = new rtSingle3DPointPipeline();
+    tempPipe->setResolution(20);
+    tempPipe->setRadius(pointList->at(ix1).pSize);
+    tempPipe->setPosition(pointList->at(ix1).px, pointList->at(ix1).py, pointList->at(ix1).pz);
+    tempPipe->setProperty(pointList->at(ix1).pProp);
 
     m_pipeList.append(tempPipe);
-    m_pipe3D.push_back(tempPipe->actor);
-    if (visible) {
-      rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->actor);
+    m_pipe3D.push_back(tempPipe->getActor());
+    if (getVisible3D()) {
+      rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getActor());
     }
   }
 }
@@ -74,9 +72,9 @@ void rt3DPointBufferRenderObject::update() {
 bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren) {
   if (!ren) return false;
   setVisible3D(true);
-  for (int ix1=0; ix1<m_pipe3D.count(); ix1++) {
-    if (!ren->HasViewProp(m_pipe3D.at(ix1))) {
-      ren->AddViewProp(m_pipe3D.at(ix1));
+  for (int ix1=0; ix1<m_pipeList.count(); ix1++) {
+    if (!ren->HasViewProp(m_pipeList.at(ix1)->getActor())) {
+      ren->AddViewProp( m_pipeList.at(ix1)->getActor() );
     }
   }
   return true;
@@ -85,8 +83,8 @@ bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren) {
 bool rt3DPointBufferRenderObject::removeFromRenderer(vtkRenderer* ren) {
   if (!ren) return false;
   setVisible3D(false);
-  for (int ix1=0; ix1<m_pipe3D.count(); ix1++) {
-    if (ren->HasViewProp(m_pipe3D.at(ix1))) ren->RemoveViewProp(m_pipe3D.at(ix1));
+  for (int ix1=0; ix1<m_pipeList.count(); ix1++) {
+    if (ren->HasViewProp( m_pipeList.at(ix1)->getActor() )) ren->RemoveViewProp( m_pipeList.at(ix1)->getActor() );
   }
   return true;
 }
@@ -98,8 +96,7 @@ void rt3DPointBufferRenderObject::setRenderQuality(double quality) {
   else q = quality;
 
   for (int ix1=0; ix1<m_pipeList.size(); ix1++) {
-    m_pipeList[ix1]->sphere->SetThetaResolution(q*40.0f+5);
-    m_pipeList[ix1]->sphere->SetPhiResolution(q*40.0f+5);
+    m_pipeList[ix1]->setResolution(q*40.0f+5);
   }
 }
 
@@ -111,15 +108,14 @@ void rt3DPointBufferRenderObject::setupDataObject() {
 
 void rt3DPointBufferRenderObject::setupPipeline() {
   //Create a dummy object in the pipeline
-  SinglePointPipeline *tempPipe;
-  tempPipe = new SinglePointPipeline();
-  tempPipe->sphere->SetThetaResolution(10);
-  tempPipe->sphere->SetPhiResolution(10);
-  tempPipe->sphere->SetRadius(1);
-  tempPipe->sphere->SetCenter(0.0f ,0.0f ,0.0f);
+  rtSingle3DPointPipeline *tempPipe;
+  tempPipe = new rtSingle3DPointPipeline();
+  tempPipe->setResolution(10);
+  tempPipe->setRadius(1);
+  tempPipe->setPosition(0.0f ,0.0f ,0.0f);
 
   m_pipeList.append(tempPipe);
-  m_pipe3D.push_back(tempPipe->actor);
+  m_pipe3D.push_back(tempPipe->getActor());
 }
 
 
@@ -161,4 +157,19 @@ bool rt3DPointBufferRenderObject::getObjectLocation(double loc[6]) {
   }
 
   return true;
+}
+
+
+void rt3DPointBufferRenderObject::cleanupPipeList() {
+  rtSingle3DPointPipeline *tempPipe;
+
+  while(!m_pipeList.empty()) {
+    tempPipe = m_pipeList.takeFirst();
+    m_pipe3D.removeAll(tempPipe->getActor());
+
+    // Remove the item if it is currently being rendered.
+    if (getVisible3D()) rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getActor());
+    delete tempPipe;
+  }
+
 }

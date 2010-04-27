@@ -21,45 +21,15 @@
 #define RT3D_POINT_BUFFER_RENDER_OBJECT_H
 
 #include "rtRenderObject.h"
+#include "rtSingle3DPointPipeline.h"
 
 //Qt
 #include <QList>
-
-//VTK 
-#include "vtkSphereSource.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkActor.h"
-#include "vtkProperty.h"
-
 
 //! A group of points in 3D that are rendered as a group of spheres.
 class rt3DPointBufferRenderObject : public rtRenderObject {
 
  public:
-
-  class SinglePointPipeline {
-  public:
-    SinglePointPipeline() {
-      sphere = vtkSphereSource::New();
-      mapper = vtkPolyDataMapper::New();
-      actor = vtkActor::New();
-
-      mapper->SetInput(sphere->GetOutput());
-      actor->SetMapper(mapper);
-    }
-
-    ~SinglePointPipeline() {
-      sphere->Delete();
-      mapper->Delete();
-      actor->Delete();
-    }
-
-    // VTK pipeline objects.
-    vtkSphereSource* sphere;
-    vtkPolyDataMapper* mapper;
-    vtkActor* actor;
-  };
-
   rt3DPointBufferRenderObject();
   ~rt3DPointBufferRenderObject();
 
@@ -87,8 +57,11 @@ class rt3DPointBufferRenderObject : public rtRenderObject {
 
   void update();
 
+  //! Perform a proper cleanup on the m_pipeList object.
+  void cleanupPipeList();
+
  private:
-  QList<SinglePointPipeline*> m_pipeList;
+  QList<rtSingle3DPointPipeline*> m_pipeList;
 };
 
 #endif
