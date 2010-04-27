@@ -98,7 +98,7 @@ void rtPolyRenderObject::setupPipeline() {
   m_mapper->UseLookupTableScalarRangeOn();\
   m_mapper->SetColorModeToMapScalars();
 
-  m_pipe3D.push_back(m_actor);
+  m_canRender3D = true;
 }
 
 

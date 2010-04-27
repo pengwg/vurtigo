@@ -271,10 +271,7 @@ void rtCathRenderObject::setupPipeline() {
   m_coneActor->SetMapper(m_coneMapper);
   m_coneActor->SetProperty( dObj->getTipProperty() );
 
-  // Add the actors to the render list.
-  m_pipe3D.push_back(m_splineActor);
-  m_pipe3D.push_back(m_sphereActor);
-  m_pipe3D.push_back(m_coneActor);
+  m_canRender3D = true;
 
   // But set their visibility to off
   m_splineActor->VisibilityOff();

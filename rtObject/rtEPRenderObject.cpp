@@ -174,9 +174,8 @@ void rtEPRenderObject::setupPipeline() {
   m_infoMapper->UseLookupTableScalarRangeOn();
   m_infoMapper->SetColorModeToMapScalars();
 
-  m_pipe3D.push_back(m_pointActor);
-  m_pipe3D.push_back(m_meshActor);
-  m_pipe3D.push_back(m_infoActor);
+  // This pipeline can be rendered in 3D
+  m_canRender3D = true;
 }
 
 

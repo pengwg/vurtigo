@@ -469,17 +469,13 @@ void rt3DVolumeRenderObject::setupPipeline() {
 
   //m_outlineMapper->GlobalImmediateModeRenderingOn();
 
-  m_pipe3D.push_back(m_volumeActor);
-  m_pipe3D.push_back(m_outlineActor);
 
   // Cut planes
   m_boxOutline[0].setOutlineColor(0, 1, 0);
   m_boxOutline[1].setOutlineColor(1, 1, 0);
   m_boxOutline[2].setOutlineColor(1, 0, 1);
-  for (int ix1=0; ix1<3; ix1++) {
-    m_pipe3D.push_back(m_boxOutline[ix1].getActor());
-    m_pipe3D.push_back(m_texturePlane[ix1].getActor());
-  }
+
+  m_canRender3D = true;
 
   // Do the 2D planes as well.
   for (int ix1=0; ix1<3; ix1++) {

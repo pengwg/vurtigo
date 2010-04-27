@@ -100,7 +100,7 @@ void rtMatrixRenderObject::setupPipeline() {
   m_actor->SetMapper(m_mapper);
   m_actor->SetProperty(m_property);
 
-  m_pipe3D.push_back( m_actor );
+  m_canRender3D = true;
 }
 
 //! The bounds for the plane in 3D space.

@@ -243,10 +243,6 @@ void rt2DSliceRenderObject::setupDataObject() {
 
 //! Create the part of the pipeline that is done first. 
 void rt2DSliceRenderObject::setupPipeline() {
-  // Objects for the texture pipeline.
-  m_pipe3D.push_back( m_texturePlane.getActor() );
-  m_pipe3D.push_back( m_boxOutline.getActor() );
-
     // Do the 2D planes as well.
   m_imgCast = vtkImageCast::New();
   m_imgMap = vtkImageMapper::New();
@@ -260,6 +256,8 @@ void rt2DSliceRenderObject::setupPipeline() {
   m_actor2D->SetMapper(m_imgMap);
 
   m_pipe2D.insert("2DSlice", m_actor2D);
+
+  m_canRender3D = true;
 }
 
 //! The position of the center of the plane is given

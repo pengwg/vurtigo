@@ -49,11 +49,7 @@ Q_OBJECT
   //! Destructor
   ~rtRenderObject();
 
-  //! Get the list of 3D props available.
-  /*!
-    \return The list of 3D props.
-    */
-  virtual QList<vtkProp*>* get3DPipeline();
+  //! Get a version of the 2D pipeline that cannot be modified.
   virtual QHash<QString, vtkProp*>* get2DPipeline();
 
   //! Get the pointer to the data object
@@ -151,8 +147,8 @@ Q_OBJECT
   //! Pointer to the data object
   rtDataObject* m_dataObj;
 
-  //! A list of props that are part of the 3D pipeline
-  QList<vtkProp*> m_pipe3D;
+  //! Flag to determine if this instance of the object can be rendered in 3D
+  bool m_canRender3D;
 
   //! There are multiple possible 2D views so a Hash is needed
   /*!

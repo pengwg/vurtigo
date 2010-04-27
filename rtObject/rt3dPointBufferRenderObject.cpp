@@ -62,7 +62,6 @@ void rt3DPointBufferRenderObject::update() {
     tempPipe->setProperty(pointList->at(ix1).pProp);
 
     m_pipeList.append(tempPipe);
-    m_pipe3D.push_back(tempPipe->getActor());
     if (getVisible3D()) {
       rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getActor());
     }
@@ -115,7 +114,7 @@ void rt3DPointBufferRenderObject::setupPipeline() {
   tempPipe->setPosition(0.0f ,0.0f ,0.0f);
 
   m_pipeList.append(tempPipe);
-  m_pipe3D.push_back(tempPipe->getActor());
+  m_canRender3D = true;
 }
 
 
@@ -165,8 +164,6 @@ void rt3DPointBufferRenderObject::cleanupPipeList() {
 
   while(!m_pipeList.empty()) {
     tempPipe = m_pipeList.takeFirst();
-    m_pipe3D.removeAll(tempPipe->getActor());
-
     // Remove the item if it is currently being rendered.
     if (getVisible3D()) rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getActor());
     delete tempPipe;

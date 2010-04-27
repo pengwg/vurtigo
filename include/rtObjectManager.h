@@ -49,8 +49,6 @@ class rtObjectManager : public QObject {
   QList<int> getObjectsOfType(rtConstants::rtObjectType objType);
   int getNumObjectsOfType(rtConstants::rtObjectType objType);
 
-  rtRenderObject* getObjectWith3DProp(vtkProp* prop);
-
   inline QMultiHash<int, QString>* get2DObjectNameHash() { return &m_list2DHash; }
 
  protected:

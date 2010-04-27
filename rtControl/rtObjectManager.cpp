@@ -256,28 +256,6 @@ QList<int> rtObjectManager::getObjectsOfType(rtConstants::rtObjectType objType) 
   return objList;
 }
 
-//! Get the object with a specific 3D pipeline.
-/*!
-  Given a pipeline object it is important to be able to find the object that the pipeline corresponds to.
-  @param prop The vtkProp object that is the key to finding the render object. If the parameter is NULL this function will return NULL.
-  @return The render object requested or NULL if no such object exists.
-  */
-rtRenderObject* rtObjectManager::getObjectWith3DProp(vtkProp* prop) {
-  rtRenderObject* res=NULL;
-  QHashIterator<int, rtRenderObject*> i(m_objectHash);
-
-  if (!prop) return res;
-
-  while (i.hasNext()) {
-    i.next();
-    if ( i.value()->get3DPipeline()->contains(prop) ) {
-      res = i.value();
-      break;
-    }
-  }
-  return res;
-}
-
 //! Get the number of objects of one type. 
 /*!
   @return The number of objects of that type.

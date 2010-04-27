@@ -22,16 +22,13 @@
 #include "rtDataObject.h"
 #include "rtApplication.h"
 
-rtRenderObject::rtRenderObject() {
-  m_dataObj = NULL;
-  m_renderName = "None";
-  m_objType = rtConstants::OT_None;
+rtRenderObject::rtRenderObject()
+: m_dataObj(NULL), m_canRender3D(false), m_visible3D(false), m_renderName("None"), m_objType(rtConstants::OT_None)
+{
   m_treeItem = new QTreeWidgetItem();
   m_treeItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-  m_visible3D = false;
 
   // Clear the list first.
-  m_pipe3D.clear();
   m_pipe2D.clear();
 }
 
@@ -39,12 +36,7 @@ rtRenderObject::~rtRenderObject() {
   if (m_treeItem) delete m_treeItem;
 }
 
-//! Get a version of the 3D pipeline that cannot be modified
-QList<vtkProp*>* rtRenderObject::get3DPipeline() {
-  return &m_pipe3D;
-}
 
-//! Get a version of the 2D pipeline that cannot be modified.
 QHash<QString, vtkProp*>* rtRenderObject::get2DPipeline() {
   return &m_pipe2D;
 }
@@ -98,8 +90,8 @@ void rtRenderObject::updateTreeItem() {
     m_treeItem->setText(1, QString::number(m_dataObj->getId()));
     m_treeItem->setTextAlignment(1, Qt::AlignHCenter);
 
-    // Only show the 3D checkbox if there are 3D type of items.
-    if (m_pipe3D.count() > 0) {
+    // Only show the 3D checkbox if the 3D can be rendered.
+    if (m_canRender3D) {
       m_treeItem->setText(2, "3D");
       if (m_visible3D || m_treeItem->checkState(2) == Qt::Checked) {
         m_treeItem->setCheckState(2,Qt::Checked);
