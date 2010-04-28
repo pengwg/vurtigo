@@ -36,9 +36,12 @@ class PluginXmlInfo {
 //! XML handler for plugin config files.
 class PluginConfigHandler : public QXmlDefaultHandler {
  public:
+  //! Constructor
   PluginConfigHandler();
+  //! Destructor
   ~PluginConfigHandler();
 
+  //! Called by the reader when the document is started.
   bool startDocument();
   bool startElement(const QString & namespaceURI, const QString & localName, const QString & qName, const QXmlAttributes & atts);
   bool endElement(const QString & namespaceURI, const QString & localName, const QString & qName);

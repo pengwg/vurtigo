@@ -32,7 +32,6 @@
 rtPluginLoader::rtPluginLoader() {
   m_pluginHash.clear();
   m_loaderHash.clear();
-
 }
 
 rtPluginLoader::~rtPluginLoader() {
@@ -56,12 +55,6 @@ rtPluginLoader::~rtPluginLoader() {
   }
 }
 
-
-//! Load plugins from the specified config file.
-/*!
-  \param file The plugin configuration file.
-  \return True if at least one plugin was loaded from the file.
- */
 bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
   bool ok = false;
   int ix1;
@@ -143,7 +136,6 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
   return ok;
 }
 
-//! Return a plugin with a specific ID.
 DataInterface* rtPluginLoader::getPluginWithID(int ID) {
   DataInterface* obj = NULL;
   if (m_pluginHash.contains(ID)) {
@@ -161,7 +153,6 @@ bool rtPluginLoader::addToClickWatch(int ID) {
   return false;
 }
 
-//! Remove a plugin from the click watch list
 bool rtPluginLoader::removeFromClickWatch(int ID) {
   if (m_clickWatchList.contains(ID)) {
     m_clickWatchList.removeAll(ID);
@@ -170,7 +161,6 @@ bool rtPluginLoader::removeFromClickWatch(int ID) {
   return false;
 }
 
-//! A point in the 3D view has been selected. Pass it to all the plugins in the click watch list.
 void rtPluginLoader::point3DSelected(double px, double py, double pz, int intensity) {
   int ix1;
   for (ix1=0; ix1<m_clickWatchList.size(); ix1++) {
@@ -178,10 +168,7 @@ void rtPluginLoader::point3DSelected(double px, double py, double pz, int intens
   }
 }
 
-//! Call update on each plugin
-/*!
-  Each plugin can determine if it needs to call the update function. The update function will not be called on plugins where the required update time has not elapsed.
-  */
+
 void rtPluginLoader::updatePlugins() {
   QHashIterator<int, DataInterface*> i(m_pluginHash);
    while (i.hasNext()) {
@@ -190,11 +177,6 @@ void rtPluginLoader::updatePlugins() {
    }
 }
 
-//! Called every time an object is modified.
-/*!
-  This function may be called quite often since every object that changes will call this function.
-  @param objId The object ID of the object that was modified.
-  */
 void rtPluginLoader::objectModified(int objId) {
   QHashIterator<int, DataInterface*> i(m_pluginHash);
   while (i.hasNext()) {
@@ -205,7 +187,9 @@ void rtPluginLoader::objectModified(int objId) {
   }
 }
 
-//! Return the next available unique ID.
+////////////////
+// Protected
+////////////////
 int rtPluginLoader::getNextFreeID() {
   int ix1;
 
