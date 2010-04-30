@@ -42,17 +42,13 @@ rtOptions2DView::rtOptions2DView(QWidget *parent, Qt::WindowFlags flags) {
 
   m_renderWidget = new customQVTKWidget(this->scrollAreaWidgetContents);
   m_renderWidget->setSquare(true);
-  m_renderWidget->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  m_renderWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
   this->scrollAreaWidgetContents->setLayout(m_renLayout);
-
-  m_interactor = vtkInteractorStyleRubberBand2D::New();
 
   m_renLayout->addWidget(m_renderWidget);
   m_renLayout->setContentsMargins ( 1,1,1,1 );
   m_renWin2D = m_renderWidget->GetRenderWindow();
-  m_inter2D = m_renderWidget->GetInteractor();
-  m_inter2D->SetInteractorStyle(m_interactor);
   m_renderer2D = vtkRenderer::New();
   m_renWin2D->AddRenderer(m_renderer2D);
   m_renderer2D->GetActiveCamera()->ParallelProjectionOn();
@@ -72,7 +68,6 @@ rtOptions2DView::rtOptions2DView(QWidget *parent, Qt::WindowFlags flags) {
 
 rtOptions2DView::~rtOptions2DView() {
   m_renderer2D->Delete();
-  m_interactor->Delete();
 
   if (m_renderWidget) delete m_renderWidget;
 }
@@ -115,7 +110,10 @@ void rtOptions2DView::tryRender() {
     m_currProp->Modified();
     m_renWin2D->Modified();
     m_renWin2D->Render();
-
+  } else if (m_renderFlag) {
+    m_renderFlag = false;
+    m_renWin2D->Modified();
+    m_renWin2D->Render();
   }
 }
 
@@ -235,7 +233,6 @@ void rtOptions2DView::comboIndexChanged(int index) {
   }
   m_currRenObj->tryUpdate();
   m_currProp = m_currRenObj->get2DViewWithName(name);
-
 
   // Remove the current prop (if any)
   m_renderer2D->RemoveAllViewProps();

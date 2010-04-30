@@ -71,6 +71,7 @@ void rt3DVolumeRenderObject::update() {
   if (!m_isInit || !dObj || !dObj->isDataValid()) return;
 
   double range[2];
+  double spacing[3];
   int dims[3];
   for (int ix1=0; ix1<3; ix1++) {
     if (dObj->getInterpolation() == 0) {
@@ -84,6 +85,7 @@ void rt3DVolumeRenderObject::update() {
     m_imgCast[ix1]->Update();
     m_imgCast[ix1]->GetOutput()->GetScalarRange(range);
     m_imgCast[ix1]->GetOutput()->GetDimensions(dims);
+    m_imgCast[ix1]->GetOutput()->GetSpacing(spacing);
 
     m_imgMap[ix1]->SetColorWindow( dObj->getWindow() );
     m_imgMap[ix1]->SetColorLevel( dObj->getLevel() );
@@ -91,15 +93,33 @@ void rt3DVolumeRenderObject::update() {
     m_texturePlane[ix1].setWindow(dObj->getWindow());
     m_texturePlane[ix1].setLevel(dObj->getLevel());
 
-    m_actor2D[ix1]->SetPosition(0, 0);
-    m_actor2D[ix1]->SetPosition2(1, 1);
+    double imageSizes[2];
+
+    imageSizes[0] = ((double)dims[0])*spacing[0];
+    imageSizes[1] = ((double)dims[1])*spacing[1];
+
+
+
+    // Set the bounds.
+    if (imageSizes[0] == imageSizes[1]) {
+      m_actor2D[ix1]->SetPosition(0.0, 0.0);
+      m_actor2D[ix1]->SetPosition2(1.0, 1.0);
+    } else if(imageSizes[1] > imageSizes[0]) {
+      double posValue = imageSizes[0]/imageSizes[1];
+      m_actor2D[ix1]->SetPosition(0.0, 0.0);
+      m_actor2D[ix1]->SetPosition2(posValue, 1.0);
+    } else if(imageSizes[0] > imageSizes[1]) {
+      double posValue = imageSizes[1]/imageSizes[0];
+      m_actor2D[ix1]->SetPosition(0.0, 0.0);
+      m_actor2D[ix1]->SetPosition2(1.0,  posValue);
+    }
 
     // Fix the extents
     int extents[4];
-    extents[0] = 1;
-    extents[1] = dims[0];
-    extents[2] = 1;
-    extents[3] = dims[1];
+    extents[0] = 0;
+    extents[1] = dims[0]-1;
+    extents[2] = 0;
+    extents[3] = dims[1]-1;
     m_imgMap[ix1]->UseCustomExtentsOn();
     m_imgMap[ix1]->SetCustomDisplayExtents(extents);
   }

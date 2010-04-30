@@ -77,11 +77,9 @@ protected:
 
   QWidget* m_container;
 
-  vtkRenderWindowInteractor *m_inter2D;
   vtkRenderWindow* m_renWin2D;
   vtkRenderer* m_renderer2D;
   vtkProp* m_currProp;
-  vtkInteractorStyleRubberBand2D* m_interactor;
   rtRenderObject* m_currRenObj;
 
   bool m_selected;
