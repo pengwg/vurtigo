@@ -36,11 +36,6 @@ rtRenderObject::~rtRenderObject() {
   if (m_treeItem) delete m_treeItem;
 }
 
-
-QHash<QString, vtkProp*>* rtRenderObject::get2DPipeline() {
-  return &m_pipe2D;
-}
-
 rtDataObject* rtRenderObject::getDataObject() {
   return m_dataObj;
 }

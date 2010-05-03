@@ -49,9 +49,6 @@ Q_OBJECT
   //! Destructor
   ~rtRenderObject();
 
-  //! Get a version of the 2D pipeline that cannot be modified.
-  virtual QHash<QString, vtkProp*>* get2DPipeline();
-
   //! Get the pointer to the data object
   /*!
     Each render object has a data object that it is paired with. This function will retrieve the pointer the the data object that corresponds to this render object.
