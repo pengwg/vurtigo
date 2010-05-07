@@ -43,10 +43,6 @@ rt2DSliceDataObject::rt2DSliceDataObject() {
   m_level = 50;
 
   m_dataCopyLock.release();
-
-  m_wlDialog = new rtWindowLevelDialog();
-
-  connect(m_wlDialog, SIGNAL(valuesChanged(int,int)), this, SLOT(wlChanged(int,int)));
 }
 
 //! Destructor
@@ -57,6 +53,11 @@ rt2DSliceDataObject::~rt2DSliceDataObject() {
   if (m_trans) m_trans->Delete();
   if (m_imgUCharCast) m_imgUCharCast->Delete();
   if (m_lumin) m_lumin->Delete();
+
+  while (!m_colorInput.empty()) {
+    rt2DSliceInputColorWidget* temp = m_colorInput.takeLast();
+    delete temp;
+  }
 
   if (m_wlDialog) delete m_wlDialog;
 }
@@ -76,6 +77,26 @@ void rt2DSliceDataObject::update() {
 //! Set the GUI widgets.
 void rt2DSliceDataObject::setupGUI() {
   m_optionsWidget.setupUi(getBaseWidget());
+
+  m_wlDialog = new rtWindowLevelDialog();
+
+  // Add the three color inputs
+  for (unsigned int ix1=0; ix1<maxNumberOfInputs(); ix1++) {
+    m_colorInput.append( new rt2DSliceInputColorWidget( this->getId()) );
+    m_optionsWidget.inputSelectionVertical->insertWidget(ix1, m_colorInput[ix1]);
+
+    // Set the input id only for the current object
+    if (ix1 == 0) {
+      m_colorInput[ix1]->setCurrentObjectID(this->getId());
+    } else {
+      m_colorInput[ix1]->setCurrentObjectID(-1);
+    }
+
+    connect(m_colorInput[ix1], SIGNAL(inputColorModified(QColor)), this, SLOT(Modified()));
+    connect(m_colorInput[ix1], SIGNAL(inputIdModified(int)), this, SLOT(Modified()));
+  }
+
+  connect(m_wlDialog, SIGNAL(valuesChanged(int,int)), this, SLOT(wlChanged(int,int)));
 
  connect(m_optionsWidget.spinLeftButton, SIGNAL(clicked()), this, SLOT(spinLeft()));
  connect(m_optionsWidget.spinRightButton, SIGNAL(clicked()), this, SLOT(spinRight()));

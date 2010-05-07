@@ -29,9 +29,10 @@
 #include <QPalette>
 #include <QStringList>
 
-#include "vtkRenderer.h"
-#include "vtkProp.h"
-#include "vtkCamera.h"
+#include <vtkActor2D.h>
+#include <vtkRenderer.h>
+#include <vtkProp.h>
+#include <vtkCamera.h>
 
 #include <iostream>
 
@@ -122,7 +123,6 @@ QSize rtOptions2DView::sizeHint() {
   QSize hint;
   hint = this->size();
   hint.setWidth( hint.height()-28-this->verticalLayout->spacing() );
-  //std::cout << "Size Hint: " << hint.height() << " " << hint.width() << std::endl;
   return hint;
 }
 
@@ -136,9 +136,9 @@ void rtOptions2DView::resizeEvent ( QResizeEvent * event ) {
   numWid = m_container->layout()->count();
 
   // Spacing.
-  spac = 6;
+  spac = 5;
   // Margins
-  mar = 6;
+  mar = 5;
   // Size of the options above the render window
   sizeOptionsAbove = 28;
 
@@ -219,11 +219,9 @@ void rtOptions2DView::comboIndexChanged(int index) {
 
   name = splitter.join("");
 
-  //std::cout << id << "  with  " << name.toStdString() << std::endl;
-
   m_currRenObj = rtApplication::instance().getObjectManager()->getObjectWithID(id);
   if (!m_currRenObj) {
-    std::cout << "Object with ID: " << id << " no longer exists." << std::endl;
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Object with ID not found: ").append(QString::number(id)));
     return;
   }
 

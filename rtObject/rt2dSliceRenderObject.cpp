@@ -17,15 +17,23 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
+
+// Vurtigo includes
 #include "rt2dSliceRenderObject.h"
 #include "rt2dSliceDataObject.h"
 #include "rtObjectManager.h"
 #include "rtApplication.h"
 #include "rtMainWindow.h"
 
-#include "vtkRenderWindow.h"
-#include "vtkActor.h"
-#include "vtkCellArray.h"
+// VTK includes
+#include <vtkRenderWindow.h>
+#include <vtkActor.h>
+#include <vtkCellArray.h>
+
+
+/////////////////
+// Public
+/////////////////
 
 rt2DSliceRenderObject::rt2DSliceRenderObject() {
   setObjectType(rtConstants::OT_2DObject);
@@ -36,72 +44,26 @@ rt2DSliceRenderObject::rt2DSliceRenderObject() {
 
 
 rt2DSliceRenderObject::~rt2DSliceRenderObject() {
+
+  while (!m_reslice.isEmpty()) {
+    m_reslice.takeLast()->Delete();
+  }
+
+  while (!m_mapToColors.isEmpty()) {
+    m_mapToColors.takeLast()->Delete();
+  }
+
+  while (!m_colorFunction.isEmpty()) {
+    m_colorFunction.takeLast()->Delete();
+  }
+
+  m_imageBlend->Delete();
+
   m_imgCast->Delete();
   m_imgMap->Delete();
   m_actor2D->Delete();
 }
 
-
-//! Take info from the data object.
-void rt2DSliceRenderObject::update() {
-  rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
-  if ( !dObj->isDataValid() || !dObj->getUCharData()) return;
-
-  double scaleRange[2];
-  double bounds[6];
-
-  dObj->getUCharData()->Update();
-  dObj->getUCharData()->GetScalarRange(scaleRange);
-  dObj->getUCharData()->GetBounds(bounds);
-
-  m_texturePlane.setImageData(dObj->getUCharData());
-  m_texturePlane.setScalarRange(scaleRange[0], scaleRange[1]);
-  m_texturePlane.setWindow(dObj->getWindow());
-  m_texturePlane.setLevel(dObj->getLevel());
-
-  m_texturePlane.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2]);
-  m_texturePlane.setTransform(dObj->getTransform());
-  m_texturePlane.update();
-
-  m_boxOutline.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2]);
-  m_boxOutline.setTransform(dObj->getTransform());
-  m_boxOutline.update();
-
-  m_control.setTransform(dObj->getTransform());
-  m_control.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2] );
-
-  // Update the 2D as well
-  m_imgCast->SetInput(dObj->getUCharData());
-
-  double range[2];
-  int dims[3];
-
-  m_imgCast->Update();
-  m_imgCast->GetOutput()->GetScalarRange(range);
-  m_imgCast->GetOutput()->GetDimensions(dims);
-
-  m_imgMap->SetColorWindow( dObj->getWindow() );
-  m_imgMap->SetColorLevel( dObj->getLevel() );
-
-  m_actor2D->SetPosition(0, 0);
-  m_actor2D->SetPosition2(1, 1);
-
-  // Fix the extents
-  int extents[4];
-  extents[0] = 1;
-  extents[1] = dims[0];
-  extents[2] = 1;
-  extents[3] = dims[1];
-  m_imgMap->UseCustomExtentsOn();
-  m_imgMap->SetZSlice(1);
-  m_imgMap->SetCustomDisplayExtents(extents);
-
-  if ( rtApplication::instance().getMainWinHandle() ) {
-    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
-  }
-}
-
-//! Add this object to the given renderer.
 bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren) {
   if (!ren) return false;
   setVisible3D(true);
@@ -134,7 +96,6 @@ bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren) {
   return true;
 }
 
-//! Remove this object from the given renderer.
 bool rt2DSliceRenderObject::removeFromRenderer(vtkRenderer* ren) {
   if (!ren) return false;
   setVisible3D(false);
@@ -161,6 +122,18 @@ bool rt2DSliceRenderObject::removeFromRenderer(vtkRenderer* ren) {
 
   return true;
 }
+
+bool rt2DSliceRenderObject::getObjectLocation(double loc[6]) {
+  if (!m_boxOutline.getActor()) return false;
+
+  m_boxOutline.getActor()->GetBounds(loc);
+
+  return true;
+}
+
+//////////////////
+// Public Slots
+//////////////////
 
 void rt2DSliceRenderObject::mousePressEvent(QMouseEvent* event) {
   if (!m_selectedProp) return;
@@ -235,14 +208,17 @@ void rt2DSliceRenderObject::wheelEvent(QWheelEvent* event) {
   }
 }
 
-//! Create the correct data object.
+/////////////////////////////
+// Protected
+////////////////////////////
 void rt2DSliceRenderObject::setupDataObject() {
   m_dataObj = new rt2DSliceDataObject();
 }
 
 
-//! Create the part of the pipeline that is done first. 
 void rt2DSliceRenderObject::setupPipeline() {
+  rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
+
     // Do the 2D planes as well.
   m_imgCast = vtkImageCast::New();
   m_imgMap = vtkImageMapper::New();
@@ -250,21 +226,121 @@ void rt2DSliceRenderObject::setupPipeline() {
 
   m_imgCast->SetOutputScalarTypeToUnsignedShort();
 
-  m_imgMap->SetInputConnection(m_imgCast->GetOutputPort());
+  m_imageBlend = vtkImageBlend::New();
+  for (unsigned int ix1=0; ix1<dObj->maxNumberOfInputs(); ix1++) {
+    m_reslice.append(vtkImageReslice::New());
+    m_mapToColors.append(vtkImageMapToColors::New());
+    m_colorFunction.append(vtkWindowLevelLookupTable::New());
+
+    // Set the lookup table for each color function.
+    m_mapToColors[ix1]->SetLookupTable(m_colorFunction[ix1]);
+  }
+
+  m_imgMap->SetInputConnection(m_imageBlend->GetOutputPort());
   m_imgMap->RenderToRectangleOn();
-
   m_actor2D->SetMapper(m_imgMap);
-
   m_pipe2D.insert("2DSlice", m_actor2D);
-
   m_canRender3D = true;
 }
 
-//! The position of the center of the plane is given
-bool rt2DSliceRenderObject::getObjectLocation(double loc[6]) {
-  if (!m_boxOutline.getActor()) return false;
+void rt2DSliceRenderObject::update() {
+  rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
+  if ( !dObj->isDataValid() || !dObj->getUCharData()) return;
 
-  m_boxOutline.getActor()->GetBounds(loc);
+  double scaleRange[2];
+  double bounds[6];
 
-  return true;
+  dObj->getUCharData()->Update();
+  dObj->getUCharData()->GetScalarRange(scaleRange);
+  dObj->getUCharData()->GetBounds(bounds);
+
+  m_texturePlane.setImageData(dObj->getUCharData());
+  m_texturePlane.setScalarRange(scaleRange[0], scaleRange[1]);
+  m_texturePlane.setWindow(dObj->getWindow());
+  m_texturePlane.setLevel(dObj->getLevel());
+  m_texturePlane.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2]);
+  m_texturePlane.setTransform(dObj->getTransform());
+  m_texturePlane.update();
+
+  m_boxOutline.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2]);
+  m_boxOutline.setTransform(dObj->getTransform());
+  m_boxOutline.update();
+
+  m_control.setTransform(dObj->getTransform());
+  m_control.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2] );
+
+  // Update the 2D as well
+  m_imgCast->SetInput(dObj->getUCharData());
+
+  double range[2];
+  int dims[3];
+
+  rt2DSliceInputColorWidget* inputWidget;
+  unsigned short connectionNum = 0;
+  double tempColor[3];
+
+  m_imageBlend->RemoveAllInputs();
+
+  // Check the multiple inputs.
+  for (unsigned short ix1=0; ix1<dObj->maxNumberOfInputs(); ix1++) {
+    inputWidget = dObj->getColorWidgetAt(ix1);
+    if ( inputWidget->getCurrentObjectID() == dObj->getId() ) {
+      inputWidget->getCurrentColorAsVTKArray(tempColor);
+      m_colorFunction[ix1]->SetRange(scaleRange[0], scaleRange[1]);
+      m_colorFunction[ix1]->SetMinimumTableValue(0.0, 0.0, 0.0, 1.0);
+      m_colorFunction[ix1]->SetMaximumTableValue(tempColor[0], tempColor[1], tempColor[2], 1.0);
+      m_colorFunction[ix1]->Build();
+      m_mapToColors[ix1]->SetInputConnection(m_imgCast->GetOutputPort());
+      m_imageBlend->AddInput(0, m_mapToColors[ix1]->GetOutput());
+      connectionNum++;
+    } else if ( inputWidget->getCurrentObjectID() >= 0) {
+      // TODO
+      // Continue here by getting the objects with the right ID and then adding them to the m_reslice so that they volumes can be cut.
+      //connectionNum++;
+    }
+  }
+
+  for (unsigned short ix1=0; ix1<connectionNum; ix1++) {
+    m_imageBlend->SetOpacity(ix1, 1.0f/static_cast<double>(connectionNum));
+  }
+
+  // If there are no connections then use a defualt.
+  if (connectionNum == 0) {
+    //m_colorFunction[0]->RemoveAllPoints();
+    inputWidget->getCurrentColorAsVTKArray(tempColor);
+    m_colorFunction[0]->SetMinimumTableValue(0.0, 0.0, 0.0, 1.0);
+    m_colorFunction[0]->SetMaximumTableValue(1.0, 1.0, 1.0, 1.0);
+    m_colorFunction[0]->Build();
+    m_mapToColors[0]->SetInputConnection(m_imgCast->GetOutputPort());
+    m_imageBlend->AddInput(0, m_mapToColors[0]->GetOutput());
+    m_imageBlend->SetOpacity(0, 1.0);
+  }
+
+  m_imageBlend->GetOutput()->Update();
+  m_imageBlend->GetOutput()->GetScalarRange(range);
+  m_imageBlend->GetOutput()->GetDimensions(dims);
+
+  double scalarRangeSize = (scaleRange[1]-scaleRange[0]);
+  if (scalarRangeSize == 0.0) scalarRangeSize = 1.0;
+
+  m_imgMap->SetColorWindow( dObj->getWindow()/scalarRangeSize*(range[1]-range[0]) );
+  m_imgMap->SetColorLevel( dObj->getLevel()/scalarRangeSize*(range[1]-range[0]) );
+
+  m_actor2D->SetPosition(0, 0);
+  m_actor2D->SetPosition2(1, 1);
+
+  // Fix the extents
+  int extents[4];
+  extents[0] = 1;
+  extents[1] = dims[0];
+  extents[2] = 1;
+  extents[3] = dims[1];
+  m_imgMap->UseCustomExtentsOn();
+  m_imgMap->SetZSlice(1);
+  m_imgMap->SetCustomDisplayExtents(extents);
+
+  // Set the render flag
+  if ( rtApplication::instance().getMainWinHandle() ) {
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+  }
 }

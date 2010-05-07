@@ -76,6 +76,7 @@ void rtLabelRenderObject::setupPipeline() {
   m_textActor2D = vtkTextActor::New();
   m_textActor2D->SetInput(dObj->getText().toStdString().c_str());
   m_textActor2D->SetTextProperty(dObj->getTextProperty());
+  m_textActor2D->SetTextScaleModeToNone();
 
   m_canRender3D = true;
 

@@ -119,6 +119,16 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   view3D->setLayout(&m_only3DLayout);
   view2D->setLayout(&m_only2DLayout);
 
+  // Remove spacing
+  m_only3DLayout.setSpacing(0);
+  m_only2DLayout.setSpacing(0);
+  dualView->layout()->setSpacing(0);
+
+  // Remove borders
+  m_only3DLayout.setContentsMargins(0,0,0,0);
+  m_only2DLayout.setContentsMargins(0,0,0,0);
+  dualView->layout()->setContentsMargins(0,0,0,0);
+
   m_view2DHash.clear();
   m_max2DWidgets = 100;
 

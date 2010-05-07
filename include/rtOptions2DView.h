@@ -23,10 +23,11 @@
 #include "ui_options2DView.h"
 #include "customQVTKWidget.h"
 
-#include "vtkRenderWindowInteractor.h"
-#include "vtkRenderWindow.h"
-#include "vtkProp.h"
-#include "vtkInteractorStyleRubberBand2D.h"
+#include <vtkActor2D.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderWindow.h>
+#include <vtkProp.h>
+#include <vtkProperty2D.h>
 
 #include <QWidget>
 #include <QBoxLayout>

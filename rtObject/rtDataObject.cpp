@@ -21,9 +21,19 @@
 #include "rtPluginLoader.h"
 #include "rtApplication.h"
 #include "rtMessage.h"
+#include "rtObjectManager.h"
 
 rtDataObject::rtDataObject() {
+  int nextID;
+
   m_readOnly = false;
+
+  // Get a valid ID from the object manager.
+  nextID = rtApplication::instance().getObjectManager()->getNextID();
+  if (nextID == -1) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not find a valid ID for a new object! "));
+  }
+  setId(nextID);
 
   // When the object changes we can update the GUI.
   connect(this, SIGNAL(objectChanged(int)), this, SLOT(updateGUI()));

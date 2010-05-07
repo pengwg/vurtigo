@@ -15,6 +15,7 @@ set ( RTOBJECT_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rt3dVolumeRenderObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rt2dSliceDataObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rt2dSliceRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt2dSliceInputColorWidget.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtMatrixDataObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtMatrixRenderObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtPolyDataObject.cpp
@@ -46,6 +47,7 @@ set (RTOBJECT_MOC_FILES
   ${CMAKE_HOME_DIRECTORY}/include/rt3dVolumeDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rt3dVolumeRenderObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rt2dSliceDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rt2dSliceInputColorWidget.h
   ${CMAKE_HOME_DIRECTORY}/include/rtMatrixDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtPolyDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtEPDataObject.h

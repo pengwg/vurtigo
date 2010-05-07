@@ -22,20 +22,20 @@
 
 #include <QSemaphore>
 #include <QDateTime>
+#include <QList>
 
 #include "rtDataObject.h"
 #include "rtWindowLevelDialog.h"
+#include "rt2dSliceInputColorWidget.h"
 
-#include "vtkImageData.h"
-#include "vtkTransform.h"
-#include "vtkImageReslice.h"
-#include "vtkImageShiftScale.h"
-#include "vtkMatrix4x4.h"
-#include "vtkImageLuminance.h"
+#include <vtkImageData.h>
+#include <vtkTransform.h>
+#include <vtkImageReslice.h>
+#include <vtkImageShiftScale.h>
+#include <vtkMatrix4x4.h>
+#include <vtkImageLuminance.h>
 
 #include "ui_slice2DOptions.h"
-
-#include <vector>
 
 //! A Single 2D Slice
 /*!
@@ -53,16 +53,26 @@ public:
 
   void update();
 
-  bool isDataValid() { return m_imgDataValid; }
+  //! Get the maximum number of inputs to the 2D plane.
+  /*!
+    This is a constant return value.
+    */
+  inline unsigned short maxNumberOfInputs() { return 3; }
+
+  //! Check if the image data is valid.
+  /*!
+    Invalid image data has not been loaded and an attempt to render invalid data results in access to unallocated memory space.
+    */
+  inline bool isDataValid() { return m_imgDataValid; }
 
   //! Copy new data over top of this one.
   /*!
   */
   bool copyImageData2D(vtkImageData* img);
 
-  vtkImageData* getRawData() { return m_imgData; }
-  vtkImageData* getUCharData() { return m_imgUCharCast->GetOutput(); }
-  vtkTransform* getTransform() { return m_trans; }
+  inline vtkImageData* getRawData() { return m_imgData; }
+  inline vtkImageData* getUCharData() { return m_imgUCharCast->GetOutput(); }
+  inline vtkTransform* getTransform() { return m_trans; }
 
   bool setTransform(float rotMatrix[9], float transMatrix[3], bool asUser=false);
   bool setVtkMatrix(vtkMatrix4x4* m, bool asUser=false);
@@ -94,14 +104,17 @@ public:
 
 
   //! Get the wndow part of the window level
-  double getWindow() { return m_window; }
+  inline double getWindow() { return m_window; }
   //! Get the level part of the window level
-  double getLevel() { return m_level; }
+  inline double getLevel() { return m_level; }
 
-  void setManualOn() { m_optionsWidget.prescribeGroupBox->setChecked(true); }
-  void setManualOff() { m_optionsWidget.prescribeGroupBox->setChecked(false); }
-  void setManual(bool man) { m_optionsWidget.prescribeGroupBox->setChecked(man); }
-  bool getManual() { return m_optionsWidget.prescribeGroupBox->isChecked(); }
+  inline void setManualOn() { m_optionsWidget.prescribeGroupBox->setChecked(true); }
+  inline void setManualOff() { m_optionsWidget.prescribeGroupBox->setChecked(false); }
+  inline void setManual(bool man) { m_optionsWidget.prescribeGroupBox->setChecked(man); }
+  inline bool getManual() { return m_optionsWidget.prescribeGroupBox->isChecked(); }
+
+  //! Get the pointer to one of the three color widgets
+  inline rt2DSliceInputColorWidget* getColorWidgetAt(int pos) { if ( pos <0 || pos>=maxNumberOfInputs() ) return 0; return m_colorInput[pos]; }
 
  protected slots:
   void spinRight();
@@ -118,10 +131,10 @@ public:
 
   void wlChanged(int w, int l);
 
-
   void copyImageData2DSlot();
 
   void showWindowLevel();
+
  signals:
   void copyImageData2DSignal();
 
@@ -148,6 +161,8 @@ public:
   double m_level;
 
   Ui::slice2DOptions m_optionsWidget;
+
+  QList<rt2DSliceInputColorWidget*> m_colorInput;
 
   QDateTime m_currTime;
 

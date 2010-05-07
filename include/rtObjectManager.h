@@ -22,6 +22,7 @@
 
 #include <QHash>
 #include <QList>
+#include <QMutex>
 
 #include "objTypes.h"
 class rtRenderObject;
@@ -49,7 +50,14 @@ class rtObjectManager : public QObject {
   QList<int> getObjectsOfType(rtConstants::rtObjectType objType);
   int getNumObjectsOfType(rtConstants::rtObjectType objType);
 
+  //! Get a pointer to the 2D object hash.
   inline QMultiHash<int, QString>* get2DObjectNameHash() { return &m_list2DHash; }
+
+  //! Get the next unused ID.
+  /*!
+    @return The next unused ID
+  */
+  int getNextID();
 
  protected:
   //! Hash table of all the objects listed by unique ID
@@ -62,15 +70,18 @@ class rtObjectManager : public QObject {
     */
   QMultiHash<int, QString> m_list2DHash;
 
- signals:
+  //! Lock for object creation and deletion.
+  /*!
+    Only one object should be created or deleted at one time. This ensures that the object list remains consistent.
+    */
+  QMutex m_objectLock;
+signals:
   void objectCreated(int objID);
   void objectRemoved(int objID);
 
  private:
   //! Maximum number of objects.
   int m_max_object;
-
-  int getNextID();
 
   rtObjectManager(const rtObjectManager&);
   rtObjectManager& operator=(const rtObjectManager&);

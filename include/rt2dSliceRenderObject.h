@@ -24,19 +24,25 @@
 #include "ObjectControlWidget.h"
 #include "rtBox2DOutline.h"
 #include "rtTexture2DPlane.h"
-#include "vtkImageCast.h"
-#include "vtkImageMapper.h"
-#include "vtkActor2D.h"
+
+#include <vtkImageCast.h>
+#include <vtkImageMapper.h>
+#include <vtkActor2D.h>
+#include <vtkImageMapToColors.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkWindowLevelLookupTable.h>
+#include <vtkImageBlend.h>
+#include <vtkImageReslice.h>
 
 //! A Single 2D Slice
 /*!
   Render a single 2D slice in a specified orientation.
   */
 class rt2DSliceRenderObject : public rtRenderObject {
-
  public:
-
+  //! Constructor
   rt2DSliceRenderObject();
+  //! Destructor
   ~rt2DSliceRenderObject();
 
   //! Add this object to the given renderer.
@@ -44,6 +50,8 @@ class rt2DSliceRenderObject : public rtRenderObject {
 
   //! Remove this object from the given renderer.
   virtual bool removeFromRenderer(vtkRenderer* ren);
+
+  //! Get the bounds in 3D for this object.
   virtual bool getObjectLocation(double loc[6]);
 public slots:
   virtual void mousePressEvent(QMouseEvent* event);
@@ -55,9 +63,13 @@ public slots:
   virtual void wheelEvent(QWheelEvent* event);
 
  protected:
+  //! Create the correct data object.
   void setupDataObject();
+
+  //! Create the pipeline.
   void setupPipeline();
 
+  //! Update the rendering with information from the data object
   void update();
 
   rtTexture2DPlane m_texturePlane;
@@ -67,6 +79,12 @@ public slots:
   vtkImageCast* m_imgCast;
   vtkImageMapper* m_imgMap;
   vtkActor2D* m_actor2D;
+
+  // Blend streams of data.
+  QList<vtkImageReslice*> m_reslice;
+  QList<vtkImageMapToColors*> m_mapToColors;
+  QList<vtkWindowLevelLookupTable*> m_colorFunction;
+  vtkImageBlend* m_imageBlend;
  private:
 
 };

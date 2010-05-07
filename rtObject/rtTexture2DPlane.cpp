@@ -37,7 +37,7 @@ rtTexture2DPlane::rtTexture2DPlane() {
   m_ysize = 1.0f;
 
   // Balck and white.
-  m_imgMapToColors->SetOutputFormatToLuminance();
+  m_imgMapToColors->SetOutputFormatToRGB();
 
   m_lookupTable->SetHueRange(0.0, 0.0);
   m_lookupTable->SetSaturationRange(0.0, 0.0);
@@ -52,7 +52,6 @@ rtTexture2DPlane::rtTexture2DPlane() {
   m_textureActor->SetMapper(m_planeMapper);
   m_textureActor->SetTexture(m_texture);
   m_texture->SetInputConnection(m_imgMapToColors->GetOutputPort());
-  m_texture->SetLookupTable(m_lookupTable);
   m_imgMapToColors->SetLookupTable(m_lookupTable);
 }
 

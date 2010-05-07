@@ -39,7 +39,8 @@
 #include "rt2dPointRenderObject.h"
 #include "rtEPRenderObject.h"
 #include "rtApplication.h"
-#include <sstream>
+
+#include <QMutexLocker>
 
 
 rtObjectManager::rtObjectManager() {
@@ -75,14 +76,9 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
   rtRenderObject* temp = NULL;
   rtDataObject* dataO = NULL;
   int nextID;
-  std::stringstream msg;
 
-  // Try to get a valid ID. 
-  nextID = getNextID();
-  if (nextID == -1) {
-    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not find a valid ID for a new object! "));
-    return NULL;
-  }
+  // Lock this function
+  QMutexLocker locker(&m_objectLock);
 
   // Find out which object will be used. 
   switch(objType) {
@@ -134,13 +130,19 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
 
   // The object has been created.
   if (temp){
-    // Push the new object creation to the log.
-    msg.str(" ");
-    msg << "Created Object with ID: " << nextID;
-    rtApplication::instance().getMessageHandle()->log(msg.str());
-
     dataO = temp->getDataObject();
-    dataO->setId(nextID);
+
+    // Try to get the valid ID.
+    nextID = dataO->getId();
+    if (nextID == -1) {
+      rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not find a valid ID for a new object! "));
+      delete temp;
+      return NULL;
+    }
+
+    // Push the new object creation to the log.
+    rtApplication::instance().getMessageHandle()->log(QString("Created Object with ID: ").append(QString::number(nextID)));
+
     dataO->setObjName(objName);
     dataO->update();
     m_objectHash.insert(nextID, temp);
@@ -187,6 +189,9 @@ rtRenderObject* rtObjectManager::addReadOnlyObject(rtConstants::rtObjectType obj
 bool rtObjectManager::removeObject(int objID) {
   rtRenderObject* temp;
 
+  // Lock this function
+  QMutexLocker locker(&m_objectLock);
+
   if (m_objectHash.contains(objID)) {
     temp = m_objectHash.value(objID);
     if (!temp || temp->getDataObject()->isReadOnly()) return false;
@@ -209,6 +214,9 @@ bool rtObjectManager::removeObject(int objID) {
  */
 bool rtObjectManager::removeReadOnly(int objID) {
   rtRenderObject* temp;
+
+  // Lock this function
+  QMutexLocker locker(&m_objectLock);
 
   if (m_objectHash.contains(objID)) {
     temp = m_objectHash.value(objID);
@@ -274,10 +282,6 @@ int rtObjectManager::getNumObjectsOfType(rtConstants::rtObjectType objType) {
   return numObj;
 }
 
-//! Get the next unused ID. 
-/*!
-  @return The next unused ID
- */
 int rtObjectManager::getNextID() {
   int i; 
 
