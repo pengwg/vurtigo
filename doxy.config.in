@@ -576,7 +576,8 @@ INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/main.cpp \
                          @CMAKE_CURRENT_SOURCE_DIR@/rtObject \
                          @CMAKE_CURRENT_SOURCE_DIR@/rtPlugin \
                          @CMAKE_CURRENT_SOURCE_DIR@/rtUI \
-                         @CMAKE_CURRENT_SOURCE_DIR@/external/dcmtk-Vurtigo/Vurtigo \
+			 @CMAKE_CURRENT_SOURCE_DIR@/rtMessage \
+                         @CMAKE_CURRENT_SOURCE_DIR@/external/dcmtk-Vurtigo/ \
                          @CMAKE_CURRENT_BINARY_DIR@
 
 # This tag can be used to specify the character encoding of the source files

@@ -26,6 +26,7 @@
 #include <QWheelEvent>
 #include <QPoint>
 #include <QList>
+#include <QTimer>
 
 #include <vtkCamera.h>
 #include <vtkMatrix4x4.h>
@@ -68,6 +69,12 @@ public:
     \return true if the camera is currently in motion. False otherwise.
     */
   bool cameraMoving();
+
+  //! Tell the camera control that the camera is in motion.
+  inline void startCameraMotion() { m_cameraInMotion = true; }
+
+  //! Tell the camera control that the camera is no longer in motion.
+  inline void stopCameraMotion() { m_cameraInMotion = false; }
 
   //! Get the direction in which the camera is facing.
   /*!
@@ -115,6 +122,8 @@ public slots:
   void keyRelease(QKeyEvent*);
   //! Slot called when the mouse wheel is moved.
   void wheel(QWheelEvent*);
+  //! Slot is called when the wheel timer expires.
+  void wheelFinished();
 
 protected:
   //! The pointer to the vtk camera object in the main 3D view.
@@ -137,6 +146,13 @@ protected:
   bool m_rightMouseDown;
   //! True if the middle mouse button is down.
   bool m_midMouseDown;
+  //! True if the scroll wheel is moving.
+  bool m_scrollWheelMotion;
+  //! True if the camera is in motion.
+  bool m_cameraInMotion;
+
+  //! Since the mouse scroll does not have an 'up' and a 'down' the scroll is considered to have finished a certain time after the wheel motion has been received.
+  QTimer m_scrollTimer;
 
   //! A list of saved camera views
   /*!

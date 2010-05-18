@@ -26,17 +26,14 @@
 #include "rtMainWindow.h"
 #include "customQVTKWidget.h"
 
-rtCameraControl::rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWid) {
-  m_camera = cam;
-  m_eventWidget = eventWid;
-
+rtCameraControl::rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWid)
+  : m_camera(cam), m_eventWidget(eventWid), m_leftMouseDown(false), m_rightMouseDown(false), m_midMouseDown(false), m_scrollWheelMotion(true), m_cameraInMotion(false)
+{
   connectEvents();
-
-  m_leftMouseDown = false;
-  m_rightMouseDown = false;
-  m_midMouseDown = false;
-
   m_cameraPosList.clear();
+
+  m_scrollTimer.setSingleShot(true);
+  m_scrollTimer.setInterval(400); // Wait 400 msec before declaring the scroll event over.
 
   CameraPosition p;
 
@@ -54,7 +51,7 @@ rtCameraControl::rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWid) {
 }
 
 bool rtCameraControl::cameraMoving() {
-  return (m_leftMouseDown || m_rightMouseDown || m_midMouseDown);
+  return (m_leftMouseDown || m_rightMouseDown || m_midMouseDown || m_scrollWheelMotion || m_cameraInMotion);
 }
 
 void rtCameraControl::getForwardDirection(double val[3]) {
@@ -199,10 +196,23 @@ void rtCameraControl::keyRelease(QKeyEvent* ev) {
 }
 
 void rtCameraControl::wheel(QWheelEvent* ev) {
-  int diff;
-  diff = ev->delta();
-  m_camera->Dolly(1.0+((double)diff)/1200.0f);
+  if (!ev) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Wheel event pointer is NULL."));
+  }
+
+  m_scrollTimer.stop();
+  m_scrollWheelMotion = true;
+  connect(&m_scrollTimer, SIGNAL(timeout()), this, SLOT(wheelFinished()));
+  m_scrollTimer.start();
+
+  m_camera->Dolly(1.0+((double)ev->delta())/1200.0f);
   m_camera->OrthogonalizeViewUp();
+  rtApplication::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+  rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+}
+
+void rtCameraControl::wheelFinished() {
+  m_scrollWheelMotion = false;
   rtApplication::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
   rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
