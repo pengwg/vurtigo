@@ -92,6 +92,38 @@ void rtCameraControl::setToRobotArmPosition() {
   m_camera->SetViewUp(m_cameraPosList[1].up);
 }
 
+void rtCameraControl::setViewAngle(double angle) {
+  if (!m_camera) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("VTK Camera pointer is NULL."));
+    return;
+  }
+
+  double factor;
+  // It is possible that the angle is too small or too large so it can be fixed here.
+  if (angle < 0.0) {
+    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("View angle is negative. Adding sets of 180."));
+    factor = (-1.0)*floor(angle / 180.0);
+    angle = angle + 180.0*factor;
+  } else if (angle > 180.0) {
+    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("View angle is greater than 180. Subtracting sets of 180."));
+    factor = floor(angle / 180.0);
+    angle = angle - 180.0*factor;
+  }
+
+  if ( angle != m_camera->GetViewAngle() ) {
+    m_camera->SetViewAngle(angle);
+    rtApplication::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+  }
+}
+
+double rtCameraControl::getViewAngle() {
+  if (!m_camera) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("VTK Camera pointer is NULL."));
+    return 0.0;
+  }
+  return m_camera->GetViewAngle();
+}
 
 //////////////
 // PUBLIC SLOTS
@@ -198,6 +230,7 @@ void rtCameraControl::keyRelease(QKeyEvent* ev) {
 void rtCameraControl::wheel(QWheelEvent* ev) {
   if (!ev) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Wheel event pointer is NULL."));
+    return;
   }
 
   m_scrollTimer.stop();

@@ -91,6 +91,7 @@ protected:
 
   bool readGE_MR(DcmDataset* datSet);
   bool readPhilips_MR(DcmDataset* datSet);
+  bool readPhilips_CT(DcmDataset* datSet);
   bool readHeartVista_MR(DcmDataset* datSet);
 
   QList<double> *m_trigList;

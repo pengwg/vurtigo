@@ -107,6 +107,18 @@ public:
   //! Set the camera to the position and orientation as viewed by the operator controling the robot arm.
   void setToRobotArmPosition();
 
+  //! Set the view angle for the camera.
+  /*!
+    \param angle The new view angle to set. Should be in the range (0, 180).
+    */
+  void setViewAngle(double angle);
+
+  //! Gt the view angle for the camera.
+  /*!
+    \return The view angle. Should be in the range (0, 180).
+    */
+  double getViewAngle();
+
 public slots:
   //! Slot called when the mouse is pressed in the QVTK widget.
   void mousePress(QMouseEvent*);

@@ -38,3 +38,8 @@ set(VURTIGO_PLUGIN_CARTO_READER ON CACHE BOOL "Compile the Carto Reader Plugin")
 if (VURTIGO_PLUGIN_CARTO_READER)
 add_subdirectory(CartoReader)
 endif (VURTIGO_PLUGIN_CARTO_READER)
+
+set(VURTIGO_PLUGIN_CAMERA_MOTION ON CACHE BOOL "Compile the Camera Motion Plugin")
+if (VURTIGO_PLUGIN_CAMERA_MOTION)
+add_subdirectory(CameraMotion)
+endif (VURTIGO_PLUGIN_CAMERA_MOTION)
