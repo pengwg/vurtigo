@@ -221,16 +221,17 @@ void rt3DVolumeRenderObject::resetAxialPlane() {
   pts[3][1] = bounds[2];
   pts[3][2] = (bounds[4]+bounds[5])/2.0f;
 
-  vtkTransform* tt = vtkTransform::New();
-  tt->Concatenate(dObj->getTransform()->GetMatrix());
-  tt->Inverse();
-
   m_boxOutline[0].setCorners(pts[0], pts[1], pts[2], pts[3]);
   m_texturePlane[0].setCorners(pts[0], pts[1], pts[3]);
   adjustReslice(0);
 
   m_planeControl[0].setTransform(m_boxOutline[0].getTransform());
   m_planeControl[0].setSize(bounds[3]-bounds[2], bounds[1]-bounds[0] );
+
+  // Set the user transform from the data object.
+  vtkTransform* tt = vtkTransform::New();
+  tt->Concatenate(dObj->getTransform()->GetMatrix());
+  tt->Inverse();
 
   m_texturePlane[0].setUserTransform(tt);
   m_boxOutline[0].setUserTransform(tt);
@@ -445,6 +446,20 @@ void rt3DVolumeRenderObject::update3PlaneStatus() {
     m_boxOutline[2].getActor()->SetVisibility(0);
     m_texturePlane[2].getActor()->SetVisibility(0);
   }
+
+  // Fix the user transforms for the 3 planes
+  vtkTransform* tt = vtkTransform::New();
+  tt->Concatenate(dObj->getTransform()->GetMatrix());
+  tt->Inverse();
+
+  for (int ix1=0; ix1<3; ix1++) {
+    m_texturePlane[ix1].setUserTransform(tt);
+    m_boxOutline[ix1].setUserTransform(tt);
+    m_planeControl[ix1].setUserTransform(tt);
+  }
+
+  tt->Delete();
+
 }
 
 //! Create the correct data object.

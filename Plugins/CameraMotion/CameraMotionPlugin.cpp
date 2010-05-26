@@ -129,9 +129,11 @@ void CameraMotionPlugin::createTestObject() {
       // Lock the object before doing modifications
       ptObj->lock();
 
+
       // Copy the image data over.
       ptObj->copyNewImageData(sinSrc->GetOutput());
-
+      // Apply a translation to the data
+      ptObj->translateData(10, 20, 2);
       // Reset the modified time.
       ptObj->Modified();
 
