@@ -71,6 +71,9 @@ bool CameraMotionPlugin::init() {
   // Create a simple Vurtigo test object.
   createTestObject();
 
+  // Ask the base to update this plugin every 500 msec
+  setUpdateTime(500);
+
   // Return true to show that the plugin has been created as required.
   return true;
 }
@@ -81,7 +84,32 @@ void CameraMotionPlugin::cleanup() {
 }
 
 void CameraMotionPlugin::update(){
-  // No regular updates needed for this plugin
+  // This function will be called as specified by setUpdateTime().
+
+  // Check that the object was actually created.
+  // If an object creation fails then the id is negative.
+  if (m_smallVol >= 0) {
+
+    // Get the object with the unique ID
+    rt3DVolumeDataObject* ptObj = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(m_smallVol));
+
+    // Check that the object exists.
+    if (ptObj) {
+
+      // Lock the object before doing modifications
+      ptObj->lock();
+
+      // Apply a rotation to the data
+      ptObj->getTransform()->RotateX(5);
+
+      // Reset the modified time.
+      ptObj->Modified();
+
+      // Unlock the object after modifications are finished.
+      ptObj->unlock();
+
+    }
+  }
 }
 
 void CameraMotionPlugin::point3DSelected(double px, double py, double pz, int intensity) {
