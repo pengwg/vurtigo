@@ -112,7 +112,7 @@ protected:
   unsigned short m_imagesPerCycle; // Number of images in one cardiac cycle.
   unsigned short m_cardiacPhase; // The cardiac phase of the current image.
   unsigned short m_sine;
-  unsigned long m_pixelGroupLen;
+  Uint32 m_pixelGroupLen;
   unsigned long m_numElements;
   double m_triggerTime;
   short* m_shortData; // The data for the image
