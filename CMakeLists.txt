@@ -101,6 +101,7 @@ set (UI_FILES
   rtUI/rtTimeOptionsDialog.ui
   rtUI/EPOptions.ui
   rtUI/cineWidget.ui
+  rtUI/rt3DPointBuffer.ui
 )
 
 

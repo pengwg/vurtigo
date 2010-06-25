@@ -39,8 +39,10 @@ public:
 
 public slots:
   void loadFile();
+  void loadXmlFile();
   void saveAsPoints();
   void saveAsSurface();
+  void tableSelection();
 
 protected:
   //! Connect the signals and slots from the GUI.
@@ -63,6 +65,9 @@ protected:
 
   //! The ids of the three types of surface objects
   int m_surf[3];
+
+  //! The id of the currenly selected point.
+  int m_currPointSelection;
 
 };
 

@@ -45,6 +45,7 @@ CartoReaderUI::CartoReaderUI() {
   m_surf[0] = -1;
   m_surf[1] = -1;
   m_surf[2] = -1;
+  m_currPointSelection = -1;
 
   filePointsTableWidget->setColumnWidth(0, 35);
   filePointsTableWidget->setColumnWidth(1, 60);
@@ -54,7 +55,8 @@ CartoReaderUI::CartoReaderUI() {
 
   masterTabWidget->setCurrentIndex(0);
   masterTabWidget->setTabEnabled(1, false);
-  masterTabWidget->setTabEnabled(2, false);
+  saveAsPointsPushButton->setEnabled(false);
+  saveAsPointsLineEdit->setEnabled(false);
 }
 
 CartoReaderUI::~CartoReaderUI() {
@@ -62,8 +64,10 @@ CartoReaderUI::~CartoReaderUI() {
 
 void CartoReaderUI::connectSignals() {
   connect(loadFilePushButton, SIGNAL(clicked()), this, SLOT(loadFile()));
+  connect(loadXMLPushButton, SIGNAL(clicked()), this, SLOT(loadXmlFile()));
   connect(saveAsPointsPushButton, SIGNAL(clicked()), this, SLOT(saveAsPoints()));
   connect(saveAsSurfacePushButton, SIGNAL(clicked()), this, SLOT(saveAsSurface()));
+  connect(filePointsTableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(tableSelection()));
 }
 
 void CartoReaderUI::resetTableInfo() {
@@ -73,14 +77,16 @@ void CartoReaderUI::resetTableInfo() {
   // There are no points.
   if (pointList.count() == 0) {
     masterTabWidget->setTabEnabled(1, false);
-    masterTabWidget->setTabEnabled(2, false);
+    saveAsPointsPushButton->setEnabled(false);
+    saveAsPointsLineEdit->setEnabled(false);
     saveAsPointsLineEdit->setText("");
     saveAsSurfaceLineEdit->setText("");
     return;
   }
 
   masterTabWidget->setTabEnabled(1, true);
-  masterTabWidget->setTabEnabled(2, true);
+  saveAsPointsPushButton->setEnabled(true);
+  saveAsPointsLineEdit->setEnabled(true);
   saveAsPointsLineEdit->setText(m_customReader.getDataName());
   saveAsSurfaceLineEdit->setText(m_customReader.getDataName());
 
@@ -102,34 +108,38 @@ void CartoReaderUI::resetTableInfo() {
     itemz->setText(QString::number(pointList[ix1].z));
     filePointsTableWidget->setItem(ix1, 3, itemz);
 
+    QTableWidgetItem *trigDelay = new QTableWidgetItem();
+    trigDelay->setText(QString::number(pointList[ix1].triggerDelay));
+    filePointsTableWidget->setItem(ix1, 4, trigDelay);
+
     QTableWidgetItem *itemalpha = new QTableWidgetItem();
     itemalpha->setText(QString::number(pointList[ix1].alpha));
-    filePointsTableWidget->setItem(ix1, 4, itemalpha);
+    filePointsTableWidget->setItem(ix1, 5, itemalpha);
 
     QTableWidgetItem *itembeta = new QTableWidgetItem();
     itembeta->setText(QString::number(pointList[ix1].beta));
-    filePointsTableWidget->setItem(ix1, 5, itembeta);
+    filePointsTableWidget->setItem(ix1, 6, itembeta);
 
     QTableWidgetItem *itemgamma = new QTableWidgetItem();
     itemgamma->setText(QString::number(pointList[ix1].gamma));
-    filePointsTableWidget->setItem(ix1, 6, itemgamma);
+    filePointsTableWidget->setItem(ix1, 7, itemgamma);
 
     QTableWidgetItem *itemuni = new QTableWidgetItem();
     itemuni->setText(QString::number(pointList[ix1].uniPolar));
-    filePointsTableWidget->setItem(ix1, 7, itemuni);
+    filePointsTableWidget->setItem(ix1, 8, itemuni);
 
     QTableWidgetItem *itembi = new QTableWidgetItem();
     itembi->setText(QString::number(pointList[ix1].biPolar));
-    filePointsTableWidget->setItem(ix1, 8, itembi);
+    filePointsTableWidget->setItem(ix1, 9, itembi);
 
     QTableWidgetItem *itemLAT = new QTableWidgetItem();
     itemLAT->setText(QString::number(pointList[ix1].LAT));
-    filePointsTableWidget->setItem(ix1, 9, itemLAT);
+    filePointsTableWidget->setItem(ix1, 10, itemLAT);
   }
 }
 
 void CartoReaderUI::loadFile() {
-  m_fName = QFileDialog::getOpenFileName(this, "Open Carto File", "/home", "Carto (*.car)");
+  m_fName = QFileDialog::getOpenFileName(this, "Open Carto File", QDir::homePath(), "Carto (*.car)");
   if (m_fName.size() != 0) {
     if ( m_customReader.readFile(m_fName) ) {
       resetTableInfo();
@@ -138,8 +148,20 @@ void CartoReaderUI::loadFile() {
 }
 
 
+void CartoReaderUI::loadXmlFile() {
+   m_fName = QFileDialog::getOpenFileName(this, "Open Xml Carto File", QDir::homePath(), "Xml (*.xml)");
+  if (m_fName.size() != 0) {
+    if ( m_customReader.readXmlFile(m_fName) ) {
+      resetTableInfo();
+    }
+  }
+}
+
+
 void CartoReaderUI::saveAsPoints() {
   QList<CartoFileReader::CartoPoint> pointList;
+  double tempColor[3];
+  double biPolarDiff;
   pointList = m_customReader.getPointSet();
 
   if (pointList.count() == 0) return;
@@ -157,11 +179,41 @@ void CartoReaderUI::saveAsPoints() {
         sp.px = pointList[ix1].x;
         sp.py = pointList[ix1].y;
         sp.pz = pointList[ix1].z;
+
+        biPolarDiff = m_customReader.getMaxBiPolar()-m_customReader.getMinBiPolar();
+        if (biPolarDiff < 0.0001) biPolarDiff = 0.0001;
+
+        // Use the bi-polar
+        if (biPolarDiff < 2.0) {
+          // Small range file
+          tempColor[0] = 0.0;
+          tempColor[1] = 1.0f-tempColor[0];
+          tempColor[2] = (pointList[ix1].biPolar-m_customReader.getMinBiPolar())/biPolarDiff;
+        } else {
+          // Normal
+          if (pointList[ix1].biPolar < 0.5) {
+            tempColor[0] = 0.0;
+            tempColor[1] = 1.0;
+            tempColor[2] = 0.0;
+          } else if (pointList[ix1].biPolar < 1.5) {
+            tempColor[0] = 0.0;
+            tempColor[1] = 0.5;
+            tempColor[2] = 0.5;
+          } else {
+            tempColor[0] = 0.0;
+            tempColor[1] = 0.0;
+            tempColor[2] = 1.0;
+          }
+        }
+        sp.pProp->SetColor(tempColor);
+
         ptObj->addPoint(sp);
       }
       ptObj->Modified();
       ptObj->unlock();
     }
+    saveAsPointsPushButton->setEnabled(false);
+    saveAsPointsLineEdit->setEnabled(false);
   }
 }
 
@@ -243,6 +295,41 @@ void CartoReaderUI::saveAsSurface() {
         surfObj[ix1]->Modified();
         surfObj[ix1]->unlock();
       }
+    }
+  }
+}
+
+void CartoReaderUI::tableSelection() {
+  int row = filePointsTableWidget->currentRow();
+  int col = filePointsTableWidget->currentColumn();
+  rt3DPointBufferDataObject::SimplePoint* pt;
+  CartoFileReader::CartoPoint cPt;
+
+  // Sanity check.
+  if (row<0 || col <0) return;
+
+  QTableWidgetItem* item = filePointsTableWidget->item(row, 0);
+  if (m_pts >=0) {
+    rt3DPointBufferDataObject* ptObj = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pts));
+    if (ptObj) {
+
+      // Remove the old point.
+      if (m_currPointSelection >= 0) {
+        cPt = m_customReader.getPointWithId(m_currPointSelection);
+        pt = ptObj->getPointAt(cPt.x, cPt.y, cPt.z);
+        ptObj->lock();
+        pt->pSize = 1;
+        ptObj->Modified();
+        ptObj->unlock();
+      }
+
+      m_currPointSelection = item->text().toInt();
+      cPt = m_customReader.getPointWithId(m_currPointSelection);
+      pt = ptObj->getPointAt(cPt.x, cPt.y, cPt.z);
+      ptObj->lock();
+      pt->pSize = 3;
+      ptObj->Modified();
+      ptObj->unlock();
     }
   }
 }

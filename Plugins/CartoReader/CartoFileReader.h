@@ -24,6 +24,8 @@
 #include <QList>
 #include <QString>
 
+#include <vtkTransform.h>
+
 class CartoFileReader
 {
 public:
@@ -37,6 +39,7 @@ public:
     double uniPolar;
     double biPolar;
     int LAT;
+    int triggerDelay;
   };
 
   //! Read a particular carto file.
@@ -46,8 +49,14 @@ public:
       */
   bool readFile(QString fName);
 
+  //! Read an Xml Version of the carto file.
+  bool readXmlFile(QString fName);
+
   //! Get a list of all the carto points loaded by the reader.
   QList<CartoPoint> getPointSet();
+
+  //! Get the point with a specific ID.
+  inline CartoPoint getPointWithId(int id) { return m_pointList.value(id); }
 
   //! Get the name of the dataset.
   /*! The name of the dataset is taken from the first line of the file. Carto files have one line of text at the top that does not have any point informtaion. */
@@ -84,6 +93,9 @@ protected:
 
   //! Flag to determine if a valid flag has been loaded.
   bool m_fileLoaded;
+
+  //! Center the points around the origin.
+  void centerPoints();
 };
 
 #endif

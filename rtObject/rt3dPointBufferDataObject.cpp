@@ -20,7 +20,11 @@
 #include "rt3dPointBufferDataObject.h"
 
 //! Constructor
-rt3DPointBufferDataObject::rt3DPointBufferDataObject() {
+rt3DPointBufferDataObject::rt3DPointBufferDataObject()
+: m_pTransform(0), m_currentScale(1.0)
+{
+  m_pTransform = vtkTransform::New();
+  m_pTransform->Identity();
   m_pointList.clear();
   setObjectType(rtConstants::OT_3DPointBuffer);
   setupGUI();
@@ -28,8 +32,19 @@ rt3DPointBufferDataObject::rt3DPointBufferDataObject() {
 
 //! Destructor
 rt3DPointBufferDataObject::~rt3DPointBufferDataObject() {
+  if (m_pTransform) m_pTransform->Delete();
   m_pointList.clear();
   cleanupGUI();
+}
+
+rt3DPointBufferDataObject::SimplePoint* rt3DPointBufferDataObject::getPointAt(double x, double y, double z) {
+  SimplePoint* res = 0;
+  for (int ix1=0; ix1<m_pointList.size(); ix1++) {
+    if (m_pointList.at(ix1).px == x && m_pointList.at(ix1).py == y && m_pointList.at(ix1).pz == z) {
+      res = &(m_pointList[ix1]);
+    }
+  }
+  return res;
 }
 
 //! Add a point to the list
@@ -60,10 +75,24 @@ void rt3DPointBufferDataObject::update() {
 
 //! Set the GUI widgets.
 /*!
-  @todo Write the GUI
  */
 void rt3DPointBufferDataObject::setupGUI() {
+  m_optionsWidget.setupUi(getBaseWidget());
 
+  connect( m_optionsWidget.pushButtonIdentity, SIGNAL(clicked()), this, SLOT(identityButton()) );
+  connect( m_optionsWidget.pushXPlus, SIGNAL(clicked()), this, SLOT(transPlusX()) );
+  connect( m_optionsWidget.pushYPlus, SIGNAL(clicked()), this, SLOT(transPlusY()) );
+  connect( m_optionsWidget.pushZPlus, SIGNAL(clicked()), this, SLOT(transPlusZ()) );
+  connect( m_optionsWidget.pushXMinus, SIGNAL(clicked()), this, SLOT(transMinusX()) );
+  connect( m_optionsWidget.pushYMinus, SIGNAL(clicked()), this, SLOT(transMinusY()) );
+  connect( m_optionsWidget.pushZMinus, SIGNAL(clicked()), this, SLOT(transMinusZ()) );
+  connect( m_optionsWidget.rotateXPlus, SIGNAL(clicked()), this, SLOT(rotPlusX()) );
+  connect( m_optionsWidget.rotateYPlus, SIGNAL(clicked()), this, SLOT(rotPlusY()) );
+  connect( m_optionsWidget.rotateZPlus, SIGNAL(clicked()), this, SLOT(rotPlusZ()) );
+  connect( m_optionsWidget.rotateXMinus, SIGNAL(clicked()), this, SLOT(rotMinusX()) );
+  connect( m_optionsWidget.rotateYMinus, SIGNAL(clicked()), this, SLOT(rotMinusY()) );
+  connect( m_optionsWidget.rotateZMinus, SIGNAL(clicked()), this, SLOT(rotMinusZ()) );
+  connect( m_optionsWidget.scaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(scaleChanged(double)) );
 }
 
 //! Clean the GUI widgets.
@@ -72,4 +101,80 @@ void rt3DPointBufferDataObject::setupGUI() {
  */
 void rt3DPointBufferDataObject::cleanupGUI() {
 
+}
+
+/////////////
+// Public slots
+/////////////
+
+void rt3DPointBufferDataObject::identityButton() {
+  m_pTransform->Identity();
+  Modified();
+}
+
+void rt3DPointBufferDataObject::transPlusX() {
+  m_pTransform->Translate(10.0, 0.0, 0.0);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::transMinusX() {
+  m_pTransform->Translate(-10.0, 0.0, 0.0);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::transPlusY() {
+  m_pTransform->Translate(0.0, 10.0, 0.0);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::transMinusY() {
+  m_pTransform->Translate(0.0, -10.0, 0.0);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::transPlusZ() {
+  m_pTransform->Translate(0.0, 0.0, 10.0);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::transMinusZ() {
+  m_pTransform->Translate(0.0, 0.0, -10.0);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::rotPlusX() {
+  m_pTransform->RotateX(5.0);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::rotMinusX() {
+  m_pTransform->RotateX(-5.0);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::rotPlusY() {
+  m_pTransform->RotateY(5.0);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::rotMinusY() {
+  m_pTransform->RotateY(-5.0);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::rotPlusZ() {
+  m_pTransform->RotateZ(5.0);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::rotMinusZ() {
+  m_pTransform->RotateZ(-5.0);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::scaleChanged(double val) {
+  double scaleChange = val / m_currentScale;
+  m_currentScale = val;
+  m_pTransform->Scale(scaleChange, scaleChange, scaleChange);
+  Modified();
 }

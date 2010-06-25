@@ -21,11 +21,13 @@
 #define RT_3D_POINT_BUFFER_DATA_OBJECT_H
 
 #include "rtDataObject.h"
+#include "ui_rt3DPointBuffer.h"
 
 #include <QList>
 #include <QColor>
 
-#include "vtkProperty.h"
+#include <vtkProperty.h>
+#include <vtkTransform.h>
 
 //! A buffer of 3D points
 class rt3DPointBufferDataObject : public rtDataObject
@@ -89,14 +91,43 @@ public:
   ~rt3DPointBufferDataObject();
 
   QList<SimplePoint>* getPointList() { return &m_pointList; }
+  SimplePoint* getPointAt(double x, double y, double z);
+  vtkTransform* const getTransform() { return m_pTransform; }
+
   void addPoint(SimplePoint sp);
   void removePoint(SimplePoint sp);
 
   void update();
 
+ public slots:
+  void identityButton();
+  void transPlusX();
+  void transMinusX();
+  void transPlusY();
+  void transMinusY();
+  void transPlusZ();
+  void transMinusZ();
+  void rotPlusX();
+  void rotMinusX();
+  void rotPlusY();
+  void rotMinusY();
+  void rotPlusZ();
+  void rotMinusZ();
+  void scaleChanged(double val);
+
  protected:
   // Properties
+  //! List of points in 3D space
   QList<SimplePoint> m_pointList;
+
+  //! Global transform for all of the points.
+  vtkTransform* m_pTransform;
+
+  //! Ui Interface
+  Ui::rt3DPointBuffer m_optionsWidget;
+
+  //! The current scale for this object
+  double m_currentScale;
 
   // Functions
   void setupGUI();
