@@ -43,6 +43,7 @@ public slots:
   void saveAsPoints();
   void saveAsSurface();
   void tableSelection();
+  void filterByTriggerDelay();
 
 protected:
   //! Connect the signals and slots from the GUI.
@@ -53,6 +54,9 @@ protected:
 
   //! Set the info in the table based on the reader.
   void resetTableInfo();
+
+  //! Select the color for this point based on the bi-polar voltage.
+  void selectPointColor(double biPolar, double color[3]);
 
   //! Name of the loaded file.
   QString m_fName;

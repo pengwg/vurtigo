@@ -68,6 +68,8 @@ public:
   double getMaxBiPolar() { return m_maxBiPolar; }
   int getMinLAT() { return m_minLAT; }
   int getMaxLAT() { return m_maxLAT; }
+  int getMinTrigDelay() { return m_minTrigDelay; }
+  int getMaxTrigDelay() { return m_maxTrigDelay; }
 
 protected:
   //! A map between an object ID and the object itself.
@@ -90,6 +92,12 @@ protected:
   int m_minLAT;
   //! Max LAT
   int m_maxLAT;
+
+  //! The minimum value for the trigger delay
+  int m_minTrigDelay;
+
+  //! The maximum value for the trigger delay
+  int m_maxTrigDelay;
 
   //! Flag to determine if a valid flag has been loaded.
   bool m_fileLoaded;

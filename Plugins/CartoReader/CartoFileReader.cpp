@@ -28,6 +28,7 @@
 #include <iostream>
 
 CartoFileReader::CartoFileReader()
+ : m_minTrigDelay(0), m_maxTrigDelay(0)
 {
   m_fileLoaded = false;
   m_dataName = "";
@@ -76,6 +77,8 @@ bool CartoFileReader::readFile(QString fName) {
         m_maxBiPolar = pt.biPolar;
         m_minLAT = pt.LAT;
         m_maxLAT = pt.LAT;
+        m_maxTrigDelay = pt.triggerDelay;
+        m_minTrigDelay = pt.triggerDelay;
         firstPoint = false;
       } else if (pt.uniPolar < m_minUniPolar) {
         m_minUniPolar = pt.uniPolar;
@@ -93,6 +96,12 @@ bool CartoFileReader::readFile(QString fName) {
         m_minLAT = pt.LAT;
       } else if (pt.LAT > m_maxLAT) {
         m_maxLAT = pt.LAT;
+      }
+
+      if (pt.triggerDelay > m_maxTrigDelay) {
+        m_maxTrigDelay = pt.triggerDelay;
+      } else if ( pt.triggerDelay < m_minTrigDelay) {
+        m_minTrigDelay = pt.triggerDelay;
       }
 
     }
@@ -182,6 +191,12 @@ bool CartoFileReader::readXmlFile(QString fName) {
             m_minLAT = pt.LAT;
           } else if (pt.LAT > m_maxLAT) {
             m_maxLAT = pt.LAT;
+          }
+
+          if (pt.triggerDelay > m_maxTrigDelay) {
+            m_maxTrigDelay = pt.triggerDelay;
+          } else if ( pt.triggerDelay < m_minTrigDelay) {
+            m_minTrigDelay = pt.triggerDelay;
           }
         }
       }

@@ -38,12 +38,18 @@ public:
 
   class SimplePoint {
   public:
+    int pId;
     double px, py, pz;
     double pSize;
     vtkProperty *pProp;
 
     SimplePoint() {
       pProp = vtkProperty::New();
+      pId = 0;
+      px=0.0;
+      py=0.0;
+      pz=0.0;
+      pSize=1.0;
     }
 
     ~SimplePoint() {
@@ -51,17 +57,17 @@ public:
     }
 
     bool operator==(const SimplePoint &other) const {
-      if (px==other.px && 
-	  py==other.py && 
-	  pz==other.pz && 
-	  pSize == other.pSize && 
-	  pProp == other.pProp) 
+      if (pId==other.pId &&
+          px==other.px && py==other.py && pz==other.pz &&
+          pSize == other.pSize &&
+          pProp == other.pProp)
 	return true;
       else 
 	return false;
     }
 
     SimplePoint(const SimplePoint& sp) {
+      pId = sp.pId;
       px = sp.px;
       py = sp.py;
       pz = sp.pz;
@@ -75,6 +81,7 @@ public:
       if (this == &sp)      // Same object?
 	return *this;
 
+      pId = sp.pId;
       px = sp.px;
       py = sp.py;
       pz = sp.pz;
@@ -91,11 +98,28 @@ public:
   ~rt3DPointBufferDataObject();
 
   QList<SimplePoint>* getPointList() { return &m_pointList; }
+
+  //! Get a handle to the point at a particular location in 3D.
+  /*!
+    \param x The X coord of the point to find.
+    \param y The Y coord of the point to find.
+    \param z The Z coord of the point to find.
+    \return The handle to the point or 0 if the point is not found.
+    */
   SimplePoint* getPointAt(double x, double y, double z);
+
+  //! Get a handle to a point with a partiucular Id.
+  /*!
+    \return The handle to the point or 0 if the point is not found.
+    */
+  SimplePoint* getPointWithId(int id);
+
   vtkTransform* const getTransform() { return m_pTransform; }
 
   void addPoint(SimplePoint sp);
   void removePoint(SimplePoint sp);
+
+  inline void removeAllPoints() { m_pointList.clear(); Modified(); }
 
   void update();
 

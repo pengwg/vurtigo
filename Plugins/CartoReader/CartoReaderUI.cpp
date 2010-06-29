@@ -57,6 +57,9 @@ CartoReaderUI::CartoReaderUI() {
   masterTabWidget->setTabEnabled(1, false);
   saveAsPointsPushButton->setEnabled(false);
   saveAsPointsLineEdit->setEnabled(false);
+  minTrigSpinBox->setEnabled(false);
+  maxTrigSpinBox->setEnabled(false);
+  filterNowPushButton->setEnabled(false);
 }
 
 CartoReaderUI::~CartoReaderUI() {
@@ -68,6 +71,7 @@ void CartoReaderUI::connectSignals() {
   connect(saveAsPointsPushButton, SIGNAL(clicked()), this, SLOT(saveAsPoints()));
   connect(saveAsSurfacePushButton, SIGNAL(clicked()), this, SLOT(saveAsSurface()));
   connect(filePointsTableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(tableSelection()));
+  connect(filterNowPushButton, SIGNAL(clicked()), this, SLOT(filterByTriggerDelay()));
 }
 
 void CartoReaderUI::resetTableInfo() {
@@ -161,7 +165,6 @@ void CartoReaderUI::loadXmlFile() {
 void CartoReaderUI::saveAsPoints() {
   QList<CartoFileReader::CartoPoint> pointList;
   double tempColor[3];
-  double biPolarDiff;
   pointList = m_customReader.getPointSet();
 
   if (pointList.count() == 0) return;
@@ -176,35 +179,12 @@ void CartoReaderUI::saveAsPoints() {
     if (ptObj) {
       ptObj->lock();
       for (int ix1=0; ix1<pointList.count(); ix1++) {
+        sp.pId = pointList[ix1].id;
         sp.px = pointList[ix1].x;
         sp.py = pointList[ix1].y;
         sp.pz = pointList[ix1].z;
 
-        biPolarDiff = m_customReader.getMaxBiPolar()-m_customReader.getMinBiPolar();
-        if (biPolarDiff < 0.0001) biPolarDiff = 0.0001;
-
-        // Use the bi-polar
-        if (biPolarDiff < 2.0) {
-          // Small range file
-          tempColor[0] = 0.0;
-          tempColor[1] = 1.0f-tempColor[0];
-          tempColor[2] = (pointList[ix1].biPolar-m_customReader.getMinBiPolar())/biPolarDiff;
-        } else {
-          // Normal
-          if (pointList[ix1].biPolar < 0.5) {
-            tempColor[0] = 0.0;
-            tempColor[1] = 1.0;
-            tempColor[2] = 0.0;
-          } else if (pointList[ix1].biPolar < 1.5) {
-            tempColor[0] = 0.0;
-            tempColor[1] = 0.5;
-            tempColor[2] = 0.5;
-          } else {
-            tempColor[0] = 0.0;
-            tempColor[1] = 0.0;
-            tempColor[2] = 1.0;
-          }
-        }
+        this->selectPointColor(pointList[ix1].biPolar, tempColor);
         sp.pProp->SetColor(tempColor);
 
         ptObj->addPoint(sp);
@@ -212,6 +192,21 @@ void CartoReaderUI::saveAsPoints() {
       ptObj->Modified();
       ptObj->unlock();
     }
+
+    if (m_customReader.getMinTrigDelay() < m_customReader.getMaxTrigDelay()) {
+      minTrigSpinBox->setMinimum(m_customReader.getMinTrigDelay());
+      minTrigSpinBox->setMaximum(m_customReader.getMaxTrigDelay());
+      minTrigSpinBox->setValue(m_customReader.getMinTrigDelay());
+
+      maxTrigSpinBox->setMinimum(m_customReader.getMinTrigDelay());
+      maxTrigSpinBox->setMaximum(m_customReader.getMaxTrigDelay());
+      maxTrigSpinBox->setValue(m_customReader.getMaxTrigDelay());
+
+      minTrigSpinBox->setEnabled(true);
+      maxTrigSpinBox->setEnabled(true);
+      filterNowPushButton->setEnabled(true);
+    }
+
     saveAsPointsPushButton->setEnabled(false);
     saveAsPointsLineEdit->setEnabled(false);
   }
@@ -303,7 +298,6 @@ void CartoReaderUI::tableSelection() {
   int row = filePointsTableWidget->currentRow();
   int col = filePointsTableWidget->currentColumn();
   rt3DPointBufferDataObject::SimplePoint* pt;
-  CartoFileReader::CartoPoint cPt;
 
   // Sanity check.
   if (row<0 || col <0) return;
@@ -315,23 +309,64 @@ void CartoReaderUI::tableSelection() {
 
       // Remove the old point.
       if (m_currPointSelection >= 0) {
-        cPt = m_customReader.getPointWithId(m_currPointSelection);
-        pt = ptObj->getPointAt(cPt.x, cPt.y, cPt.z);
-        ptObj->lock();
-        pt->pSize = 1;
-        ptObj->Modified();
-        ptObj->unlock();
+        pt = ptObj->getPointWithId(m_currPointSelection);
+        if (pt) {
+          ptObj->lock();
+          pt->pSize = 1;
+          ptObj->Modified();
+          ptObj->unlock();
+        }
       }
 
       m_currPointSelection = item->text().toInt();
-      cPt = m_customReader.getPointWithId(m_currPointSelection);
-      pt = ptObj->getPointAt(cPt.x, cPt.y, cPt.z);
-      ptObj->lock();
-      pt->pSize = 3;
-      ptObj->Modified();
-      ptObj->unlock();
+      pt = ptObj->getPointWithId(m_currPointSelection);
+      if (pt) {
+        ptObj->lock();
+        pt->pSize = 3;
+        ptObj->Modified();
+        ptObj->unlock();
+      }
     }
   }
+}
+
+
+void CartoReaderUI::filterByTriggerDelay() {
+  // Check that the ID exists
+  if (m_pts < 0) return;
+
+  rt3DPointBufferDataObject* ptObj = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pts));
+
+  // Check that the object was obtained correctly.
+  if (!ptObj) return;
+
+  rt3DPointBufferDataObject::SimplePoint sp;
+  QList<CartoFileReader::CartoPoint> pointList;
+  double tempColor[3];
+
+  pointList = m_customReader.getPointSet();
+  sp.pSize = 1;
+
+  ptObj->lock();
+  // Remove the old points.
+  ptObj->removeAllPoints();
+  for (int ix1=0; ix1<pointList.count(); ix1++) {
+
+    if (pointList[ix1].triggerDelay >= minTrigSpinBox->value() && pointList[ix1].triggerDelay <= maxTrigSpinBox->value() ) {
+
+      sp.pId = pointList[ix1].id;
+      sp.px = pointList[ix1].x;
+      sp.py = pointList[ix1].y;
+      sp.pz = pointList[ix1].z;
+
+      this->selectPointColor(pointList[ix1].biPolar, tempColor);
+      sp.pProp->SetColor(tempColor);
+
+      ptObj->addPoint(sp);
+    }
+  }
+  ptObj->Modified();
+  ptObj->unlock();
 }
 
 
@@ -376,4 +411,34 @@ bool CartoReaderUI::runVtkDelaunay(vtkPoints* pointsIn, QList<rtPolyDataObject::
   delFilt->Delete();
   pointSet->Delete();
   return true;
+}
+
+void CartoReaderUI::selectPointColor(double biPolar, double color[3]) {
+  double biPolarDiff = m_customReader.getMaxBiPolar()-m_customReader.getMinBiPolar();
+
+  if (biPolarDiff < 0.0001) biPolarDiff = 0.0001;
+
+  // Use the bi-polar
+  if (biPolarDiff < 2.0) {
+    // Small range file
+    color[0] = 0.0;
+    color[1] = 1.0f-(biPolar-m_customReader.getMinBiPolar())/biPolarDiff;
+    color[2] = (biPolar-m_customReader.getMinBiPolar())/biPolarDiff;
+
+  } else {
+    // Normal
+    if (biPolar < 0.5) {
+      color[0] = 0.0;
+      color[1] = 1.0;
+      color[2] = 0.0;
+    } else if (biPolar < 1.5) {
+      color[0] = 0.0;
+      color[1] = 0.5;
+      color[2] = 0.5;
+    } else {
+      color[0] = 0.0;
+      color[1] = 0.0;
+      color[2] = 1.0;
+    }
+  }
 }

@@ -47,6 +47,17 @@ rt3DPointBufferDataObject::SimplePoint* rt3DPointBufferDataObject::getPointAt(do
   return res;
 }
 
+rt3DPointBufferDataObject::SimplePoint* rt3DPointBufferDataObject::getPointWithId(int id) {
+  SimplePoint* res = 0;
+  for (int ix1=0; ix1<m_pointList.size(); ix1++) {
+    if (m_pointList.at(ix1).pId == id) {
+      res = &(m_pointList[ix1]);
+    }
+  }
+  return res;
+}
+
+
 //! Add a point to the list
 void rt3DPointBufferDataObject::addPoint(SimplePoint sp) {
   m_pointList.append(sp);
