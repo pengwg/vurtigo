@@ -29,6 +29,7 @@
 #include "rtPolyDataObject.h"
 #include "rtColorFuncDataObject.h"
 #include "rtPieceFuncDataObject.h"
+#include "rtBasic3DPointData.h"
 
 #include "vtkImageSinusoidSource.h"
 #include "vtkColorTransferFunction.h"
@@ -53,33 +54,33 @@ void TestSuiteBasic::run() {
     } else {
 
       emit sendOutput("Setting Data for 3D Spheres...");
-      rt3DPointBufferDataObject::SimplePoint pp[10][10];
-      rt3DPointBufferDataObject::SimplePoint p[4];
+      rtBasic3DPointData pp[10][10];
+      rtBasic3DPointData p[4];
 
-      p[0].px = 0.0;
-      p[0].py = 0.0;
-      p[0].pz = 0.0;
-      p[0].pSize = 0.25;
-      p[0].pProp->SetColor(1, 0, 0); //Red
-      p[0].pProp->SetOpacity(0.2);
+      p[0].setX(0.0);
+      p[0].setY(0.0);
+      p[0].setZ(0.0);
+      p[0].setPointSize(0.25);
+      p[0].getProperty()->SetColor(1, 0, 0); //Red
+      p[0].getProperty()->SetOpacity(0.2);
 
-      p[1].px = 1.0;
-      p[1].py = 0.0;
-      p[1].pz = 0.0;
-      p[1].pSize = 0.25;
-      p[1].pProp->SetColor(1, 0, 0);
+      p[1].setX(1.0);
+      p[1].setY(0.0);
+      p[1].setZ(0.0);
+      p[1].setPointSize(0.25);
+      p[1].getProperty()->SetColor(1, 0, 0);
 
-      p[2].px = 0.0;
-      p[2].py = 1.0;
-      p[2].pz = 0.0;
-      p[2].pSize = 0.25;
-      p[2].pProp->SetColor(0, 1, 0);
+      p[2].setX(0.0);
+      p[2].setY(1.0);
+      p[2].setZ(0.0);
+      p[2].setPointSize(0.25);
+      p[2].getProperty()->SetColor(0, 1, 0);
 
-      p[3].px = 0.0;
-      p[3].py = 0.0;
-      p[3].pz = 1.0;
-      p[3].pSize = 0.25;
-      p[3].pProp->SetColor(0, 0, 1);
+      p[3].setX(0.0);
+      p[3].setY(0.0);
+      p[3].setZ(1.0);
+      p[3].setPointSize(0.25);
+      p[3].getProperty()->SetColor(0, 0, 1);
 
       ptObj->lock();
       for (int ix1=0; ix1<4; ix1++) {
@@ -89,12 +90,12 @@ void TestSuiteBasic::run() {
       // Add 100 semi-transparent spheres.
       for (int ix1=2; ix1<12; ix1++) {
         for (int ix2=2; ix2<12; ix2++) {
-          pp[ix1-2][ix2-2].px = ix1;
-          pp[ix1-2][ix2-2].py = ix2;
-          pp[ix1-2][ix2-2].pz = 2;
-          pp[ix1-2][ix2-2].pSize = 0.25;
-          pp[ix1-2][ix2-2].pProp->SetColor(0,1,0);
-          pp[ix1-2][ix2-2].pProp->SetOpacity(0.2);
+          pp[ix1-2][ix2-2].setX(ix1);
+          pp[ix1-2][ix2-2].setY(ix2);
+          pp[ix1-2][ix2-2].setZ(2);
+          pp[ix1-2][ix2-2].setPointSize(0.25);
+          pp[ix1-2][ix2-2].getProperty()->SetColor(0,1,0);
+          pp[ix1-2][ix2-2].getProperty()->SetOpacity(0.2);
           ptObj->addPoint(pp[ix1-2][ix2-2]);
         }
       }

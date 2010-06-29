@@ -34,6 +34,9 @@ set ( RTOBJECT_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rtEPRenderObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtEPInfoObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtEPPropertyPointList.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtBasicPointData.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtBasic2DPointData.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtBasic3DPointData.cpp
   CACHE INTERNAL "Vurtigo rtObject Source Files"
 )
 

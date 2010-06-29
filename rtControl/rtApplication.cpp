@@ -30,6 +30,7 @@
 #include "buildParam.h"
 #include "rt3dPointBufferRenderObject.h"
 #include "rt3dPointBufferDataObject.h"
+#include "rtBasic3DPointData.h"
 
 // Qt
 #include <QCoreApplication>
@@ -154,29 +155,29 @@ void rtApplication::setupOrigin() {
   // Setup the origin.
   rt3DPointBufferRenderObject *renObj = static_cast<rt3DPointBufferRenderObject*>(m_objManager->addObjectOfType(rtConstants::OT_3DPointBuffer, "True Origin"));
   rt3DPointBufferDataObject *datObj = static_cast<rt3DPointBufferDataObject*>(renObj->getDataObject());
-  rt3DPointBufferDataObject::SimplePoint origin;
-  rt3DPointBufferDataObject::SimplePoint xDir, yDir, zDir;
-  origin.px = 0.0f;
-  origin.py = 0.0f;
-  origin.pz = 0.0f;
-  origin.pSize = 5.0f;
+  rtBasic3DPointData origin;
+  rtBasic3DPointData xDir, yDir, zDir;
+  origin.setX(0.0f);
+  origin.setY(0.0f);
+  origin.setZ(0.0f);
+  origin.setPointSize(5.0f);
   datObj->addPoint(origin);
 
   for (int ix1=10; ix1<=100; ix1+=10) {
-    xDir.px = ix1;
-    xDir.py = 0.0f;
-    xDir.pz = 0.0f;
-    xDir.pSize = 2.0f;
+    xDir.setX(ix1);
+    xDir.setY(0.0f);
+    xDir.setZ(0.0f);
+    xDir.setPointSize(2.0f);
     datObj->addPoint(xDir);
-    yDir.px = 0.0f;
-    yDir.py = ix1;
-    yDir.pz = 0.0f;
-    yDir.pSize = 2.0f;
+    yDir.setX(0.0f);
+    yDir.setY(ix1);
+    yDir.setZ(0.0f);
+    yDir.setPointSize(2.0f);
     datObj->addPoint(yDir);
-    zDir.px = 0.0f;
-    zDir.py = 0.0f;
-    zDir.pz = ix1;
-    zDir.pSize = 2.0f;
+    zDir.setX(0.0f);
+    zDir.setY(0.0f);
+    zDir.setZ(ix1);
+    zDir.setPointSize(2.0f);
     datObj->addPoint(zDir);
   }
   datObj->Modified();

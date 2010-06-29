@@ -22,6 +22,7 @@
 #include "rtObjectManager.h"
 #include "rtMainWindow.h"
 #include "rtApplication.h"
+#include "rtBasic3DPointData.h"
 
 //VTK
 #include "vtkSphereSource.h"
@@ -54,21 +55,21 @@ void rt3DPointBufferRenderObject::update() {
   cleanupPipeList();
 
   // Get the new list
-  QList<rt3DPointBufferDataObject::SimplePoint>* pointList = dObj->getPointList();
+  QList<rtBasic3DPointData>* pointList = dObj->getPointList();
   for (int ix1=0; ix1<pointList->size(); ix1++) {
     tempPipe = new rtSingle3DPointPipeline();
     tempPipe->setResolution(20);
-    tempPipe->setRadius(pointList->at(ix1).pSize);
+    tempPipe->setRadius( (*pointList)[ix1].getPointSize() );
 
     // Transform the points.
-    ptIn[0] = pointList->at(ix1).px;
-    ptIn[1] = pointList->at(ix1).py;
-    ptIn[2] = pointList->at(ix1).pz;
+    ptIn[0] = (*pointList)[ix1].getX();
+    ptIn[1] = (*pointList)[ix1].getY();
+    ptIn[2] = (*pointList)[ix1].getZ();
     ptIn[3] = 1.0;
     dObj->getTransform()->MultiplyPoint(ptIn, ptOut);
 
     tempPipe->setPosition(ptOut[0], ptOut[1], ptOut[2]);
-    tempPipe->setProperty(pointList->at(ix1).pProp);
+    tempPipe->setProperty( (*pointList)[ix1].getProperty() );
 
     m_pipeList.append(tempPipe);
     if (getVisible3D()) {
@@ -131,36 +132,40 @@ bool rt3DPointBufferRenderObject::getObjectLocation(double loc[6]) {
   rt3DPointBufferDataObject *dObj = dynamic_cast<rt3DPointBufferDataObject*>(m_dataObj);
   if (!dObj) return false;
 
-  QList<rt3DPointBufferDataObject::SimplePoint>* ptList = dObj->getPointList();
+  QList<rtBasic3DPointData>* ptList = dObj->getPointList();
   if (!ptList) return false;
   if (ptList->count() <= 0) return false;
 
   // Just use the first point as the default.
-  int ptSize = ptList->at(0).pSize;
-  loc[0] = ptList->at(0).px - ptSize; loc[1] = ptList->at(0).px + ptSize; // x
-  loc[2] = ptList->at(0).py - ptSize; loc[3] = ptList->at(0).py + ptSize; // y
-  loc[4] = ptList->at(0).pz - ptSize; loc[5] = ptList->at(0).pz + ptSize; // z
+  int ptSize = (*ptList)[0].getPointSize();
+  loc[0] = (*ptList)[0].getX() - ptSize; loc[1] = (*ptList)[0].getX() + ptSize; // x
+  loc[2] = (*ptList)[0].getY() - ptSize; loc[3] = (*ptList)[0].getY() + ptSize; // y
+  loc[4] = (*ptList)[0].getZ() - ptSize; loc[5] = (*ptList)[0].getZ() + ptSize; // z
 
   for (int ix1=1; ix1<ptList->count(); ix1++) {
     // X
-    if ( (ptList->at(ix1).px - ptSize) < loc[0]) {
-      loc[0] = ptList->at(ix1).px - ptSize;
-    } else if ( (ptList->at(ix1).px + ptSize) > loc[1]) {
-      loc[1] = ptList->at(ix1).px + ptSize;
+    double xVal = (*ptList)[ix1].getX();
+    double yVal = (*ptList)[ix1].getY();
+    double zVal = (*ptList)[ix1].getZ();
+
+    if ( ( xVal - ptSize ) < loc[0]) {
+      loc[0] = xVal - ptSize;
+    } else if ( (xVal + ptSize) > loc[1]) {
+      loc[1] = xVal + ptSize;
     }
 
     // Y
-    if ( (ptList->at(ix1).py - ptSize) < loc[2]) {
-      loc[2] = ptList->at(ix1).py - ptSize;
-    } else if ( (ptList->at(ix1).py + ptSize) > loc[3]) {
-      loc[3] = ptList->at(ix1).py + ptSize;
+    if ( (yVal - ptSize) < loc[2]) {
+      loc[2] = yVal - ptSize;
+    } else if ( (yVal + ptSize) > loc[3]) {
+      loc[3] = yVal + ptSize;
     }
 
     // Z
-    if ( (ptList->at(ix1).pz - ptSize) < loc[4]) {
-      loc[4] = ptList->at(ix1).pz - ptSize;
-    } else if ( (ptList->at(ix1).pz + ptSize) > loc[5]) {
-      loc[5] = ptList->at(ix1).pz + ptSize;
+    if ( (zVal - ptSize) < loc[4]) {
+      loc[4] = zVal - ptSize;
+    } else if ( (zVal + ptSize) > loc[5]) {
+      loc[5] = zVal + ptSize;
     }
   }
 

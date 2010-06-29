@@ -21,6 +21,7 @@
 #define RT_3D_POINT_BUFFER_DATA_OBJECT_H
 
 #include "rtDataObject.h"
+#include "rtBasic3DPointData.h"
 #include "ui_rt3DPointBuffer.h"
 
 #include <QList>
@@ -35,69 +36,10 @@ class rt3DPointBufferDataObject : public rtDataObject
 Q_OBJECT
 
 public:
-
-  class SimplePoint {
-  public:
-    int pId;
-    double px, py, pz;
-    double pSize;
-    vtkProperty *pProp;
-
-    SimplePoint() {
-      pProp = vtkProperty::New();
-      pId = 0;
-      px=0.0;
-      py=0.0;
-      pz=0.0;
-      pSize=1.0;
-    }
-
-    ~SimplePoint() {
-      pProp->Delete();
-    }
-
-    bool operator==(const SimplePoint &other) const {
-      if (pId==other.pId &&
-          px==other.px && py==other.py && pz==other.pz &&
-          pSize == other.pSize &&
-          pProp == other.pProp)
-	return true;
-      else 
-	return false;
-    }
-
-    SimplePoint(const SimplePoint& sp) {
-      pId = sp.pId;
-      px = sp.px;
-      py = sp.py;
-      pz = sp.pz;
-      pSize = sp.pSize;
-
-      pProp = vtkProperty::New();
-      pProp->DeepCopy(sp.pProp);
-    }
-
-    SimplePoint& operator=(const SimplePoint& sp) {
-      if (this == &sp)      // Same object?
-	return *this;
-
-      pId = sp.pId;
-      px = sp.px;
-      py = sp.py;
-      pz = sp.pz;
-      pSize = sp.pSize;
-
-      pProp->Delete();
-      pProp = vtkProperty::New();
-      pProp->DeepCopy(sp.pProp);
-    }
-
-  };
-
   rt3DPointBufferDataObject();
   ~rt3DPointBufferDataObject();
 
-  QList<SimplePoint>* getPointList() { return &m_pointList; }
+  QList<rtBasic3DPointData>* getPointList() { return &m_pointList; }
 
   //! Get a handle to the point at a particular location in 3D.
   /*!
@@ -106,18 +48,18 @@ public:
     \param z The Z coord of the point to find.
     \return The handle to the point or 0 if the point is not found.
     */
-  SimplePoint* getPointAt(double x, double y, double z);
+  rtBasic3DPointData* getPointAt(double x, double y, double z);
 
   //! Get a handle to a point with a partiucular Id.
   /*!
     \return The handle to the point or 0 if the point is not found.
     */
-  SimplePoint* getPointWithId(int id);
+  rtBasic3DPointData* getPointWithId(int id);
 
   vtkTransform* const getTransform() { return m_pTransform; }
 
-  void addPoint(SimplePoint sp);
-  void removePoint(SimplePoint sp);
+  void addPoint(rtBasic3DPointData sp);
+  void removePoint(rtBasic3DPointData sp);
 
   inline void removeAllPoints() { m_pointList.clear(); Modified(); }
 
@@ -142,7 +84,7 @@ public:
  protected:
   // Properties
   //! List of points in 3D space
-  QList<SimplePoint> m_pointList;
+  QList<rtBasic3DPointData> m_pointList;
 
   //! Global transform for all of the points.
   vtkTransform* m_pTransform;

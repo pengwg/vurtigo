@@ -173,19 +173,19 @@ void CartoReaderUI::saveAsPoints() {
   if (m_pts >=0) {
     rt3DPointBufferDataObject* ptObj = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pts));
 
-    rt3DPointBufferDataObject::SimplePoint sp;
-    sp.pSize = 1;
+    rtBasic3DPointData sp;
+    sp.setPointSize(1.0);
 
     if (ptObj) {
       ptObj->lock();
       for (int ix1=0; ix1<pointList.count(); ix1++) {
-        sp.pId = pointList[ix1].id;
-        sp.px = pointList[ix1].x;
-        sp.py = pointList[ix1].y;
-        sp.pz = pointList[ix1].z;
+        sp.setPointId(pointList[ix1].id);
+        sp.setX(pointList[ix1].x);
+        sp.setY(pointList[ix1].y);
+        sp.setZ(pointList[ix1].z);
 
         this->selectPointColor(pointList[ix1].biPolar, tempColor);
-        sp.pProp->SetColor(tempColor);
+        sp.getProperty()->SetColor(tempColor);
 
         ptObj->addPoint(sp);
       }
@@ -297,7 +297,7 @@ void CartoReaderUI::saveAsSurface() {
 void CartoReaderUI::tableSelection() {
   int row = filePointsTableWidget->currentRow();
   int col = filePointsTableWidget->currentColumn();
-  rt3DPointBufferDataObject::SimplePoint* pt;
+  rtBasic3DPointData* pt;
 
   // Sanity check.
   if (row<0 || col <0) return;
@@ -312,7 +312,7 @@ void CartoReaderUI::tableSelection() {
         pt = ptObj->getPointWithId(m_currPointSelection);
         if (pt) {
           ptObj->lock();
-          pt->pSize = 1;
+          pt->setPointSize( 1.0 );
           ptObj->Modified();
           ptObj->unlock();
         }
@@ -322,7 +322,7 @@ void CartoReaderUI::tableSelection() {
       pt = ptObj->getPointWithId(m_currPointSelection);
       if (pt) {
         ptObj->lock();
-        pt->pSize = 3;
+        pt->setPointSize( 3.0 );
         ptObj->Modified();
         ptObj->unlock();
       }
@@ -340,12 +340,12 @@ void CartoReaderUI::filterByTriggerDelay() {
   // Check that the object was obtained correctly.
   if (!ptObj) return;
 
-  rt3DPointBufferDataObject::SimplePoint sp;
+  rtBasic3DPointData sp;
   QList<CartoFileReader::CartoPoint> pointList;
   double tempColor[3];
 
   pointList = m_customReader.getPointSet();
-  sp.pSize = 1;
+  sp.setPointSize(1.0);
 
   ptObj->lock();
   // Remove the old points.
@@ -354,13 +354,13 @@ void CartoReaderUI::filterByTriggerDelay() {
 
     if (pointList[ix1].triggerDelay >= minTrigSpinBox->value() && pointList[ix1].triggerDelay <= maxTrigSpinBox->value() ) {
 
-      sp.pId = pointList[ix1].id;
-      sp.px = pointList[ix1].x;
-      sp.py = pointList[ix1].y;
-      sp.pz = pointList[ix1].z;
+      sp.setPointId(pointList[ix1].id);
+      sp.setX(pointList[ix1].x);
+      sp.setY(pointList[ix1].y);
+      sp.setZ(pointList[ix1].z);
 
       this->selectPointColor(pointList[ix1].biPolar, tempColor);
-      sp.pProp->SetColor(tempColor);
+      sp.getProperty()->SetColor(tempColor);
 
       ptObj->addPoint(sp);
     }

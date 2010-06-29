@@ -30,12 +30,12 @@ rt2DPointDataObject::~rt2DPointDataObject() {
   cleanupGUI();
 }
 
-void rt2DPointDataObject::addPoint(SimplePoint2D sp) {
+void rt2DPointDataObject::addPoint(rtBasic2DPointData sp) {
   m_pointList.append(sp);
   Modified();
 }
 
-void rt2DPointDataObject::removePoint(SimplePoint2D sp) {
+void rt2DPointDataObject::removePoint(rtBasic2DPointData sp) {
   int i;
 
   if (m_pointList.contains(sp)) {

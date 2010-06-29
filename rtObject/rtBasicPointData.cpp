@@ -17,37 +17,49 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
-#ifndef RT_2D_POINT_DATA_OBJECT_H
-#define RT_2D_POINT_DATA_OBJECT_H
 
-#include "rtDataObject.h"
-#include "rtBasic2DPointData.h"
+#include <vtkProperty.h>
 
-//! Object that represents a set of 2D points
-/*!
-  A data representation of a point in 2D space.
-  */
-class rt2DPointDataObject : public rtDataObject
+#include "rtBasicPointData.h"
+
+
+rtBasicPointData::rtBasicPointData()
+ : m_pId(-1), m_pSize(1.0), m_pProp(0)
 {
-Q_OBJECT
+  m_coords.clear();
+  m_pProp = vtkProperty::New();
+}
 
-public:
+rtBasicPointData::rtBasicPointData(const rtBasicPointData& sp) {
+  m_pId = sp.m_pId;
+  m_coords = sp.m_coords;
+  m_pSize = sp.m_pSize;
 
-  rt2DPointDataObject();
-  ~rt2DPointDataObject();
+  m_pProp = vtkProperty::New();
+  m_pProp->DeepCopy(sp.m_pProp);
+}
 
-  QList<rtBasic2DPointData>* getPointList() { return &m_pointList; }
-  void addPoint(rtBasic2DPointData sp);
-  void removePoint(rtBasic2DPointData sp);
+rtBasicPointData::~rtBasicPointData() {
+  if(m_pProp) m_pProp->Delete();
+}
 
-  void update();
+bool rtBasicPointData::operator==(const rtBasicPointData &other) const {
+  if (m_pId==other.m_pId &&  m_coords==other.m_coords && m_pSize == other.m_pSize && m_pProp == other.m_pProp)
+    return true;
+  else
+    return false;
+}
 
- protected:
-  // Functions
-  void setupGUI();
-  void cleanupGUI();
+rtBasicPointData& rtBasicPointData::operator=(const rtBasicPointData& sp) {
+  if (this != &sp) {
+    m_pId = sp.m_pId;
+    m_coords = sp.m_coords;
+    m_pSize = sp.m_pSize;
 
-  QList<rtBasic2DPointData> m_pointList;
-};
+    m_pProp->Delete();
+    m_pProp = vtkProperty::New();
+    m_pProp->DeepCopy(sp.m_pProp);
+  }
 
-#endif 
+  return *this;
+}

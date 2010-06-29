@@ -37,20 +37,20 @@ rt3DPointBufferDataObject::~rt3DPointBufferDataObject() {
   cleanupGUI();
 }
 
-rt3DPointBufferDataObject::SimplePoint* rt3DPointBufferDataObject::getPointAt(double x, double y, double z) {
-  SimplePoint* res = 0;
+rtBasic3DPointData* rt3DPointBufferDataObject::getPointAt(double x, double y, double z) {
+  rtBasic3DPointData* res = 0;
   for (int ix1=0; ix1<m_pointList.size(); ix1++) {
-    if (m_pointList.at(ix1).px == x && m_pointList.at(ix1).py == y && m_pointList.at(ix1).pz == z) {
+    if (m_pointList[ix1].getX() == x && m_pointList[ix1].getY() == y && m_pointList[ix1].getZ() == z) {
       res = &(m_pointList[ix1]);
     }
   }
   return res;
 }
 
-rt3DPointBufferDataObject::SimplePoint* rt3DPointBufferDataObject::getPointWithId(int id) {
-  SimplePoint* res = 0;
+rtBasic3DPointData* rt3DPointBufferDataObject::getPointWithId(int id) {
+  rtBasic3DPointData* res = 0;
   for (int ix1=0; ix1<m_pointList.size(); ix1++) {
-    if (m_pointList.at(ix1).pId == id) {
+    if (m_pointList[ix1].getPointId() == id) {
       res = &(m_pointList[ix1]);
     }
   }
@@ -59,13 +59,13 @@ rt3DPointBufferDataObject::SimplePoint* rt3DPointBufferDataObject::getPointWithI
 
 
 //! Add a point to the list
-void rt3DPointBufferDataObject::addPoint(SimplePoint sp) {
+void rt3DPointBufferDataObject::addPoint(rtBasic3DPointData sp) {
   m_pointList.append(sp);
   Modified();
 }
 
 //! Remove a point from the list
-void rt3DPointBufferDataObject::removePoint(SimplePoint sp) {
+void rt3DPointBufferDataObject::removePoint(rtBasic3DPointData sp) {
   int i;
 
   if (m_pointList.contains(sp)) {
