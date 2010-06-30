@@ -30,6 +30,7 @@
 #include "rtEPDataObject.h"
 #include "rtBaseHandle.h"
 #include "DICOMFileReader.h"
+#include "rtBasic3DPointData.h"
 
 CardiacMeshReaderUI::CardiacMeshReaderUI() {
   setupUi(this);
@@ -290,23 +291,17 @@ void CardiacMeshReaderUI::page3Finish() {
 bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPointSet::PointType type, double smoothStep) {
   if (!data) return false;
 
-  rtPolyDataObject::PolyPoint temp;
+  rtBasic3DPointData temp;
   rtPolyDataObject::PolyPointLink tempLink;
-  QList<rtPolyDataObject::PolyPoint> pointList;
+  QList<rtBasic3DPointData> pointList;
   QList<rtPolyDataObject::PolyPointLink> pointListLink;
 
   if (type == MeshPointSet::PT_ICONTOUR) {
-    temp.color[0] = 255.0;
-    temp.color[1] = 0.0;
-    temp.color[2] = 0.0;
+    temp.setColor(1.0, 0.0, 0.0);
   } else if (type == MeshPointSet::PT_OCONTOUR) {
-    temp.color[0] = 0.0;
-    temp.color[1] = 0.0;
-    temp.color[2] = 255.0;
+    temp.setColor(0.0, 0.0, 1.0);
   } else {
-    temp.color[0] = 255.0;
-    temp.color[1] = 255.0;
-    temp.color[2] = 255.0;
+    temp.setColor(1.0, 1.0, 1.0);
   }
 
   pointList.clear();
@@ -331,6 +326,7 @@ bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPo
     }
   }
 
+  double tempPoint[3];
   for (int ix1=0; ix1<=numPhases; ix1++) {
     MeshPointSet* currPhase=NULL;
     currPhase = m_meshReader.getPointSet(ix1);
@@ -339,11 +335,16 @@ bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPo
     int numVertices=0;
     for (double curvePos=minSliceSlider->value(); curvePos<=maxSliceSlider->value(); curvePos+=smoothStep) {
       for (int ix2=0; ix2<=currPhase->getMaxPtNum(); ix2++) {
-        temp.ptList[0] = currPhase->getInterpolateXValue(type, curvePos, ix2)*space[0];
-        temp.ptList[1] = currPhase->getInterpolateYValue(type, curvePos, ix2)*space[1];
-        temp.ptList[2] = (curvePos*space[2]+0.0f*space[2]);
+        tempPoint[0] = (currPhase->getInterpolateXValue(type, curvePos, ix2)*space[0]);
+        tempPoint[1] = (currPhase->getInterpolateYValue(type, curvePos, ix2)*space[1]);
+        tempPoint[2] = (curvePos*space[2]+0.0f*space[2]);
 
-        trans->TransformPoint(temp.ptList, temp.ptList);
+        trans->TransformPoint(tempPoint, tempPoint);
+
+        temp.setX(tempPoint[0]);
+        temp.setY(tempPoint[1]);
+        temp.setZ(tempPoint[2]);
+
         pointList.append(temp);
         numVertices++;
       }

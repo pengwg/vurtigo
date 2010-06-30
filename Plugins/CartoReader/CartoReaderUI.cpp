@@ -23,7 +23,7 @@
 #include "CartoFileReader.h"
 #include "CartoReaderUI.h"
 #include "rt3dPointBufferDataObject.h"
-
+#include "rtBasic3DPointData.h"
 
 #include <iostream>
 
@@ -260,26 +260,23 @@ void CartoReaderUI::saveAsSurface() {
     }
 
     if (surfObj[ix1]) {
-      rtPolyDataObject::PolyPoint tempPt;
-      QList<rtPolyDataObject::PolyPoint> ptList;
+      rtBasic3DPointData tempPt;
+      QList<rtBasic3DPointData> ptList;
 
       // Save the point list and the colors
       for (int ix2=0; ix2<pointList.count(); ix2++) {
-        tempPt.ptList[0] = pointList[ix2].x;
-        tempPt.ptList[1] = pointList[ix2].y;
-        tempPt.ptList[2] = pointList[ix2].z;
+        tempPt.setX(pointList[ix2].x);
+        tempPt.setY(pointList[ix2].y);
+        tempPt.setZ(pointList[ix2].z);
         if (ix1==0) {
-          tempPt.color[0] = (pointList[ix2].uniPolar-m_customReader.getMinUniPolar())/(m_customReader.getMaxUniPolar()-m_customReader.getMinUniPolar())*255.0f;
-          tempPt.color[1] = 0;
-          tempPt.color[2] = 255-tempPt.color[0];
+          double uni = (pointList[ix2].uniPolar-m_customReader.getMinUniPolar())/(m_customReader.getMaxUniPolar()-m_customReader.getMinUniPolar());
+          tempPt.setColor(uni, 0.0, 1.0-uni);
         } else if (ix1==1) {
-          tempPt.color[0] = (pointList[ix2].biPolar-m_customReader.getMinBiPolar())/(m_customReader.getMaxBiPolar()-m_customReader.getMinBiPolar())*255.0f;
-          tempPt.color[1] = 0;
-          tempPt.color[2] = 255-tempPt.color[0];
+          double biPol = (pointList[ix2].biPolar-m_customReader.getMinBiPolar())/(m_customReader.getMaxBiPolar()-m_customReader.getMinBiPolar());
+          tempPt.setColor(biPol, 0.0, 1.0-biPol);
         } else if (ix1==2) {
-          tempPt.color[0] = ((double)(pointList[ix2].LAT-m_customReader.getMinLAT()))/((double)(m_customReader.getMaxLAT()-m_customReader.getMinLAT()))*255.0f;
-          tempPt.color[1] = 0;
-          tempPt.color[2] = 255-tempPt.color[0];
+          double minLat = ((double)(pointList[ix2].LAT-m_customReader.getMinLAT()))/((double)(m_customReader.getMaxLAT()-m_customReader.getMinLAT()));
+          tempPt.setColor(minLat, 0.0, 1.0-minLat);
         }
         ptList.push_back(tempPt);
       }

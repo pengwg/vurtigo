@@ -23,7 +23,9 @@
 
 #include <vector>
 
-class vtkProperty;
+#include <QColor>
+
+#include <vtkProperty.h>
 
 //! Generic data object for a point in N dimensional space.
 class rtBasicPointData
@@ -56,6 +58,26 @@ public:
   inline void setDimention(unsigned int dim) { m_coords.resize(dim, 0.0); }
 
   inline vtkProperty* getProperty() { return m_pProp; }
+
+  //! Set the r,g,b color for this point.
+  /*!
+    Values for r,g,b should be in the range [0,1].
+    */
+  inline void setColor(double r, double g, double b) { m_pProp->SetColor(r,g,b); }
+
+  inline void setColor(QColor c) { m_pProp->SetColor(c.redF(),c.greenF(),c.blueF()); }
+
+  inline void getColor(double &r, double &g, double &b) { m_pProp->GetColor(r,g,b); }
+
+  inline QColor getColor() {
+    double r,g,b;
+    QColor res;
+    m_pProp->GetColor(r,g,b);
+    res.setRedF(r);
+    res.setGreenF(g);
+    res.setBlueF(b);
+    return res;
+  }
 
 protected:
   //! Point Id.

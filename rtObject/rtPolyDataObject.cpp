@@ -98,7 +98,7 @@ void rtPolyDataObject::clearAllData() {
 }
   
 
-bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink> *links, int trigDelay) {
+bool rtPolyDataObject::setNewGeometry(QList<rtBasic3DPointData> *pts, QList<PolyPointLink> *links, int trigDelay) {
 	
   // Check that the pointers are valid. 
   if (!pts || !links) {
@@ -156,14 +156,12 @@ bool rtPolyDataObject::setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink
   pointList->SetNumberOfPoints( pts->count() );
   scalars->SetNumberOfValues( pts->count() );
   for (int ix1=0; ix1<pts->count(); ix1++) {
-    pointList->SetPoint(ix1, pts->value(ix1).ptList);
-    temp.setRed(pts->value(ix1).color[0]);
-    temp.setGreen(pts->value(ix1).color[1]);
-    temp.setBlue(pts->value(ix1).color[2]);
+    pointList->SetPoint(ix1, pts->value(ix1).getX(), pts->value(ix1).getY(), pts->value(ix1).getZ() );
+    temp = pts->value(ix1).getColor();
     if (!colorTable.contains(temp.name())) {
       colorTable.insert(temp.name(), ix1);
     }
-    m_colorLookup[addIndex]->AddRGBPoint(colorTable.value(temp.name()), ((double)temp.red())/255.0f, ((double)temp.green())/255.0f, ((double)temp.blue())/255.0f );
+    m_colorLookup[addIndex]->AddRGBPoint(colorTable.value(temp.name()), temp.redF(), temp.greenF(), temp.blueF() );
     scalars->SetTupleValue(ix1, &colorTable[temp.name()]);
   }
 
@@ -356,8 +354,8 @@ bool rtPolyDataObject::readNewPhaseFromFile(QXmlStreamReader* reader, int phase,
   bool valueOK;
 
   int id;
-  QList<PolyPoint> pts;
-  PolyPoint tempPT;
+  QList<rtBasic3DPointData> pts;
+  rtBasic3DPointData tempPT;
   QList<PolyPointLink> links;
   PolyPointLink tempLINK;
 
@@ -367,12 +365,10 @@ bool rtPolyDataObject::readNewPhaseFromFile(QXmlStreamReader* reader, int phase,
       if(reader->name() == "Point") {
         attrib = reader->attributes();
         id = attrib.value("ID").toString().toInt(&valueOK);
-        tempPT.ptList[0] =  attrib.value("X").toString().toDouble(&valueOK);
-        tempPT.ptList[1] =  attrib.value("Y").toString().toDouble(&valueOK);
-        tempPT.ptList[2] =  attrib.value("Z").toString().toDouble(&valueOK);
-        tempPT.color[0] = attrib.value("R").toString().toDouble(&valueOK) * 255.0f;
-        tempPT.color[1] = attrib.value("G").toString().toDouble(&valueOK) * 255.0f;
-        tempPT.color[2] = attrib.value("B").toString().toDouble(&valueOK) * 255.0f;
+        tempPT.setX( attrib.value("X").toString().toDouble(&valueOK) );
+        tempPT.setY( attrib.value("Y").toString().toDouble(&valueOK) );
+        tempPT.setZ( attrib.value("Z").toString().toDouble(&valueOK) );
+        tempPT.setColor(attrib.value("R").toString().toDouble(&valueOK), attrib.value("G").toString().toDouble(&valueOK), attrib.value("B").toString().toDouble(&valueOK));
         pts.insert(id, tempPT);
       } else if (reader->name() == "CellPoint") {
         attrib = reader->attributes();

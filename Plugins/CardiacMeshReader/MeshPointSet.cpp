@@ -29,12 +29,6 @@ MeshPointSet::~MeshPointSet() {
 }
 
 void MeshPointSet::addPointToSet(MeshPointSet::PointType pt, int slice, int ptNum, double x, double y) {
-  PointData temp;
-
-  temp.slice = slice;
-  temp.x = x;
-  temp.y = y;
-
   if (ptNum > m_maxPtNum) m_maxPtNum = ptNum;
   if (slice > m_maxSlice) m_maxSlice = slice;
 
@@ -42,7 +36,6 @@ void MeshPointSet::addPointToSet(MeshPointSet::PointType pt, int slice, int ptNu
   if (!m_pointNumberList.contains(ptNum)) m_pointNumberList.append(ptNum);
 
   if (pt == PT_ICONTOUR) {
-    m_iContourPts.insert(ptNum, temp);
 
     checkForSpline( &(m_iSplineMap[0]), ptNum);
     checkForSpline( &(m_iSplineMap[1]), ptNum);
@@ -57,7 +50,6 @@ void MeshPointSet::addPointToSet(MeshPointSet::PointType pt, int slice, int ptNu
     }
 
   } else if (pt == PT_OCONTOUR){
-    m_oContourPts.insert(ptNum, temp);
 
     checkForSpline( &(m_oSplineMap[0]), ptNum);
     checkForSpline( &(m_oSplineMap[1]), ptNum);
@@ -76,23 +68,6 @@ void MeshPointSet::addPointToSet(MeshPointSet::PointType pt, int slice, int ptNu
 
 }
 
-
-QList<MeshPointSet::PointData> MeshPointSet::getPointByNumber(MeshPointSet::PointType pt, int ptNum) {
-  QList<PointData> vals;
-
-
-  if (ptNum <= m_maxPtNum) {
-    if (pt == PT_ICONTOUR) {
-      vals = m_iContourPts.values(ptNum);
-    } else if (pt == PT_OCONTOUR){
-      vals = m_oContourPts.values(ptNum);
-    } else {
-      // Just return an empty list
-    }
-  }
-
-  return vals;
-}
 
 double MeshPointSet::getInterpolateXValue(PointType pt, double slice, int ptNum) {
   double res = 0.0;

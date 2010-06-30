@@ -20,15 +20,16 @@
 #ifndef RT_POLY_DATA_OBJECT_H
 #define RT_POLY_DATA_OBJECT_H
 
-#include "rtDataObject.h"
-#include "ui_polyDataOptions.h"
-
 #include <QList>
 #include <QTimer>
 
 #include <vtkPolyData.h>
 #include <vtkProperty.h>
 #include <vtkColorTransferFunction.h>
+
+#include "rtDataObject.h"
+#include "ui_polyDataOptions.h"
+#include "rtBasic3DPointData.h"
 
 //! Object that represents polygonal data
 /*!
@@ -40,15 +41,7 @@ Q_OBJECT
 
 public:
 
-  //! A point that is part of a set in the poly data.
-  struct PolyPoint {
-    //! The XYZ coordinate list
-    double ptList[3];
-    //! The RGB color for this point.
-    int color[3];
-  };
-
-  //! A link between two point the poly data.
+  //! A link between three poly data points.
   /*!
     To create polygonal data the points must be joined into polygons that will be rendered as surfaces.
 To join three points create an object such as this one and give the number of each point. Numbering starts at ZERO.
@@ -80,7 +73,7 @@ Points should be joined into triangles to be rendered.
   Long computations are performed in this function so resetting of the geometry should not be done all the time.
   @return True if the replacement was a success.
   */
-  bool setNewGeometry(QList<PolyPoint> *pts, QList<PolyPointLink> *links, int trigDelay=0);
+  bool setNewGeometry(QList<rtBasic3DPointData> *pts, QList<PolyPointLink> *links, int trigDelay=0);
   bool copyPolyData(vtkPolyData*);
   bool copyLookupTable(vtkColorTransferFunction*);
 

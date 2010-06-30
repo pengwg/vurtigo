@@ -39,6 +39,7 @@ public:
   rt3DPointBufferDataObject();
   ~rt3DPointBufferDataObject();
 
+  //! Get the handle to the point list.
   QList<rtBasic3DPointData>* getPointList() { return &m_pointList; }
 
   //! Get a handle to the point at a particular location in 3D.

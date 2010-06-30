@@ -17,15 +17,7 @@ public:
       PT_OCONTOUR,
     };
 
-    struct PointData {
-      int slice;
-      double x;
-      double y;
-    };
-
     void addPointToSet(PointType pt, int slice, int ptNum, double x, double y);
-
-    QList<PointData> getPointByNumber(PointType pt, int ptNum);
 
     int getMaxPtNum() { return m_maxPtNum; }
     int getMaxSlice() { return m_maxSlice; }
@@ -42,10 +34,6 @@ protected:
 
   //! A list of all the point numbers used.
   QList<int> m_pointNumberList;
-
-  // Mapped by point number.
-  QMultiMap<int, PointData> m_iContourPts;
-  QMultiMap<int, PointData> m_oContourPts;
 
   // Mapped by point number
   QMap<int, vtkKochanekSpline*> m_iSplineMap[2];

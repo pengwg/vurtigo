@@ -17,6 +17,12 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
+
+#include <vtkImageSinusoidSource.h>
+#include <vtkColorTransferFunction.h>
+
+#include <QList>
+
 #include "TestSuiteBasic.h"
 #include "rtBaseHandle.h"
 #include "objTypes.h"
@@ -31,10 +37,7 @@
 #include "rtPieceFuncDataObject.h"
 #include "rtBasic3DPointData.h"
 
-#include "vtkImageSinusoidSource.h"
-#include "vtkColorTransferFunction.h"
 
-#include <QList>
 
 TestSuiteBasic::TestSuiteBasic() {
   m_imgPeriod = 30;
@@ -266,49 +269,39 @@ void TestSuiteBasic::run() {
       emit sendOutput("Could Not Get Poly Object! FAIL!");
     } else {
       emit sendOutput("Load Poly Object Surfaces...");
-      rtPolyDataObject::PolyPoint tempPt;
+      rtBasic3DPointData tempPt;
       rtPolyDataObject::PolyPointLink tempLink;
-      QList<rtPolyDataObject::PolyPoint> ptList;
+      QList<rtBasic3DPointData> ptList;
       QList<rtPolyDataObject::PolyPointLink> linkList;
 
-      tempPt.ptList[0] = 0.0;
-      tempPt.ptList[1] = 0.0;
-      tempPt.ptList[2] = 0.0;
-      tempPt.color[0] = 255;
-      tempPt.color[1] = 0;
-      tempPt.color[2] = 0;
+      tempPt.setX(0.0);
+      tempPt.setY(0.0);
+      tempPt.setZ(0.0);
+      tempPt.setColor(1.0, 0.0, 0.0);
       ptList.push_back(tempPt);
 
-      tempPt.ptList[0] = 10.0;
-      tempPt.ptList[1] = 0.0;
-      tempPt.ptList[2] = 0.0;
-      tempPt.color[0] = 0;
-      tempPt.color[1] = 255;
-      tempPt.color[2] = 0;
+      tempPt.setX(10.0);
+      tempPt.setY(0.0);
+      tempPt.setZ(0.0);
+      tempPt.setColor(0.0, 1.0, 0.0);
       ptList.push_back(tempPt);
 
-      tempPt.ptList[0] = 0.0;
-      tempPt.ptList[1] = 10.0;
-      tempPt.ptList[2] = 0.0;
-      tempPt.color[0] = 0;
-      tempPt.color[1] = 0;
-      tempPt.color[2] = 255;
+      tempPt.setX(0.0);
+      tempPt.setY(10.0);
+      tempPt.setZ(0.0);
+      tempPt.setColor(0.0, 0.0, 1.0);
       ptList.push_back(tempPt);
 
-      tempPt.ptList[0] = 15.0;
-      tempPt.ptList[1] = 15.0;
-      tempPt.ptList[2] = -10.0;
-      tempPt.color[0] = 255;
-      tempPt.color[1] = 0;
-      tempPt.color[2] = 0;
+      tempPt.setX(15.0);
+      tempPt.setY(15.0);
+      tempPt.setZ(-10.0);
+      tempPt.setColor(1.0, 0.0, 0.0);
       ptList.push_back(tempPt);
 
-      tempPt.ptList[0] = 0.0;
-      tempPt.ptList[1] = 0.0;
-      tempPt.ptList[2] = -10.0;
-      tempPt.color[0] = 128;
-      tempPt.color[1] = 128;
-      tempPt.color[2] = 128;
+      tempPt.setX(0.0);
+      tempPt.setY(0.0);
+      tempPt.setZ(-10.0);
+      tempPt.setColor(0.5, 0.5, 0.5);
       ptList.push_back(tempPt);
 
       tempLink.threeVertex[0] = 0;
