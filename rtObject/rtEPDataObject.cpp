@@ -50,34 +50,6 @@ rtEPDataObject::rtEPDataObject()
   if (m_threadCount == -1) m_threadCount = 1;
 
   setupGUI();
-
-
-  ///// TEST ///////////
-  rtEPPropertyPointList::InfoPoint p;
-  p.location[0] = -9.5;
-  p.location[1] = -38.0;
-  p.location[2] = 84.2;
-  p.property = 15;
-  addInfoPoint(p, "TEST");
-
-  p.location[0] = -9.5;
-  p.location[1] = -38.0;
-  p.location[2] = 85.2;
-  p.property = 15;
-  addInfoPoint(p, "TEST");
-
-  p.location[0] = -9.5;
-  p.location[1] = -38.0;
-  p.location[2] = 89.2;
-  p.property = 5;
-  addInfoPoint(p, "TEST");
-
-  p.location[0] = -10.5;
-  p.location[1] = -38.0;
-  p.location[2] = 87.2;
-  p.property = 7;
-  addInfoPoint(p, "TEST");
-  ////////// END TEST ///////////
 }
 
 //! Destructor
@@ -360,17 +332,17 @@ vtkProperty* rtEPDataObject::getMeshProperty() {
 }
 
 
-void rtEPDataObject::addInfoPoint(rtEPPropertyPointList::InfoPoint point, QString name) {
-  m_EPInfoObject.addInfoPoint(point, name);
+void rtEPDataObject::addInfoPoint(rtNamedInfoPointData  point) {
+  m_EPInfoObject.addInfoPoint(point);
   int numElem = m_optionsWidget.colorByComboBox->count();
   bool found = false;
 
   // Check if the item exists
   for (int ix1=0; ix1<numElem; ix1++) {
-    if (m_optionsWidget.colorByComboBox->itemText(ix1) == name) found = true;
+    if (m_optionsWidget.colorByComboBox->itemText(ix1) == point.getName()) found = true;
   }
   // Add it if the item does not exist.
-  if (!found) m_optionsWidget.colorByComboBox->insertItem(numElem, name);
+  if (!found) m_optionsWidget.colorByComboBox->insertItem(numElem, point.getName());
 }
 
 bool rtEPDataObject::saveFile(QFile *file) {

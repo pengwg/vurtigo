@@ -24,7 +24,7 @@
 #include <vtkMath.h>
 
 rtEPInfoObject::rtEPInfoObject()
-    : m_radius(25)
+ : m_radius(25)
 {
   m_defaultColorFunc = vtkColorTransferFunction::New();
   m_defaultColorFunc->AddRGBPoint(0.0, 0.0, 0.0, 1.0);
@@ -49,22 +49,22 @@ rtEPInfoObject::~rtEPInfoObject() {
 }
 
 
-void rtEPInfoObject::addInfoPoint(rtEPPropertyPointList::InfoPoint p, QString propName) {
+void rtEPInfoObject::addInfoPoint(rtNamedInfoPointData p) {
   if (m_pointLists.isEmpty()) {
-    rtEPPropertyPointList* temp = new rtEPPropertyPointList(propName);
-    m_pointLists.insert(propName, temp);
+    rtEPPropertyPointList* temp = new rtEPPropertyPointList(p.getName());
+    m_pointLists.insert(p.getName(), temp);
     temp->addPointToList(p);
-    m_currentPropertyName = propName;
-  } else if(m_pointLists.contains(propName)) {
-    m_pointLists.value(propName)->addPointToList(p);
+    m_currentPropertyName = p.getName();
+  } else if(m_pointLists.contains(p.getName())) {
+    m_pointLists.value(p.getName())->addPointToList(p);
   } else {
-    rtEPPropertyPointList* temp = new rtEPPropertyPointList(propName);
-    m_pointLists.insert(propName, temp);
+    rtEPPropertyPointList* temp = new rtEPPropertyPointList(p.getName());
+    m_pointLists.insert(p.getName(), temp);
     temp->addPointToList(p);
   }
 }
 
-bool rtEPInfoObject::getInfoPoint(double x, double y, double z, rtEPPropertyPointList::InfoPoint &p, QString propName) {
+bool rtEPInfoObject::getInfoPoint(double x, double y, double z, rtNamedInfoPointData &p, QString propName) {
   if(m_pointLists.contains(propName)) {
     return m_pointLists.value(propName)->getInfoPoint(x, y, z, p);
   } else {
@@ -72,7 +72,7 @@ bool rtEPInfoObject::getInfoPoint(double x, double y, double z, rtEPPropertyPoin
   }
 }
 
-bool rtEPInfoObject::removeInfoPoint(double x, double y, double z, rtEPPropertyPointList::InfoPoint &p, QString propName) {
+bool rtEPInfoObject::removeInfoPoint(double x, double y, double z, rtNamedInfoPointData &p, QString propName) {
   if(m_pointLists.contains(propName)) {
     return m_pointLists.value(propName)->removeInfoPoint(x, y, z, p);
   } else {
@@ -103,7 +103,7 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
   float val;
   vtkIdType numPts;
   double weightSum=0.0;
-  double tempPT[3];
+  double tempPT[3], currLocation[3];
   double currDist;
   double propValueDiff = ptList->getMaxValue()-ptList->getMinValue();
 
@@ -116,11 +116,16 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
     data->GetPoint(currID, tempPT);
 
     for (int ix1=0; ix1<ptList->getNumPoints(); ix1++) {
-      rtEPPropertyPointList::InfoPoint pt = ptList->getPointAt(ix1);
-      currDist = vtkMath::Distance2BetweenPoints(tempPT, pt.location);
+      rtNamedInfoPointData pt = ptList->getPointAt(ix1);
+
+      currLocation[0] = pt.getX();
+      currLocation[1] = pt.getY();
+      currLocation[2] = pt.getZ();
+
+      currDist = vtkMath::Distance2BetweenPoints(tempPT, currLocation);
       if (currDist < 0.01) currDist = 0.01;
       if (currDist < m_radius) {
-        val += (((double)(pt.property - ptList->getMinValue()))/propValueDiff)*(m_radius/currDist);
+        val += (((double)(pt.getValue() - ptList->getMinValue()))/propValueDiff)*(m_radius/currDist);
         weightSum += (m_radius/currDist);
       }
     }
@@ -187,16 +192,16 @@ void rtEPInfoObject::updatePointPolyData() {
   m_pointPolyData->RemoveAllInputs();
 
   for (int ix1=0; ix1<ptList->getNumPoints(); ix1++) {
-    rtEPPropertyPointList::InfoPoint pt = ptList->getPointAt(ix1);
+    rtNamedInfoPointData pt = ptList->getPointAt(ix1);
     temp = vtkSphereSource::New();
     scalars = vtkDataArray::CreateDataArray(VTK_DOUBLE);
     m_sphereList.append(temp);
     m_sphereScalarList.append(scalars);
-    temp->SetCenter(pt.location);
+    temp->SetCenter(pt.getX(), pt.getY(), pt.getZ());
     poly = temp->GetOutput();
     poly->Update();
 
-    scalarValue = ((double)(pt.property - ptList->getMinValue()))/propValueDiff;
+    scalarValue = ((double)(pt.getValue() - ptList->getMinValue()))/propValueDiff;
     for (int ptNum=0; ptNum < poly->GetNumberOfPoints(); ptNum++) {
       scalars->InsertNextTuple(&scalarValue);
     }

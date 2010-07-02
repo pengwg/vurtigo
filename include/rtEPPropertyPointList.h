@@ -1,18 +1,34 @@
+/*******************************************************************************
+    Vurtigo: Visualization software for interventional applications in medicine
+    Copyright (C) 2009 Sunnybrook Health Sciences Centre
+
+    This file is part of Vurtigo.
+
+    Vurtigo is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*******************************************************************************/
+
 #ifndef RTEPPROPERTYPOINTLIST_H
 #define RTEPPROPERTYPOINTLIST_H
 
 #include <QString>
 #include <QList>
 
+#include "rtNamedInfoPointData.h"
+
 class rtEPPropertyPointList
 {
  public:
-
-  //! Structure that contains some kind of EP info at a certain point.
-  struct InfoPoint{
-    double location[3];
-    double property;
-  };
 
   //! Constructor
   rtEPPropertyPointList(QString name);
@@ -22,7 +38,7 @@ class rtEPPropertyPointList
   /*!
     Adding a point will update the min and max values for this property.
     */
-  void addPointToList(InfoPoint p);
+  void addPointToList(rtNamedInfoPointData p);
 
   //! Get the point at the specified set of 3d coordinates
   /*!
@@ -32,9 +48,9 @@ class rtEPPropertyPointList
     \param p The point that is found will be stored in p.
     \return True if a point is found at that location. False otherwise.
     */
-  bool getInfoPoint(double x,double y,double z,InfoPoint& p);
+  bool getInfoPoint(double x,double y,double z,rtNamedInfoPointData& p);
 
-  bool removeInfoPoint(double,double,double,InfoPoint&);
+  bool removeInfoPoint(double,double,double,rtNamedInfoPointData&);
 
   void clearPointList();
 
@@ -45,14 +61,14 @@ class rtEPPropertyPointList
   double getMaxValue() { return m_maxPropValue; }
 
   //! Get the point at a position in the list.
-  InfoPoint getPointAt(int pos) { return m_infoList.at(pos); }
+  rtNamedInfoPointData getPointAt(int pos) { return m_infoList.at(pos); }
 
  protected:
 
   //! The name of this property
   QString m_propName;
   //! List of points that hold EP info
-  QList<InfoPoint> m_infoList;
+  QList<rtNamedInfoPointData> m_infoList;
   //! Max value of the property
   double m_maxPropValue;
   //! Minimum value of the property

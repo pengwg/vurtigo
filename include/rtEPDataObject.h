@@ -147,7 +147,7 @@ public:
   void deletePhase(int phaseNum);
 
   //! Add a point with related EP info
-  void addInfoPoint(rtEPPropertyPointList::InfoPoint point, QString name);
+  void addInfoPoint(rtNamedInfoPointData point);
 
   //! Check if the info points should be shown
   bool showInfoPoints() { return m_showInfoPoints; }

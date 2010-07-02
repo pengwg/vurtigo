@@ -27,6 +27,7 @@
 #include <vtkSphereSource.h>
 
 #include "rtEPPropertyPointList.h"
+#include "rtNamedInfoPointData.h"
 
 class rtEPInfoObject
 {
@@ -38,10 +39,10 @@ class rtEPInfoObject
     vtkColorTransferFunction* getColorFunction() { return m_defaultColorFunc; }
 
     //! Add an EP info point to the list of saved points.
-    void addInfoPoint(rtEPPropertyPointList::InfoPoint p, QString propName);
+    void addInfoPoint(rtNamedInfoPointData p);
 
-    bool getInfoPoint(double,double,double,rtEPPropertyPointList::InfoPoint&, QString propName);
-    bool removeInfoPoint(double,double,double,rtEPPropertyPointList::InfoPoint&, QString propName);
+    bool getInfoPoint(double,double,double,rtNamedInfoPointData&, QString propName);
+    bool removeInfoPoint(double,double,double,rtNamedInfoPointData&, QString propName);
     void clearPointList(QString propName);
 
     bool updateScalars(vtkPolyData*);
