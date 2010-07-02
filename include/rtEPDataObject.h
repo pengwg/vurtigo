@@ -20,11 +20,6 @@
 #ifndef RT_EP_DATA_OBJECT_H
 #define RT_EP_DATA_OBJECT_H
 
-#include "rtDataObject.h"
-#include "rtEPInfoObject.h"
-#include "ui_EPOptions.h"
-#include "cineWidget.h"
-
 #include <QMultiMap>
 #include <QMap>
 #include <QList>
@@ -38,6 +33,12 @@
 #include <vtkTransform.h>
 #include <vtkPoints.h>
 
+#include "rtDataObject.h"
+#include "rtEPInfoObject.h"
+#include "ui_EPOptions.h"
+#include "cineWidget.h"
+#include "rtCardiacMeshPointData.h"
+
 //! Object that represents electro phisiological data
 /*!
   EP Data object.
@@ -48,17 +49,11 @@ Q_OBJECT
 
 public:
 
-  //! A single EP mesh point in 3D space
-  struct EPPoint {
-    unsigned int loc;
-    double x, y, z;
-  };
-
   //! All of the data for a single phase.
   struct PhaseData{
     int triggerDelay;
     //! Point list sorted and mapped by slice.
-    QMultiMap <int, EPPoint> pointList;
+    QMultiMap <int, rtCardiacMeshPointData> pointList;
     //! Poly data representing the points.
     vtkPolyData* pointData;
     vtkProperty* pointProperty;
@@ -97,10 +92,10 @@ public:
   bool setTriggerDelay(int phase, int trigger);
 
   //! Add a point to the mesh.
-  bool addPoint(int phase, int slice, EPPoint pt);
+  bool addPoint(rtCardiacMeshPointData pt);
 
   //! Get the list of points for a particular phase and slice.
-  QList<EPPoint> getPoints(int phase, int slice);
+  QList<rtCardiacMeshPointData> getPoints(int phase, int slice);
 
   //! Get the point data for the current phase
   /*!
@@ -234,9 +229,9 @@ public:
   int m_threadCount;
 
   //! Minimum slice number
-  int m_minSliceNum;
+  unsigned int m_minSliceNum;
   //! Maximum slice number
-  int m_maxSliceNum;
+  unsigned int m_maxSliceNum;
 
   //! Object to hold all of the points that have EP info.
   rtEPInfoObject m_EPInfoObject;

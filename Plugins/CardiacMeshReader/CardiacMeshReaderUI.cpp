@@ -31,6 +31,7 @@
 #include "rtBaseHandle.h"
 #include "DICOMFileReader.h"
 #include "rtBasic3DPointData.h"
+#include "rtCardiacMeshPointData.h"
 
 CardiacMeshReaderUI::CardiacMeshReaderUI() {
   setupUi(this);
@@ -379,7 +380,7 @@ bool CardiacMeshReaderUI::loadEPMeshFromPoints(rtEPDataObject* data, MeshPointSe
   if(!data) return false;
 
   int numPhases=m_customReader.getTriggerList()->size();
-  rtEPDataObject::EPPoint tempPT;
+  rtCardiacMeshPointData tempPT;
 
   double space[3];
   double pt[3];
@@ -400,20 +401,25 @@ bool CardiacMeshReaderUI::loadEPMeshFromPoints(rtEPDataObject* data, MeshPointSe
 
     data->setTriggerDelay(ix1, m_customReader.getTriggerList()->at(ix1));
 
+    tempPT.setPhase(ix1);
+    tempPT.setTriggerDelay(m_customReader.getTriggerList()->at(ix1));
+
     for (double curvePos=minSliceSlider->value(); curvePos<=maxSliceSlider->value(); curvePos++) {
+      tempPT.setSlice(curvePos);
+
       for (int ix2=0; ix2<=currPhase->getMaxPtNum(); ix2++) {
-        tempPT.loc = ix2;
+        tempPT.setLocation(ix2);
 
         pt[0] = (currPhase->getInterpolateXValue(type, curvePos, ix2)-1)*space[0];
         pt[1] = (currPhase->getInterpolateYValue(type, curvePos, ix2)-1)*space[1];
         pt[2] = (curvePos*space[2]+0.0f*space[2]);
 
         trans->TransformPoint(pt, pt);
-        tempPT.x = pt[0];
-        tempPT.y = pt[1];
-        tempPT.z = pt[2];
+        tempPT.setX(pt[0]);
+        tempPT.setY(pt[1]);
+        tempPT.setZ(pt[2]);
 
-        data->addPoint(ix1, curvePos, tempPT);
+        data->addPoint(tempPT);
       }
     }
   }

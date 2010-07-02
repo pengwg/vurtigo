@@ -262,7 +262,12 @@ void rtEPDataObject::update() {
 
 }
 
-bool rtEPDataObject::addPoint(int phase, int slice, rtEPDataObject::EPPoint pt) {
+bool rtEPDataObject::addPoint(rtCardiacMeshPointData pt) {
+  unsigned int phase, slice;
+
+  phase = pt.getPhase();
+  slice = pt.getSlice();
+
   if(phase < 0) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Phase is negative: ").append(QString::number(phase)));
     return false;
@@ -297,8 +302,8 @@ bool rtEPDataObject::addPoint(int phase, int slice, rtEPDataObject::EPPoint pt) 
   return true;
 }
 
-QList<rtEPDataObject::EPPoint> rtEPDataObject::getPoints(int phase, int slice) {
-  QList<rtEPDataObject::EPPoint> errorList;
+QList<rtCardiacMeshPointData> rtEPDataObject::getPoints(int phase, int slice) {
+  QList<rtCardiacMeshPointData> errorList;
   errorList.clear();
   if(phase < 0) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Phase is negative: ").append(QString::number(phase)));
@@ -625,7 +630,7 @@ void rtEPDataObject::updatePointData(int updatePhase) {
   if (m_phaseDataList[updatePhase].pointDataUpdate) {
     vtkPoints* pts = m_phaseDataList[updatePhase].pointData->GetPoints();
     vtkCellArray* cells = m_phaseDataList[updatePhase].pointData->GetVerts();
-    QList<EPPoint> tempPT;
+    QList<rtCardiacMeshPointData> tempPT;
     vtkIdType pID;
 
     // Clear the previous lists.
@@ -639,7 +644,7 @@ void rtEPDataObject::updatePointData(int updatePhase) {
 
       tempPT = m_phaseDataList.value(updatePhase).pointList.values(slices[ix1]);
       for (int ix2=0; ix2<tempPT.size(); ix2++) {
-        pID = pts->InsertNextPoint(tempPT.at(ix2).x, tempPT.at(ix2).y, tempPT.at(ix2).z);
+        pID = pts->InsertNextPoint(tempPT[ix2].getX(), tempPT[ix2].getY(), tempPT[ix2].getZ());
         cells->InsertNextCell(1, &pID);
       }
     }
@@ -662,7 +667,7 @@ void rtEPDataObject::updateMeshData(int updatePhase) {
   rtApplication::instance().getMessageHandle()->debug(QString("Start Updating Mesh Data"));
 
     if (m_phaseDataList[updatePhase].meshDataUpdate) {
-      QList<EPPoint> tempPT, tempPT2;
+      QList<rtCardiacMeshPointData> tempPT, tempPT2;
       QList<int> slices = m_phaseDataList.value(updatePhase).pointList.uniqueKeys();
       vtkKochanekSpline *tempSpline[3];
       int maxSlice = 0;
@@ -690,12 +695,12 @@ void rtEPDataObject::updateMeshData(int updatePhase) {
         }
 
         for (int ix2=0; ix2<tempPT.size(); ix2++) {
-          tempSpline[0]->AddPoint(tempPT.at(ix2).loc, tempPT.at(ix2).x);
-          tempSpline[1]->AddPoint(tempPT.at(ix2).loc, tempPT.at(ix2).y);
-          tempSpline[2]->AddPoint(tempPT.at(ix2).loc, tempPT.at(ix2).z);
+          tempSpline[0]->AddPoint(tempPT[ix2].getLocation(), tempPT[ix2].getX());
+          tempSpline[1]->AddPoint(tempPT[ix2].getLocation(), tempPT[ix2].getY());
+          tempSpline[2]->AddPoint(tempPT[ix2].getLocation(), tempPT[ix2].getZ());
 
           // Determine the maximum position.
-          if (tempPT.at(ix2).loc > maxPos) maxPos = tempPT.at(ix2).loc;
+          if (tempPT[ix2].getLocation() > maxPos) maxPos = tempPT[ix2].getLocation();
         }
       }
 
