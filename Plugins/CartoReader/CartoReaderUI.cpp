@@ -17,22 +17,25 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
+
+#include <iostream>
+
 #include <QFileDialog>
+
+#include <vtkSurfaceReconstructionFilter.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkCell.h>
+#include <vtkDelaunay3D.h>
+#include <vtkUnstructuredGrid.h>
 
 #include "rtBaseHandle.h"
 #include "CartoFileReader.h"
 #include "CartoReaderUI.h"
 #include "rt3dPointBufferDataObject.h"
 #include "rtBasic3DPointData.h"
+#include "rtCartoPointData.h"
 
-#include <iostream>
-
-#include "vtkSurfaceReconstructionFilter.h"
-#include "vtkPoints.h"
-#include "vtkPolyData.h"
-#include "vtkCell.h"
-#include "vtkDelaunay3D.h"
-#include "vtkUnstructuredGrid.h"
 
 CartoReaderUI::CartoReaderUI() {
   setupUi(this);
@@ -75,7 +78,7 @@ void CartoReaderUI::connectSignals() {
 }
 
 void CartoReaderUI::resetTableInfo() {
-  QList<CartoFileReader::CartoPoint> pointList;
+  QList<rtCartoPointData> pointList;
   pointList = m_customReader.getPointSet();
 
   // There are no points.
@@ -97,47 +100,47 @@ void CartoReaderUI::resetTableInfo() {
   filePointsTableWidget->setRowCount(pointList.count());
   for (int ix1=0; ix1<pointList.count(); ix1++) {
     QTableWidgetItem *item = new QTableWidgetItem();
-    item->setText(QString::number(pointList[ix1].id));
+    item->setText(QString::number(pointList[ix1].getPointId()));
     filePointsTableWidget->setItem(ix1, 0, item);
 
     QTableWidgetItem *itemx = new QTableWidgetItem();
-    itemx->setText(QString::number(pointList[ix1].x));
+    itemx->setText(QString::number(pointList[ix1].getX()));
     filePointsTableWidget->setItem(ix1, 1, itemx);
 
     QTableWidgetItem *itemy = new QTableWidgetItem();
-    itemy->setText(QString::number(pointList[ix1].y));
+    itemy->setText(QString::number(pointList[ix1].getY()));
     filePointsTableWidget->setItem(ix1, 2, itemy);
 
     QTableWidgetItem *itemz = new QTableWidgetItem();
-    itemz->setText(QString::number(pointList[ix1].z));
+    itemz->setText(QString::number(pointList[ix1].getZ()));
     filePointsTableWidget->setItem(ix1, 3, itemz);
 
     QTableWidgetItem *trigDelay = new QTableWidgetItem();
-    trigDelay->setText(QString::number(pointList[ix1].triggerDelay));
+    trigDelay->setText(QString::number(pointList[ix1].getTriggerDelay()));
     filePointsTableWidget->setItem(ix1, 4, trigDelay);
 
     QTableWidgetItem *itemalpha = new QTableWidgetItem();
-    itemalpha->setText(QString::number(pointList[ix1].alpha));
+    itemalpha->setText(QString::number(pointList[ix1].getAlpha()));
     filePointsTableWidget->setItem(ix1, 5, itemalpha);
 
     QTableWidgetItem *itembeta = new QTableWidgetItem();
-    itembeta->setText(QString::number(pointList[ix1].beta));
+    itembeta->setText(QString::number(pointList[ix1].getBeta()));
     filePointsTableWidget->setItem(ix1, 6, itembeta);
 
     QTableWidgetItem *itemgamma = new QTableWidgetItem();
-    itemgamma->setText(QString::number(pointList[ix1].gamma));
+    itemgamma->setText(QString::number(pointList[ix1].getGamma()));
     filePointsTableWidget->setItem(ix1, 7, itemgamma);
 
     QTableWidgetItem *itemuni = new QTableWidgetItem();
-    itemuni->setText(QString::number(pointList[ix1].uniPolar));
+    itemuni->setText(QString::number(pointList[ix1].getUniPolar()));
     filePointsTableWidget->setItem(ix1, 8, itemuni);
 
     QTableWidgetItem *itembi = new QTableWidgetItem();
-    itembi->setText(QString::number(pointList[ix1].biPolar));
+    itembi->setText(QString::number(pointList[ix1].getBiPolar()));
     filePointsTableWidget->setItem(ix1, 9, itembi);
 
     QTableWidgetItem *itemLAT = new QTableWidgetItem();
-    itemLAT->setText(QString::number(pointList[ix1].LAT));
+    itemLAT->setText(QString::number(pointList[ix1].getLAT()));
     filePointsTableWidget->setItem(ix1, 10, itemLAT);
   }
 }
@@ -163,7 +166,7 @@ void CartoReaderUI::loadXmlFile() {
 
 
 void CartoReaderUI::saveAsPoints() {
-  QList<CartoFileReader::CartoPoint> pointList;
+  QList<rtCartoPointData> pointList;
   double tempColor[3];
   pointList = m_customReader.getPointSet();
 
@@ -179,12 +182,12 @@ void CartoReaderUI::saveAsPoints() {
     if (ptObj) {
       ptObj->lock();
       for (int ix1=0; ix1<pointList.count(); ix1++) {
-        sp.setPointId(pointList[ix1].id);
-        sp.setX(pointList[ix1].x);
-        sp.setY(pointList[ix1].y);
-        sp.setZ(pointList[ix1].z);
+        sp.setPointId(pointList[ix1].getPointId());
+        sp.setX(pointList[ix1].getX());
+        sp.setY(pointList[ix1].getY());
+        sp.setZ(pointList[ix1].getZ());
 
-        this->selectPointColor(pointList[ix1].biPolar, tempColor);
+        this->selectPointColor(pointList[ix1].getBiPolar(), tempColor);
         sp.getProperty()->SetColor(tempColor);
 
         ptObj->addPoint(sp);
@@ -213,7 +216,7 @@ void CartoReaderUI::saveAsPoints() {
 }
 
 void CartoReaderUI::saveAsSurface() {
-  QList<CartoFileReader::CartoPoint> pointList;
+  QList<rtCartoPointData> pointList;
   QList<rtPolyDataObject::PolyPointLink> linkList;
   bool checkBoxState[3];
   QString SurfType[3];
@@ -237,7 +240,7 @@ void CartoReaderUI::saveAsSurface() {
 
   // Save the points.
   for (int ix1=0; ix1<pointList.count(); ix1++) {
-    pts->SetPoint(ix1, pointList[ix1].x, pointList[ix1].y, pointList[ix1].z);
+    pts->SetPoint(ix1, pointList[ix1].getX(), pointList[ix1].getY(), pointList[ix1].getZ());
   }
   // Find the polygons
   runVtkDelaunay(pts, linkList);
@@ -265,17 +268,17 @@ void CartoReaderUI::saveAsSurface() {
 
       // Save the point list and the colors
       for (int ix2=0; ix2<pointList.count(); ix2++) {
-        tempPt.setX(pointList[ix2].x);
-        tempPt.setY(pointList[ix2].y);
-        tempPt.setZ(pointList[ix2].z);
+        tempPt.setX(pointList[ix2].getX());
+        tempPt.setY(pointList[ix2].getY());
+        tempPt.setZ(pointList[ix2].getZ());
         if (ix1==0) {
-          double uni = (pointList[ix2].uniPolar-m_customReader.getMinUniPolar())/(m_customReader.getMaxUniPolar()-m_customReader.getMinUniPolar());
+          double uni = (pointList[ix2].getUniPolar()-m_customReader.getMinUniPolar())/(m_customReader.getMaxUniPolar()-m_customReader.getMinUniPolar());
           tempPt.setColor(uni, 0.0, 1.0-uni);
         } else if (ix1==1) {
-          double biPol = (pointList[ix2].biPolar-m_customReader.getMinBiPolar())/(m_customReader.getMaxBiPolar()-m_customReader.getMinBiPolar());
+          double biPol = (pointList[ix2].getBiPolar()-m_customReader.getMinBiPolar())/(m_customReader.getMaxBiPolar()-m_customReader.getMinBiPolar());
           tempPt.setColor(biPol, 0.0, 1.0-biPol);
         } else if (ix1==2) {
-          double minLat = ((double)(pointList[ix2].LAT-m_customReader.getMinLAT()))/((double)(m_customReader.getMaxLAT()-m_customReader.getMinLAT()));
+          double minLat = ((double)(pointList[ix2].getLAT()-m_customReader.getMinLAT()))/((double)(m_customReader.getMaxLAT()-m_customReader.getMinLAT()));
           tempPt.setColor(minLat, 0.0, 1.0-minLat);
         }
         ptList.push_back(tempPt);
@@ -338,8 +341,12 @@ void CartoReaderUI::filterByTriggerDelay() {
   if (!ptObj) return;
 
   rtBasic3DPointData sp;
-  QList<CartoFileReader::CartoPoint> pointList;
+  QList<rtCartoPointData> pointList;
   double tempColor[3];
+
+  unsigned int minTrig, maxTrig;
+  minTrig = ((unsigned int)minTrigSpinBox->value());
+  maxTrig = ((unsigned int)maxTrigSpinBox->value());
 
   pointList = m_customReader.getPointSet();
   sp.setPointSize(1.0);
@@ -349,14 +356,14 @@ void CartoReaderUI::filterByTriggerDelay() {
   ptObj->removeAllPoints();
   for (int ix1=0; ix1<pointList.count(); ix1++) {
 
-    if (pointList[ix1].triggerDelay >= minTrigSpinBox->value() && pointList[ix1].triggerDelay <= maxTrigSpinBox->value() ) {
+    if (pointList[ix1].getTriggerDelay() >= minTrig && pointList[ix1].getTriggerDelay() <= maxTrig ) {
 
-      sp.setPointId(pointList[ix1].id);
-      sp.setX(pointList[ix1].x);
-      sp.setY(pointList[ix1].y);
-      sp.setZ(pointList[ix1].z);
+      sp.setPointId(pointList[ix1].getPointId());
+      sp.setX(pointList[ix1].getX());
+      sp.setY(pointList[ix1].getY());
+      sp.setZ(pointList[ix1].getZ());
 
-      this->selectPointColor(pointList[ix1].biPolar, tempColor);
+      this->selectPointColor(pointList[ix1].getBiPolar(), tempColor);
       sp.getProperty()->SetColor(tempColor);
 
       ptObj->addPoint(sp);

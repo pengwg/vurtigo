@@ -75,6 +75,20 @@ void rt3DPointBufferDataObject::removePoint(rtBasic3DPointData sp) {
   }
 }
 
+void rt3DPointBufferDataObject::addCartoPoint(rtCartoPointData pt) {
+  m_cartoPointList.append(pt);
+  Modified();
+}
+
+void rt3DPointBufferDataObject::removeCartoPoint(rtCartoPointData pt) {
+  int i;
+
+  if (m_cartoPointList.contains(pt)) {
+    i = m_cartoPointList.indexOf(pt);
+    m_cartoPointList.removeAt(i);
+    Modified();
+  }
+}
 
 //! Send the info to the GUI
 /*!

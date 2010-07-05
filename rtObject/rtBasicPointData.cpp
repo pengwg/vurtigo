@@ -56,7 +56,7 @@ rtBasicPointData& rtBasicPointData::operator=(const rtBasicPointData& sp) {
     m_coords = sp.m_coords;
     m_pSize = sp.m_pSize;
 
-    m_pProp->Delete();
+    if(m_pProp) m_pProp->Delete();
     m_pProp = vtkProperty::New();
     m_pProp->DeepCopy(sp.m_pProp);
   }

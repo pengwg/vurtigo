@@ -22,6 +22,7 @@
 
 #include "rtDataObject.h"
 #include "rtBasic3DPointData.h"
+#include "rtCartoPointData.h"
 #include "ui_rt3DPointBuffer.h"
 
 #include <QList>
@@ -40,7 +41,10 @@ public:
   ~rt3DPointBufferDataObject();
 
   //! Get the handle to the point list.
-  QList<rtBasic3DPointData>* getPointList() { return &m_pointList; }
+  inline QList<rtBasic3DPointData>* getPointList() { return &m_pointList; }
+
+  //! Get a handle to the carto point list.
+  inline QList<rtCartoPointData>* getCartoPointList() { return &m_cartoPointList; }
 
   //! Get a handle to the point at a particular location in 3D.
   /*!
@@ -62,7 +66,11 @@ public:
   void addPoint(rtBasic3DPointData sp);
   void removePoint(rtBasic3DPointData sp);
 
+  void addCartoPoint(rtCartoPointData pt);
+  void removeCartoPoint(rtCartoPointData pt);
+
   inline void removeAllPoints() { m_pointList.clear(); Modified(); }
+  inline void removeAllCartoPoints() { m_cartoPointList.clear(); Modified(); }
 
   void update();
 
@@ -86,6 +94,9 @@ public:
   // Properties
   //! List of points in 3D space
   QList<rtBasic3DPointData> m_pointList;
+
+  //! List of carto points in space
+  QList<rtCartoPointData> m_cartoPointList;
 
   //! Global transform for all of the points.
   vtkTransform* m_pTransform;

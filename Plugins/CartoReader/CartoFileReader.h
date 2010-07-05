@@ -26,21 +26,13 @@
 
 #include <vtkTransform.h>
 
+#include "rtCartoPointData.h"
+
 class CartoFileReader
 {
 public:
   CartoFileReader();
   ~CartoFileReader();
-
-  struct CartoPoint {
-    int id;
-    double x, y, z;
-    double alpha, beta, gamma;
-    double uniPolar;
-    double biPolar;
-    int LAT;
-    int triggerDelay;
-  };
 
   //! Read a particular carto file.
   /*! Read the file with the name fName. Will return true if the file was read as expected and false otherwise. Note that this function will still return true if an empty carto file was read. As a result it is important to check the point list to verify that there exists at least one point in the list.
@@ -53,10 +45,10 @@ public:
   bool readXmlFile(QString fName);
 
   //! Get a list of all the carto points loaded by the reader.
-  QList<CartoPoint> getPointSet();
+  QList<rtCartoPointData> getPointSet();
 
   //! Get the point with a specific ID.
-  inline CartoPoint getPointWithId(int id) { return m_pointList.value(id); }
+  inline rtCartoPointData getPointWithId(int id) { return m_pointList.value(id); }
 
   //! Get the name of the dataset.
   /*! The name of the dataset is taken from the first line of the file. Carto files have one line of text at the top that does not have any point informtaion. */
@@ -68,12 +60,12 @@ public:
   double getMaxBiPolar() { return m_maxBiPolar; }
   int getMinLAT() { return m_minLAT; }
   int getMaxLAT() { return m_maxLAT; }
-  int getMinTrigDelay() { return m_minTrigDelay; }
-  int getMaxTrigDelay() { return m_maxTrigDelay; }
+  unsigned int getMinTrigDelay() { return m_minTrigDelay; }
+  unsigned int getMaxTrigDelay() { return m_maxTrigDelay; }
 
 protected:
   //! A map between an object ID and the object itself.
-  QMap<int, CartoPoint> m_pointList;
+  QMap<int, rtCartoPointData> m_pointList;
 
   //! The name of the dataset which is found on the first line of the file.
   QString m_dataName;
@@ -94,10 +86,10 @@ protected:
   int m_maxLAT;
 
   //! The minimum value for the trigger delay
-  int m_minTrigDelay;
+  unsigned int m_minTrigDelay;
 
   //! The maximum value for the trigger delay
-  int m_maxTrigDelay;
+  unsigned int m_maxTrigDelay;
 
   //! Flag to determine if a valid flag has been loaded.
   bool m_fileLoaded;

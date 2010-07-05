@@ -21,8 +21,14 @@
 #include "rtBasic3DPointData.h"
 
 rtBasic3DPointData::rtBasic3DPointData()
+ : m_pTransform(0)
 {
   this->setDimention(3);
+  m_pTransform = vtkTransform::New();
+}
+
+rtBasic3DPointData::~rtBasic3DPointData() {
+  if (m_pTransform) m_pTransform->Delete();
 }
 
 rtBasic3DPointData::rtBasic3DPointData(const rtBasic3DPointData& sp)
@@ -31,10 +37,13 @@ rtBasic3DPointData::rtBasic3DPointData(const rtBasic3DPointData& sp)
   m_coords[0] = sp.m_coords[0];
   m_coords[1] = sp.m_coords[1];
   m_coords[2] = sp.m_coords[2];
+
+  m_pTransform = vtkTransform::New();
+  m_pTransform->DeepCopy(sp.m_pTransform);
 }
 
 bool rtBasic3DPointData::operator==(const rtBasic3DPointData &other) const {
-  return rtBasicPointData::operator==(other) && m_coords[0]==other.m_coords[0] && m_coords[1]==other.m_coords[1] && m_coords[2]==other.m_coords[2];
+  return rtBasicPointData::operator==(other) && m_coords[0]==other.m_coords[0] && m_coords[1]==other.m_coords[1] && m_coords[2]==other.m_coords[2] && m_pTransform == other.m_pTransform;
 }
 
 rtBasic3DPointData& rtBasic3DPointData::operator=(const rtBasic3DPointData& sp) {
@@ -43,6 +52,35 @@ rtBasic3DPointData& rtBasic3DPointData::operator=(const rtBasic3DPointData& sp) 
     m_coords[0]=sp.m_coords[0];
     m_coords[1]=sp.m_coords[1];
     m_coords[2]=sp.m_coords[2];
+
+    if(m_pTransform) m_pTransform->Delete();
+    m_pTransform = vtkTransform::New();
+    m_pTransform->DeepCopy(sp.m_pTransform);
   }
   return *this;
+}
+
+double rtBasic3DPointData::getX() {
+  return m_coords[0];
+}
+
+double rtBasic3DPointData::getY() {
+  return m_coords[1];
+}
+
+double rtBasic3DPointData::getZ() {
+  return m_coords[2];
+}
+
+void rtBasic3DPointData::getPoint(double p[3]) {
+  p[0] = m_coords[0];
+  p[1] = m_coords[1];
+  p[2] = m_coords[2];
+}
+
+void rtBasic3DPointData::getTransformedPoint(double p[3]) {
+  p[0] = m_coords[0];
+  p[1] = m_coords[1];
+  p[2] = m_coords[2];
+  m_pTransform->TransformPoint(p, p);
 }

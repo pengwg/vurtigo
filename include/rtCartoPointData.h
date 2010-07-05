@@ -18,40 +18,43 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#ifndef RTBASIC3DPOINTDATA_H
-#define RTBASIC3DPOINTDATA_H
+#ifndef RTCARTOPOINTDATA_H
+#define RTCARTOPOINTDATA_H
 
-#include <vtkTransform.h>
+#include "rt3DTimePointData.h"
 
-#include "rtBasicPointData.h"
-
-class rtBasic3DPointData : public rtBasicPointData
+class rtCartoPointData : public rt3DTimePointData
 {
+
 public:
-  rtBasic3DPointData();
-  ~rtBasic3DPointData();
+  rtCartoPointData();
 
   //! Copy constructor
-  rtBasic3DPointData(const rtBasic3DPointData& sp);
+  rtCartoPointData(const rtCartoPointData& sp);
   //! Equals operator. Checks if two objects are equal.
-  bool operator==(const rtBasic3DPointData &other) const;
+  bool operator==(const rtCartoPointData &other) const;
   //! Assignment operator
-  rtBasic3DPointData& operator=(const rtBasic3DPointData& sp);
+  rtCartoPointData& operator=(const rtCartoPointData& sp);
 
-  inline void setX(double x) { m_coords[0] = x; }
-  inline void setY(double y) { m_coords[1] = y; }
-  inline void setZ(double z) { m_coords[2] = z; }
+  inline void setAlpha(double a) { m_alpha = a; }
+  inline void setBeta(double b) { m_beta = b; }
+  inline void setGamma(double c) { m_gamma = c; }
+  inline void setUniPolar(double uniPolar) { m_uniPolar = uniPolar; }
+  inline void setBiPolar(double biPolar) { m_biPolar = biPolar; }
+  inline void setLAT(int lat) { m_LAT = lat; }
 
-  double getX();
-  double getY();
-  double getZ();
-  void getPoint(double p[3]);
-  void getTransformedPoint(double p[3]);
-
-  inline vtkTransform* getTransform() { return m_pTransform; }
+  inline double getAlpha() { return m_alpha; }
+  inline double getBeta() { return m_beta; }
+  inline double getGamma() { return m_gamma; }
+  inline double getUniPolar() { return m_uniPolar; }
+  inline double getBiPolar() { return m_biPolar; }
+  inline double getLAT() { return m_LAT; }
 
 protected:
-  vtkTransform *m_pTransform;
+  double m_alpha, m_beta, m_gamma;
+  double m_uniPolar;
+  double m_biPolar;
+  int m_LAT;
 };
 
-#endif // RTBASIC3DPOINTDATA_H
+#endif // RTCARTOPOINTDATA_H

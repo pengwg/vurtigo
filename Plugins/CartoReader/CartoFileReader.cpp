@@ -54,54 +54,73 @@ bool CartoFileReader::readFile(QString fName) {
   m_dataName=ts.readLine(256);
   m_dataName = m_dataName.simplified();
   m_dataName.remove(" ");
-  CartoPoint pt;
+  rtCartoPointData pt;
 
   m_pointList.clear();
 
   int temp1, temp2;
+  int pId;
+  double pX,pY,pZ;
+  double pAlpha,pBeta,pGamma;
+  double pUniPolar, pBiPolar;
+  int pLAT;
   bool firstPoint = true;
+
 
   while (!ts.atEnd()) {
     while (temp!='P' && !ts.atEnd()) ts >> temp;
     if (!ts.atEnd()) {
-      ts >> temp1 >> pt.id >> temp2 >> pt.x >> pt.y >> pt.z;
-      ts >> pt.alpha >> pt.beta >> pt.gamma;
-      ts >> pt.uniPolar >> pt.biPolar >> pt.LAT;
-      pt.triggerDelay = 0; // No trigger delay for this type of file.
-      m_pointList.insert(pt.id, pt);
+      ts >> temp1 >> pId >> temp2 >> pX >> pY >> pZ;
+      pt.setPointId(pId);
+      pt.setX(pX);
+      pt.setY(pY);
+      pt.setZ(pZ);
+
+      ts >> pAlpha >> pBeta >> pGamma;
+      pt.setAlpha(pAlpha);
+      pt.setBeta(pBeta);
+      pt.setGamma(pGamma);
+
+      ts >> pUniPolar >> pBiPolar >> pLAT;
+      pt.setUniPolar(pUniPolar);
+      pt.setBiPolar(pBiPolar);
+      pt.setLAT(pLAT);
+
+      pt.setTriggerDelay(0); // No trigger delay for this type of file.
+      m_pointList.insert(pt.getPointId(), pt);
 
       if (firstPoint) {
-        m_minUniPolar = pt.uniPolar;
-        m_maxUniPolar = pt.uniPolar;
-        m_minBiPolar = pt.biPolar;
-        m_maxBiPolar = pt.biPolar;
-        m_minLAT = pt.LAT;
-        m_maxLAT = pt.LAT;
-        m_maxTrigDelay = pt.triggerDelay;
-        m_minTrigDelay = pt.triggerDelay;
+        m_minUniPolar = pt.getUniPolar();
+        m_maxUniPolar = pt.getUniPolar();
+        m_minBiPolar = pt.getBiPolar();
+        m_maxBiPolar = pt.getBiPolar();
+        m_minLAT = pt.getLAT();
+        m_maxLAT = pt.getLAT();
+        m_maxTrigDelay = pt.getTriggerDelay();
+        m_minTrigDelay = pt.getTriggerDelay();
         firstPoint = false;
-      } else if (pt.uniPolar < m_minUniPolar) {
-        m_minUniPolar = pt.uniPolar;
-      } else if (pt.uniPolar > m_maxUniPolar) {
-        m_maxUniPolar = pt.uniPolar;
+      } else if (pt.getUniPolar() < m_minUniPolar) {
+        m_minUniPolar = pt.getUniPolar();
+      } else if (pt.getUniPolar() > m_maxUniPolar) {
+        m_maxUniPolar = pt.getUniPolar();
       }
 
-      if (pt.biPolar < m_minBiPolar) {
-        m_minBiPolar = pt.biPolar;
-      } else if (pt.biPolar > m_maxBiPolar) {
-        m_maxBiPolar = pt.biPolar;
+      if (pt.getBiPolar() < m_minBiPolar) {
+        m_minBiPolar = pt.getBiPolar();
+      } else if (pt.getBiPolar() > m_maxBiPolar) {
+        m_maxBiPolar = pt.getBiPolar();
       }
 
-      if (pt.LAT < m_minLAT) {
-        m_minLAT = pt.LAT;
-      } else if (pt.LAT > m_maxLAT) {
-        m_maxLAT = pt.LAT;
+      if (pt.getLAT() < m_minLAT) {
+        m_minLAT = pt.getLAT();
+      } else if (pt.getLAT() > m_maxLAT) {
+        m_maxLAT = pt.getLAT();
       }
 
-      if (pt.triggerDelay > m_maxTrigDelay) {
-        m_maxTrigDelay = pt.triggerDelay;
-      } else if ( pt.triggerDelay < m_minTrigDelay) {
-        m_minTrigDelay = pt.triggerDelay;
+      if (pt.getTriggerDelay() > m_maxTrigDelay) {
+        m_maxTrigDelay = pt.getTriggerDelay();
+      } else if ( pt.getTriggerDelay() < m_minTrigDelay) {
+        m_minTrigDelay = pt.getTriggerDelay();
       }
 
     }
@@ -131,7 +150,7 @@ bool CartoFileReader::readXmlFile(QString fName) {
   if (!f.open(QIODevice::ReadOnly)) return false;
 
   m_dataName=fInfo.fileName();
-  CartoPoint pt;
+  rtCartoPointData pt;
   m_pointList.clear();
 
   QXmlStreamReader xml(&f);
@@ -147,56 +166,56 @@ bool CartoFileReader::readXmlFile(QString fName) {
         inMapData = true;
       } else if (xml.name() == "item" && inMapData) {
         strList = xml.readElementText().split(" ");
-        pt.id = currId;
+        pt.setPointId( currId );
         currId++;
-        pt.x = strList.at(0).toDouble();
-        pt.y = strList.at(1).toDouble();
-        pt.z = strList.at(2).toDouble();
-        pt.biPolar = strList.at(4).toDouble();
-        pt.triggerDelay = strList.at(7).toInt();
+        pt.setX( strList.at(0).toDouble() );
+        pt.setY( strList.at(1).toDouble() );
+        pt.setZ( strList.at(2).toDouble() );
+        pt.setBiPolar( strList.at(4).toDouble() );
+        pt.setTriggerDelay( strList.at(7).toInt() );
 
         // Zero everything else
-        pt.alpha = 0.0;
-        pt.beta = 0.0;
-        pt.gamma = 0.0;
-        pt.uniPolar = 0.0;
-        pt.LAT = 0.0;
+        pt.setAlpha( 0.0 );
+        pt.setBeta( 0.0 );
+        pt.setGamma( 0.0 );
+        pt.setUniPolar( 0.0 );
+        pt.setLAT( 0 );
 
         // Ensure that at least one element is non-zero.
-        if (pt.x != 0.0 || pt.y != 0.0 || pt.z != 0.0 || pt.biPolar != 0.0 || pt.triggerDelay!=0.0 ) {
-          m_pointList.insert(pt.id, pt);
+        if ( pt.getX() != 0.0 || pt.getY() != 0.0 || pt.getZ() != 0.0 || pt.getBiPolar() != 0.0 || pt.getTriggerDelay() != 0.0 ) {
+          m_pointList.insert(pt.getPointId(), pt);
 
 
           if (firstPoint) {
-            m_minUniPolar = pt.uniPolar;
-            m_maxUniPolar = pt.uniPolar;
-            m_minBiPolar = pt.biPolar;
-            m_maxBiPolar = pt.biPolar;
-            m_minLAT = pt.LAT;
-            m_maxLAT = pt.LAT;
+            m_minUniPolar = pt.getUniPolar();
+            m_maxUniPolar = pt.getUniPolar();
+            m_minBiPolar = pt.getBiPolar();
+            m_maxBiPolar = pt.getBiPolar();
+            m_minLAT = pt.getLAT();
+            m_maxLAT = pt.getLAT();
             firstPoint = false;
-          } else if (pt.uniPolar < m_minUniPolar) {
-            m_minUniPolar = pt.uniPolar;
-          } else if (pt.uniPolar > m_maxUniPolar) {
-            m_maxUniPolar = pt.uniPolar;
+          } else if (pt.getUniPolar() < m_minUniPolar) {
+            m_minUniPolar = pt.getUniPolar();
+          } else if (pt.getUniPolar() > m_maxUniPolar) {
+            m_maxUniPolar = pt.getUniPolar();
           }
 
-          if (pt.biPolar < m_minBiPolar) {
-            m_minBiPolar = pt.biPolar;
-          } else if (pt.biPolar > m_maxBiPolar) {
-            m_maxBiPolar = pt.biPolar;
+          if (pt.getBiPolar() < m_minBiPolar) {
+            m_minBiPolar = pt.getBiPolar();
+          } else if (pt.getBiPolar() > m_maxBiPolar) {
+            m_maxBiPolar = pt.getBiPolar();
           }
 
-          if (pt.LAT < m_minLAT) {
-            m_minLAT = pt.LAT;
-          } else if (pt.LAT > m_maxLAT) {
-            m_maxLAT = pt.LAT;
+          if (pt.getLAT() < m_minLAT) {
+            m_minLAT = pt.getLAT();
+          } else if (pt.getLAT() > m_maxLAT) {
+            m_maxLAT = pt.getLAT();
           }
 
-          if (pt.triggerDelay > m_maxTrigDelay) {
-            m_maxTrigDelay = pt.triggerDelay;
-          } else if ( pt.triggerDelay < m_minTrigDelay) {
-            m_minTrigDelay = pt.triggerDelay;
+          if (pt.getTriggerDelay() > m_maxTrigDelay) {
+            m_maxTrigDelay = pt.getTriggerDelay();
+          } else if ( pt.getTriggerDelay() < m_minTrigDelay) {
+            m_minTrigDelay = pt.getTriggerDelay();
           }
         }
       }
@@ -225,7 +244,7 @@ bool CartoFileReader::readXmlFile(QString fName) {
 
 
 
-QList<CartoFileReader::CartoPoint> CartoFileReader::getPointSet() {
+QList<rtCartoPointData> CartoFileReader::getPointSet() {
   return m_pointList.values();
 }
 
@@ -244,10 +263,10 @@ void CartoFileReader::centerPoints() {
 
   // Add all the point values.
   for (int ix1=0; ix1<pointKeys.size(); ix1++) {
-    CartoPoint pt = m_pointList.value(pointKeys[ix1]);
-    midCloud[0] += pt.x;
-    midCloud[1] += pt.y;
-    midCloud[2] += pt.z;
+    rtCartoPointData pt = m_pointList.value(pointKeys[ix1]);
+    midCloud[0] += pt.getX();
+    midCloud[1] += pt.getY();
+    midCloud[2] += pt.getZ();
   }
 
   // Find the middle of the cloud.
@@ -256,8 +275,6 @@ void CartoFileReader::centerPoints() {
   midCloud[2] = midCloud[2] / ((double)pointKeys.size());
 
   for (int ix1=0; ix1<pointKeys.size(); ix1++) {
-    m_pointList[pointKeys[ix1]].x -= midCloud[0];
-    m_pointList[pointKeys[ix1]].y -= midCloud[1];
-    m_pointList[pointKeys[ix1]].z -= midCloud[2];
+    m_pointList[pointKeys[ix1]].getTransform()->Translate(-midCloud[0], -midCloud[1], -midCloud[2]);
   }
 }

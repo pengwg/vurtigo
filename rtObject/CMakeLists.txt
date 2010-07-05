@@ -40,6 +40,7 @@ set ( RTOBJECT_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rt3DTimePointData.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtCardiacMeshPointData.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtNamedInfoPointData.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtCartoPointData.cpp
   CACHE INTERNAL "Vurtigo rtObject Source Files"
 )
 
