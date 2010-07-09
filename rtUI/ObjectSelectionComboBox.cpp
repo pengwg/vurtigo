@@ -93,7 +93,6 @@ void ObjectSelectionComboBox::newSelection(int sel) {
 
   if ( sel >= 0 ) {
     m_currentObjectIndex = itemData(sel).toInt();
-    std::cout << "quack Selection: " << sel << " index " << m_currentObjectIndex << std::endl;
     if (m_currentObjectIndex != -1) {
       renderObj = objManagerHandle->getObjectWithID(m_currentObjectIndex);
       // Valid object so connect the signal

@@ -119,20 +119,32 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
   numPts = data->GetNumberOfPoints();
   vtkFloatArray * scalars = vtkFloatArray::New();
 
+  // Save the transformed points first.
+  // Done mainly to trade space for speed.
+  double* transPointList = new double[ptList->getNumPoints()*4];
+  for (int ix1=0; ix1<ptList->getNumPoints(); ix1++) {
+    rtNamedInfoPointData pt = ptList->getPointAt(ix1);
+    pt.getTransformedPoint(currLocation);
+    transPointList[ix1*3] = currLocation[0];
+    transPointList[ix1*3+1] = currLocation[1];
+    transPointList[ix1*3+2] = currLocation[2];
+    transPointList[ix1*3+3] = pt.getValue();
+  }
+
   for (vtkIdType currID=0; currID<numPts; currID++) {
     weightSum = 1.0;
     val = 0.5;
     data->GetPoint(currID, tempPT);
 
     for (int ix1=0; ix1<ptList->getNumPoints(); ix1++) {
-      rtNamedInfoPointData pt = ptList->getPointAt(ix1);
-
-      pt.getTransformedPoint(currLocation);
+      currLocation[0] = transPointList[ix1*3];
+      currLocation[1] = transPointList[ix1*3+1];
+      currLocation[2] = transPointList[ix1*3+2];
 
       currDist = vtkMath::Distance2BetweenPoints(tempPT, currLocation);
       if (currDist < 0.01) currDist = 0.01;
       if (currDist < m_radius) {
-        val += (((double)(pt.getValue() - ptList->getMinValue()))/propValueDiff)*(m_radius/currDist);
+        val += (((double)(transPointList[ix1*3+3] - ptList->getMinValue()))/propValueDiff)*(m_radius/currDist);
         weightSum += (m_radius/currDist);
       }
     }
@@ -142,6 +154,7 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
   }
   data->GetPointData()->SetScalars(scalars);
   scalars->Delete();
+  delete[] transPointList;
 
   return true;
 }

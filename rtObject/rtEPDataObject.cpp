@@ -539,7 +539,9 @@ void rtEPDataObject::cartoPointObjectChanged(int id) {
         // Add the points
         for (int ix1=0; ix1<pointData->size(); ix1++) {
           namedInfoPoint = (*pointData)[ix1].toNamedInfoBiPolar();
+          namedInfoPoint.getTransform()->PostMultiply();
           namedInfoPoint.getTransform()->Concatenate( pointDataObject->getTransform() );
+          namedInfoPoint.getTransform()->PreMultiply();
           this->addInfoPoint( namedInfoPoint );
         }
 
@@ -547,6 +549,7 @@ void rtEPDataObject::cartoPointObjectChanged(int id) {
 
     }
   }
+  setModifyFlagForAll();
   Modified();
 }
 
