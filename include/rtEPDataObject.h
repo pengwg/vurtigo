@@ -38,6 +38,7 @@
 #include "ui_EPOptions.h"
 #include "cineWidget.h"
 #include "rtCardiacMeshPointData.h"
+#include "ObjectSelectionComboBox.h"
 
 //! Object that represents electro phisiological data
 /*!
@@ -87,6 +88,9 @@ public:
 
   //! Set the object orientation and position through a transform.
   bool setTransform(vtkTransform* t);
+
+  //! Get the object orientation and position through a transform.
+  inline vtkTransform* getTransform() { return m_objTransform; }
 
   //! Set the trigger delay for a particular phase.
   bool setTriggerDelay(int phase, int trigger);
@@ -177,6 +181,9 @@ public:
 
   void showPointsChanged(bool);
 
+  //! The object that supplies the carto point information has changed.
+  void cartoPointObjectChanged(int);
+
  protected:
   // Functions
   void setupGUI();
@@ -215,6 +222,7 @@ public:
   Ui::EPOptions m_optionsWidget;
 
   CineWidget m_cineWidget;
+  ObjectSelectionComboBox m_objectSelectionBox;
 
   //! The user defined opacity for the surface
   double m_surfaceOpacity;

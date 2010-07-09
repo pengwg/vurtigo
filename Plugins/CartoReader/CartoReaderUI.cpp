@@ -176,6 +176,8 @@ void CartoReaderUI::saveAsPoints() {
   if (m_pts >=0) {
     rt3DPointBufferDataObject* ptObj = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pts));
 
+    ptObj->setObjName(saveAsPointsLineEdit->text());
+
     rtBasic3DPointData sp;
     sp.setPointSize(1.0);
 
@@ -189,8 +191,10 @@ void CartoReaderUI::saveAsPoints() {
 
         this->selectPointColor(pointList[ix1].getBiPolar(), tempColor);
         sp.getProperty()->SetColor(tempColor);
+        sp.getTransform()->DeepCopy(pointList[ix1].getTransform());
 
         ptObj->addPoint(sp);
+        ptObj->addCartoPoint(pointList[ix1]);
       }
       ptObj->Modified();
       ptObj->unlock();
@@ -365,8 +369,10 @@ void CartoReaderUI::filterByTriggerDelay() {
 
       this->selectPointColor(pointList[ix1].getBiPolar(), tempColor);
       sp.getProperty()->SetColor(tempColor);
+      sp.getTransform()->DeepCopy(pointList[ix1].getTransform());
 
       ptObj->addPoint(sp);
+      ptObj->addCartoPoint(pointList[ix1]);
     }
   }
   ptObj->Modified();

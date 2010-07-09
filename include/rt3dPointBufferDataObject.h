@@ -43,8 +43,14 @@ public:
   //! Get the handle to the point list.
   inline QList<rtBasic3DPointData>* getPointList() { return &m_pointList; }
 
+  //! Get the size of the point list
+  inline unsigned int getPointListSize() { return m_pointList.size(); }
+
   //! Get a handle to the carto point list.
   inline QList<rtCartoPointData>* getCartoPointList() { return &m_cartoPointList; }
+
+  //! Get the number of carto points available.
+  inline unsigned int getCartoPointListSize() { return m_cartoPointList.size(); }
 
   //! Get a handle to the point at a particular location in 3D.
   /*!

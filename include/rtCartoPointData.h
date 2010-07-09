@@ -22,7 +22,7 @@
 #define RTCARTOPOINTDATA_H
 
 #include "rt3DTimePointData.h"
-
+#include "rtNamedInfoPointData.h"
 class rtCartoPointData : public rt3DTimePointData
 {
 
@@ -35,6 +35,8 @@ public:
   bool operator==(const rtCartoPointData &other) const;
   //! Assignment operator
   rtCartoPointData& operator=(const rtCartoPointData& sp);
+
+  rtNamedInfoPointData toNamedInfoBiPolar();
 
   inline void setAlpha(double a) { m_alpha = a; }
   inline void setBeta(double b) { m_beta = b; }

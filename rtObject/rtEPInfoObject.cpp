@@ -86,6 +86,15 @@ void rtEPInfoObject::clearPointList(QString propName) {
   }
 }
 
+void rtEPInfoObject::clearAllPointList() {
+  QList<QString> keys;
+  keys = m_pointLists.uniqueKeys();
+
+  for (int ix1=0; ix1<keys.size(); ix1++) {
+    m_pointLists.value(keys[ix1])->clearPointList();
+  }
+}
+
 bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
   if (!data) return false;
   if (m_currentPropertyName=="") return false;
@@ -118,9 +127,7 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
     for (int ix1=0; ix1<ptList->getNumPoints(); ix1++) {
       rtNamedInfoPointData pt = ptList->getPointAt(ix1);
 
-      currLocation[0] = pt.getX();
-      currLocation[1] = pt.getY();
-      currLocation[2] = pt.getZ();
+      pt.getTransformedPoint(currLocation);
 
       currDist = vtkMath::Distance2BetweenPoints(tempPT, currLocation);
       if (currDist < 0.01) currDist = 0.01;
@@ -188,6 +195,7 @@ void rtEPInfoObject::updatePointPolyData() {
   vtkPolyData* poly;
   vtkDataArray* scalars;
   double scalarValue;
+  double currLocation[3];
   // Remove the previous inputs.
   m_pointPolyData->RemoveAllInputs();
 
@@ -197,7 +205,8 @@ void rtEPInfoObject::updatePointPolyData() {
     scalars = vtkDataArray::CreateDataArray(VTK_DOUBLE);
     m_sphereList.append(temp);
     m_sphereScalarList.append(scalars);
-    temp->SetCenter(pt.getX(), pt.getY(), pt.getZ());
+    pt.getTransformedPoint(currLocation);
+    temp->SetCenter(currLocation[0], currLocation[1], currLocation[2]);
     poly = temp->GetOutput();
     poly->Update();
 

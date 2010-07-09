@@ -17,6 +17,7 @@ set (RTUI_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/ObjectControlWidget.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtWindowLevelDialog.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cineWidget.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/ObjectSelectionComboBox.cpp
   CACHE INTERNAL "Vurtigo rtUI Source Files"
 )
 
@@ -40,5 +41,6 @@ set (RTUI_MOC_FILES
   ${CMAKE_HOME_DIRECTORY}/include/ObjectControlWidget.h
   ${CMAKE_HOME_DIRECTORY}/include/rtWindowLevelDialog.h
   ${CMAKE_HOME_DIRECTORY}/include/cineWidget.h
+  ${CMAKE_HOME_DIRECTORY}/include/ObjectSelectionComboBox.h
   CACHE INTERNAL "rtUI Files to be processed by Qt first"
 )

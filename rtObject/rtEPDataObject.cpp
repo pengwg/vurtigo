@@ -17,11 +17,6 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
-#include "rtEPDataObject.h"
-#include "rtMessage.h"
-#include "rtApplication.h"
-#include "rtTimeManager.h"
-
 #include <QHash>
 #include <QColor>
 #include <QString>
@@ -34,6 +29,13 @@
 #include <vtkCellArray.h>
 #include <vtkPointData.h>
 #include <vtkPolyDataWriter.h>
+
+#include "rtEPDataObject.h"
+#include "rtMessage.h"
+#include "rtApplication.h"
+#include "rtTimeManager.h"
+#include "rt3dPointBufferDataObject.h"
+#include "rtRenderObject.h"
 
 //! Constructor
 rtEPDataObject::rtEPDataObject()
@@ -511,6 +513,43 @@ void rtEPDataObject::showPointsChanged(bool show) {
   }
 }
 
+void rtEPDataObject::cartoPointObjectChanged(int id) {
+  rtObjectManager* objManager = rtApplication::instance().getObjectManager();
+  rtRenderObject* renderObj;
+  rt3DPointBufferDataObject* pointDataObject;
+  QList<rtCartoPointData> * pointData;
+  rtNamedInfoPointData namedInfoPoint;
+
+  // Not enabled by default
+  m_optionsWidget.loadedDataGroupBox->setEnabled(false);
+  m_EPInfoObject.clearAllPointList();
+
+  if (id > -1) {
+    renderObj = objManager->getObjectWithID(id);
+    if (renderObj) {
+      pointDataObject = static_cast<rt3DPointBufferDataObject*>(renderObj->getDataObject());
+      if (pointDataObject) {
+
+        if (pointDataObject->getCartoPointListSize() > 0) {
+          m_optionsWidget.loadedDataGroupBox->setEnabled(true);
+        }
+
+        pointData = pointDataObject->getCartoPointList();
+        m_EPInfoObject.clearPointList("Bi-Polar");
+        // Add the points
+        for (int ix1=0; ix1<pointData->size(); ix1++) {
+          namedInfoPoint = (*pointData)[ix1].toNamedInfoBiPolar();
+          namedInfoPoint.getTransform()->Concatenate( pointDataObject->getTransform() );
+          this->addInfoPoint( namedInfoPoint );
+        }
+
+      }
+
+    }
+  }
+  Modified();
+}
+
 ////////////////
 // Protected
 ////////////////
@@ -518,8 +557,15 @@ void rtEPDataObject::showPointsChanged(bool show) {
 void rtEPDataObject::setupGUI() {
   m_optionsWidget.setupUi(getBaseWidget());
 
+  QBoxLayout *temp;
+
   // The cine widget
-  m_optionsWidget.epTabs->widget(1)->layout()->addWidget(&m_cineWidget);
+  temp = static_cast<QBoxLayout*>(m_optionsWidget.epTabs->widget(1)->layout());
+  temp->insertWidget(0, &m_cineWidget);
+  temp = static_cast<QBoxLayout*>(m_optionsWidget.epTabs->widget(2)->layout());
+  temp->insertWidget(0, &m_objectSelectionBox);
+
+  m_objectSelectionBox.addObjectType(rtConstants::OT_3DPointBuffer);
 
   m_optionsWidget.surfaceOpacitySlider->setValue(100);
   m_optionsWidget.pointsOpacitySlider->setValue(100);
@@ -542,6 +588,8 @@ void rtEPDataObject::setupGUI() {
   connect(m_optionsWidget.applyAllNow, SIGNAL(clicked()), this, SLOT(updateObjectNow()));
 
   connect(&m_cineWidget, SIGNAL(triggerChanged(int)), this, SLOT(triggerChanged(int)));
+  connect(&m_objectSelectionBox, SIGNAL(objectSelectionChanged(int)), this, SLOT(cartoPointObjectChanged(int)));
+  connect(&m_objectSelectionBox, SIGNAL(selectedObjectModified(int)), this, SLOT(cartoPointObjectChanged(int)));
 
   connect(m_optionsWidget.inSliceSpace, SIGNAL(valueChanged(double)), this, SLOT(inSliceValueChanged(double)));
   connect(m_optionsWidget.betweenSliceSpace, SIGNAL(valueChanged(double)), this, SLOT(betweenSliceValueChanged(double)));

@@ -43,7 +43,12 @@ class rtEPInfoObject
 
     bool getInfoPoint(double,double,double,rtNamedInfoPointData&, QString propName);
     bool removeInfoPoint(double,double,double,rtNamedInfoPointData&, QString propName);
+
+    //! Remove all the point from one type of list.
     void clearPointList(QString propName);
+
+    //! Remove all of the point from all of the lists.
+    void clearAllPointList();
 
     bool updateScalars(vtkPolyData*);
 

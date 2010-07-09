@@ -60,3 +60,17 @@ rtCartoPointData& rtCartoPointData::operator=(const rtCartoPointData& sp) {
   }
   return *this;
 }
+
+rtNamedInfoPointData rtCartoPointData::toNamedInfoBiPolar() {
+  rtNamedInfoPointData res;
+
+  res.setPointId(this->getPointId());
+  res.setX(this->getX());
+  res.setY(this->getY());
+  res.setZ(this->getZ());
+  res.setPointSize(this->getPointSize());
+  res.getTransform()->DeepCopy(this->getTransform());
+  res.getProperty()->DeepCopy(this->getProperty());
+  res.setNamedValue("Bi-Polar", this->getBiPolar());
+  return res;
+}
