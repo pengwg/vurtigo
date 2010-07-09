@@ -250,27 +250,21 @@ public:
   //! Task that can create the position splines
   class CreatePositionSplinesTask : public QRunnable {
     public:
-      CreatePositionSplinesTask(PhaseData* phase, int coord, double maxPosition, double planeInterval, QList<int>* slices, int minSlice, int maxSlice) {
-        m_phase = phase;
-        m_coord = coord;
-        m_maxPosition = maxPosition;
-        m_planeInterval = planeInterval;
-        m_slices = slices;
-        m_minSlice = minSlice;
-        m_maxSlice = maxSlice;
-      }
+      CreatePositionSplinesTask(PhaseData* phase, int coord, double maxPosition, double planeInterval, QList<int>* slices, int minSlice, int maxSlice)
+      : m_phase(phase), m_slices(slices), m_coord(coord), m_maxPosition(maxPosition), m_planeInterval(planeInterval), m_minSlice(minSlice), m_maxSlice(maxSlice)
+      { }
 
       void run() {
-        vtkKochanekSpline *tempSpline[3];
+        vtkKochanekSpline *tempSpline;
         double pos = 0.0;
 
         for (pos=0.0; pos<=m_maxPosition;) {
-          tempSpline[m_coord] = vtkKochanekSpline::New();
-          m_phase->posSpline[m_coord].insert(pos, tempSpline[m_coord]);
+          tempSpline = vtkKochanekSpline::New();
+          m_phase->posSpline[m_coord].insert(pos, tempSpline);
 
           for (int ix1=0; ix1<m_slices->size(); ix1++) {
             if (m_slices->at(ix1) < m_minSlice || m_slices->at(ix1) > m_maxSlice) continue;
-            tempSpline[m_coord]->AddPoint( ix1, m_phase->sliceSpline[m_coord].value(m_slices->at(ix1))->Evaluate(pos) );
+            tempSpline->AddPoint( ix1, m_phase->sliceSpline[m_coord].value(m_slices->at(ix1))->Evaluate(pos) );
           }
 
           if (pos < m_maxPosition && (pos+m_planeInterval) > m_maxPosition) {
@@ -278,7 +272,7 @@ public:
           } else {
             pos+=m_planeInterval;
           }
-
+          tempSpline->Compute();
         }
       }
 
