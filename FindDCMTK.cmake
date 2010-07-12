@@ -41,6 +41,7 @@ IF (NOT DCMTK_DIR)
             include
     )
 ELSE (NOT DCMTK_DIR)
+  message(STATUS ${DCMTK_DIR})
     FIND_PATH( ${INCLUDE_DIR_VAR} dcmtk/${THIS_DCMTK_LIB}/${THIS_DCMTK_INC}
         PATHS
             ${DCMTK_DIR}/
