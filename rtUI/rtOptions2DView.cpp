@@ -59,7 +59,9 @@ rtOptions2DView::rtOptions2DView(QWidget *parent, Qt::WindowFlags flags) {
   area2DView->setFrameStyle(QFrame::NoFrame);
   area2DView->setLineWidth(0);
 
-  m_renderFlag = false;
+  // Render the empty image
+  m_renderer2D->RemoveAllViewProps();
+  m_renderFlag = true;
   m_currProp=NULL;
   m_currRenObj=NULL;
 
@@ -192,6 +194,10 @@ void rtOptions2DView::comboIndexChanged(int index) {
 
   // No selection.
   if (index == -1) {
+    m_renderer2D->RemoveAllViewProps();
+    m_currProp = NULL;
+    m_currRenObj = NULL;
+    m_renderFlag=true;
     return;
   }
 

@@ -176,7 +176,7 @@ void TestSuiteBasic::run() {
       emit sendOutput("Load Small Volume Data...");
       vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
 
-      sinSrc->SetWholeExtent(1,128, 1, 128, 1, 128);
+      sinSrc->SetWholeExtent(0,127, 0, 127, 0, 127);
       sinSrc->SetDirection(1, 2, 3);
       sinSrc->SetPeriod(25);
       sinSrc->SetPhase(1);
@@ -202,7 +202,7 @@ void TestSuiteBasic::run() {
       emit sendOutput("Load Very Large Volume Data...");
       vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
 
-      sinSrc->SetWholeExtent(1, 400, 1, 400, 1, 400);
+      sinSrc->SetWholeExtent(0, 399, 0, 399, 0, 399);
       sinSrc->SetDirection(1, 2, 3);
       sinSrc->SetPeriod(50);
       sinSrc->SetPhase(1);
@@ -226,7 +226,7 @@ void TestSuiteBasic::run() {
       emit sendOutput("Load 2D Plane Data...");
       vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
 
-      sinSrc->SetWholeExtent(1,256, 1, 256, 1, 1);
+      sinSrc->SetWholeExtent(0,255, 0, 255, 0, 0);
       sinSrc->SetDirection(1, 2, 3);
       sinSrc->SetPeriod(30);
       sinSrc->SetPhase(1);
@@ -467,7 +467,7 @@ void TestSuiteBasic::changeImage() {
       emit sendOutput("Change 2D Plane Info...");
       vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
 
-      sinSrc->SetWholeExtent(1,256, 1, 256, 1, 1);
+      sinSrc->SetWholeExtent(0,255, 0, 255, 0, 0);
       sinSrc->SetDirection(1, 2, 3);
       sinSrc->SetPeriod(m_imgPeriod);
       sinSrc->SetPhase(1);

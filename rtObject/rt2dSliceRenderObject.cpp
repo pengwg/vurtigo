@@ -329,16 +329,6 @@ void rt2DSliceRenderObject::update() {
   m_actor2D->SetPosition(0, 0);
   m_actor2D->SetPosition2(1, 1);
 
-  // Fix the extents
-  int extents[4];
-  extents[0] = 1;
-  extents[1] = dims[0];
-  extents[2] = 1;
-  extents[3] = dims[1];
-  m_imgMap->UseCustomExtentsOn();
-  m_imgMap->SetZSlice(1);
-  m_imgMap->SetCustomDisplayExtents(extents);
-
   // Set the render flag
   if ( rtApplication::instance().getMainWinHandle() ) {
     rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
