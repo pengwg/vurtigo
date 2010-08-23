@@ -56,9 +56,20 @@ bool DICOMImageData::readFile(QString fName) {
   datSet = dcmFile.getDataset();
 
   // Read some fo the standard tags.
-  result = datSet->findAndGetOFString(DCM_PatientsName, m_patientsName).good() && result;
-  result = datSet->findAndGetOFString(DCM_StudyDate, m_studyDate).good() && result;
-  result = datSet->findAndGetOFString(DCM_StudyTime, m_studyTime).good() && result;
+  if (!datSet->findAndGetOFString(DCM_PatientsName, m_patientsName).good()) {
+    m_patientsName = "ANONYMOUS";
+  }
+
+  if (!datSet->findAndGetOFString(DCM_StudyDate, m_studyDate).good()) {
+    // yyyymmdd
+    m_studyDate = "19700101";
+  }
+
+  if (!datSet->findAndGetOFString(DCM_StudyTime, m_studyTime).good()) {
+    // hhmmss
+    m_studyTime = "010101";
+  }
+
   result = datSet->findAndGetOFString(DCM_PatientPosition, m_patientPosition).good() && result;
   result = datSet->findAndGetOFString(DCM_Modality, m_modality).good() && result;
   result = datSet->findAndGetOFString(DCM_Manufacturer, m_manufacturer).good() && result;
