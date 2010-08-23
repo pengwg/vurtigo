@@ -39,8 +39,10 @@ class GenericMode{
   // Variables that are common to all modes.
   //! Object that communicates with the Geometry Server.
   GeometrySender* m_sender;
-  std::vector<IMAGEDATA> m_imgDataArray; //! All data related to the image.
-  std::vector<CATHDATA> m_cathDataArray; //! All data related to the catheter
+  //! All data related to the image.
+  std::vector<IMAGEDATA> m_imgDataArray;
+  //! All data related to the catheter
+  std::vector<CATHDATA> m_cathDataArray;
   int m_planeID;
 
   QList<SenderThread::ListObject> m_planeList;

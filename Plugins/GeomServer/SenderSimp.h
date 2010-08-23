@@ -32,26 +32,7 @@
 class SenderSimp : public QObject {
   Q_OBJECT
 
-protected:
-  //! Sends info, needed by Generic Mode
-  GeometrySender sender;
-  //! Config information for connecting
-  arguments args;
-  //! For reading information
-  GenericMode * readMode;
-  //! true, if the application is connecting temporarily (for sending information)
-  bool tempConnect;
-
-  //! Semaphore to ensure only one read process is running at a time.
-  QSemaphore runLock;
-
-  void setSenderDefaults();
-
-  QSemaphore m_signalsAvailable;
-
   public:
-    //! File types for text files (currenly not used)
-    enum TxtFileType { tft_None };
     SenderSimp();
     ~SenderSimp();
     bool isConnected();
@@ -73,6 +54,22 @@ protected:
     void print();
     void runReadMode();
 
+protected:
+  //! Sends info, needed by Generic Mode
+  GeometrySender sender;
+  //! Config information for connecting
+  arguments args;
+  //! For reading information
+  GenericMode * readMode;
+  //! true, if the application is connecting temporarily (for sending information)
+  bool tempConnect;
+
+  //! Semaphore to ensure only one read process is running at a time.
+  QSemaphore runLock;
+
+  void setSenderDefaults();
+
+  QSemaphore m_signalsAvailable;
 };
 
 #endif
