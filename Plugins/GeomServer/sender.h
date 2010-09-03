@@ -57,6 +57,7 @@ class GeometrySender {
 
 	int getImgSize() { return m_geomClient->getImageSize(); }
 	int getNumChan() { return m_geomClient->getNumImgChannels(); }
+  int getNumBytesPerPixel() { return m_geomClient->getNumImgBytesPerPixel(); } 
 	int getLastClientWrite() { return m_geomClient->getLastClientWrite(); }
 
 	//! Get the volume translation from the server. 

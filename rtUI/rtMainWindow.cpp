@@ -77,6 +77,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_renWin3D->AddRenderer(m_renderer3D);
 
   m_cameraControl = new rtCameraControl( m_renderer3D->GetActiveCamera(), m_render3DVTKWidget );
+  m_cameraControl->setToDefaultPosition();
 
   m_movingQuality = 0.5f;
   m_stillQuality = 1.0f;

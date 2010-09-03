@@ -112,6 +112,7 @@ public:
   bool setLocalCath(CATHDATA & remote, rtCathDataObject * local);
 
   rt2DSliceDataObject * getLocalImage(int remoteId, int imageSize);
+  vtkImageData* CopyImage(IMAGEDATA &remote);
   bool setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local);
   bool setLocalImageOnly(IMAGEDATA & remote, rt2DSliceDataObject * local);
   bool setRemoteImageTransform(std::vector<IMAGEDATA> & image);

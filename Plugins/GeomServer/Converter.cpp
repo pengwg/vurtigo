@@ -305,44 +305,96 @@ rt2DSliceDataObject * Converter::getLocalImage(int remoteId, int imageSize) {
   return (rt2DSliceDataObject *) obj;
 }
 
+vtkImageData * Converter::CopyImage(IMAGEDATA &remote)
+  {
+    vtkImageData *img = vtkImageData::New();
+    
+    if (img == NULL)
+      return NULL;
+
+    double spacing = ((double)remote.FOV*10)/((double)remote.imgSize);
+
+    img->Initialize();
+
+    if (remote.numChannels == 1)
+      {
+        if (remote.numBytesPerPixel == 1)
+          img->SetScalarTypeToUnsignedChar();
+        else
+          img->SetScalarTypeToUnsignedShort();
+      }
+    else
+      img->SetScalarTypeToUnsignedChar();
+
+
+    img->SetSpacing(spacing, spacing, 1.0);
+    img->SetOrigin(0.0,0.0,0.0);
+    img->SetDimensions(remote.imgSize,remote.imgSize,1);
+    if (remote.numChannels >= 3) {
+      img->SetNumberOfScalarComponents(3);
+    } else {
+      img->SetNumberOfScalarComponents(1);
+    }
+    img->SetWholeExtent(0, remote.FOV*10, 0, remote.FOV*10,0,1);
+    img->AllocateScalars();
+
+    // Copy the data
+    if (remote.numChannels == 1)
+      {
+        if (remote.numBytesPerPixel == 1)
+          { // gray8 
+            int srcPos = 0;
+            for (int ix1 = 0; ix1 < remote.imgSize; ix1++) {
+              for (int ix2 = 0; ix2 < remote.imgSize; ix2++) {  
+                unsigned char *dstPixel = static_cast<unsigned char*>(img->GetScalarPointer( remote.imgSize-ix2-1,remote.imgSize-ix1-1, 0));
+                *dstPixel = remote.img[srcPos++];
+              }
+            }
+          }
+        else
+          { // gray16 (new code)
+            int srcPos = 0;
+            for (int ix1 = 0; ix1 < remote.imgSize; ix1++) {
+              for (int ix2 = 0; ix2 < remote.imgSize; ix2++) {  
+                short *dstPixel = static_cast<short*>(img->GetScalarPointer( remote.imgSize-ix2-1, remote.imgSize-ix1-1, 0));
+                *dstPixel = ((short *)remote.img)[srcPos++];
+                }
+              }
+          }
+      }
+    else
+      { // rgba8 
+        int srcPos = 0;
+        for (int ix1 = 0; ix1 < remote.imgSize; ix1++) {
+          for (int ix2 = 0; ix2 < remote.imgSize; ix2++) {  
+            unsigned char *dstPixel = static_cast<unsigned char*>(img->GetScalarPointer( remote.imgSize-ix2-1,remote.imgSize-ix1-1, 0));
+
+           // rearrange color data
+           //   QT QImage RGBA8 format is actually 0xxAARRGGBB, or BB GG RR AA
+           //   vtkImageData 3-channel format is RR GG BB
+            dstPixel[0] = remote.img[srcPos + 2]; // r
+            dstPixel[1] = remote.img[srcPos + 1]; // g
+            dstPixel[2] = remote.img[srcPos + 0]; // b
+
+            srcPos += 4;
+          }
+        }
+      }
+
+    img->Update();
+    
+    return img;
+  }
+
 //! Sets the value of the local image object, given a remote image object. Returns true of successful.
 bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local) {
-  if (remote.FOV <= 0 || remote.imgSize <= 0 || remote.numChannels <= 0) return false;
+  if (remote.FOV <= 0 || remote.imgSize <= 0 || remote.numChannels <= 0 || remote.numBytesPerPixel <= 0) return false;
 
   bool success = true;
 
-  vtkImageData *img = vtkImageData::New();
-
-  double spacing = ((double)remote.FOV*10)/((double)remote.imgSize);
-
-  img->Initialize();
-  img->SetScalarTypeToUnsignedChar();
-  img->SetSpacing(spacing, spacing, 1.0);
-  img->SetOrigin(0.0,0.0,0.0);
-  img->SetDimensions(remote.imgSize,remote.imgSize,1);
-  if (remote.numChannels >= 3) {
-    img->SetNumberOfScalarComponents(3);
-  } else {
-    img->SetNumberOfScalarComponents(1);
-  }
-  img->SetWholeExtent(0, remote.FOV*10, 0, remote.FOV*10,0,1);
-  img->AllocateScalars();
-
+  vtkImageData *img = CopyImage(remote);
+  
   vtkImageChangeInformation *imgChangeInfo = vtkImageChangeInformation::New();
-
-  // Copy the data
-  int pos = 0;
-  unsigned char* temp;
-  for (int ix1 = 0; ix1 < remote.imgSize; ix1++) {
-    for (int ix2 = 0; ix2 < remote.imgSize; ix2++) {  
-      temp = static_cast<unsigned char*>(img->GetScalarPointer( remote.imgSize-ix2-1,remote.imgSize-ix1-1, 0));
-      for (int ix3 = 0; ix3 < remote.numChannels; ix3++) {
-        if ( (remote.numChannels >= 3 && ix3<3) || (ix3==0) ) *(temp+ix3) = remote.img[pos];
-        pos++;
-      }
-    }
-  }
-  img->Update();
 
   imgChangeInfo->SetInput(img);
   imgChangeInfo->Update();
@@ -396,39 +448,9 @@ bool Converter::setLocalImageOnly(IMAGEDATA & remote, rt2DSliceDataObject * loca
 
   bool success = true;
 
-  vtkImageData *img = vtkImageData::New();
-
-  double spacing = ((double)remote.FOV*10)/((double)remote.imgSize);
-
-  img->Initialize();
-  img->SetScalarTypeToUnsignedChar();
-  img->SetSpacing(spacing, spacing, 1.0);
-  img->SetOrigin(0.0,0.0,0.0);
-  img->SetDimensions(remote.imgSize,remote.imgSize,1);
-  // Cannot use more than 3.
-  if (remote.numChannels >= 3) {
-    img->SetNumberOfScalarComponents(3);
-  } else {
-    img->SetNumberOfScalarComponents(1);
-  }
-  img->SetWholeExtent(0, remote.FOV*10, 0, remote.FOV*10,0,1);
-  img->AllocateScalars();
+  vtkImageData *img = CopyImage(remote);
 
   vtkImageChangeInformation *imgChangeInfo = vtkImageChangeInformation::New();
-
-  // Copy the data
-  int pos = 0;
-  unsigned char* temp;
-  for (int ix1 = 0; ix1 < remote.imgSize; ix1++) {
-    for (int ix2 = 0; ix2 < remote.imgSize; ix2++) {
-      temp = static_cast<unsigned char*>(img->GetScalarPointer( remote.imgSize-ix2-1,remote.imgSize-ix1-1, 0));
-      for (int ix3 = 0; ix3 < remote.numChannels; ix3++) {
-        if ( (remote.numChannels >= 3 && ix3<3) || (ix3==0) ) *(temp+ix3) = remote.img[pos];
-        pos++;
-      }
-    }
-  }
-  img->Update();
 
   imgChangeInfo->SetInput(img);
   imgChangeInfo->Update();

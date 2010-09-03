@@ -39,6 +39,7 @@ struct IMAGEDATA {
   int FOV;
   int imgSize;
   int numChannels;
+  int numBytesPerPixel;
   int arraySize;
   unsigned char* img;
 };

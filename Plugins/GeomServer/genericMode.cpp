@@ -114,7 +114,7 @@ void GenericMode::runMode() {
       planeTime.append(" plane and position received: ");
       planeTime.append(QString::number(tt.elapsed()));
 
-      localImage = converter->getLocalImage(ix1, m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].numChannels);
+      localImage = converter->getLocalImage(ix1, m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].numBytesPerPixel);
       if (!localImage) continue;
       converter->setLocalImage(m_imgDataArray[ix1], localImage);
     } else if(m_planeList[ix1].act == SenderThread::OBJ_WRITE) {
@@ -127,7 +127,7 @@ void GenericMode::runMode() {
       planeTime.append(" plane received and position sent: ");
       planeTime.append(QString::number(tt.elapsed()));
 
-      localImage = converter->getLocalImage(ix1, m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].numChannels);
+      localImage = converter->getLocalImage(ix1, m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].imgSize * m_imgDataArray[ix1].numBytesPerPixel);
       if (!localImage) continue;
       converter->setLocalImageOnly(m_imgDataArray[ix1], localImage);
     } else if (m_planeList[ix1].act == SenderThread::OBJ_IGNORE) {
@@ -249,6 +249,7 @@ bool GenericMode::receivePlane(int id) {
   currImg = &m_imgDataArray[m_planeID];
   currImg->imgSize = m_sender->getImgSize();
   currImg->numChannels = m_sender->getNumChan();
+  currImg->numBytesPerPixel = m_sender->getNumBytesPerPixel();
 
   // Check the image size and the number of channels to see if this makes sense.
   if (currImg->imgSize > 0 && currImg->imgSize <= 2048 && currImg->numChannels > 0 && currImg->numChannels <= 16) {
@@ -259,7 +260,7 @@ bool GenericMode::receivePlane(int id) {
     image =  m_sender->getImage();
 
     if (image) {
-      int imageSize = currImg->imgSize * currImg->imgSize * currImg->numChannels;
+      int imageSize = currImg->imgSize * currImg->imgSize * currImg->numBytesPerPixel;
 
       // Check if a resize is needed.
       if (currImg->arraySize == 0 || currImg->arraySize != imageSize) {
@@ -292,6 +293,7 @@ bool GenericMode::receivePlaneAndPosition(int id) {
   // Get the plane.
   currImg->imgSize = m_sender->getImgSize();
   currImg->numChannels = m_sender->getNumChan();
+  currImg->numBytesPerPixel = m_sender->getNumBytesPerPixel();
 
   // Check the image size and the number of channels to see if this makes sense.
   if (currImg->imgSize > 0 && currImg->imgSize <= 2048 && currImg->numChannels > 0 && currImg->numChannels <= 16) {
@@ -302,7 +304,7 @@ bool GenericMode::receivePlaneAndPosition(int id) {
     image =  m_sender->getImage();
 
     if (image) {
-      int imageSize = currImg->imgSize * currImg->imgSize * currImg->numChannels;
+      int imageSize = currImg->imgSize * currImg->imgSize * currImg->numBytesPerPixel;
 
       // Check if a resize is needed.
       if (currImg->arraySize == 0 || currImg->arraySize != imageSize) {
@@ -410,6 +412,7 @@ void GenericMode::print() {
     cout << "Translation: [" << m_imgDataArray[ix1].transMatrix[0] << " " << m_imgDataArray[ix1].transMatrix[1] << " " << m_imgDataArray[ix1].transMatrix[2] << " ]" << endl;
     cout << "Image size = " << m_imgDataArray[ix1].imgSize << endl;
     cout << "Number of image color channels = " << m_imgDataArray[ix1].numChannels << endl;
+    cout << "Number of bytes per pixel = " << m_imgDataArray[ix1].numBytesPerPixel << endl;
   }
 
   for (ix1=0; ix1<m_cathDataArray.size(); ix1++) {

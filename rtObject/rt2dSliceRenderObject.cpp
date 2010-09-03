@@ -245,17 +245,21 @@ void rt2DSliceRenderObject::setupPipeline() {
 
 void rt2DSliceRenderObject::update() {
   rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
-  if ( !dObj->isDataValid() || !dObj->getUCharData()) return;
+  if ( !dObj->isDataValid() || !dObj->getRawData() || !dObj->getUCharData()) return;
 
   double scaleRange[2];
+  double scaleRange_raw[2];
   double bounds[6];
 
   dObj->getUCharData()->Update();
   dObj->getUCharData()->GetScalarRange(scaleRange);
-  dObj->getUCharData()->GetBounds(bounds);
 
-  m_texturePlane.setImageData(dObj->getUCharData());
-  m_texturePlane.setScalarRange(scaleRange[0], scaleRange[1]);
+  dObj->getRawData()->Update();
+  dObj->getRawData()->GetScalarRange(scaleRange_raw);
+  dObj->getRawData()->GetBounds(bounds);
+      
+  m_texturePlane.setImageData(dObj->getRawData());
+  m_texturePlane.setScalarRange(scaleRange_raw[0], scaleRange_raw[1]);
   m_texturePlane.setWindow(dObj->getWindow());
   m_texturePlane.setLevel(dObj->getLevel());
   m_texturePlane.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2]);

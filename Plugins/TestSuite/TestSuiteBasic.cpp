@@ -20,8 +20,13 @@
 
 #include <vtkImageSinusoidSource.h>
 #include <vtkColorTransferFunction.h>
+#include <vtkPNGReader.h>
+#include <vtkDICOMImageReader.h>
+#include <vtkImageShiftScale.h>
 
 #include <QList>
+#include <QString>
+#include <QFileDialog>
 
 #include "TestSuiteBasic.h"
 #include "rtBaseHandle.h"
@@ -43,6 +48,15 @@ TestSuiteBasic::TestSuiteBasic() {
   m_imgPeriod = 30;
   m_imgChange.setInterval(20);
   connect(&m_imgChange, SIGNAL(timeout()), this, SLOT(changeImage()));
+  m_pngFileName = "";
+  m_dicomFileName = "";
+  m_imgMapToColors = vtkImageMapToColors::New();
+  m_lookupTable = vtkWindowLevelLookupTable::New();
+}
+
+TestSuiteBasic::~TestSuiteBasic() {
+  if (m_imgMapToColors) m_imgMapToColors->Delete();
+  if (m_lookupTable) m_lookupTable->Delete();
 }
 
 void TestSuiteBasic::run() {
@@ -105,6 +119,14 @@ void TestSuiteBasic::run() {
       ptObj->Modified();
       ptObj->unlock();
     }
+      
+    m_lookupTable->SetHueRange(0.5, 1.0);
+    m_lookupTable->SetSaturationRange(0.5, 1.0);
+    m_lookupTable->SetValueRange(0.5, 1.0);
+
+    m_imgMapToColors->SetOutputFormatToRGB();
+    m_imgMapToColors->SetLookupTable(m_lookupTable);
+
   }
 
 
@@ -225,6 +247,7 @@ void TestSuiteBasic::run() {
     } else {
       emit sendOutput("Load 2D Plane Data...");
       vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
+      vtkImageShiftScale *shift = vtkImageShiftScale::New();
 
       sinSrc->SetWholeExtent(0,255, 0, 255, 0, 0);
       sinSrc->SetDirection(1, 2, 3);
@@ -232,19 +255,77 @@ void TestSuiteBasic::run() {
       sinSrc->SetPhase(1);
       sinSrc->SetAmplitude(10);
       sinSrc->Update();
+      
+      shift->SetInput(sinSrc->GetOutput());
+      shift->SetOutputScalarType(VTK_UNSIGNED_CHAR);
+      shift->SetShift(20);
+      shift->Update();
 
       ptObj->lock();
       ptObj->getTransform()->Translate(20, 200, 2);
       ptObj->getTransform()->RotateX(25);
       ptObj->getTransform()->RotateY(25);
       ptObj->getTransform()->RotateZ(25);
-      ptObj->copyImageData2D(sinSrc->GetOutput());
+      ptObj->copyImageData2D(shift->GetOutput());
       ptObj->Modified();
       ptObj->unlock();
 
       sinSrc->Delete();
     }
   }
+  
+  if (m_2DPlaneColor >= 0) {
+    rt2DSliceDataObject* ptObj = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(m_2DPlaneColor));
+    if (!ptObj) {
+      emit sendOutput("Could Not Get 2D Color Plane Object! FAIL!");
+    } else {
+      emit sendOutput("Load 2D Color Plane Data...");
+
+      vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
+
+      vtkPNGReader *pngReader = vtkPNGReader::New();
+      pngReader->SetFileName( m_pngFileName.toStdString().c_str() );
+      pngReader->SetNumberOfScalarComponents(3);
+      pngReader->SetDataScalarType(VTK_UNSIGNED_CHAR);
+      pngReader->Update();
+
+      ptObj->lock();
+      ptObj->getTransform()->Translate(100, 300, 2);
+      ptObj->getTransform()->RotateX(25);
+      ptObj->getTransform()->RotateY(25);
+      ptObj->getTransform()->RotateZ(25);
+      ptObj->copyImageData2D(pngReader->GetOutput());
+      ptObj->Modified();
+      ptObj->unlock();
+
+      sinSrc->Delete(); 
+    }
+  }
+
+  if (m_2DPlane16 >= 0) {
+    rt2DSliceDataObject* ptObj = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(m_2DPlane16));
+    if (!ptObj) {
+      emit sendOutput("Could Not Get 2D 16-bit Plane Object! FAIL!");
+    } else {
+      emit sendOutput("Load 2D 16-bit Plane Data...");
+
+      vtkDICOMImageReader *dcmReader = vtkDICOMImageReader::New();
+      dcmReader->SetFileName( m_dicomFileName.toStdString().c_str() );
+      dcmReader->SetNumberOfScalarComponents(1);
+      dcmReader->SetDataScalarType(VTK_UNSIGNED_SHORT);
+      dcmReader->Update();
+
+      ptObj->lock();
+      ptObj->getTransform()->Translate(100, 300, 2);
+      ptObj->getTransform()->RotateX(25);
+      ptObj->getTransform()->RotateY(25);
+      ptObj->getTransform()->RotateZ(25);
+      ptObj->copyImageData2D(dcmReader->GetOutput());
+      ptObj->Modified();
+      ptObj->unlock();
+    }
+  }
+  
 
   if (m_matrix >= 0) {
     rtMatrixDataObject* ptObj = static_cast<rtMatrixDataObject*>(rtBaseHandle::instance().getObjectWithID(m_matrix));
@@ -429,6 +510,14 @@ void TestSuiteBasic::basicTestCreateObjects() {
   // Test image
   m_2DPlane = rtBaseHandle::instance().requestNewObject(rtConstants::OT_2DObject, "Test Image 256x256");
   testObject(m_2DPlane, "Test Image 256x256");
+  
+  // Test image (color)
+  m_2DPlaneColor = rtBaseHandle::instance().requestNewObject(rtConstants::OT_2DObject, "Color Test Image 256x256");
+  testObject(m_2DPlaneColor, "Color Test Image 256x256");
+
+  // Test image (16-bit grayscale)
+  m_2DPlane16 = rtBaseHandle::instance().requestNewObject(rtConstants::OT_2DObject, "Test Image 16-bit 256x256");
+  testObject(m_2DPlane16, "Test Image 16-bit 256x256");
 
   // Test matrix
   m_matrix = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkMatrix4x4, "Test Matrix");
@@ -459,6 +548,7 @@ void TestSuiteBasic::testObject(int id, QString name) {
 }
 
 void TestSuiteBasic::changeImage() {
+
   if (m_2DPlane >= 0) {
     rt2DSliceDataObject* ptObj = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(m_2DPlane));
     if (!ptObj) {
@@ -466,6 +556,7 @@ void TestSuiteBasic::changeImage() {
     } else {
       emit sendOutput("Change 2D Plane Info...");
       vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
+      vtkImageShiftScale *shift = vtkImageShiftScale::New();
 
       sinSrc->SetWholeExtent(0,255, 0, 255, 0, 0);
       sinSrc->SetDirection(1, 2, 3);
@@ -473,6 +564,11 @@ void TestSuiteBasic::changeImage() {
       sinSrc->SetPhase(1);
       sinSrc->SetAmplitude(10);
       sinSrc->Update();
+
+      shift->SetInput(sinSrc->GetOutput());
+      shift->SetOutputScalarType(VTK_UNSIGNED_CHAR);
+      shift->SetShift(+20);
+      shift->Update();
 
       m_imgPeriod = m_imgPeriod + 1;
       if (m_imgPeriod > 100) m_imgPeriod = 10;
@@ -487,12 +583,63 @@ void TestSuiteBasic::changeImage() {
       tempCopy->SetMatrix(matCopy);
       tempCopy->RotateX(2);
       ptObj->setVtkMatrix(tempCopy->GetMatrix());
-      ptObj->copyImageData2D(sinSrc->GetOutput());
+      ptObj->copyImageData2D(shift->GetOutput());
       ptObj->Modified();
       ptObj->unlock();
 
       tempCopy->Delete();
+      shift->Delete();
       sinSrc->Delete();
     }
   }
+
+  if (m_2DPlaneColor >= 0) {
+    rt2DSliceDataObject* ptObj = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(m_2DPlaneColor));
+    if (!ptObj) {
+      emit sendOutput("Could Not Get 2D Color Plane Object! FAIL!");
+    } else {
+      emit sendOutput("Change 2D Plane Color Info...");
+
+      vtkTransform *temp;
+      vtkMatrix4x4 *matCopy;
+      vtkTransform *tempCopy = vtkTransform::New();
+
+      ptObj->lock();
+      temp = ptObj->getTransform();
+      matCopy = temp->GetMatrix();
+      tempCopy->SetMatrix(matCopy);
+      tempCopy->RotateX(2);
+      ptObj->setVtkMatrix(tempCopy->GetMatrix());
+      ptObj->Modified();
+      ptObj->unlock();
+
+      tempCopy->Delete();
+    }
+  }
+
+  if (m_2DPlane16 >= 0) {
+    rt2DSliceDataObject* ptObj = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(m_2DPlane16));
+    if (!ptObj) {
+      emit sendOutput("Could Not Get 2D 16-bit Plane Object! FAIL!");
+    } else {
+      emit sendOutput("Change 2D 16-bit Plane Info...");
+
+      vtkTransform *temp;
+      vtkMatrix4x4 *matCopy;
+      vtkTransform *tempCopy = vtkTransform::New();
+
+      ptObj->lock();
+      temp = ptObj->getTransform();
+      matCopy = temp->GetMatrix();
+      tempCopy->SetMatrix(matCopy);
+      tempCopy->RotateX(2);
+      ptObj->setVtkMatrix(tempCopy->GetMatrix());
+      ptObj->Modified();
+      ptObj->unlock();
+
+      tempCopy->Delete();
+    }
+  }
+
+
 }

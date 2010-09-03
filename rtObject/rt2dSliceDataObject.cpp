@@ -147,21 +147,24 @@ void rt2DSliceDataObject::copyImageData2DSlot() {
   //m_imgData->GetScalarRange(rangeI);
   m_imgUCharCast->SetOutputScalarTypeToUnsignedChar();
 
-  if( m_imgData->GetNumberOfScalarComponents() == 3) {
-    m_lumin->SetInput(m_imgData);
-    m_lumin->GetOutput()->Update();
-    m_lumin->GetOutput()->GetScalarRange(rangeI);
-    m_imgUCharCast->SetInput(m_lumin->GetOutput());
-  }
-  else {
-    m_imgData->GetScalarRange(rangeI);
-    m_imgUCharCast->SetInput(m_imgData);
-  }
+  m_wlDialog->setImageData( m_imgData );  
 
-  m_imgUCharCast->SetShift(-rangeI[0]);
+  m_imgData->GetScalarRange(rangeI);
 
+ // xxxx EthanB keeping the m_imgUCharCast code around because the imgCast pathway in rt2dSliceRenderObject (possibly) seems to need it
+  m_imgUCharCast->SetInput(m_imgData);  
+  if (m_imgData->GetScalarType() == VTK_UNSIGNED_SHORT)
+    {
+      m_imgUCharCast->SetShift(-rangeI[0]);
+      m_imgUCharCast->SetScale(255.0 / (rangeI[1] - rangeI[0])); 
+    }
+  else
+    {
+      m_imgUCharCast->SetShift(-rangeI[0]);
+      m_imgUCharCast->SetScale(1.0);
+    } 
   m_imgUCharCast->GetOutput()->Update();
-  m_wlDialog->setImageData( m_imgUCharCast->GetOutput() );
+ // this previous block of code can possibly be nixed if I can figure out the imgCast pathway
 
   m_dataCopyLock.release();
 

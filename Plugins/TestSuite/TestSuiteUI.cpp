@@ -17,8 +17,13 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
-#include "TestSuiteUI.h"
+
 #include <iostream>
+
+#include <QFileDialog>
+#include <QString>
+
+#include "TestSuiteUI.h"
 
 TestSuiteUI::TestSuiteUI()
 {
@@ -50,6 +55,10 @@ void TestSuiteUI::setupSlots() {
 
 
 void TestSuiteUI::basicTest() {
+  QString pngFile = QFileDialog::getOpenFileName(this, "Select PNG File", QDir::currentPath(),"Image File (*.png)" );
+  m_basicTest->setPngFileName(pngFile);
+  QString dicomFile = QFileDialog::getOpenFileName(this, "Select DICOM File", QDir::currentPath(),"Image File (*.dcm)" );
+  m_basicTest->setDicomFileName(dicomFile);
   m_basicTest->start();
 }
 

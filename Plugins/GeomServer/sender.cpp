@@ -112,7 +112,7 @@ bool GeometrySender::sendImgData(IMAGEDATA *imgDat, int planeID) {
   }
 
   m_geomClient->setPlaneID(planeID);
-  m_geomClient->setAll(m_clientID, imgDat->trig, imgDat->resp, imgDat->rotMatrix, imgDat->transMatrix, imgDat->FOV, imgDat->imgSize, imgDat->img, imgDat->numChannels);
+  m_geomClient->setAll(m_clientID, imgDat->trig, imgDat->resp, imgDat->rotMatrix, imgDat->transMatrix, imgDat->FOV, imgDat->imgSize, imgDat->img, imgDat->numChannels, imgDat->numBytesPerPixel);
 
   return true;
 }

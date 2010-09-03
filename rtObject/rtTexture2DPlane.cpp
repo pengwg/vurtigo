@@ -35,14 +35,13 @@ rtTexture2DPlane::rtTexture2DPlane() {
   // Default sizes.
   m_xsize = 1.0f;
   m_ysize = 1.0f;
-
-  // Balck and white.
+  
+  // Black and white.
   m_imgMapToColors->SetOutputFormatToRGB();
 
   m_lookupTable->SetHueRange(0.0, 0.0);
   m_lookupTable->SetSaturationRange(0.0, 0.0);
   m_lookupTable->SetValueRange(0.0, 1.0);
-
 
   m_texturePlane->SetOrigin(0,0,0);
   m_texturePlane->SetPoint1(1,0,0);
@@ -51,7 +50,6 @@ rtTexture2DPlane::rtTexture2DPlane() {
   m_planeMapper->SetInput(m_texturePlane->GetOutput());
   m_textureActor->SetMapper(m_planeMapper);
   m_textureActor->SetTexture(m_texture);
-  m_texture->SetInputConnection(m_imgMapToColors->GetOutputPort());
   m_imgMapToColors->SetLookupTable(m_lookupTable);
 }
 
@@ -78,7 +76,13 @@ void rtTexture2DPlane::setLevel(double l) {
 }
 
 void rtTexture2DPlane::setImageData(vtkImageData* img) {
-  m_imgMapToColors->SetInput(img);
+  if (img->GetNumberOfScalarComponents() == 1) {
+    m_texture->SetInputConnection(m_imgMapToColors->GetOutputPort());
+    m_imgMapToColors->SetInput(img);
+  }
+  else {
+    m_texture->SetInput(img); 
+  }
 }
 
 void rtTexture2DPlane::setTransform( vtkTransform* t ) {
