@@ -103,6 +103,13 @@
        </layout>
       </item>
       <item>
+       <widget class="QCheckBox" name="cathZeroCheckBox">
+        <property name="text">
+         <string>Use Only Catheter ZERO</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QTableWidget" name="objectTable">
         <property name="columnCount">
          <number>2</number>

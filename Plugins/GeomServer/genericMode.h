@@ -52,6 +52,7 @@ class GenericMode{
   QSemaphore m_planeListLock;
   QSemaphore m_cathListLock;
 
+  bool m_zeroCathOnly;
  public:
   // This class cannot be created directly.
   GenericMode();
@@ -69,10 +70,11 @@ class GenericMode{
   bool receivePlanePosition(int id);
   bool receivePlane(int id);
   bool receivePlaneAndPosition(int id);
-  bool receiveCatheter();
+  bool receiveCatheter(int id);
 
   void setPlaneList(QList<SenderThread::ListObject>  plane);
   void setCathList(QList<SenderThread::ListObject> cath);
+  inline void setZeroCathOnly(bool zeroCath) { m_zeroCathOnly = zeroCath; }
 
   std::vector<CATHDATA> & getCaths() {
     return m_cathDataArray;

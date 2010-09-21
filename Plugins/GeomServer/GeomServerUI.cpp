@@ -33,6 +33,7 @@ void GeomServerUI::setupSlots() {
   connect(disconnectButton, SIGNAL(clicked()), this, SLOT(serverDisconnect()));
   connect(numPlanesSpinBox, SIGNAL(valueChanged(int)), this, SLOT(numPlanesChanged(int)));
   connect(numCathSpinBox, SIGNAL(valueChanged(int)), this, SLOT(numCathChanged(int)));
+  connect(cathZeroCheckBox, SIGNAL(toggled(bool)), this, SLOT(cathZeroOnlyChanged(bool)));
 }
 
 //! Set defaults of the UI state
@@ -189,6 +190,10 @@ void GeomServerUI::itemStateChanged(int state) {
     m_cathList[ix1].act = static_cast<SenderThread::ObjectActions>(temp->currentIndex());
   }
   updateReaderObject();
+}
+
+void GeomServerUI::cathZeroOnlyChanged (bool status) {
+  senderThread.getSender()->getReaderHandle()->setZeroCathOnly(status);
 }
 
 void GeomServerUI::updateReaderObject() {

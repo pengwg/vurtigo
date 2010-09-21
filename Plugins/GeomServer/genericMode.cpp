@@ -31,7 +31,7 @@
 
 using namespace std;
 
-GenericMode::GenericMode():m_sender(0) {
+GenericMode::GenericMode():m_sender(0), m_zeroCathOnly(false) {
   converter = new Converter();
 
   m_imgDataArray.clear();
@@ -76,7 +76,7 @@ void GenericMode::runMode() {
 
   tt.start();
   // Re-size as is needed.
-  while(m_imgDataArray.size() < m_planeList.count()) {
+  while( m_imgDataArray.size() < ((unsigned int)m_planeList.size()) ) {
     imgData.arraySize = 0;
     imgData.img = NULL;
     m_imgDataArray.push_back(imgData);
@@ -156,10 +156,24 @@ void GenericMode::runMode() {
   for (int ix1=0; ix1<m_cathList.count(); ix1++) {
     tt.restart();
     if (m_cathList[ix1].act == SenderThread::OBJ_READ) {
-      receiveCatheter();
-      if (m_cathDataArray.at(ix1).cathMode != NO_CATHETERS) {
-        localCath = converter->getLocalCath(ix1);
-        converter->setLocalCath(m_cathDataArray[ix1], localCath);
+
+      // Get the catheter is required.
+      if ( (m_zeroCathOnly && ix1 == 0) || !m_zeroCathOnly) {
+        receiveCatheter(ix1);
+      }
+
+      if (m_zeroCathOnly) {
+        // Only catheter zero is used for ALL instances of the catheter in Vurtigo.
+        if (m_cathDataArray.at(0).cathMode != NO_CATHETERS) {
+          localCath = converter->getLocalCath(ix1);
+          converter->setLocalCath(m_cathDataArray[0], localCath);
+        }
+      } else {
+        // Each catheter is different.
+        if (m_cathDataArray.at(ix1).cathMode != NO_CATHETERS) {
+          localCath = converter->getLocalCath(ix1);
+          converter->setLocalCath(m_cathDataArray[ix1], localCath);
+        }
       }
     } else if(m_cathList[ix1].act == SenderThread::OBJ_WRITE) {
       // Do nothing
@@ -338,7 +352,7 @@ bool GenericMode::receivePlaneAndPosition(int id) {
 }
 
 
-bool GenericMode::receiveCatheter() {
+bool GenericMode::receiveCatheter(int id) {
   CATHDATA* currCath;
   COILDATA coilDat;
   float *coords;
@@ -346,7 +360,7 @@ bool GenericMode::receiveCatheter() {
   bool res = false;
 
     // Always use the first catheter.
-  currCath = &m_cathDataArray[0];
+  currCath = &m_cathDataArray[id];
 
   //QTime temp;
   //temp = QTime::currentTime();
