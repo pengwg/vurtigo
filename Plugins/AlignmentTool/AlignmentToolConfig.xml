@@ -1,0 +1,4 @@
+<plugin>
+  <name title="Alignment Tool" version="1.0"/>
+  <lib libname="AlignmentTool" libpath="/home/spintilie/Code/Vurtigo-build/bin/"/>
+</plugin>

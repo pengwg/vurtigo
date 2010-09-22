@@ -1,0 +1,4 @@
+<plugin>
+  <name title="Cath History" version="1.0"/>
+  <lib libname="CathHistory" libpath="/home/spintilie/Code/Vurtigo-build/bin/"/>
+</plugin>
