@@ -26,6 +26,7 @@
 #include <ui_AlignmentTool.h>
 
 #include "Aligner.h"
+#include "rtBasic3DPointData.h"
 #include "rt2dSliceDataObject.h"
 #include "rt3dPointBufferDataObject.h"
 
@@ -56,9 +57,7 @@ protected:
 
   int m_pointTarget;
   int m_pointEntry;
-  
-  double findDistance(rt3DPointBufferDataObject::SimplePoint p1, rt3DPointBufferDataObject::SimplePoint p2);
-
+  int m_pointAiming;
 
 };
 

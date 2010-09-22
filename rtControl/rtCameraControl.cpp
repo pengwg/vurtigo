@@ -38,9 +38,9 @@ rtCameraControl::rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWid)
   CameraPosition p;
 
   // Default Positions
-  p.pos[0] = 0.0f; p.pos[1] = 0.0f; p.pos[2] = 1000.0f;
+  p.pos[0] = 0.0f; p.pos[1] = 0.0f; p.pos[2] = -1000.0f;
   p.focal[0] = 0.0f; p.focal[1] = 0.0f; p.focal[2] = 0.0f;
-  p.up[0] = 0.0f; p.up[1] = 1.0f; p.up[2] = 0.0f;
+  p.up[0] = 0.0f; p.up[1] = -1.0f; p.up[2] = 0.0f;
   m_cameraPosList.append(p);
 
   // Robot Arm Position

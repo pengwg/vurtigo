@@ -1,4 +1,6 @@
 #ifdef UNDEF
+/* NOT USED AT ALL RIGHT NOW */
+
 /*******************************************************************************
     Vurtigo: Visualization software for interventional applications in medicine
     Copyright (C) 2009 Sunnybrook Health Sciences Centre

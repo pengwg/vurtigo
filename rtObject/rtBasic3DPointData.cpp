@@ -84,3 +84,26 @@ void rtBasic3DPointData::getTransformedPoint(double p[3]) {
   p[2] = m_coords[2];
   m_pTransform->TransformPoint(p, p);
 }
+
+void rtBasic3DPointData::setPoint(double x, double y, double z)
+  {
+    m_coords[0] = x;
+    m_coords[1] = y;
+    m_coords[2] = z;
+  }
+  
+void rtBasic3DPointData::setPoint(double p[3])
+  {
+    m_coords[0] = p[0];
+    m_coords[1] = p[1];
+    m_coords[2] = p[2];
+  }
+  
+#define SQR(x) ((x)*(x))
+  
+double rtBasic3DPointData::findDistance(rtBasic3DPointData p1, rtBasic3DPointData p2)
+  {
+    return sqrt(SQR((p1.m_coords[0] - p2.m_coords[0])) + SQR((p1.m_coords[1] - p2.m_coords[1])) + SQR((p1.m_coords[2] - p2.m_coords[2])));
+  }
+  
+

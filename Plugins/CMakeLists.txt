@@ -34,6 +34,16 @@ if (VURTIGO_PLUGIN_CATH_TRACKING)
 add_subdirectory(CathTracking)
 endif (VURTIGO_PLUGIN_CATH_TRACKING)
 
+set(VURTIGO_PLUGIN_CATH_HISTORY ON CACHE BOOL "Compile the Catheter History Plugin")
+if (VURTIGO_PLUGIN_CATH_HISTORY)
+add_subdirectory(CathHistory)
+endif (VURTIGO_PLUGIN_CATH_HISTORY)
+
+set(VURTIGO_PLUGIN_ALIGNMENT_TOOL ON CACHE BOOL "Compile the Alignment Tool Plugin")
+if (VURTIGO_PLUGIN_ALIGNMENT_TOOL)
+add_subdirectory(AlignmentTool)
+endif (VURTIGO_PLUGIN_ALIGNMENT_TOOL)
+
 set(VURTIGO_PLUGIN_CARTO_READER ON CACHE BOOL "Compile the Carto Reader Plugin")
 if (VURTIGO_PLUGIN_CARTO_READER)
 add_subdirectory(CartoReader)

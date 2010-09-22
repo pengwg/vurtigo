@@ -76,7 +76,13 @@ public:
 
   bool setTransform(float rotMatrix[9], float transMatrix[3], bool asUser=false);
   bool setVtkMatrix(vtkMatrix4x4* m, bool asUser=false);
+
+
   bool setPlaneCenter(double center[3], bool asUser=false);
+  bool setPlaneNormal(double normal[3], bool asUser=false);
+  
+  void getPlaneCenter(double center[3]);
+  void getPlaneNormal(double normal[3]);
 
   //! Push the plane in the direction of the surface normal.
   /*!

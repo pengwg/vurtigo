@@ -66,6 +66,13 @@ public:
     \return The handle to the point or 0 if the point is not found.
     */
   rtBasic3DPointData* getPointWithId(int id);
+  
+  //! Get a handle to a point at a particular index
+  /*!
+    \return The handle to the point or 0 if the point is not found.
+    */
+  rtBasic3DPointData* getPointAtIndex(int index);
+  
 
   vtkTransform* const getTransform() { return m_pTransform; }
 

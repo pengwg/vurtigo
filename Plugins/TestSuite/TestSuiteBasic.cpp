@@ -503,9 +503,10 @@ void TestSuiteBasic::basicTestCreateObjects() {
 
   // Two test volumes
   m_smallVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 128x128x128");
-  m_hugeVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 400x400x400");
+//  m_hugeVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 400x400x400");
+  m_hugeVol = 0;
   testObject(m_smallVol, "Test Volume 128x128x128");
-  testObject(m_hugeVol, "Test Volume 400x400x400");
+//  testObject(m_hugeVol, "Test Volume 400x400x400");
 
   // Test image
   m_2DPlane = rtBaseHandle::instance().requestNewObject(rtConstants::OT_2DObject, "Test Image 256x256");
@@ -593,6 +594,7 @@ void TestSuiteBasic::changeImage() {
     }
   }
 
+/*
   if (m_2DPlaneColor >= 0) {
     rt2DSliceDataObject* ptObj = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(m_2DPlaneColor));
     if (!ptObj) {
@@ -640,6 +642,28 @@ void TestSuiteBasic::changeImage() {
       tempCopy->Delete();
     }
   }
+*/  
+
+  static int count = 0;
+  count++;
+  if (((count % 50) == 0) && m_cath[0]) {
+    rtCathDataObject* ptObj = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(m_cath[0]));
+    if (!ptObj) {
+      emit sendOutput("Could Not Get 1 Coil Catheter Object! FAIL!");
+    } else {
+      emit sendOutput("Moving Catheter...");
+      ptObj->lock();
+      double pos[3];
+      ptObj->getPositionAtLocation(0, pos);
+      pos[0] += 25*((rand()%32767)/32767.0 - 0.5);
+      pos[1] += 25*((rand()%32767)/32767.0 - 0.5);
+      pos[2] += 25*((rand()%32767)/32767.0 - 0.5);
+      ptObj->setCoilCoords(0, pos[0], pos[1], pos[2]);
+      ptObj->Modified();
+      ptObj->unlock();
+    }
+  }
+
 
 
 }

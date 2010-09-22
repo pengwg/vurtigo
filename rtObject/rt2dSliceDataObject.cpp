@@ -24,6 +24,8 @@
 #include "buildParam.h"
 #include <cmath>
 
+#include <vtkMath.h>
+
 //! Constructor
 rt2DSliceDataObject::rt2DSliceDataObject() {
   setObjectType(rtConstants::OT_2DObject);
@@ -195,6 +197,9 @@ bool rt2DSliceDataObject::setVtkMatrix(vtkMatrix4x4* m, bool asUser) {
   if (!m) return false;
   if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return false;
   m_trans->SetMatrix(m);
+  
+  Modified();
+  
   return true;
 }
 
@@ -222,8 +227,83 @@ bool rt2DSliceDataObject::setPlaneCenter(double center[3], bool asUser) {
   m_trans->SetMatrix(mat);
 
   if(mat) mat->Delete();
+  
+  Modified();
+  
   return true;
 }
+
+void rt2DSliceDataObject::getPlaneCenter(double center[3]) {
+  int dims[3];
+  double space[3];
+
+  m_imgData->GetDimensions(dims);
+  m_imgData->GetSpacing(space);
+
+  vtkMatrix4x4* mat = vtkMatrix4x4::New();  
+
+  double xOff, yOff;
+  xOff = dims[0]*space[0]/2.0f;
+  yOff = dims[1]*space[1]/2.0f;
+  
+  m_trans->GetMatrix(mat);
+  
+  center[0] = mat->GetElement(0, 3) + xOff*mat->GetElement(0, 0) + yOff*mat->GetElement(0, 1);
+  center[1] = mat->GetElement(1, 3) + xOff*mat->GetElement(1, 0) + yOff*mat->GetElement(1, 1);
+  center[2] = mat->GetElement(2, 3) + xOff*mat->GetElement(2, 0) + yOff*mat->GetElement(2, 1);
+}
+
+bool rt2DSliceDataObject::setPlaneNormal(double normal[3], bool asUser) {
+
+  if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return false;
+
+  double oldCenter[3];
+  double oldNormal[3];
+  double rotationAxis[3];
+  double rot_angle;
+  vtkTransform* tempTrans = vtkTransform::New();
+
+  tempTrans->DeepCopy(m_trans);
+
+  getPlaneCenter(oldCenter);
+  getPlaneNormal(oldNormal);
+
+  // Cross product to find rotation axis.
+  vtkMath::Cross(oldNormal, normal, rotationAxis);
+  rot_angle = ( 180/vtkMath::Pi() ) * acos(vtkMath::Dot(oldNormal, normal) / (vtkMath::Norm(oldNormal) * vtkMath::Norm(normal)));
+
+  tempTrans->PostMultiply();
+  tempTrans->Translate(-oldCenter[0], -oldCenter[1], -oldCenter[2]);
+  tempTrans->RotateWXYZ(rot_angle, rotationAxis);
+  tempTrans->Translate(oldCenter[0], oldCenter[1], oldCenter[2]);
+  tempTrans->PreMultiply();
+
+  m_trans->Identity();
+  m_trans->SetMatrix(tempTrans->GetMatrix());
+
+  if (tempTrans) tempTrans->Delete();
+
+  Modified();
+  return true;
+}
+
+void rt2DSliceDataObject::getPlaneNormal(double normal[3]) {
+  vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+
+  m_trans->GetMatrix(mat);
+
+  double zDirec[3];
+  double sumSq = 0.0;
+  for (int ix1=0; ix1<3; ix1++) {
+    zDirec[ix1] = mat->GetElement(ix1, 2);
+    sumSq += zDirec[ix1]*zDirec[ix1];
+  }
+  sumSq = sqrt(sumSq);
+
+   for (int ix1 = 0; ix1 < 3; ix1++)
+     normal[ix1] = zDirec[ix1] / sumSq;
+}
+
 
 void rt2DSliceDataObject::pushPlaneBy(double amt, bool asUser) {
   if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return;

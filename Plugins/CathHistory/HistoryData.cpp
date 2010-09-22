@@ -21,6 +21,8 @@
 #include <iostream>
 #include <cmath>
 
+#include "rtBasic3DPointData.h"
+
 #include "vtkTransform.h"
 #include "vtkMatrix4x4.h"
 
@@ -31,9 +33,7 @@ HistoryData::HistoryData(rtCathDataObject* cath, rt3DPointBufferDataObject* poin
   
   m_fAutoTrack = false;
 
-  m_prevAutoTrackPoint.px = -1000;
-  m_prevAutoTrackPoint.py = -1000;
-  m_prevAutoTrackPoint.pz = -1000;
+  m_prevAutoTrackPoint.setPoint(-1000, -1000, -1000);
   
   m_autoTrackDistanceThreshold = 2;
 }
@@ -65,16 +65,14 @@ void HistoryData::savePoint()
       return;
       
    // create a point at this position
-    rt3DPointBufferDataObject::SimplePoint p;
+    rtBasic3DPointData p;
 
-    p.px = pos[0];
-    p.py = pos[1];
-    p.pz = pos[2];
+    p.setPoint(pos);
 
-    p.pSize = 3;
+    p.setPointSize(3);
 
-    p.pProp->SetColor(1, 0, 0);
-    p.pProp->SetOpacity(0.5);
+    p.setColor(1, 0, 0); // red
+    p.getProperty()->SetOpacity(0.5);
     
     m_points->lock();
     m_points->addPoint(p);
@@ -112,19 +110,17 @@ void HistoryData::doAutoTrack()
       return;
       
    // create a point at this position
-    rt3DPointBufferDataObject::SimplePoint p;
+    rtBasic3DPointData p;
     
-    p.px = pos[0];
-    p.py = pos[1];
-    p.pz = pos[2];
+    p.setPoint(pos);
 
-    if (findDistance(p, m_prevAutoTrackPoint) < m_autoTrackDistanceThreshold)
+    if (rtBasic3DPointData::findDistance(p, m_prevAutoTrackPoint) < m_autoTrackDistanceThreshold)
       return;
-      
-    p.pSize = 3;
 
-    p.pProp->SetColor(1, 0, 0);
-    p.pProp->SetOpacity(0.5);
+    p.setPointSize(3);
+
+    p.setColor(1, 0, 0); // red
+    p.getProperty()->SetOpacity(0.5);
 
     m_prevAutoTrackPoint = p;
     
@@ -132,12 +128,5 @@ void HistoryData::doAutoTrack()
     m_points->addPoint(p);
     m_points->Modified();
     m_points->unlock();
-  }
-
-#define SQR(x) ((x)*(x))
-
-double HistoryData::findDistance(rt3DPointBufferDataObject::SimplePoint p1, rt3DPointBufferDataObject::SimplePoint p2)
-  {
-    return sqrt(SQR((p1.px-p2.px)) + SQR((p1.py-p2.py)) + SQR((p1.pz-p2.pz)));
   }
 

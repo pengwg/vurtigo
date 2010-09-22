@@ -53,12 +53,27 @@ void TestSuiteUI::setupSlots() {
   connect( m_basicTest, SIGNAL(sendOutput(QString)), this, SLOT(addText(QString)), Qt::QueuedConnection );
 }
 
+bool fExist(QString *filename)
+  {
+    FILE *f = fopen(filename->toStdString().c_str(), "rb");
+    fclose(f);
+    
+    return (f != NULL);
+  }
 
 void TestSuiteUI::basicTest() {
-  QString pngFile = QFileDialog::getOpenFileName(this, "Select PNG File", QDir::currentPath(),"Image File (*.png)" );
+  QString pngFile("/home/hawk/x.png");
+  QString dicomFile("/home/hawk/x.dcm");
+  
+  if (!fExist(&pngFile))
+    pngFile = QFileDialog::getOpenFileName(this, "Select PNG File", QDir::currentPath(),"Image File (*.png)" );
+    
+  if (!fExist(&dicomFile)) 
+    dicomFile = QFileDialog::getOpenFileName(this, "Select DICOM File", QDir::currentPath(),"Image File (*.dcm)" );
+
   m_basicTest->setPngFileName(pngFile);
-  QString dicomFile = QFileDialog::getOpenFileName(this, "Select DICOM File", QDir::currentPath(),"Image File (*.dcm)" );
   m_basicTest->setDicomFileName(dicomFile);
+  
   m_basicTest->start();
 }
 

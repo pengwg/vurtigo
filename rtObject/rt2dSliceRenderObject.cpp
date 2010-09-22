@@ -247,12 +247,8 @@ void rt2DSliceRenderObject::update() {
   rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
   if ( !dObj->isDataValid() || !dObj->getRawData() || !dObj->getUCharData()) return;
 
-  double scaleRange[2];
   double scaleRange_raw[2];
   double bounds[6];
-
-  dObj->getUCharData()->Update();
-  dObj->getUCharData()->GetScalarRange(scaleRange);
 
   dObj->getRawData()->Update();
   dObj->getRawData()->GetScalarRange(scaleRange_raw);
@@ -275,6 +271,11 @@ void rt2DSliceRenderObject::update() {
 
   // Update the 2D as well
   m_imgCast->SetInput(dObj->getUCharData());
+
+ // not sure if this old scaleRange code is needed anymore
+  double scaleRange[2];
+  dObj->getUCharData()->Update();
+  dObj->getUCharData()->GetScalarRange(scaleRange);
 
   double range[2];
   int dims[3];

@@ -47,8 +47,14 @@ public:
   double getZ();
   void getPoint(double p[3]);
   void getTransformedPoint(double p[3]);
+  
+  void setPoint(double x, double y, double z);
+  void setPoint(double p[3]);
 
   inline vtkTransform* getTransform() { return m_pTransform; }
+  
+  static double findDistance(rtBasic3DPointData p1, rtBasic3DPointData p2);
+  
 
 protected:
   vtkTransform *m_pTransform;

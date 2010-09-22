@@ -31,15 +31,14 @@ AlignmentToolUI::AlignmentToolUI() {
  // create target and entry point "buffers"  
   m_pointTarget = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DPointBuffer, "Target Point");
   m_pointEntry  = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DPointBuffer, "Entry Point");
+  m_pointAiming  = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DPointBuffer, "Aiming Point");
   
  // create target (initial) point
-  rt3DPointBufferDataObject::SimplePoint p;
-  p.px = 0;
-  p.py = 0;
-  p.pz = 0;
-  p.pSize = 5;
-  p.pProp->SetOpacity(0.5);
-  p.pProp->SetColor(1, 0, 0); // red
+  rtBasic3DPointData p;
+  p.setPoint(0, 0, 0);
+  p.setPointSize(5);
+  p.getProperty()->SetOpacity(0.5);
+  p.setColor(1, 0, 0); // red
   rt3DPointBufferDataObject *pointTarget = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pointTarget));
   pointTarget->lock();
   pointTarget->addPoint(p);
@@ -48,12 +47,10 @@ AlignmentToolUI::AlignmentToolUI() {
 //  pointTarget->setVisible3D(true);
   
  // create entry (initial) point
-  p.px = 100;
-  p.py = 100;
-  p.pz = 100;
-  p.pSize = 5;
-  p.pProp->SetOpacity(0.5);
-  p.pProp->SetColor(1, 1, 0); // yellow
+  p.setPoint(100, 100, 100);
+  p.setPointSize(5);
+  p.getProperty()->SetOpacity(0.5);
+  p.setColor(1, 1, 0); // yellow
   rt3DPointBufferDataObject *pointEntry = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pointEntry));
   pointEntry->lock();
   pointEntry->addPoint(p);
@@ -61,8 +58,19 @@ AlignmentToolUI::AlignmentToolUI() {
   pointEntry->unlock();
 //  pointEntry->setVisible3D(true);
 
+// create aiming point
+  p.setPoint(200, 200, 200);
+  p.setPointSize(5);
+  p.getProperty()->SetOpacity(0); // invisible for now
+  p.setColor(0, 1, 0); // green
+  rt3DPointBufferDataObject *pointAiming = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pointAiming));
+  pointAiming->lock();
+  pointAiming->addPoint(p);
+  pointAiming->Modified();
+  pointAiming ->unlock();
+
  // initial distance from insertion point to aiming plane
-  aimingOffsetDoubleSpinBox->setValue(5);
+  aimingOffsetDoubleSpinBox->setValue(50);
 
  // initial depth is undefined
   depthEdit->setText(""); 
@@ -162,17 +170,23 @@ void AlignmentToolUI::update() {
  // get pointers to point buffer objects (target and entry)
   rt3DPointBufferDataObject *pointBufTarget = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pointTarget));
   rt3DPointBufferDataObject *pointBufEntry  = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pointEntry));
+  rt3DPointBufferDataObject *pointBufAiming = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pointAiming));
   
  // make sure everything exists
-  if (!pointBufTarget || !pointBufEntry)
+  if (!pointBufTarget || !pointBufEntry || !pointBufAiming)
     return;
   
  // get points
-  rt3DPointBufferDataObject::SimplePoint pointTarget = *pointBufTarget->getPoint(0);
-  rt3DPointBufferDataObject::SimplePoint pointEntry  = *pointBufEntry->getPoint(0);
-  
+  rtBasic3DPointData pointTarget = *pointBufTarget->getPointAtIndex(0);
+  rtBasic3DPointData pointEntry  = *pointBufEntry->getPointAtIndex(0);
+
+// get point positions
+ double entryPoint[3], targetPoint[3];
+ pointEntry.getPoint(entryPoint);
+ pointTarget.getPoint(targetPoint);
+
  // update "insertion depth" display
-  double insertionDepth = findDistance(pointTarget, pointEntry);
+  double insertionDepth = rtBasic3DPointData::findDistance(pointTarget, pointEntry);
   depthEdit->setText(QString::number(insertionDepth, 'f', 3)); 
 
  // get indices to planes
@@ -185,28 +199,33 @@ void AlignmentToolUI::update() {
   rt2DSliceDataObject* sliceMonitoring1 = m_planeObjectMap.value(monitoringPlane1Pos);
   rt2DSliceDataObject* sliceMonitoring2 = m_planeObjectMap.value(monitoringPlane2Pos);
 
- // make sure everything exists
-  if (!sliceAiming || !sliceMonitoring1 || !sliceMonitoring2)
-    return;
-  
  // get aiming plane offset distance
   double aimingPlaneOffset = aimingOffsetDoubleSpinBox->value();
   
  // get unit vector in direction from entry point to target point
   double aimingVector[3];
-  aimingVector[0] = (pointTarget.px - pointEntry.px) / insertionDepth;
-  aimingVector[1] = (pointTarget.py - pointEntry.py) / insertionDepth;
-  aimingVector[2] = (pointTarget.pz - pointEntry.pz) / insertionDepth;
+  aimingVector[0] = (targetPoint[0] - entryPoint[0]) / insertionDepth;
+  aimingVector[1] = (targetPoint[1] - entryPoint[1]) / insertionDepth;
+  aimingVector[2] = (targetPoint[2] - entryPoint[2]) / insertionDepth;
   
  // get "aiming point" by backing off aimingPlaneOffset from the insertion point in the direction of the aimingVector
   double aimingPoint[3];
-  aimingPoint[0] = pointEntry.px - aimingPlaneOffset*aimingVector[0];
-  aimingPoint[1] = pointEntry.py - aimingPlaneOffset*aimingVector[1];
-  aimingPoint[2] = pointEntry.pz - aimingPlaneOffset*aimingVector[2];
+  aimingPoint[0] = entryPoint[0] - aimingPlaneOffset*aimingVector[0];
+  aimingPoint[1] = entryPoint[1] - aimingPlaneOffset*aimingVector[1];
+  aimingPoint[2] = entryPoint[2] - aimingPlaneOffset*aimingVector[2];
+  
+ // adjust "aiming point"
+  rtBasic3DPointData *p_pointAiming = pointBufAiming->getPointAtIndex(0);
+  p_pointAiming->setPoint(aimingPoint);
+  p_pointAiming->getProperty()->SetOpacity(0.5); // make visible
+  pointBufAiming->Modified();
   
  // set aiming plane
-  sliceAiming->setPlaneCenter(aimingPoint, true);
-  sliceAiming->setPlaneNormal(aimingVector, true);
+  if (sliceAiming)
+    {
+      sliceAiming->setPlaneCenter(aimingPoint, true);
+      sliceAiming->setPlaneNormal(aimingVector, true);
+    }
   
  // find normals for monitoring planes
   double perp1[3];
@@ -214,31 +233,32 @@ void AlignmentToolUI::update() {
   double norm1[3];
   vtkMath::Cross(aimingVector, perp1, norm1);
   
-  double perp2[3];
-  perp2[0] = 0;  perp2[1] = 0; perp2[2] = 1;
+//  double perp2[3];
+//  perp2[0] = 0;  perp2[1] = 0; perp2[2] = 1;
   double norm2[3];
-  vtkMath::Cross(aimingVector, perp2, norm2);
+  vtkMath::Cross(aimingVector, norm1, norm2);
   
+ // find center point for monitoring planes (halfway between entry and target point)
+  double monitoringCenterPoint[3];
+  monitoringCenterPoint[0] = (targetPoint[0] + entryPoint[0]) / 2;
+  monitoringCenterPoint[1] = (targetPoint[1] + entryPoint[1]) / 2;
+  monitoringCenterPoint[2] = (targetPoint[2] + entryPoint[2]) / 2;
+    
  // set monitoring planes
- double entryPoint[3];
- entryPoint[0] = pointEntry.px; 
- entryPoint[1] = pointEntry.py; 
- entryPoint[2] = pointEntry.pz; 
- sliceMonitoring1->setPlaneCenter(entryPoint, true);
- sliceMonitoring2->setPlaneCenter(entryPoint, true);
+ if (sliceMonitoring1)
+   {
+     sliceMonitoring1->setPlaneCenter(monitoringCenterPoint, true);
+     sliceMonitoring1->setPlaneNormal(norm1, true);
+   }
 
- sliceMonitoring1->setPlaneNormal(norm1, true);
- sliceMonitoring2->setPlaneNormal(norm2, true);
+ if (sliceMonitoring2)
+   {
+     sliceMonitoring2->setPlaneCenter(monitoringCenterPoint, true);
+     sliceMonitoring2->setPlaneNormal(norm2, true);
+   }
   
 }
 
 void AlignmentToolUI::aimingOffsetChanged(double offset) {
   update();
 }
-
-#define SQR(x) ((x)*(x))
-
-double AlignmentToolUI::findDistance(rt3DPointBufferDataObject::SimplePoint p1, rt3DPointBufferDataObject::SimplePoint p2)
-  {
-    return sqrt(SQR((p1.px-p2.px)) + SQR((p1.py-p2.py)) + SQR((p1.pz-p2.pz)));
-  }

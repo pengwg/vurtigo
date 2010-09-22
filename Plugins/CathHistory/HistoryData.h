@@ -51,10 +51,8 @@ class HistoryData : public QObject
   rt3DPointBufferDataObject* m_points;
   
   bool m_fAutoTrack;
-  rt3DPointBufferDataObject::SimplePoint m_prevAutoTrackPoint;
+  rtBasic3DPointData m_prevAutoTrackPoint;
   float m_autoTrackDistanceThreshold;
-  
-  double findDistance(rt3DPointBufferDataObject::SimplePoint p1, rt3DPointBufferDataObject::SimplePoint p2);
   
 };
 

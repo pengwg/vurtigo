@@ -57,6 +57,13 @@ rtBasic3DPointData* rt3DPointBufferDataObject::getPointWithId(int id) {
   return res;
 }
 
+rtBasic3DPointData* rt3DPointBufferDataObject::getPointAtIndex(int index) {
+   if ((index < 0) || (index >= m_pointList.size()))
+      return NULL;
+      
+    return &m_pointList[index];
+}
+
 
 //! Add a point to the list
 void rt3DPointBufferDataObject::addPoint(rtBasic3DPointData sp) {
@@ -138,68 +145,92 @@ void rt3DPointBufferDataObject::identityButton() {
 }
 
 void rt3DPointBufferDataObject::transPlusX() {
-  m_pTransform->Translate(10.0, 0.0, 0.0);
+//  m_pTransform->Translate(10.0, 0.0, 0.0);
+
+  rtBasic3DPointData *pPoint = getPointAtIndex(0);
+  pPoint->setX(pPoint->getX() + 10);
+    
   Modified();
 }
 
 void rt3DPointBufferDataObject::transMinusX() {
-  m_pTransform->Translate(-10.0, 0.0, 0.0);
+//  m_pTransform->Translate(-10.0, 0.0, 0.0);
+
+  rtBasic3DPointData *pPoint = getPointAtIndex(0);
+  pPoint->setX(pPoint->getX() - 10);
+
   Modified();
 }
 
 void rt3DPointBufferDataObject::transPlusY() {
-  m_pTransform->Translate(0.0, 10.0, 0.0);
+//  m_pTransform->Translate(0.0, 10.0, 0.0);
+
+  rtBasic3DPointData *pPoint = getPointAtIndex(0);
+  pPoint->setY(pPoint->getY() + 10);
+
   Modified();
 }
 
 void rt3DPointBufferDataObject::transMinusY() {
-  m_pTransform->Translate(0.0, -10.0, 0.0);
+//  m_pTransform->Translate(0.0, -10.0, 0.0);
+
+  rtBasic3DPointData *pPoint = getPointAtIndex(0);
+  pPoint->setY(pPoint->getY() - 10);
+
   Modified();
 }
 
 void rt3DPointBufferDataObject::transPlusZ() {
-  m_pTransform->Translate(0.0, 0.0, 10.0);
+//  m_pTransform->Translate(0.0, 0.0, 10.0);
+
+  rtBasic3DPointData *pPoint = getPointAtIndex(0);
+  pPoint->setZ(pPoint->getZ() + 10);
+
   Modified();
 }
 
 void rt3DPointBufferDataObject::transMinusZ() {
-  m_pTransform->Translate(0.0, 0.0, -10.0);
+//  m_pTransform->Translate(0.0, 0.0, -10.0);
+
+  rtBasic3DPointData *pPoint = getPointAtIndex(0);
+  pPoint->setZ(pPoint->getZ() - 10);
+
   Modified();
 }
 
 void rt3DPointBufferDataObject::rotPlusX() {
-  m_pTransform->RotateX(5.0);
+//  m_pTransform->RotateX(5.0);
   Modified();
 }
 
 void rt3DPointBufferDataObject::rotMinusX() {
-  m_pTransform->RotateX(-5.0);
+//  m_pTransform->RotateX(-5.0);
   Modified();
 }
 
 void rt3DPointBufferDataObject::rotPlusY() {
-  m_pTransform->RotateY(5.0);
+//  m_pTransform->RotateY(5.0);
   Modified();
 }
 
 void rt3DPointBufferDataObject::rotMinusY() {
-  m_pTransform->RotateY(-5.0);
+//  m_pTransform->RotateY(-5.0);
   Modified();
 }
 
 void rt3DPointBufferDataObject::rotPlusZ() {
-  m_pTransform->RotateZ(5.0);
+//  m_pTransform->RotateZ(5.0);
   Modified();
 }
 
 void rt3DPointBufferDataObject::rotMinusZ() {
-  m_pTransform->RotateZ(-5.0);
+//  m_pTransform->RotateZ(-5.0);
   Modified();
 }
 
 void rt3DPointBufferDataObject::scaleChanged(double val) {
-  double scaleChange = val / m_currentScale;
-  m_currentScale = val;
-  m_pTransform->Scale(scaleChange, scaleChange, scaleChange);
+//  double scaleChange = val / m_currentScale;
+//  m_currentScale = val;
+//  m_pTransform->Scale(scaleChange, scaleChange, scaleChange);
   Modified();
 }
