@@ -227,31 +227,45 @@ void AlignmentToolUI::update() {
       sliceAiming->setPlaneNormal(aimingVector, true);
     }
   
- // find normals for monitoring planes
+ // first monitoring plane should contain the vector and the z axis
   double perp1[3];
-  perp1[0] = 0;  perp1[1] = 1; perp1[2] = 0;
+  perp1[0] = 0;  perp1[1] = 0; perp1[2] = 1;
   double norm1[3];
   vtkMath::Cross(aimingVector, perp1, norm1);
   
-//  double perp2[3];
-//  perp2[0] = 0;  perp2[1] = 0; perp2[2] = 1;
+ // if they're parallel (ambigious), then use the insertion vector and the y axis
+  if (vtkMath::Norm(norm1) == 0) 
+    {
+      perp1[0] = 0;  perp1[1] = 1; perp1[2] = 0;
+      vtkMath::Cross(aimingVector, perp1, norm1);
+    }
+    
+ // second monitoring plane should contain the vector and the normal to the first plane
   double norm2[3];
   vtkMath::Cross(aimingVector, norm1, norm2);
   
- // find center point for monitoring planes (halfway between entry and target point)
+ // if they're parallel, then use the insertion vector and the x axis
+  if (vtkMath::Norm(norm2) == 0) 
+    {
+      double perp2[3];
+      perp2[0] = 1;  perp2[1] = 0; perp2[2] = 0;
+      vtkMath::Cross(aimingVector, perp2, norm2);
+    }  
+  
+ // select center point for monitoring planes (halfway between entry and target point)
   double monitoringCenterPoint[3];
   monitoringCenterPoint[0] = (targetPoint[0] + entryPoint[0]) / 2;
   monitoringCenterPoint[1] = (targetPoint[1] + entryPoint[1]) / 2;
   monitoringCenterPoint[2] = (targetPoint[2] + entryPoint[2]) / 2;
     
  // set monitoring planes
- if (sliceMonitoring1)
+ if (sliceMonitoring1 && (vtkMath::Norm(norm1) != 0))
    {
      sliceMonitoring1->setPlaneCenter(monitoringCenterPoint, true);
      sliceMonitoring1->setPlaneNormal(norm1, true);
    }
 
- if (sliceMonitoring2)
+ if (sliceMonitoring2 && (vtkMath::Norm(norm2) != 0))
    {
      sliceMonitoring2->setPlaneCenter(monitoringCenterPoint, true);
      sliceMonitoring2->setPlaneNormal(norm2, true);
