@@ -83,6 +83,8 @@ public:
   bool setPlaneUp(double up[3], bool asUser=false);
   
   void getPlaneCenter(double center[3]);
+
+  bool setPlaneNormal(double normal[3], bool asUser=false);
   void getPlaneNormal(double normal[3]);
   void getPlaneUp(double up[3]);
 

@@ -17,12 +17,20 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
+// Standard C++
+#include <cmath>
+
+// VTK
+#include <vtkMath.h>
+
+// Internal
 #include "rt2dSliceDataObject.h"
 #include "rtObjectManager.h"
 #include "rtMainWindow.h"
 #include "rtApplication.h"
 #include "buildParam.h"
-#include <cmath>
+
+
 
 #include <vtkMath.h>
 
@@ -227,9 +235,7 @@ bool rt2DSliceDataObject::setPlaneCenter(double center[3], bool asUser) {
   m_trans->SetMatrix(mat);
 
   if(mat) mat->Delete();
-  
   Modified();
-  
   return true;
 }
 
@@ -251,10 +257,12 @@ void rt2DSliceDataObject::getPlaneCenter(double center[3]) {
   center[0] = mat->GetElement(0, 3) + xOff*mat->GetElement(0, 0) + yOff*mat->GetElement(0, 1);
   center[1] = mat->GetElement(1, 3) + xOff*mat->GetElement(1, 0) + yOff*mat->GetElement(1, 1);
   center[2] = mat->GetElement(2, 3) + xOff*mat->GetElement(2, 0) + yOff*mat->GetElement(2, 1);
+
+  if (mat) mat->Delete();
 }
 
-bool rt2DSliceDataObject::setPlaneNormal(double normal[3], bool asUser) {
 
+bool rt2DSliceDataObject::setPlaneNormal(double normal[3], bool asUser) {
   if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return false;
 
   double oldCenter[3];
@@ -303,8 +311,10 @@ void rt2DSliceDataObject::getPlaneNormal(double normal[3]) {
   }
   sumSq = sqrt(sumSq);
 
-   for (int ix1 = 0; ix1 < 3; ix1++)
-     normal[ix1] = zDirec[ix1] / sumSq;
+  for (int ix1 = 0; ix1 < 3; ix1++)
+    normal[ix1] = zDirec[ix1] / sumSq;
+
+  if (mat) mat->Delete();
 }
 
 bool rt2DSliceDataObject::setPlaneUp(double up[3], bool asUser)
