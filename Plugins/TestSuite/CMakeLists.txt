@@ -4,6 +4,7 @@ set(TEST_SUITE_SRC_FILES
   TestSuitePlugin.cpp
   TestSuiteUI.cpp
   TestSuiteBasic.cpp
+  TestLargeVol.cpp
 )
 
 # MOC files are the ones the use Q_OBJECT
@@ -11,6 +12,7 @@ set (TEST_SUITE_MOC_FILES
   TestSuitePlugin.h
   TestSuiteUI.h
   TestSuiteBasic.h
+  TestLargeVol.h
 )
 set (UI_FILES_TESTSUITE
   TestSuite.ui

@@ -17,59 +17,32 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
-#ifndef TESTSUITEBASIC_H
-#define TESTSUITEBASIC_H
+#ifndef TEST_LARGE_VOL_H
+#define TEST_LARGE_VOL_H
 
 #include <QThread>
-#include <QTimer>
 
-#include <vtkImageMapToColors.h>
-#include <vtkWindowLevelLookupTable.h>
-
-class TestSuiteBasic : public QThread
+class TestLargeVol : public QThread
 {
   Q_OBJECT
 
 public:
-  TestSuiteBasic();
-  ~TestSuiteBasic();
+  TestLargeVol();
+  ~TestLargeVol();
 
   void run();
 
-  inline void setPngFileName(QString name) { m_pngFileName=name; }
-  inline void setDicomFileName(QString name) { m_dicomFileName=name; }
-
 public slots:
-  void changeImage();
+
 signals:
   void sendOutput( QString );
 
 protected:
-  void basicTestCreateObjects();
+  void createObjects();
   void testObject(int, QString);
 
-  QString m_pngFileName;
-  QString m_dicomFileName;
-
-  QTimer m_imgChange;
-  int m_imgPeriod;
-
   // Object IDs
-  int m_label;
-  int m_3DPoints;
-  int m_cath[3];
-  int m_smallVol;
-  int m_2DPlane;
-  int m_2DPlaneColor;
-  int m_2DPlane16;
-  int m_matrix;
-  int m_polyObj;
-  int m_ctf, m_ctfGreen;
-  int m_piece;
-  
-  vtkImageMapToColors       *m_imgMapToColors;
-  vtkWindowLevelLookupTable *m_lookupTable;
-
+  int m_hugeVol;
 };
 
-#endif // TESTSUITEBASIC_H
+#endif // TEST_LARGE_VOL_H

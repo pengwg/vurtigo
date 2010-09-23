@@ -216,30 +216,6 @@ void TestSuiteBasic::run() {
     }
   }
 
-  if (m_hugeVol >= 0) {
-    rt3DVolumeDataObject* ptObj = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(m_hugeVol));
-    if (!ptObj) {
-      emit sendOutput("Could Not Get Huge Volume Object! FAIL!");
-    } else {
-      emit sendOutput("Load Very Large Volume Data...");
-      vtkImageSinusoidSource* sinSrc = vtkImageSinusoidSource::New();
-
-      sinSrc->SetWholeExtent(0, 399, 0, 399, 0, 399);
-      sinSrc->SetDirection(1, 2, 3);
-      sinSrc->SetPeriod(50);
-      sinSrc->SetPhase(1);
-      sinSrc->SetAmplitude(10);
-      sinSrc->Update();
-
-      ptObj->lock();
-      ptObj->copyNewImageData(sinSrc->GetOutput());
-      ptObj->Modified();
-      ptObj->unlock();
-
-      sinSrc->Delete();
-    }
-  }
-
   if (m_2DPlane >= 0) {
     rt2DSliceDataObject* ptObj = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(m_2DPlane));
     if (!ptObj) {
@@ -501,12 +477,9 @@ void TestSuiteBasic::basicTestCreateObjects() {
   testObject(m_cath[1], "Test Two Coil Two Loc");
   testObject(m_cath[2], "Test Five Coil Four Loc");
 
-  // Two test volumes
+  // Test volume
   m_smallVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 128x128x128");
-//  m_hugeVol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "Test Volume 400x400x400");
-  m_hugeVol = 0;
   testObject(m_smallVol, "Test Volume 128x128x128");
-//  testObject(m_hugeVol, "Test Volume 400x400x400");
 
   // Test image
   m_2DPlane = rtBaseHandle::instance().requestNewObject(rtConstants::OT_2DObject, "Test Image 256x256");
