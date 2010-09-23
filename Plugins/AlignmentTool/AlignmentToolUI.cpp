@@ -220,11 +220,31 @@ void AlignmentToolUI::update() {
   p_pointAiming->getProperty()->SetOpacity(0.5); // make visible
   pointBufAiming->Modified();
   
+ // find up vector for aiming plane
+  double aimingUp[3];
+  aimingUp[0] = 0; aimingUp[1] = 0; aimingUp[2] = 0;
+  if ((fabs(aimingVector[0]) > fabs(aimingVector[1])) && (fabs(aimingVector[0]) > fabs(aimingVector[2])))
+   // aimed along x
+    aimingUp[1] = 1; // "up" vector is in y (A/P) direction
+  else if ((fabs(aimingVector[1]) > fabs(aimingVector[0])) && (fabs(aimingVector[1]) > fabs(aimingVector[2])))
+   // aimed along y
+    aimingUp[0] = 1; // "up" vector is in x (L/R) direction
+  else
+   // aimed along z
+    aimingUp[0] = 1; // "up" vector is in y (A/P) direction
+    
+ // project aiming up vector onto aiming plane
+  double V_dot_N = vtkMath::Dot(aimingUp, aimingVector);
+  aimingUp[0] = aimingUp[0] - V_dot_N*aimingVector[0];
+  aimingUp[1] = aimingUp[1] - V_dot_N*aimingVector[1];
+  aimingUp[2] = aimingUp[2] - V_dot_N*aimingVector[2];
+  
  // set aiming plane
   if (sliceAiming)
     {
       sliceAiming->setPlaneCenter(aimingPoint, true);
       sliceAiming->setPlaneNormal(aimingVector, true);
+      sliceAiming->setPlaneUp(aimingUp, true);
     }
   
  // first monitoring plane should contain the vector and the z axis
@@ -232,6 +252,8 @@ void AlignmentToolUI::update() {
   perp1[0] = 0;  perp1[1] = 0; perp1[2] = 1;
   double norm1[3];
   vtkMath::Cross(aimingVector, perp1, norm1);
+  double up1[3];
+  vtkMath::Cross(aimingVector, norm1, up1);
   
  // if they're parallel (ambigious), then use the insertion vector and the y axis
   if (vtkMath::Norm(norm1) == 0) 
@@ -241,13 +263,16 @@ void AlignmentToolUI::update() {
     }
     
  // second monitoring plane should contain the vector and the normal to the first plane
+  double perp2[3];
+  perp2[0] = norm1[0]; perp2[1] = norm1[1]; perp2[2] = norm1[2];
   double norm2[3];
-  vtkMath::Cross(aimingVector, norm1, norm2);
+  vtkMath::Cross(aimingVector, perp2, norm2);
+  double up2[3];
+  vtkMath::Cross(aimingVector, norm2, up2);
   
  // if they're parallel, then use the insertion vector and the x axis
   if (vtkMath::Norm(norm2) == 0) 
     {
-      double perp2[3];
       perp2[0] = 1;  perp2[1] = 0; perp2[2] = 0;
       vtkMath::Cross(aimingVector, perp2, norm2);
     }  
@@ -263,12 +288,14 @@ void AlignmentToolUI::update() {
    {
      sliceMonitoring1->setPlaneCenter(monitoringCenterPoint, true);
      sliceMonitoring1->setPlaneNormal(norm1, true);
+     sliceMonitoring1->setPlaneUp(up1, true);
    }
 
  if (sliceMonitoring2 && (vtkMath::Norm(norm2) != 0))
    {
      sliceMonitoring2->setPlaneCenter(monitoringCenterPoint, true);
      sliceMonitoring2->setPlaneNormal(norm2, true);
+     sliceMonitoring2->setPlaneUp(up2, true);
    }
   
 }

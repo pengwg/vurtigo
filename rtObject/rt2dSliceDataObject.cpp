@@ -271,6 +271,9 @@ bool rt2DSliceDataObject::setPlaneNormal(double normal[3], bool asUser) {
   // Cross product to find rotation axis.
   vtkMath::Cross(oldNormal, normal, rotationAxis);
   rot_angle = ( 180/vtkMath::Pi() ) * acos(vtkMath::Dot(oldNormal, normal) / (vtkMath::Norm(oldNormal) * vtkMath::Norm(normal)));
+  
+    if (vtkMath::Norm(rotationAxis) == 0)
+      return true;
 
   tempTrans->PostMultiply();
   tempTrans->Translate(-oldCenter[0], -oldCenter[1], -oldCenter[2]);
@@ -304,6 +307,65 @@ void rt2DSliceDataObject::getPlaneNormal(double normal[3]) {
      normal[ix1] = zDirec[ix1] / sumSq;
 }
 
+bool rt2DSliceDataObject::setPlaneUp(double up[3], bool asUser)
+  {
+    if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return false;
+    
+    double oldCenter[3];
+    double oldNormal[3];
+    double oldUp[3];
+    double rotationAxis[3];
+    double rot_angle;
+    getPlaneCenter(oldCenter);
+    getPlaneNormal(oldNormal);
+    getPlaneUp(oldUp);
+
+   // Cross product to find rotation axis.
+    vtkMath::Cross(oldUp, up, rotationAxis);
+    rot_angle = ( 180/vtkMath::Pi() ) * acos(vtkMath::Dot(oldUp, up) / (vtkMath::Norm(oldUp) * vtkMath::Norm(up)));
+    
+    if (vtkMath::Norm(rotationAxis) == 0)
+      return true;
+
+   // Generate matrix for composite transform 
+    vtkTransform* tempTrans = vtkTransform::New();
+    tempTrans->DeepCopy(m_trans);
+    tempTrans->PostMultiply();
+    tempTrans->Translate(-oldCenter[0], -oldCenter[1], -oldCenter[2]);
+    tempTrans->RotateWXYZ(rot_angle, rotationAxis);
+    tempTrans->Translate(oldCenter[0], oldCenter[1], oldCenter[2]);
+    tempTrans->PreMultiply();
+
+   // Overwrite our transform matrix
+    m_trans->Identity();
+    m_trans->SetMatrix(tempTrans->GetMatrix());
+
+    if (tempTrans) 
+      tempTrans->Delete();
+
+    Modified();
+    return true;
+  }
+  
+void rt2DSliceDataObject::getPlaneUp(double up[3])
+  {
+    double y0[3], y1[3];
+    
+   // start with point at origin and point one pixel up
+    y0[0] = 0; y0[1] = 0; y0[2] = 0;
+    y1[0] = 0; y1[1] = 1; y1[2] = 0;
+    
+   // transform them both into world coordinates
+    m_trans->TransformPoint(y0, y0);
+    m_trans->TransformPoint(y1, y1);
+    
+   // find delta
+    up[0] = y1[0] - y0[0];
+    up[1] = y1[1] - y0[1];
+    up[2] = y1[2] - y0[2];
+    
+    vtkMath::Normalize(up);
+  }
 
 void rt2DSliceDataObject::pushPlaneBy(double amt, bool asUser) {
   if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return;
