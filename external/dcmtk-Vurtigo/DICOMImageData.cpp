@@ -55,24 +55,19 @@ bool DICOMImageData::readFile(QString fName) {
   dcmFile.loadAllDataIntoMemory();
   datSet = dcmFile.getDataset();
 
-  // Read some fo the standard tags.
-  if (!datSet->findAndGetOFString(DCM_PatientsName, m_patientsName).good()) {
-    m_patientsName = "ANONYMOUS";
+  m_commonData.readData(datSet);
+
+  // Check for warnings...
+  if (m_commonData.isWarning()) {
+    std::cout << "Warning: Some common DICOM data was missing. Default used." << std::endl;
   }
 
-  if (!datSet->findAndGetOFString(DCM_StudyDate, m_studyDate).good()) {
-    // yyyymmdd
-    m_studyDate = "19700101";
+  // Check for errors...
+  if (m_commonData.isError()) {
+    std::cout << "Error: Some common DICOM data was missing. No defaults available!" << std::endl;
+    return false;
   }
 
-  if (!datSet->findAndGetOFString(DCM_StudyTime, m_studyTime).good()) {
-    // hhmmss
-    m_studyTime = "010101";
-  }
-
-  result = datSet->findAndGetOFString(DCM_PatientPosition, m_patientPosition).good() && result;
-  result = datSet->findAndGetOFString(DCM_Modality, m_modality).good() && result;
-  result = datSet->findAndGetOFString(DCM_Manufacturer, m_manufacturer).good() && result;
   result = datSet->findAndGetUint16(DCM_Rows, m_numRows).good() && result;
   result = datSet->findAndGetUint16(DCM_Columns, m_numCols).good() && result;
 
@@ -83,24 +78,20 @@ bool DICOMImageData::readFile(QString fName) {
 
   // Check that all of the standard info was read.
   if (result) {
-    if (QString(m_modality.c_str()) == QString("MR") 
-        && (QString(m_manufacturer.c_str()) == QString("GE MEDICAL SYSTEMS"))) {
+    if ( m_commonData.getModality() == QString("MR") && m_commonData.getManufacturer() == QString("GE MEDICAL SYSTEMS") ) {
       // GE MRI
       result = readGE_MR(datSet) && result;
-    } else if (QString(m_modality.c_str()) == QString("MR")
-        && (QString(m_manufacturer.c_str()) == QString("Philips Medical Systems"))) {
+    } else if ( m_commonData.getModality() == QString("MR") && m_commonData.getManufacturer() == QString("Philips Medical Systems")) {
       // Philips MR
       result = readPhilips_MR(datSet) && result;
-    } else if (QString(m_modality.c_str()) == QString("MR")
-      && (QString(m_manufacturer.c_str()) == QString("HeartVista, Inc."))) {
+    } else if ( m_commonData.getModality() == QString("MR") && m_commonData.getManufacturer() == QString("HeartVista, Inc.")) {
       // HeartVista, Inc.
       std::cout << "Warning: HeartVista DICOM file. This type of file does not contain a complete tag set. " << std::endl;
       result = readHeartVista_MR(datSet) && result;
-    } else if  (QString(m_modality.c_str()) == QString("CT")
-        && (QString(m_manufacturer.c_str()) == QString("Philips"))) {
+    } else if  ( m_commonData.getModality() == QString("CT") && m_commonData.getManufacturer() == QString("Philips") ) {
       result = readPhilips_CT(datSet) && result;
     } else {
-      std::cout << "Not able to read DICOM files of type: " << m_modality.c_str() <<  " from " << m_manufacturer.c_str() << std::endl;
+      std::cout << "Not able to read DICOM files of type: " << m_commonData.getModality().toStdString() <<  " from " << m_commonData.getManufacturer().toStdString() << std::endl;
       result = false;
     }
   }
@@ -132,27 +123,27 @@ double DICOMImageData::getTriggerFromFile(QString fName) {
 }
 
 QString DICOMImageData::getPatientName() {
-  return QString(m_patientsName.c_str());
+  return m_commonData.getPatientName();
 }
 
 QDate DICOMImageData::getStudyDate() {
-  return QDate::fromString(QString(m_studyDate.c_str()), "yyyymmdd");
+  return m_commonData.getStudyDate();
 }
 
 QTime DICOMImageData::getStudyTime() {
-  return QTime::fromString(QString(m_studyTime.c_str()), "hhmmss");
+  return m_commonData.getStudyTime();
 }
 
 QString DICOMImageData::getPatientPosition() {
-  return QString(m_patientPosition.c_str());
+  return m_commonData.getPatientPosition();
 }
 
 QString DICOMImageData::getModality() {
-  return QString(m_modality.c_str());
+  return m_commonData.getModality();
 }
 
 QString DICOMImageData::getManufacturer() {
-  return QString(m_manufacturer.c_str());
+  return m_commonData.getManufacturer();
 }
 
 double DICOMImageData::getPixelSpace(int p) { 

@@ -7,6 +7,7 @@
 set ( DCMTK_VURTIGO_SRC
   DICOMFileReader.cpp
   DICOMImageData.cpp
+  DICOMCommonData.cpp
 )
 
 add_library(DCMTKVurtigo SHARED 

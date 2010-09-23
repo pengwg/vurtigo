@@ -26,6 +26,9 @@
 #include <QTime>
 #include <QList>
 
+// Local
+#include "DICOMCommonData.h"
+
 #ifdef Q_OS_UNIX
 #ifndef HAVE_CONFIG_H
 #define HAVE_CONFIG_H
@@ -36,6 +39,8 @@
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/ofstd/ofstring.h"
 #include "dcmtk/dcmdata/dcdatset.h"
+
+
 
 //! The relevant image data that can be read from a DICOM file. 
 class DICOMImageData {
@@ -88,7 +93,6 @@ public:
   double getTriggerTime() { return m_triggerTime; }
 
 protected:
-
   bool readGE_MR(DcmDataset* datSet);
   bool readPhilips_MR(DcmDataset* datSet);
   bool readPhilips_CT(DcmDataset* datSet);
@@ -96,13 +100,10 @@ protected:
 
   QList<double> *m_trigList;
 
+  //! Common data to all DICOM headers.
+  DICOMCommonData m_commonData;
+
   // Standard tags read
-  OFString m_patientsName;
-  OFString m_studyDate;
-  OFString m_studyTime;
-  OFString m_patientPosition;
-  OFString m_modality;
-  OFString m_manufacturer;
   unsigned short m_numRows;
   unsigned short m_numCols;
   double m_pixSpace[2];
