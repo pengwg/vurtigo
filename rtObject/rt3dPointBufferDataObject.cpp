@@ -135,14 +135,17 @@ void rt3DPointBufferDataObject::applyTransformToPoints(vtkTransform * t) {
   if (!t) return;
 
   for (int ix1=0; ix1<m_pointList.size(); ix1++) {
-// TODO
+    m_pointList[ix1].applyTransform(t);
   }
 }
 
 
 void rt3DPointBufferDataObject::applyTransformToCartoPoints(vtkTransform * t) {
   if (!t) return;
-// TODO
+
+  for (int ix1=0; ix1<m_cartoPointList.size(); ix1++) {
+    m_cartoPointList[ix1].applyTransform(t);
+  }
 }
 
 
@@ -190,40 +193,65 @@ void rt3DPointBufferDataObject::transMinusZ() {
 void rt3DPointBufferDataObject::rotPlusX() {
   vtkTransform * temp= vtkTransform::New();
   temp->RotateX(5.0);
-  // temp->MultiplyPoint();
-// TODO
+  applyTransformToPoints(temp);
+  applyTransformToCartoPoints(temp);
   if (temp) temp->Delete();
   Modified();
 }
 
 void rt3DPointBufferDataObject::rotMinusX() {
-//  m_pTransform->RotateX(-5.0);
+  vtkTransform * temp= vtkTransform::New();
+  temp->RotateX(-5.0);
+  applyTransformToPoints(temp);
+  applyTransformToCartoPoints(temp);
+  if (temp) temp->Delete();
   Modified();
 }
 
 void rt3DPointBufferDataObject::rotPlusY() {
-//  m_pTransform->RotateY(5.0);
+  vtkTransform * temp= vtkTransform::New();
+  temp->RotateY(5.0);
+  applyTransformToPoints(temp);
+  applyTransformToCartoPoints(temp);
+  if (temp) temp->Delete();
   Modified();
 }
 
 void rt3DPointBufferDataObject::rotMinusY() {
-//  m_pTransform->RotateY(-5.0);
+  vtkTransform * temp= vtkTransform::New();
+  temp->RotateY(-5.0);
+  applyTransformToPoints(temp);
+  applyTransformToCartoPoints(temp);
+  if (temp) temp->Delete();
   Modified();
 }
 
 void rt3DPointBufferDataObject::rotPlusZ() {
-//  m_pTransform->RotateZ(5.0);
+  vtkTransform * temp= vtkTransform::New();
+  temp->RotateZ(5.0);
+  applyTransformToPoints(temp);
+  applyTransformToCartoPoints(temp);
+  if (temp) temp->Delete();
   Modified();
 }
 
 void rt3DPointBufferDataObject::rotMinusZ() {
-//  m_pTransform->RotateZ(-5.0);
+  vtkTransform * temp= vtkTransform::New();
+  temp->RotateZ(-5.0);
+  applyTransformToPoints(temp);
+  applyTransformToCartoPoints(temp);
+  if (temp) temp->Delete();
   Modified();
 }
 
 void rt3DPointBufferDataObject::scaleChanged(double val) {
-//  double scaleChange = val / m_currentScale;
-//  m_currentScale = val;
-//  m_pTransform->Scale(scaleChange, scaleChange, scaleChange);
+  double scaleChange = val / m_currentScale;
+  m_currentScale = val;
+
+  vtkTransform * temp= vtkTransform::New();
+  temp->Scale(scaleChange, scaleChange, scaleChange);
+  applyTransformToPoints(temp);
+  applyTransformToCartoPoints(temp);
+  if (temp) temp->Delete();
   Modified();
 }
