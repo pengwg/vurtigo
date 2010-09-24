@@ -72,9 +72,6 @@ public:
     \return The handle to the point or 0 if the point is not found.
     */
   rtBasic3DPointData* getPointAtIndex(int index);
-  
-
-  vtkTransform* const getTransform() { return m_pTransform; }
 
   void addPoint(rtBasic3DPointData sp);
   void removePoint(rtBasic3DPointData sp);
@@ -85,10 +82,12 @@ public:
   inline void removeAllPoints() { m_pointList.clear(); Modified(); }
   inline void removeAllCartoPoints() { m_cartoPointList.clear(); Modified(); }
 
+  void applyTransformToPoints(vtkTransform * t);
+  void applyTransformToCartoPoints(vtkTransform * t);
+
   void update();
 
  public slots:
-  void identityButton();
   void transPlusX();
   void transMinusX();
   void transPlusY();
@@ -110,9 +109,6 @@ public:
 
   //! List of carto points in space
   QList<rtCartoPointData> m_cartoPointList;
-
-  //! Global transform for all of the points.
-  vtkTransform* m_pTransform;
 
   //! Ui Interface
   Ui::rt3DPointBuffer m_optionsWidget;

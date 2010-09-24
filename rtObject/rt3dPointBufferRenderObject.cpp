@@ -49,7 +49,7 @@ rt3DPointBufferRenderObject::~rt3DPointBufferRenderObject() {
 void rt3DPointBufferRenderObject::update() {
   rt3DPointBufferDataObject *dObj = dynamic_cast<rt3DPointBufferDataObject*>(m_dataObj);
   rtSingle3DPointPipeline *tempPipe;
-  double ptIn[3], ptOut[3];
+  double ptIn[3];
 
   // Cleaup the old list.
   cleanupPipeList();
@@ -63,9 +63,8 @@ void rt3DPointBufferRenderObject::update() {
 
     // Transform the points.
     (*pointList)[ix1].getTransformedPoint(ptIn);
-    dObj->getTransform()->TransformPoint(ptIn, ptOut);
 
-    tempPipe->setPosition(ptOut[0], ptOut[1], ptOut[2]);
+    tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
     tempPipe->setProperty( (*pointList)[ix1].getProperty() );
 
     m_pipeList.append(tempPipe);

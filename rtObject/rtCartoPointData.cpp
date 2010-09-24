@@ -69,7 +69,6 @@ rtNamedInfoPointData rtCartoPointData::toNamedInfoBiPolar() {
   res.setY(this->getY());
   res.setZ(this->getZ());
   res.setPointSize(this->getPointSize());
-  res.getTransform()->DeepCopy(this->getTransform());
   res.getProperty()->DeepCopy(this->getProperty());
   res.setNamedValue("Bi-Polar", this->getBiPolar());
   return res;

@@ -275,6 +275,6 @@ void CartoFileReader::centerPoints() {
   midCloud[2] = midCloud[2] / ((double)pointKeys.size());
 
   for (int ix1=0; ix1<pointKeys.size(); ix1++) {
-    m_pointList[pointKeys[ix1]].getTransform()->Translate(-midCloud[0], -midCloud[1], -midCloud[2]);
+    m_pointList[pointKeys[ix1]].translate(-midCloud[0], -midCloud[1], -midCloud[2]);
   }
 }

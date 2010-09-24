@@ -21,10 +21,8 @@
 
 //! Constructor
 rt3DPointBufferDataObject::rt3DPointBufferDataObject()
-: m_pTransform(0), m_currentScale(1.0)
+: m_currentScale(1.0)
 {
-  m_pTransform = vtkTransform::New();
-  m_pTransform->Identity();
   m_pointList.clear();
   setObjectType(rtConstants::OT_3DPointBuffer);
   setupGUI();
@@ -32,7 +30,6 @@ rt3DPointBufferDataObject::rt3DPointBufferDataObject()
 
 //! Destructor
 rt3DPointBufferDataObject::~rt3DPointBufferDataObject() {
-  if (m_pTransform) m_pTransform->Delete();
   m_pointList.clear();
   cleanupGUI();
 }
@@ -111,7 +108,6 @@ void rt3DPointBufferDataObject::update() {
 void rt3DPointBufferDataObject::setupGUI() {
   m_optionsWidget.setupUi(getBaseWidget());
 
-  connect( m_optionsWidget.pushButtonIdentity, SIGNAL(clicked()), this, SLOT(identityButton()) );
   connect( m_optionsWidget.pushXPlus, SIGNAL(clicked()), this, SLOT(transPlusX()) );
   connect( m_optionsWidget.pushYPlus, SIGNAL(clicked()), this, SLOT(transPlusY()) );
   connect( m_optionsWidget.pushZPlus, SIGNAL(clicked()), this, SLOT(transPlusZ()) );
@@ -135,71 +131,68 @@ void rt3DPointBufferDataObject::cleanupGUI() {
 
 }
 
+void rt3DPointBufferDataObject::applyTransformToPoints(vtkTransform * t) {
+  if (!t) return;
+
+  for (int ix1=0; ix1<m_pointList.size(); ix1++) {
+// TODO
+  }
+}
+
+
+void rt3DPointBufferDataObject::applyTransformToCartoPoints(vtkTransform * t) {
+  if (!t) return;
+// TODO
+}
+
+
 /////////////
 // Public slots
 /////////////
 
-void rt3DPointBufferDataObject::identityButton() {
-  m_pTransform->Identity();
-  Modified();
-}
 
 void rt3DPointBufferDataObject::transPlusX() {
-//  m_pTransform->Translate(10.0, 0.0, 0.0);
-
   rtBasic3DPointData *pPoint = getPointAtIndex(0);
   pPoint->setX(pPoint->getX() + 10);
-    
   Modified();
 }
 
 void rt3DPointBufferDataObject::transMinusX() {
-//  m_pTransform->Translate(-10.0, 0.0, 0.0);
-
   rtBasic3DPointData *pPoint = getPointAtIndex(0);
   pPoint->setX(pPoint->getX() - 10);
-
   Modified();
 }
 
 void rt3DPointBufferDataObject::transPlusY() {
-//  m_pTransform->Translate(0.0, 10.0, 0.0);
-
   rtBasic3DPointData *pPoint = getPointAtIndex(0);
   pPoint->setY(pPoint->getY() + 10);
-
   Modified();
 }
 
 void rt3DPointBufferDataObject::transMinusY() {
-//  m_pTransform->Translate(0.0, -10.0, 0.0);
-
   rtBasic3DPointData *pPoint = getPointAtIndex(0);
   pPoint->setY(pPoint->getY() - 10);
-
   Modified();
 }
 
 void rt3DPointBufferDataObject::transPlusZ() {
-//  m_pTransform->Translate(0.0, 0.0, 10.0);
-
   rtBasic3DPointData *pPoint = getPointAtIndex(0);
   pPoint->setZ(pPoint->getZ() + 10);
-
   Modified();
 }
 
 void rt3DPointBufferDataObject::transMinusZ() {
-//  m_pTransform->Translate(0.0, 0.0, -10.0);
-
   rtBasic3DPointData *pPoint = getPointAtIndex(0);
   pPoint->setZ(pPoint->getZ() - 10);
-
   Modified();
 }
 
 void rt3DPointBufferDataObject::rotPlusX() {
-//  m_pTransform->RotateX(5.0);
+  vtkTransform * temp= vtkTransform::New();
+  temp->RotateX(5.0);
+  // temp->MultiplyPoint();
+// TODO
+  if (temp) temp->Delete();
   Modified();
 }
 

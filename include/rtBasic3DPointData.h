@@ -51,13 +51,27 @@ public:
   void setPoint(double x, double y, double z);
   void setPoint(double p[3]);
 
-  inline vtkTransform* getTransform() { return m_pTransform; }
+  //! Translate the given point.
+  /*!
+    For more general manipulation of the point use the applyTransform function. If all that is required is a translation use this function as it is more efficient than a transform.
+    \param x The translation in x.
+    \param y The translation in y.
+    \param z The translation in z.
+    \sa applyTransform()
+    */
+  void translate(double x, double y, double z);
+
+  //! Apply a given transform to this point.
+  /*!
+    Used as a general way to manipulate the point. If all that is required is a translation then use the translate() function.
+    \sa translate()
+    */
+  void applyTransform(vtkTransform* t);
   
   static double findDistance(rtBasic3DPointData p1, rtBasic3DPointData p2);
   
-
 protected:
-  vtkTransform *m_pTransform;
+
 };
 
 #endif // RTBASIC3DPOINTDATA_H

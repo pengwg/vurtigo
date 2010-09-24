@@ -21,14 +21,11 @@
 #include "rtBasic3DPointData.h"
 
 rtBasic3DPointData::rtBasic3DPointData()
- : m_pTransform(0)
 {
   this->setDimention(3);
-  m_pTransform = vtkTransform::New();
 }
 
 rtBasic3DPointData::~rtBasic3DPointData() {
-  if (m_pTransform) m_pTransform->Delete();
 }
 
 rtBasic3DPointData::rtBasic3DPointData(const rtBasic3DPointData& sp)
@@ -37,13 +34,10 @@ rtBasic3DPointData::rtBasic3DPointData(const rtBasic3DPointData& sp)
   m_coords[0] = sp.m_coords[0];
   m_coords[1] = sp.m_coords[1];
   m_coords[2] = sp.m_coords[2];
-
-  m_pTransform = vtkTransform::New();
-  m_pTransform->DeepCopy(sp.m_pTransform);
 }
 
 bool rtBasic3DPointData::operator==(const rtBasic3DPointData &other) const {
-  return rtBasicPointData::operator==(other) && m_coords[0]==other.m_coords[0] && m_coords[1]==other.m_coords[1] && m_coords[2]==other.m_coords[2] && m_pTransform == other.m_pTransform;
+  return rtBasicPointData::operator==(other) && m_coords[0]==other.m_coords[0] && m_coords[1]==other.m_coords[1] && m_coords[2]==other.m_coords[2];
 }
 
 rtBasic3DPointData& rtBasic3DPointData::operator=(const rtBasic3DPointData& sp) {
@@ -52,10 +46,6 @@ rtBasic3DPointData& rtBasic3DPointData::operator=(const rtBasic3DPointData& sp) 
     m_coords[0]=sp.m_coords[0];
     m_coords[1]=sp.m_coords[1];
     m_coords[2]=sp.m_coords[2];
-
-    if(m_pTransform) m_pTransform->Delete();
-    m_pTransform = vtkTransform::New();
-    m_pTransform->DeepCopy(sp.m_pTransform);
   }
   return *this;
 }
@@ -82,28 +72,43 @@ void rtBasic3DPointData::getTransformedPoint(double p[3]) {
   p[0] = m_coords[0];
   p[1] = m_coords[1];
   p[2] = m_coords[2];
-  m_pTransform->TransformPoint(p, p);
 }
 
-void rtBasic3DPointData::setPoint(double x, double y, double z)
-  {
-    m_coords[0] = x;
-    m_coords[1] = y;
-    m_coords[2] = z;
-  }
+void rtBasic3DPointData::setPoint(double x, double y, double z) {
+  m_coords[0] = x;
+  m_coords[1] = y;
+  m_coords[2] = z;
+}
   
-void rtBasic3DPointData::setPoint(double p[3])
-  {
-    m_coords[0] = p[0];
-    m_coords[1] = p[1];
-    m_coords[2] = p[2];
-  }
-  
+void rtBasic3DPointData::setPoint(double p[3]) {
+  m_coords[0] = p[0];
+  m_coords[1] = p[1];
+  m_coords[2] = p[2];
+}
+
+void rtBasic3DPointData::translate(double x, double y, double z) {
+  m_coords[0] += x;
+  m_coords[1] += y;
+  m_coords[2] += z;
+}
+
+void rtBasic3DPointData::applyTransform(vtkTransform* t) {
+  if (!t) return;
+
+  double p[3];
+  p[0] = m_coords[0];
+  p[1] = m_coords[1];
+  p[2] = m_coords[2];
+  t->TransformPoint(p,p);
+  m_coords[0] = p[0];
+  m_coords[1] = p[1];
+  m_coords[2] = p[2];
+}
+
 #define SQR(x) ((x)*(x))
   
-double rtBasic3DPointData::findDistance(rtBasic3DPointData p1, rtBasic3DPointData p2)
-  {
-    return sqrt(SQR((p1.m_coords[0] - p2.m_coords[0])) + SQR((p1.m_coords[1] - p2.m_coords[1])) + SQR((p1.m_coords[2] - p2.m_coords[2])));
-  }
+double rtBasic3DPointData::findDistance(rtBasic3DPointData p1, rtBasic3DPointData p2) {
+  return sqrt(SQR((p1.m_coords[0] - p2.m_coords[0])) + SQR((p1.m_coords[1] - p2.m_coords[1])) + SQR((p1.m_coords[2] - p2.m_coords[2])));
+}
   
 
