@@ -261,6 +261,12 @@ void rt2DSliceDataObject::getPlaneCenter(double center[3]) {
   if (mat) mat->Delete();
 }
 
+bool TransformMatrixValid(vtkTransform *trans)
+  {
+    vtkMatrix4x4 *matrix = trans->GetMatrix();
+    
+    return std::isfinite(matrix->Determinant());
+  }
 
 bool rt2DSliceDataObject::setPlaneNormal(double normal[3], bool asUser) {
   if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return false;
@@ -280,14 +286,26 @@ bool rt2DSliceDataObject::setPlaneNormal(double normal[3], bool asUser) {
   vtkMath::Cross(oldNormal, normal, rotationAxis);
   rot_angle = ( 180/vtkMath::Pi() ) * acos(vtkMath::Dot(oldNormal, normal) / (vtkMath::Norm(oldNormal) * vtkMath::Norm(normal)));
   
-    if (vtkMath::Norm(rotationAxis) == 0)
-      return true;
+   // when new and old vector are nearly the same, the calculated rotation angle can be NaN - don't try to do this rotation
+  if (!std::isfinite(rot_angle))
+    return false;
 
   tempTrans->PostMultiply();
   tempTrans->Translate(-oldCenter[0], -oldCenter[1], -oldCenter[2]);
   tempTrans->RotateWXYZ(rot_angle, rotationAxis);
   tempTrans->Translate(oldCenter[0], oldCenter[1], oldCenter[2]);
   tempTrans->PreMultiply();
+
+ // EthanB: this test is to protect against corrupting the trans matrix 
+ // I don't think it's necessary anymore (after adding the isnan check above, but I'm keeping it around for testing)
+  if (!TransformMatrixValid(tempTrans))
+    {
+      std::cout << "WARNING: Invalid transform matrix generated in setPlaneNormal()" << endl;
+      std::cout << "         Current normal vector:   <" << oldNormal[0] << " " << oldNormal[1] << " " << oldNormal[2] << ">" << endl;
+      std::cout << "         Requested normal vector: <" << normal[0] << " " << normal[1] << " " << normal[2] << ">" << endl;
+      std::cout << "         Rotation axis:           <" << rotationAxis[0] << " " << rotationAxis[1] << " " << rotationAxis[2] << ">" << endl;
+      std::cout << "         Rotation angle:          " << rot_angle << endl;
+    }
 
   m_trans->Identity();
   m_trans->SetMatrix(tempTrans->GetMatrix());
@@ -333,9 +351,10 @@ bool rt2DSliceDataObject::setPlaneUp(double up[3], bool asUser)
    // Cross product to find rotation axis.
     vtkMath::Cross(oldUp, up, rotationAxis);
     rot_angle = ( 180/vtkMath::Pi() ) * acos(vtkMath::Dot(oldUp, up) / (vtkMath::Norm(oldUp) * vtkMath::Norm(up)));
-    
-    if (vtkMath::Norm(rotationAxis) == 0)
-      return true;
+  
+   // when new and old vector are nearly the same, the calculated rotation angle can be NaN - don't try to do this rotation
+    if (!std::isfinite(rot_angle))
+      return false;
 
    // Generate matrix for composite transform 
     vtkTransform* tempTrans = vtkTransform::New();
@@ -346,9 +365,23 @@ bool rt2DSliceDataObject::setPlaneUp(double up[3], bool asUser)
     tempTrans->Translate(oldCenter[0], oldCenter[1], oldCenter[2]);
     tempTrans->PreMultiply();
 
+ // EthanB: this test is to protect against corrupting the trans matrix 
+ // I don't think it's necessary anymore (after adding the isnan check above, but I'm keeping it around for testing)
+    if (!TransformMatrixValid(tempTrans))
+      {
+        std::cout << "WARNING: Invalid transform matrix generated in setPlaneUp()" << endl;
+        std::cout << "         Current up vector:    <" << oldUp[0] << " " << oldUp[1] << " " << oldUp[2] << ">" << endl;
+        std::cout << "         Requested up vector:  <" << up[0] << " " << up[1] << " " << up[2] << ">" << endl;
+        std::cout << "         Rotation axis:           <" << rotationAxis[0] << " " << rotationAxis[1] << " " << rotationAxis[2] << ">" << endl;
+        std::cout << "         Rotation angle:          " << rot_angle << endl;
+        
+        return false;
+      }
+
    // Overwrite our transform matrix
     m_trans->Identity();
     m_trans->SetMatrix(tempTrans->GetMatrix());
+
 
     if (tempTrans) 
       tempTrans->Delete();

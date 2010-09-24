@@ -156,37 +156,43 @@ void rt3DPointBufferDataObject::applyTransformToCartoPoints(vtkTransform * t) {
 
 void rt3DPointBufferDataObject::transPlusX() {
   rtBasic3DPointData *pPoint = getPointAtIndex(0);
-  pPoint->setX(pPoint->getX() + 10);
+  pPoint->setX(pPoint->getX() + 1);
+    
   Modified();
 }
 
 void rt3DPointBufferDataObject::transMinusX() {
   rtBasic3DPointData *pPoint = getPointAtIndex(0);
-  pPoint->setX(pPoint->getX() - 10);
+  pPoint->setX(pPoint->getX() - 1);
+
   Modified();
 }
 
 void rt3DPointBufferDataObject::transPlusY() {
   rtBasic3DPointData *pPoint = getPointAtIndex(0);
-  pPoint->setY(pPoint->getY() + 10);
+  pPoint->setY(pPoint->getY() + 1);
+
   Modified();
 }
 
 void rt3DPointBufferDataObject::transMinusY() {
   rtBasic3DPointData *pPoint = getPointAtIndex(0);
-  pPoint->setY(pPoint->getY() - 10);
+  pPoint->setY(pPoint->getY() - 1);
+
   Modified();
 }
 
 void rt3DPointBufferDataObject::transPlusZ() {
   rtBasic3DPointData *pPoint = getPointAtIndex(0);
-  pPoint->setZ(pPoint->getZ() + 10);
+  pPoint->setZ(pPoint->getZ() + 1);
+
   Modified();
 }
 
 void rt3DPointBufferDataObject::transMinusZ() {
   rtBasic3DPointData *pPoint = getPointAtIndex(0);
-  pPoint->setZ(pPoint->getZ() - 10);
+  pPoint->setZ(pPoint->getZ() - 1);
+
   Modified();
 }
 

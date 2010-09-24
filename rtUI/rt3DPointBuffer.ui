@@ -113,14 +113,14 @@
           <item row="0" column="1">
            <widget class="QPushButton" name="pushXPlus">
             <property name="text">
-             <string>+10</string>
+             <string>+1</string>
             </property>
            </widget>
           </item>
           <item row="0" column="2">
            <widget class="QPushButton" name="pushXMinus">
             <property name="text">
-             <string>-10</string>
+             <string>-1</string>
             </property>
            </widget>
           </item>
@@ -141,28 +141,28 @@
           <item row="1" column="1">
            <widget class="QPushButton" name="pushYPlus">
             <property name="text">
-             <string>+10</string>
+             <string>+1</string>
             </property>
            </widget>
           </item>
           <item row="1" column="2">
            <widget class="QPushButton" name="pushYMinus">
             <property name="text">
-             <string>-10</string>
+             <string>-1</string>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
            <widget class="QPushButton" name="pushZPlus">
             <property name="text">
-             <string>+10</string>
+             <string>+1</string>
             </property>
            </widget>
           </item>
           <item row="2" column="2">
            <widget class="QPushButton" name="pushZMinus">
             <property name="text">
-             <string>-10</string>
+             <string>-1</string>
             </property>
            </widget>
           </item>

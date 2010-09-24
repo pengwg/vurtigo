@@ -21,8 +21,11 @@
 #include <QApplication>
 #include <QFileDialog>
 
-#include <vtkPropAssembly.h>
 #include <vtkCamera.h>
+#include <vtkCaptionActor2D.h>
+#include <vtkPropAssembly.h>
+#include <vtkTextActor.h>
+#include <vtkTextProperty.h>
 
 #include <iostream>
 #include <cmath>
@@ -1167,6 +1170,23 @@ void rtMainWindow::setCoordType(rtAxesProperties::CoordType ct) {
     m_axesActor->SetZAxisLabelText("Z");
     break;
   }
+  
+ // enlarge axis label text to make it readable
+  m_axesActor->GetXAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
+  m_axesActor->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+  m_axesActor->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
+
+  m_axesActor->GetYAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
+  m_axesActor->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+  m_axesActor->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
+
+  m_axesActor->GetZAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
+  m_axesActor->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+  m_axesActor->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
+  
+ // EthanB: It's a shame they only allow arrows/labels on +X/+Y/+Z, as I'd really rather have a visual depiction of "Right", "Anterior", and "Superior"
+
+  
   m_renderFlag3D = true;
 }
 

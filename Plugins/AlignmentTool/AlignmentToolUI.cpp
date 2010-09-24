@@ -36,7 +36,7 @@ AlignmentToolUI::AlignmentToolUI() {
  // create target (initial) point
   rtBasic3DPointData p;
   p.setPoint(0, 0, 0);
-  p.setPointSize(5);
+  p.setPointSize(1);
   p.getProperty()->SetOpacity(0.5);
   p.setColor(1, 0, 0); // red
   rt3DPointBufferDataObject *pointTarget = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pointTarget));
@@ -48,7 +48,7 @@ AlignmentToolUI::AlignmentToolUI() {
   
  // create entry (initial) point
   p.setPoint(100, 100, 100);
-  p.setPointSize(5);
+  p.setPointSize(1);
   p.getProperty()->SetOpacity(0.5);
   p.setColor(1, 1, 0); // yellow
   rt3DPointBufferDataObject *pointEntry = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pointEntry));
@@ -60,7 +60,7 @@ AlignmentToolUI::AlignmentToolUI() {
 
 // create aiming point
   p.setPoint(200, 200, 200);
-  p.setPointSize(5);
+  p.setPointSize(1);
   p.getProperty()->SetOpacity(0); // invisible for now
   p.setColor(0, 1, 0); // green
   rt3DPointBufferDataObject *pointAiming = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pointAiming));
