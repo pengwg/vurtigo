@@ -63,6 +63,15 @@ public:
   QString getPatientPosition();
   QString getModality();
   QString getManufacturer();
+  QString getStudyID();
+  QString getSeriesNumber();
+
+  inline unsigned short getNumRows() { return m_numRows; }
+  inline unsigned short getNumCols() { return m_numCols; }
+
+  void getPixelSpacing(double pixSpace[2]);
+  void getImagePosition(double imgPosition[3]);
+  void getImageOrientation(double imgOrient[6]);
 
 protected:
   bool m_warning;
@@ -75,7 +84,23 @@ protected:
   OFString m_patientPosition;
   OFString m_modality;
   OFString m_manufacturer;
+  OFString m_studyID;
+  OFString m_seriesNumber;
 
+  //! Number of rows in the rows
+  unsigned short m_numRows;
+
+  //! Number of columns
+  unsigned short m_numCols;
+
+  //! Pixel spacing in the x ad y directions
+  double m_pixSpace[2];
+
+  //! Position in 3D of the image.
+  double m_imgPosition[3];
+
+  //! Direction cosines for the x and y directions.
+  double m_imgOrient[6];
 };
 
 #endif // DICOMCOMMONDATA_H

@@ -68,14 +68,6 @@ bool DICOMImageData::readFile(QString fName) {
     return false;
   }
 
-  result = datSet->findAndGetUint16(DCM_Rows, m_numRows).good() && result;
-  result = datSet->findAndGetUint16(DCM_Columns, m_numCols).good() && result;
-
-  int ix1;
-  for (ix1=0; ix1<2; ix1++) datSet->findAndGetFloat64(DCM_PixelSpacing, m_pixSpace[ix1], ix1);
-  for (ix1=0; ix1<3; ix1++) datSet->findAndGetFloat64(DCM_ImagePositionPatient, m_imgPosition[ix1], ix1);
-  for (ix1=0; ix1<6; ix1++) datSet->findAndGetFloat64(DCM_ImageOrientationPatient, m_imgOrient[ix1], ix1);  
-
   // Check that all of the standard info was read.
   if (result) {
     if ( m_commonData.getModality() == QString("MR") && m_commonData.getManufacturer() == QString("GE MEDICAL SYSTEMS") ) {
@@ -146,18 +138,25 @@ QString DICOMImageData::getManufacturer() {
   return m_commonData.getManufacturer();
 }
 
-double DICOMImageData::getPixelSpace(int p) { 
-  if (p == 0 || p == 1) return m_pixSpace[p]; 
+double DICOMImageData::getPixelSpace(int p) {
+  double pixSpace[2];
+  m_commonData.getPixelSpacing(pixSpace);
+
+  if (p == 0 || p == 1) return pixSpace[p];
   return 1.0f;
 }
 
 double DICOMImageData::getImagePosition(int p) {
-  if (p >= 0 && p <= 2) return m_imgPosition[p]; 
+  double imgPosition[3];
+  m_commonData.getImagePosition(imgPosition);
+  if (p >= 0 && p <= 2) return imgPosition[p];
   return 0.0f;
 }
 
 double DICOMImageData::getImageOrientation(int cosine, int p) {
-  if ( (cosine==0 || cosine==1) && (p >= 0 && p <= 2) ) return m_imgOrient[cosine*3+p];
+  double imgOrient[6];
+  m_commonData.getImageOrientation(imgOrient);
+  if ( (cosine==0 || cosine==1) && (p >= 0 && p <= 2) ) return imgOrient[cosine*3+p];
   return 1.0;
 }
 
@@ -205,7 +204,7 @@ bool DICOMImageData::readGE_MR(DcmDataset* datSet) {
   datSet->findAndGetUint32(DCM_PixelDataGroupLength, m_pixelGroupLen).good();
   datSet->findAndGetUint16Array(DCM_PixelData, temp, &m_numElements, false).good();
 
-  if (m_numElements != (unsigned long)(m_numRows*m_numCols) && m_numElements > 0) {
+  if (m_numElements != (unsigned long)( m_commonData.getNumRows()*m_commonData.getNumCols() ) && m_numElements > 0) {
     std::cout << "Error: Problem reading all of the dicom pixel data." << std::endl;
     return false;
   }
@@ -243,7 +242,7 @@ bool DICOMImageData::readPhilips_MR(DcmDataset* datSet) {
   datSet->findAndGetUint32(DCM_PixelDataGroupLength, m_pixelGroupLen).good();
   datSet->findAndGetUint16Array(DCM_PixelData, temp, &m_numElements, false).good();
 
-  if (m_numElements != (unsigned long)(m_numRows*m_numCols) && m_numElements > 0) {
+  if (m_numElements != (unsigned long)( m_commonData.getNumRows()*m_commonData.getNumCols() ) && m_numElements > 0) {
     std::cout << "Error: Problem reading all of the dicom pixel data." << std::endl;
     return false;
   }

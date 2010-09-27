@@ -62,12 +62,14 @@ public:
   QString getPatientPosition();
   QString getModality();
   QString getManufacturer();
+  inline QString getStudyID() { return m_commonData.getStudyID(); }
+  inline QString getSeriesNumber() { return m_commonData.getSeriesNumber(); }
 
   //! Get the number of rows in one image
-  unsigned short getNumRows() { return m_numRows; }
+  inline unsigned short getNumRows() { return m_commonData.getNumRows(); }
 
   //! Get the number of columns in one image
-  unsigned short getNumCols() { return m_numCols; }
+  inline unsigned short getNumCols() { return m_commonData.getNumCols(); }
 
   //! Get the pixel spacing for x or y.
   /*!
@@ -103,12 +105,6 @@ protected:
   //! Common data to all DICOM headers.
   DICOMCommonData m_commonData;
 
-  // Standard tags read
-  unsigned short m_numRows;
-  unsigned short m_numCols;
-  double m_pixSpace[2];
-  double m_imgPosition[3]; // Position of img.
-  double m_imgOrient[6]; // Direction cosines
 
   unsigned short m_imagesPerCycle; // Number of images in one cardiac cycle.
   unsigned short m_cardiacPhase; // The cardiac phase of the current image.
