@@ -47,6 +47,9 @@ public slots:
   void pointMoved();
 
   void update();
+  
+  void updatePlanesChanged(bool);
+  void planeIndexChanged(int);
 
 protected:
   void connectSignals();
@@ -58,6 +61,8 @@ protected:
   int m_pointTarget;
   int m_pointEntry;
   int m_pointAiming;
+  
+  bool m_fAutoUpdate;
 
 };
 

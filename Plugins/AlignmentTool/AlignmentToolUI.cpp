@@ -27,6 +27,8 @@
 
 AlignmentToolUI::AlignmentToolUI() {
   setupUi(this);
+  
+  m_fAutoUpdate = 0;
 
  // create target and entry point "buffers"  
   m_pointTarget = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DPointBuffer, "Target Point");
@@ -93,8 +95,12 @@ void AlignmentToolUI::connectSignals() {
 
   connect(pointEntry, SIGNAL(objectChanged(int)), this, SLOT(pointMoved()));
   connect(pointTarget, SIGNAL(objectChanged(int)), this, SLOT(pointMoved()));
-
-  connect( alignButton, SIGNAL(pressed()), this, SLOT(update())); // xxxxxxxxxxxx
+  
+  connect(aimingPlaneComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(planeIndexChanged(int)) );
+  connect(monitoringPlane1ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(planeIndexChanged(int)) );
+  connect(monitoringPlane2ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(planeIndexChanged(int)) );
+  
+  connect( updatePlanesCheckBox, SIGNAL(toggled(bool)), this, SLOT(updatePlanesChanged(bool)) );
 }
 
 
@@ -163,7 +169,8 @@ void AlignmentToolUI::objectRemoved(int objID) {
 
 void AlignmentToolUI::pointMoved()
   {
-    update();
+    if (m_fAutoUpdate)
+      update();
   }
 
 void AlignmentToolUI::update() {
@@ -284,14 +291,14 @@ void AlignmentToolUI::update() {
   monitoringCenterPoint[2] = (targetPoint[2] + entryPoint[2]) / 2;
     
  // set monitoring planes
- if (sliceMonitoring1 && (vtkMath::Norm(norm1) != 0))
+ if (sliceMonitoring1 && (vtkMath::Norm(norm1) != 0) && (sliceMonitoring1 != sliceAiming))
    {
      sliceMonitoring1->setPlaneCenter(monitoringCenterPoint, true);
      sliceMonitoring1->setPlaneNormal(norm1, true);
      sliceMonitoring1->setPlaneUp(up1, true);
    }
 
- if (sliceMonitoring2 && (vtkMath::Norm(norm2) != 0))
+ if (sliceMonitoring2 && (vtkMath::Norm(norm2) != 0)  && (sliceMonitoring1 != sliceAiming) && (sliceMonitoring2 != sliceMonitoring1))
    {
      sliceMonitoring2->setPlaneCenter(monitoringCenterPoint, true);
      sliceMonitoring2->setPlaneNormal(norm2, true);
@@ -301,5 +308,21 @@ void AlignmentToolUI::update() {
 }
 
 void AlignmentToolUI::aimingOffsetChanged(double offset) {
-  update();
+  if (m_fAutoUpdate)
+    update();
 }
+
+void AlignmentToolUI::updatePlanesChanged(bool value)
+  {
+    m_fAutoUpdate = value;
+    
+    if (m_fAutoUpdate)
+      update();
+  }
+
+void AlignmentToolUI::planeIndexChanged(int index)
+ // we don't know which combo box triggered this, but it doesn't matter - the behavior is the same
+  {
+    if (m_fAutoUpdate)
+      update();
+  }
