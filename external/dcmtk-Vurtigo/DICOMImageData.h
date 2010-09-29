@@ -26,20 +26,18 @@
 #include <QTime>
 #include <QList>
 
-// Local
-#include "DICOMCommonData.h"
-
+// DCMTK
 #ifdef Q_OS_UNIX
 #ifndef HAVE_CONFIG_H
 #define HAVE_CONFIG_H
 #endif
 #endif
 
-// DCMTK include
-#include "dcmtk/config/osconfig.h"
-#include "dcmtk/ofstd/ofstring.h"
-#include "dcmtk/dcmdata/dcdatset.h"
+#include "dcmtk/ofstd/oftypes.h"
 
+
+// Local
+#include "DICOMCommonData.h"
 
 
 //! The relevant image data that can be read from a DICOM file. 
@@ -90,9 +88,11 @@ public:
   bool isCineData();
   unsigned short getImagesPerCycle() { return m_imagesPerCycle; }
 
-  short* getDataPtr() {return m_shortData;}
+  inline short* getDataPtr() {return m_shortData;}
 
-  double getTriggerTime() { return m_triggerTime; }
+  inline double getTriggerTime() { return m_triggerTime; }
+
+  inline DICOMCommonData* getCommonDataHandle() { return &m_commonData; }
 
 protected:
   bool readGE_MR(DcmDataset* datSet);

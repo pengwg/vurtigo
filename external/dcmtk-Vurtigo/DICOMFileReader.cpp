@@ -29,6 +29,12 @@
 #include <vtkMath.h>
 
 //DCMTK
+#ifdef Q_OS_UNIX
+#ifndef HAVE_CONFIG_H
+#define HAVE_CONFIG_H
+#endif
+#endif
+
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/ofstd/ofcond.h"
 #include "dcmtk/dcmdata/dcdeftag.h"
@@ -135,7 +141,7 @@ bool DICOMFileReader::setDirectory(QString dirPath) {
   }
 
   // Give that volume a default name.
-  m_volName = fileDir.dirName();
+  m_volName = QString("E") + m_ddata->getStudyID() + QString("S") + m_ddata->getSeriesNumber();
   return true;
 }
 

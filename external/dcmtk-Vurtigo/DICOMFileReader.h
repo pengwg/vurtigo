@@ -31,6 +31,7 @@
 #include "vtkMatrixToLinearTransform.h"
 
 #include "DICOMImageData.h"
+#include "DICOMCommonData.h"
 
   const int NUM_ENTRIES = 4;
   const std::string ENTRY_STRINGS[NUM_ENTRIES] = {"HFS", "FFS","HFP","FFP"};
@@ -49,6 +50,7 @@ public:
 
   bool setDirectory(QString dirPath);
   bool createVolume(QList<DICOMImageData*>* imgData);
+  DICOMCommonData* getCommonDataHandle() { return m_ddata->getCommonDataHandle(); }
 
   vtkImageData* getImageData() { return m_infoFix->GetOutput(); }
   vtkTransform* getTransform() { return m_transform; }

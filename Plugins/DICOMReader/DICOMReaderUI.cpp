@@ -62,6 +62,7 @@ void DICOMReaderUI::newDirectory() {
       m_customReader.createVolume(m_customReader.getDICOMImageData());
 
       createVolumeButton->setEnabled(true);
+      nameLineEdit->setText(m_customReader.getDefaultName());
       nameLineEdit->setEnabled(true);
     } else {
       infoBrowser->append("Error!");
@@ -96,6 +97,7 @@ void DICOMReaderUI::saveAsVolume() {
       ptObj->copyNewTransform(m_customReader.getTransform());
       ptObj->copyNewImageData(m_customReader.getImageData());
       ptObj->copyTriggerDelayList(m_customReader.getTriggerList());
+      ptObj->copyDicomCommonData(m_customReader.getCommonDataHandle());
       ptObj->Modified();
       ptObj->unlock();
     }

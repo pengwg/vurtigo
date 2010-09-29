@@ -23,6 +23,7 @@
 #include "rtDataObject.h"
 #include "ui_volume3DOptions.h"
 #include "rtWindowLevelDialog.h"
+#include "DICOMCommonData.h"
 
 #include "vtkSmartPointer.h"
 #include "vtkImageData.h"
@@ -123,7 +124,10 @@ public:
   bool copyNewTransform(vtkTransform* temp);
 
   //! Set the trigger delay list.
-  void copyTriggerDelayList(QList<double> *trigDelay) { m_triggerList = (*trigDelay); }
+  inline void copyTriggerDelayList(QList<double> *trigDelay) { if(!trigDelay) return; m_triggerList = (*trigDelay); }
+
+  //! Set the DICOM file information.
+  inline void copyDicomCommonData(DICOMCommonData* commonData) { if(!commonData) return; m_commonData.deepCopy(commonData); }
 
   //! Check if the volume should be rendered.
   bool getRenderRayTraceVolume() { return m_optionsWidget.groupRayCastVolume->isChecked(); }
@@ -284,6 +288,9 @@ public:
   int m_piecewiseFuncID;
   //! The ID of the external color function used.
   int m_colorFuncID;
+
+  //! Meta-data is filled in if it is read from DICOM files.
+  DICOMCommonData m_commonData;
 
   //! The window value
   double m_window;

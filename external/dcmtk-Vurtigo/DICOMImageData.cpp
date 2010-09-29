@@ -22,8 +22,18 @@
 
 // Qt
 #include <QString>
+#include <QtGlobal>
 
 //DCMTK
+#ifdef Q_OS_UNIX
+#ifndef HAVE_CONFIG_H
+#define HAVE_CONFIG_H
+#endif
+#endif
+
+#include "dcmtk/config/osconfig.h"
+#include "dcmtk/ofstd/ofstring.h"
+#include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/ofstd/ofcond.h"

@@ -10,7 +10,7 @@ set ( DCMTK_VURTIGO_SRC
   DICOMCommonData.cpp
 )
 
-add_library(DCMTKVurtigo SHARED 
+add_library(DCMTKVurtigo SHARED
   ${DCMTK_VURTIGO_SRC}
 )
 target_link_libraries (DCMTKVurtigo

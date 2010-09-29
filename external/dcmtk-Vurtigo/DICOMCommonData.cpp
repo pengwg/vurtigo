@@ -18,72 +18,126 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-// Local
-#include "DICOMCommonData.h"
+// Qt
+#include <QtGlobal>
 
 //DCMTK
+#ifdef Q_OS_UNIX
+#ifndef HAVE_CONFIG_H
+#define HAVE_CONFIG_H
+#endif
+#endif
+
+#include "dcmtk/config/osconfig.h"
+#include "dcmtk/ofstd/ofstring.h"
+#include "dcmtk/dcmdata/dcdatset.h"
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmdata/dcfilefo.h"
 #include "dcmtk/ofstd/ofcond.h"
 #include "dcmtk/dcmdata/dctagkey.h"
 
+// Local
+#include "DICOMCommonData.h"
+
 
 DICOMCommonData::DICOMCommonData()
  : m_warning(false), m_error(false)
 {
+
+  // Set defaults for parameters
+  m_patientsName = "ANONYMOUS";
+  m_studyDate = QDate::fromString("19700101", "yyyymmdd");
+  m_studyTime = QTime::fromString("010101", "hhmmss");
+  m_patientPosition = "HFS";
+  m_modality = "";
+  m_manufacturer = "";
+  m_studyID = "000000";
+  m_seriesNumber = "0";
+
   m_numRows = 0;
   m_numCols = 0;
+
+  m_pixSpace[0] = 1.0;
+  m_pixSpace[1] = 1.0;
+
+  m_imgPosition[0] = 0.0;
+  m_imgPosition[1] = 0.0;
+  m_imgPosition[2] = 0.0;
+
+  m_imgOrient[0] = 1.0;
+  m_imgOrient[1] = 0.0;
+  m_imgOrient[2] = 0.0;
+  m_imgOrient[3] = 0.0;
+  m_imgOrient[4] = 1.0;
+  m_imgOrient[5] = 0.0;
 }
 
 
 void DICOMCommonData::readData(DcmDataset* datSet) {
+  OFString temp;
 
   // Get the patient name.
-  if (!datSet->findAndGetOFString(DCM_PatientsName, m_patientsName).good()) {
+  if (!datSet->findAndGetOFString(DCM_PatientsName, temp).good()) {
     m_warning = true;
     m_patientsName = "ANONYMOUS";
+  } else {
+    m_patientsName = temp.c_str();
   }
 
   // Get the study date.
-  if (!datSet->findAndGetOFString(DCM_StudyDate, m_studyDate).good()) {
+  if (!datSet->findAndGetOFString(DCM_StudyDate, temp).good()) {
     m_warning = true;
-    // yyyymmdd
-    m_studyDate = "19700101";
+    // yyyyMMdd
+    m_studyDate = QDate::fromString("19700101", "yyyyMMdd");
+  } else {
+    m_studyDate = QDate::fromString(QString(temp.c_str()), "yyyyMMdd");
   }
 
   // Get the study time.
-  if (!datSet->findAndGetOFString(DCM_StudyTime, m_studyTime).good()) {
+  if (!datSet->findAndGetOFString(DCM_StudyTime, temp).good()) {
     m_warning = true;
     // hhmmss
-    m_studyTime = "010101";
+    m_studyTime = QTime::fromString("010101", "hhmmss");
+  } else {
+    m_studyTime = QTime::fromString(QString(temp.c_str()), "hhmmss");
   }
 
-  if (!datSet->findAndGetOFString(DCM_PatientPosition, m_patientPosition).good()) {
+  if (!datSet->findAndGetOFString(DCM_PatientPosition, temp).good()) {
     m_warning = true;
     // Default to head-first supine.
     m_patientPosition = "HFS";
+  } else {
+    m_patientPosition = temp.c_str();
   }
 
   // Modality is required.
-  if (!datSet->findAndGetOFString(DCM_Modality, m_modality).good()) {
+  if (!datSet->findAndGetOFString(DCM_Modality, temp).good()) {
     m_error = true;
+  } else {
+    m_modality = temp.c_str();
   }
 
   // Manufacturer is required.
-  if(!datSet->findAndGetOFString(DCM_Manufacturer, m_manufacturer).good()) {
+  if(!datSet->findAndGetOFString(DCM_Manufacturer, temp).good()) {
     m_error = true;
+  } else {
+    m_manufacturer = temp.c_str();
   }
 
   // Study ID
-  if (!datSet->findAndGetOFString(DCM_StudyID, m_studyID).good()) {
+  if (!datSet->findAndGetOFString(DCM_StudyID, temp).good()) {
     m_studyID = "000000";
     m_warning = true;
+  } else {
+    m_studyID = temp.c_str();
   }
 
   // Series Number
-  if (!datSet->findAndGetOFString(DCM_SeriesNumber, m_seriesNumber).good()) {
+  if (!datSet->findAndGetOFString(DCM_SeriesNumber, temp).good()) {
     m_seriesNumber = "0";
     m_warning = true;
+  } else {
+    m_seriesNumber = temp.c_str();
   }
 
   // Number of rows is required.
@@ -121,37 +175,27 @@ void DICOMCommonData::readData(DcmDataset* datSet) {
 }
 
 
-QString DICOMCommonData::getPatientName() {
-  return QString(m_patientsName.c_str());
+void DICOMCommonData::deepCopy(DICOMCommonData* data) {
+  m_warning = data->isWarning();
+  m_error = data->isError();
+
+  setPatientName(data->getPatientName());
+  setStudyDate(data->getStudyDate());
+  setStudyTime(data->getStudyTime());
+  setPatientPosition(data->getPatientPosition());
+  setModality(data->getModality());
+  setManufacturer(data->getManufacturer());
+  setStudyID(data->getStudyID());
+  setSeriesNumber(data->getSeriesNumber());
+
+  setNumRows(data->getNumRows());
+  setNumCols(data->getNumCols());
+
+  data->getPixelSpacing(m_pixSpace);
+  data->getImagePosition(m_imgPosition);
+  data->getImageOrientation(m_imgOrient);
 }
 
-QDate DICOMCommonData::getStudyDate() {
-  return QDate::fromString(QString(m_studyDate.c_str()), "yyyymmdd");
-}
-
-QTime DICOMCommonData::getStudyTime() {
-  return QTime::fromString(QString(m_studyTime.c_str()), "hhmmss");
-}
-
-QString DICOMCommonData::getPatientPosition() {
-  return QString(m_patientPosition.c_str());
-}
-
-QString DICOMCommonData::getModality() {
-  return QString(m_modality.c_str());
-}
-
-QString DICOMCommonData::getManufacturer() {
-  return QString(m_manufacturer.c_str());
-}
-
-QString DICOMCommonData::getStudyID() {
-  return QString(m_studyID.c_str());
-}
-
-QString DICOMCommonData::getSeriesNumber() {
-  return QString(m_seriesNumber.c_str());
-}
 
 void DICOMCommonData::getPixelSpacing(double pixSpace[2]) {
   pixSpace[0] = m_pixSpace[0];
@@ -171,4 +215,24 @@ void DICOMCommonData::getImageOrientation(double imgOrient[6]) {
   imgOrient[3] = m_imgOrient[3];
   imgOrient[4] = m_imgOrient[4];
   imgOrient[5] = m_imgOrient[5];
+}
+
+void DICOMCommonData::setPixelSpacing(double pixSpace[2]) {
+  m_pixSpace[0] = pixSpace[0];
+  m_pixSpace[1] = pixSpace[1];
+}
+
+void DICOMCommonData::setImagePosition(double imgPosition[3]) {
+  m_imgPosition[0] = imgPosition[0];
+  m_imgPosition[1] = imgPosition[1];
+  m_imgPosition[2] = imgPosition[2];
+}
+
+void DICOMCommonData::setImageOrientation(double imgOrient[6]) {
+  m_imgOrient[0] = imgOrient[0];
+  m_imgOrient[1] = imgOrient[1];
+  m_imgOrient[2] = imgOrient[2];
+  m_imgOrient[3] = imgOrient[3];
+  m_imgOrient[4] = imgOrient[4];
+  m_imgOrient[5] = imgOrient[5];
 }

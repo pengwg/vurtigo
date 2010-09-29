@@ -250,6 +250,7 @@ void CardiacMeshReaderUI::page3Finish() {
       ptObj->copyNewTransform(m_customReader.getTransform());
       ptObj->copyNewImageData(m_customReader.getImageData());
       ptObj->copyTriggerDelayList(m_customReader.getTriggerList());
+      ptObj->copyDicomCommonData(m_customReader.getCommonDataHandle());
       ptObj->Modified();
       ptObj->unlock();
     }

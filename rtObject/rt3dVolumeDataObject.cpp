@@ -526,15 +526,20 @@ void rt3DVolumeDataObject::updateInfoText() {
 
   m_optionsWidget.volumeInfoTextEdit->clear();
   ts << this->getObjName() << "\n";
-  ts << "-------------------------------------------------\n";
-  ts << "Scalar Range: [" << rangeP[0] <<", " << rangeP[1] << "] \n";
-  ts << "Volume Size: [" << dims[0] << ", " << dims[1] << ", " << dims[2] << "] \n";
-  ts << "Number of Frames: " << m_imgUShortCast->GetOutput()->GetNumberOfScalarComponents() << " \n";
-  ts << "Memory Used: " << m_imgUShortCast->GetOutput()->GetActualMemorySize() << " kB \n";
-  ts << "Slice Spacing: [" << spacing[0] << ", " << spacing[1] << ", " << spacing[2] << "] \n";
+  ts << "--------------------------------------------\n";
+  ts << "Study ID:        [" << m_commonData.getStudyID() << "] \n";
+  ts << "Series Number:   [" << m_commonData.getSeriesNumber() << "] \n";
+  ts << "Study Date:      " << m_commonData.getStudyDate().toString("dd.MM.yyyy") << " \n";
+  ts << "Study Time:      " << m_commonData.getStudyTime().toString("hh:mm:ss") << " \n";
+  ts << "Scalar Range:    [" << rangeP[0] <<", " << rangeP[1] << "] \n";
+  ts << "Volume Size:     [" << dims[0] << ", " << dims[1] << ", " << dims[2] << "] \n";
+  ts << "Number of Frames:" << m_imgUShortCast->GetOutput()->GetNumberOfScalarComponents() << " \n";
+  ts << "Memory Used:     " << m_imgUShortCast->GetOutput()->GetActualMemorySize() << " kB \n";
+  ts << "Slice Spacing:   [" << spacing[0] << ", " << spacing[1] << ", " << spacing[2] << "] \n";
   ts.flush();
 
   m_optionsWidget.volumeInfoTextEdit->setPlainText(infoText);
+  m_optionsWidget.volumeInfoTextEdit->setFont(QFont("Courier"));
 }
 
 void rt3DVolumeDataObject::cropStatusChanged(bool status) {

@@ -26,16 +26,7 @@
 #include <QDate>
 #include <QTime>
 
-#ifdef Q_OS_UNIX
-#ifndef HAVE_CONFIG_H
-#define HAVE_CONFIG_H
-#endif
-#endif
-
-// DCMTK include
-#include "dcmtk/config/osconfig.h"
-#include "dcmtk/ofstd/ofstring.h"
-#include "dcmtk/dcmdata/dcdatset.h"
+class DcmDataset;
 
 //! Class to maintain the common elements that all DICOM files should contain.
 /*!
@@ -56,15 +47,24 @@ public:
     */
   void readData(DcmDataset* datSet);
 
+  //! Copy all of the data from the parameter into this class.
+  /*!
+    Copy all of the data from the parameter into this class. This includes date, time and error and warning flags.
+    \param data The data object to be copied. This data object is not modified.
+   */
+  void deepCopy(DICOMCommonData* data);
 
-  QString getPatientName();
-  QDate getStudyDate();
-  QTime getStudyTime();
-  QString getPatientPosition();
-  QString getModality();
-  QString getManufacturer();
-  QString getStudyID();
-  QString getSeriesNumber();
+  ////
+  // Functions to GET data
+  ////
+  inline QString getPatientName() { return m_patientsName; }
+  inline QDate getStudyDate() { return m_studyDate; }
+  inline QTime getStudyTime() { return m_studyTime; }
+  inline QString getPatientPosition() { return m_patientPosition; }
+  inline QString getModality() { return m_modality; }
+  inline QString getManufacturer() { return m_manufacturer; }
+  inline QString getStudyID() { return m_studyID; }
+  inline QString getSeriesNumber() { return m_seriesNumber; }
 
   inline unsigned short getNumRows() { return m_numRows; }
   inline unsigned short getNumCols() { return m_numCols; }
@@ -73,19 +73,38 @@ public:
   void getImagePosition(double imgPosition[3]);
   void getImageOrientation(double imgOrient[6]);
 
+  ////
+  // Functions to SET data
+  ////
+  inline void setPatientName(QString name) { m_patientsName = name; }
+  inline void setStudyDate(QDate date) { m_studyDate = date; }
+  inline void setStudyTime(QTime time) { m_studyTime = time; }
+  inline void setPatientPosition(QString pos) { m_patientPosition = pos; }
+  inline void setModality(QString modality) { m_modality = modality; }
+  inline void setManufacturer(QString manufacturer) { m_manufacturer = manufacturer; }
+  inline void setStudyID(QString studyID) { m_studyID = studyID; }
+  inline void setSeriesNumber(QString seriesNum) { m_seriesNumber = seriesNum; }
+
+  inline void setNumRows(unsigned int rows) { m_numRows=rows; }
+  inline void setNumCols(unsigned int cols) { m_numCols=cols; }
+
+  void setPixelSpacing(double pixSpace[2]);
+  void setImagePosition(double imgPosition[3]);
+  void setImageOrientation(double imgOrient[6]);
+
 protected:
   bool m_warning;
   bool m_error;
 
 
-  OFString m_patientsName;
-  OFString m_studyDate;
-  OFString m_studyTime;
-  OFString m_patientPosition;
-  OFString m_modality;
-  OFString m_manufacturer;
-  OFString m_studyID;
-  OFString m_seriesNumber;
+  QString m_patientsName;
+  QDate m_studyDate;
+  QTime m_studyTime;
+  QString m_patientPosition;
+  QString m_modality;
+  QString m_manufacturer;
+  QString m_studyID;
+  QString m_seriesNumber;
 
   //! Number of rows in the rows
   unsigned short m_numRows;

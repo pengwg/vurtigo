@@ -70,6 +70,23 @@ include_directories(
   ${DCMTK_INCLUDE_DIR}
 )
 
+##########
+# Find libtiff and libwrap if they are available
+##########
+find_library(LIBTIFF tiff)
+find_library(LIBWRAP wrap)
+
+set (EXTERN_LIBS "")
+
+if (LIBTIFF)
+message(STATUS "Found: " ${LIBTIFF})
+set (EXTERN_LIBS ${EXTERN_LIBS} "tiff")
+endif (LIBTIFF)
+
+if (LIBWRAP)
+message(STATUS "Found: " ${LIBWRAP})
+set (EXTERN_LIBS ${EXTERN_LIBS} "wrap")
+endif(LIBWRAP)
 
 ####################
 # Doxygen target called 'doc'
@@ -145,13 +162,15 @@ set (MAIN_SRC_FILES
 
 add_library(VurtigoBase SHARED ${RTOBJECT_SRC_FILES} ${RTCONTROL_SRC_FILES} ${RTUI_SRC_FILES} ${RTPLUGIN_SRC_FILES} ${MOC_FILES_OUT})
 target_link_libraries(VurtigoBase
-  rtMessage
   ${QT_LIBRARIES}
   vtkFiltering
-  vtkCommon 
-  vtkRendering 
+  vtkCommon
+  vtkRendering
   vtkVolumeRendering
   QVTK
+  rtMessage
+  DCMTKVurtigo
+  ${EXTERN_LIBS}
 )
 
 add_executable(vurtigo ${MAIN_SRC_FILES})
