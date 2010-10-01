@@ -338,13 +338,18 @@ void rtEPDataObject::addInfoPoint(rtNamedInfoPointData  point) {
   m_EPInfoObject.addInfoPoint(point);
   int numElem = m_optionsWidget.colorByComboBox->count();
   bool found = false;
+  QList<QString> tagList = point.getTagList();
+  QString currName;
 
-  // Check if the item exists
-  for (int ix1=0; ix1<numElem; ix1++) {
-    if (m_optionsWidget.colorByComboBox->itemText(ix1) == point.getName()) found = true;
+  for (int tagIdx=0; tagIdx<tagList.size(); tagIdx++) {
+    currName = tagList[tagIdx];
+    // Check if the item exists
+    for (int ix1=0; ix1<numElem; ix1++) {
+      if (m_optionsWidget.colorByComboBox->itemText(ix1) == currName) found = true;
+    }
+    // Add it if the item does not exist.
+    if (!found) m_optionsWidget.colorByComboBox->insertItem(numElem, currName);
   }
-  // Add it if the item does not exist.
-  if (!found) m_optionsWidget.colorByComboBox->insertItem(numElem, point.getName());
 }
 
 bool rtEPDataObject::saveFile(QFile *file) {

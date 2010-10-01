@@ -22,6 +22,8 @@
 #define RTNAMEDINFOPOINTDATA_H
 
 #include <QString>
+#include <QList>
+#include <QMap>
 
 #include "rtBasic3DPointData.h"
 
@@ -40,23 +42,32 @@ public:
 
   //! Set the value along with the name.
   inline void setNamedValue(QString name, double value) {
-    m_namedInfo = value;
-    m_name = name;
+    // Replace the entry if it exists.
+    if(m_infoMap.count(name) != 0) {
+      m_infoMap[name] = value;
+    } else {
+      m_infoMap.insert(name, value);
+    }
   }
 
-  //! Get the name given to this value
-  inline QString getName() { return m_name; }
-  //! Get the value
-  inline double getValue() { return m_namedInfo; }
+  //! Get a list for all of the tags
+  inline QList<QString> getTagList() { return m_infoMap.keys(); }
 
+  //! Check if a tag exists.
+  inline bool tagExists(QString name) { return m_infoMap.count(name) != 0; }
+
+  //! Get the value for a given tag.
+  inline double getValue(QString name) {
+    if (m_infoMap.count(name) != 0) {
+      return m_infoMap.value(name);
+    } else {
+      return 0.0;
+    }
+  }
 
 protected:
+  QMap<QString, double> m_infoMap;
 
-  //! Genereic information object
-  double m_namedInfo;
-
-  //! Name of the generic info object
-  QString m_name;
 };
 
 #endif // RTNAMEDINFOPOINTDATA_H

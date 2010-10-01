@@ -46,6 +46,8 @@ public:
   //! Assignment operator
   rtBasicPointData& operator=(const rtBasicPointData& sp);
 
+  inline int getCreationTime() { return m_timeStamp; }
+
   inline int getPointId() { return m_pId; }
   inline void setPointId(int id) { m_pId = id; }
 
@@ -82,6 +84,7 @@ public:
 protected:
   //! Point Id.
   int m_pId;
+  int m_timeStamp;
   double m_pSize;
   std::vector<double> m_coords;
   vtkProperty *m_pProp;

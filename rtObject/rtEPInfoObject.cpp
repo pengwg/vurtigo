@@ -50,17 +50,24 @@ rtEPInfoObject::~rtEPInfoObject() {
 
 
 void rtEPInfoObject::addInfoPoint(rtNamedInfoPointData p) {
-  if (m_pointLists.isEmpty()) {
-    rtEPPropertyPointList* temp = new rtEPPropertyPointList(p.getName());
-    m_pointLists.insert(p.getName(), temp);
-    temp->addPointToList(p);
-    m_currentPropertyName = p.getName();
-  } else if(m_pointLists.contains(p.getName())) {
-    m_pointLists.value(p.getName())->addPointToList(p);
-  } else {
-    rtEPPropertyPointList* temp = new rtEPPropertyPointList(p.getName());
-    m_pointLists.insert(p.getName(), temp);
-    temp->addPointToList(p);
+  QList<QString> tagList = p.getTagList();
+  QString currName;
+
+  // Add all of the tags for this list
+  for (int ix1=0; ix1<tagList.size(); ix1++) {
+    currName = tagList[ix1];
+    if (m_pointLists.isEmpty()) {
+      rtEPPropertyPointList* temp = new rtEPPropertyPointList(currName);
+      m_pointLists.insert(currName, temp);
+      temp->addPointToList(p);
+      m_currentPropertyName = currName;
+    } else if(m_pointLists.contains(currName)) {
+      m_pointLists.value(currName)->addPointToList(p);
+    } else {
+      rtEPPropertyPointList* temp = new rtEPPropertyPointList(currName);
+      m_pointLists.insert(currName, temp);
+      temp->addPointToList(p);
+    }
   }
 }
 
@@ -128,7 +135,7 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
     transPointList[ix1*3] = currLocation[0];
     transPointList[ix1*3+1] = currLocation[1];
     transPointList[ix1*3+2] = currLocation[2];
-    transPointList[ix1*3+3] = pt.getValue();
+    transPointList[ix1*3+3] = pt.getValue(m_currentPropertyName);
   }
 
   for (vtkIdType currID=0; currID<numPts; currID++) {
@@ -223,7 +230,7 @@ void rtEPInfoObject::updatePointPolyData() {
     poly = temp->GetOutput();
     poly->Update();
 
-    scalarValue = ((double)(pt.getValue() - ptList->getMinValue()))/propValueDiff;
+    scalarValue = ((double)(pt.getValue(m_currentPropertyName) - ptList->getMinValue()))/propValueDiff;
     for (int ptNum=0; ptNum < poly->GetNumberOfPoints(); ptNum++) {
       scalars->InsertNextTuple(&scalarValue);
     }

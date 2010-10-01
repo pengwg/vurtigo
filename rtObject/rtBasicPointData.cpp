@@ -21,13 +21,15 @@
 #include <vtkProperty.h>
 
 #include "rtBasicPointData.h"
-
+#include "rtApplication.h"
+#include "rtTimeManager.h"
 
 rtBasicPointData::rtBasicPointData()
  : m_pId(-1), m_pSize(1.0), m_pProp(0)
 {
   m_coords.clear();
   m_pProp = vtkProperty::New();
+  m_timeStamp = rtApplication::instance().getTimeManager()->getSystemTime();
 }
 
 rtBasicPointData::rtBasicPointData(const rtBasicPointData& sp) {

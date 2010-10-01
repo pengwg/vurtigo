@@ -32,14 +32,16 @@ rtEPPropertyPointList::~rtEPPropertyPointList() {
 
 
 void rtEPPropertyPointList::addPointToList(rtNamedInfoPointData p) {
+  if ( !p.tagExists(m_propName) ) return;
+
   if (m_infoList.empty()) {
-    m_maxPropValue = p.getValue();
-    m_minPropValue = p.getValue();
+    m_maxPropValue = p.getValue(m_propName);
+    m_minPropValue = p.getValue(m_propName);
     m_infoList.append(p);
   } else {
     m_infoList.append(p);
-    if (p.getValue() > m_maxPropValue) m_maxPropValue = p.getValue();
-    if (p.getValue() < m_minPropValue) m_minPropValue = p.getValue();
+    if (p.getValue(m_propName) > m_maxPropValue) m_maxPropValue = p.getValue(m_propName);
+    if (p.getValue(m_propName) < m_minPropValue) m_minPropValue = p.getValue(m_propName);
   }
 }
 

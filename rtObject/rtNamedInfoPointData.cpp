@@ -21,26 +21,24 @@
 #include "rtNamedInfoPointData.h"
 
 rtNamedInfoPointData::rtNamedInfoPointData()
- : m_namedInfo(0.0), m_name("")
 {
+  m_infoMap.clear();
 }
 
 rtNamedInfoPointData::rtNamedInfoPointData(const rtNamedInfoPointData& sp)
  : rtBasic3DPointData(sp)
 {
-  m_namedInfo = sp.m_namedInfo;
-  m_name = sp.m_name;
+  m_infoMap = sp.m_infoMap;
 }
 
 bool rtNamedInfoPointData::operator==(const rtNamedInfoPointData &other) const {
-  return rtBasic3DPointData::operator==(other) && m_namedInfo == other.m_namedInfo && m_name == other.m_name;
+  return rtBasic3DPointData::operator==(other) && m_infoMap == other.m_infoMap;
 }
 
 rtNamedInfoPointData& rtNamedInfoPointData::operator=(const rtNamedInfoPointData& sp) {
   if (this!=&sp) {
     rtBasic3DPointData::operator=(sp);
-    m_namedInfo = sp.m_namedInfo;
-    m_name = sp.m_name;
+    m_infoMap = sp.m_infoMap;
   }
   return *this;
 }
