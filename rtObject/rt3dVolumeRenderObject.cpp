@@ -26,6 +26,7 @@
 #include <math.h>
 
 #include <vtkProperty.h>
+#include <vtkTextProperty.h>
 #include <vtkMath.h>
 #include <vtkMatrix4x4.h>
 
@@ -36,6 +37,16 @@ rt3DVolumeRenderObject::rt3DVolumeRenderObject() {
   m_imgReslice[0] = vtkImageReslice::New();
   m_imgReslice[1] = vtkImageReslice::New();
   m_imgReslice[2] = vtkImageReslice::New();
+
+  // Annotate the volume with some text in the 3D window
+  m_annotateActor = vtkTextActor::New();
+  m_annotateActor->SetInput("");
+  m_annotateActor->GetTextProperty()->SetFontSize(14);
+  m_annotateActor->GetTextProperty()->SetFontFamilyToCourier();
+  m_annotateActor->GetTextProperty()->SetJustificationToLeft();
+  m_annotateActor->GetTextProperty()->SetVerticalJustificationToTop();
+  m_annotateActor->GetPositionCoordinate()->SetCoordinateSystemToNormalizedDisplay();
+  m_annotateActor->SetPosition(0.02,0.98);
 
   m_currentPlane = -1;
   m_isInit = false;
@@ -62,6 +73,8 @@ rt3DVolumeRenderObject::~rt3DVolumeRenderObject() {
   if(m_outline) m_outline->Delete();
   if(m_outlineMapper) m_outlineMapper->Delete();
   if(m_outlineActor) m_outlineActor->Delete();
+
+  if (m_annotateActor) m_annotateActor->Delete();
 }
 
 
@@ -98,7 +111,9 @@ void rt3DVolumeRenderObject::update() {
     imageSizes[0] = ((double)dims[0])*spacing[0];
     imageSizes[1] = ((double)dims[1])*spacing[1];
 
-
+    // Update the annotation.
+    m_annotateActor->SetInput(dObj->getAnnotation().toStdString().c_str());
+    m_annotateActor->SetVisibility(dObj->getDoAnnotate());
 
     // Set the bounds.
     if (imageSizes[0] == imageSizes[1]) {
@@ -356,6 +371,11 @@ bool rt3DVolumeRenderObject::addToRenderer(vtkRenderer* ren) {
   rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
   if (!ren || !dObj || !dObj->isDataValid()) return false;
   setVisible3D(true);
+
+  if (!ren->HasViewProp(m_annotateActor)) {
+    ren->AddViewProp(m_annotateActor);
+  }
+
   if (!ren->HasViewProp(m_volumeActor)) {
     ren->AddViewProp(m_volumeActor);
   }
@@ -386,6 +406,11 @@ bool rt3DVolumeRenderObject::addToRenderer(vtkRenderer* ren) {
 bool rt3DVolumeRenderObject::removeFromRenderer(vtkRenderer* ren) {
   if (!ren) return false;
   setVisible3D(false);
+
+  if (ren->HasViewProp(m_annotateActor)) {
+    ren->RemoveViewProp(m_annotateActor);
+  }
+
   if (ren->HasViewProp(m_volumeActor)) {
     ren->RemoveViewProp(m_volumeActor);
   }

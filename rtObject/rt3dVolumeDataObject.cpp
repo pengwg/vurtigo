@@ -36,6 +36,7 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
 
   m_rayCastFunction=RCF_COMPOSITE;
   m_imgDataValid = false;
+  m_annotation = "";
 
   m_imgUShortCast = vtkImageShiftScale::New();
   m_imgData = vtkImageData::New();
@@ -540,6 +541,17 @@ void rt3DVolumeDataObject::updateInfoText() {
 
   m_optionsWidget.volumeInfoTextEdit->setPlainText(infoText);
   m_optionsWidget.volumeInfoTextEdit->setFont(QFont("Courier"));
+
+  // Now update the annotation text.
+  QTextStream annotate(&m_annotation, QIODevice::WriteOnly);
+  annotate << "-------------------------------\n";
+  annotate << this->getObjName() << "\n";
+  annotate << "-------------------------------\n";
+  annotate << "Study ID:        " << m_commonData.getStudyID() << " \n";
+  annotate << "Series Number:   " << m_commonData.getSeriesNumber() << " \n";
+  annotate << "Study Date:      " << m_commonData.getStudyDate().toString("dd.MM.yyyy") << " \n";
+  annotate << "Study Time:      " << m_commonData.getStudyTime().toString("hh:mm:ss") << " \n";
+  annotate.flush();
 }
 
 void rt3DVolumeDataObject::cropStatusChanged(bool status) {
@@ -736,6 +748,10 @@ void rt3DVolumeDataObject::createNewCTF() {
 
 void rt3DVolumeDataObject::setupGUI() {
   m_optionsWidget.setupUi(getBaseWidget());
+
+  // Annotation
+  m_optionsWidget.annotateCheckBox->setChecked(true);
+  connect(m_optionsWidget.annotateCheckBox, SIGNAL(toggled(bool)), this, SLOT(Modified()));
 
   // Volume Crop.
   m_optionsWidget.cropVolumeGroupBox->setChecked(true);

@@ -25,6 +25,13 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
+        <widget class="QCheckBox" name="annotateCheckBox">
+         <property name="text">
+          <string>Annotate</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QTextEdit" name="volumeInfoTextEdit">
          <property name="readOnly">
           <bool>true</bool>

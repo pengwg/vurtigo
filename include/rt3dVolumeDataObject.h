@@ -169,6 +169,17 @@ public:
   //! Get the level part of the window level.
   int getLevel() { return m_level; }
 
+  //! Get the annotation status.
+  /*!
+    \return true if the annotation check box is checked. false otherwise.
+    */
+  inline bool getDoAnnotate() { return m_optionsWidget.annotateCheckBox->isChecked(); }
+
+  //! Get the annotation string.
+  /*!
+    \return The annotation string to be displayed.
+    */
+  inline QString getAnnotation() { return m_annotation; }
 
   //! Get the transform matrix for a particular plane.
   vtkTransform* getTransformForPlane(int id) {
@@ -296,6 +307,9 @@ public:
   double m_window;
   //! The level value
   double m_level;
+
+  //! The annotation for this volume.
+  QString m_annotation;
 
   QList<double> m_triggerList;
   vtkSmartPointer<vtkImageExtractComponents> m_subImg;

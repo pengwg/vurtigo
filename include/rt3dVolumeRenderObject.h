@@ -40,6 +40,7 @@
 #include <vtkWindowLevelLookupTable.h>
 #include <vtkSmartPointer.h>
 #include <vtkImageResample.h>
+#include <vtkTextActor.h>
 
 //! The 3D Volume render object
 /*!
@@ -93,6 +94,8 @@ public slots:
   vtkSmartPointer<vtkOutlineFilter> m_outline;
   vtkSmartPointer<vtkPolyDataMapper> m_outlineMapper;
   vtkSmartPointer<vtkActor> m_outlineActor;
+
+  vtkTextActor* m_annotateActor;
 
   ///////////////
   // The 2D planes
