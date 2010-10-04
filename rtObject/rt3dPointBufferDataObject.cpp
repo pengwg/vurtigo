@@ -148,6 +148,17 @@ void rt3DPointBufferDataObject::applyTransformToCartoPoints(vtkTransform * t) {
   }
 }
 
+void rt3DPointBufferDataObject::applyTranslateToPoints(double x, double y, double z) {
+  for (int ix1=0; ix1<m_pointList.size(); ix1++) {
+    m_pointList[ix1].translate(x,y,z);
+  }
+}
+
+void rt3DPointBufferDataObject::applyTranslateToCartoPoints(double x, double y, double z) {
+  for (int ix1=0; ix1<m_cartoPointList.size(); ix1++) {
+    m_cartoPointList[ix1].translate(x,y,z);
+  }
+}
 
 /////////////
 // Public slots
@@ -155,44 +166,38 @@ void rt3DPointBufferDataObject::applyTransformToCartoPoints(vtkTransform * t) {
 
 
 void rt3DPointBufferDataObject::transPlusX() {
-  rtBasic3DPointData *pPoint = getPointAtIndex(0);
-  pPoint->setX(pPoint->getX() + 1);
-    
+  applyTranslateToPoints(1.0, 0.0, 0.0);
+  applyTranslateToCartoPoints(1.0, 0.0, 0.0);
   Modified();
 }
 
 void rt3DPointBufferDataObject::transMinusX() {
-  rtBasic3DPointData *pPoint = getPointAtIndex(0);
-  pPoint->setX(pPoint->getX() - 1);
-
+  applyTranslateToPoints(-1.0, 0.0, 0.0);
+  applyTranslateToCartoPoints(-1.0, 0.0, 0.0);
   Modified();
 }
 
 void rt3DPointBufferDataObject::transPlusY() {
-  rtBasic3DPointData *pPoint = getPointAtIndex(0);
-  pPoint->setY(pPoint->getY() + 1);
-
+  applyTranslateToPoints(0.0, 1.0, 0.0);
+  applyTranslateToCartoPoints(0.0, 1.0, 0.0);
   Modified();
 }
 
 void rt3DPointBufferDataObject::transMinusY() {
-  rtBasic3DPointData *pPoint = getPointAtIndex(0);
-  pPoint->setY(pPoint->getY() - 1);
-
+  applyTranslateToPoints(0.0, -1.0, 0.0);
+  applyTranslateToCartoPoints(0.0, -1.0, 0.0);
   Modified();
 }
 
 void rt3DPointBufferDataObject::transPlusZ() {
-  rtBasic3DPointData *pPoint = getPointAtIndex(0);
-  pPoint->setZ(pPoint->getZ() + 1);
-
+  applyTranslateToPoints(0.0, 0.0, 1.0);
+  applyTranslateToCartoPoints(0.0, 0.0, 1.0);
   Modified();
 }
 
 void rt3DPointBufferDataObject::transMinusZ() {
-  rtBasic3DPointData *pPoint = getPointAtIndex(0);
-  pPoint->setZ(pPoint->getZ() - 1);
-
+  applyTranslateToPoints(0.0, 0.0, -1.0);
+  applyTranslateToCartoPoints(0.0, 0.0, -1.0);
   Modified();
 }
 

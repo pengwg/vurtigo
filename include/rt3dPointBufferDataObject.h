@@ -85,6 +85,9 @@ public:
   void applyTransformToPoints(vtkTransform * t);
   void applyTransformToCartoPoints(vtkTransform * t);
 
+  void applyTranslateToPoints(double x, double y, double z);
+  void applyTranslateToCartoPoints(double x, double y, double z);
+
   void update();
 
  public slots:
