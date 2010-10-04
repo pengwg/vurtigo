@@ -68,12 +68,6 @@ void rtBasic3DPointData::getPoint(double p[3]) {
   p[2] = m_coords[2];
 }
 
-void rtBasic3DPointData::getTransformedPoint(double p[3]) {
-  p[0] = m_coords[0];
-  p[1] = m_coords[1];
-  p[2] = m_coords[2];
-}
-
 void rtBasic3DPointData::setPoint(double x, double y, double z) {
   m_coords[0] = x;
   m_coords[1] = y;

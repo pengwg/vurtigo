@@ -46,7 +46,6 @@ public:
   double getY();
   double getZ();
   void getPoint(double p[3]);
-  void getTransformedPoint(double p[3]);
   
   void setPoint(double x, double y, double z);
   void setPoint(double p[3]);

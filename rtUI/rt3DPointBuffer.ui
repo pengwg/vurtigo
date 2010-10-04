@@ -59,6 +59,14 @@
          </attribute>
          <column>
           <property name="text">
+           <string>Point ID</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+          </property>
+         </column>
+         <column>
+          <property name="text">
            <string>X</string>
           </property>
           <property name="textAlignment">
@@ -76,6 +84,14 @@
          <column>
           <property name="text">
            <string>Z</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Timestamp (ms)</string>
           </property>
           <property name="textAlignment">
            <set>AlignHCenter|AlignVCenter|AlignCenter</set>

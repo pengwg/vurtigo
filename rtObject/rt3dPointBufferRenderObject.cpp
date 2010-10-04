@@ -62,7 +62,7 @@ void rt3DPointBufferRenderObject::update() {
     tempPipe->setRadius( (*pointList)[ix1].getPointSize() );
 
     // Transform the points.
-    (*pointList)[ix1].getTransformedPoint(ptIn);
+    (*pointList)[ix1].getPoint(ptIn);
 
     tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
     tempPipe->setProperty( (*pointList)[ix1].getProperty() );

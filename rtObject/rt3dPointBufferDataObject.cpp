@@ -17,6 +17,8 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
+#include <climits>
+
 #include "rt3dPointBufferDataObject.h"
 
 //! Constructor
@@ -64,8 +66,17 @@ rtBasic3DPointData* rt3DPointBufferDataObject::getPointAtIndex(int index) {
 
 //! Add a point to the list
 void rt3DPointBufferDataObject::addPoint(rtBasic3DPointData sp) {
-  m_pointList.append(sp);
-  Modified();
+  rtNamedInfoPointData namedPt;
+  int id = getNextId();
+
+  if (id != -1) {
+    sp.setPointId(id);
+    m_pointList.append(sp);
+    namedPt.fromBasic3DPoint(&sp);
+    m_namedInfoData.insert(id, namedPt);
+    Modified();
+    updateGuiPointList();
+  }
 }
 
 //! Remove a point from the list
@@ -74,14 +85,25 @@ void rt3DPointBufferDataObject::removePoint(rtBasic3DPointData sp) {
 
   if (m_pointList.contains(sp)) {
     i = m_pointList.indexOf(sp);
+    m_namedInfoData.remove(sp.getPointId());
     m_pointList.removeAt(i);
     Modified();
+    updateGuiPointList();
   }
 }
 
 void rt3DPointBufferDataObject::addCartoPoint(rtCartoPointData pt) {
-  m_cartoPointList.append(pt);
-  Modified();
+  rtNamedInfoPointData namedPt;
+  int id = getNextId();
+
+  if (id != -1) {
+    pt.setPointId(id);
+    m_cartoPointList.append(pt);
+    namedPt.fromCartoPoint(&pt);
+    m_namedInfoData.insert(id, namedPt);
+    Modified();
+    updateGuiPointList();
+  }
 }
 
 void rt3DPointBufferDataObject::removeCartoPoint(rtCartoPointData pt) {
@@ -89,8 +111,10 @@ void rt3DPointBufferDataObject::removeCartoPoint(rtCartoPointData pt) {
 
   if (m_cartoPointList.contains(pt)) {
     i = m_cartoPointList.indexOf(pt);
+    m_namedInfoData.remove(pt.getPointId());
     m_cartoPointList.removeAt(i);
     Modified();
+    updateGuiPointList();
   }
 }
 
@@ -102,41 +126,15 @@ void rt3DPointBufferDataObject::update() {
 
 }
 
-//! Set the GUI widgets.
-/*!
- */
-void rt3DPointBufferDataObject::setupGUI() {
-  m_optionsWidget.setupUi(getBaseWidget());
-
-  connect( m_optionsWidget.pushXPlus, SIGNAL(clicked()), this, SLOT(transPlusX()) );
-  connect( m_optionsWidget.pushYPlus, SIGNAL(clicked()), this, SLOT(transPlusY()) );
-  connect( m_optionsWidget.pushZPlus, SIGNAL(clicked()), this, SLOT(transPlusZ()) );
-  connect( m_optionsWidget.pushXMinus, SIGNAL(clicked()), this, SLOT(transMinusX()) );
-  connect( m_optionsWidget.pushYMinus, SIGNAL(clicked()), this, SLOT(transMinusY()) );
-  connect( m_optionsWidget.pushZMinus, SIGNAL(clicked()), this, SLOT(transMinusZ()) );
-  connect( m_optionsWidget.rotateXPlus, SIGNAL(clicked()), this, SLOT(rotPlusX()) );
-  connect( m_optionsWidget.rotateYPlus, SIGNAL(clicked()), this, SLOT(rotPlusY()) );
-  connect( m_optionsWidget.rotateZPlus, SIGNAL(clicked()), this, SLOT(rotPlusZ()) );
-  connect( m_optionsWidget.rotateXMinus, SIGNAL(clicked()), this, SLOT(rotMinusX()) );
-  connect( m_optionsWidget.rotateYMinus, SIGNAL(clicked()), this, SLOT(rotMinusY()) );
-  connect( m_optionsWidget.rotateZMinus, SIGNAL(clicked()), this, SLOT(rotMinusZ()) );
-  connect( m_optionsWidget.scaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(scaleChanged(double)) );
-}
-
-//! Clean the GUI widgets.
-/*!
-  @todo Write the GUI
- */
-void rt3DPointBufferDataObject::cleanupGUI() {
-
-}
-
 void rt3DPointBufferDataObject::applyTransformToPoints(vtkTransform * t) {
   if (!t) return;
 
   for (int ix1=0; ix1<m_pointList.size(); ix1++) {
     m_pointList[ix1].applyTransform(t);
+    m_namedInfoData[m_pointList[ix1].getPointId()].applyTransform(t);
   }
+  Modified();
+  updateGuiPointList();
 }
 
 
@@ -145,19 +143,28 @@ void rt3DPointBufferDataObject::applyTransformToCartoPoints(vtkTransform * t) {
 
   for (int ix1=0; ix1<m_cartoPointList.size(); ix1++) {
     m_cartoPointList[ix1].applyTransform(t);
+    m_namedInfoData[m_cartoPointList[ix1].getPointId()].applyTransform(t);
   }
+  Modified();
+  updateGuiPointList();
 }
 
 void rt3DPointBufferDataObject::applyTranslateToPoints(double x, double y, double z) {
   for (int ix1=0; ix1<m_pointList.size(); ix1++) {
     m_pointList[ix1].translate(x,y,z);
+    m_namedInfoData[m_pointList[ix1].getPointId()].translate(x,y,z);
   }
+  Modified();
+  updateGuiPointList();
 }
 
 void rt3DPointBufferDataObject::applyTranslateToCartoPoints(double x, double y, double z) {
   for (int ix1=0; ix1<m_cartoPointList.size(); ix1++) {
     m_cartoPointList[ix1].translate(x,y,z);
+    m_namedInfoData[m_cartoPointList[ix1].getPointId()].translate(x,y,z);
   }
+  Modified();
+  updateGuiPointList();
 }
 
 /////////////
@@ -265,4 +272,71 @@ void rt3DPointBufferDataObject::scaleChanged(double val) {
   applyTransformToCartoPoints(temp);
   if (temp) temp->Delete();
   Modified();
+}
+
+void rt3DPointBufferDataObject::updateGuiPointList() {
+  QHash<int, rtNamedInfoPointData>::iterator i;
+  int index=0;
+
+  m_optionsWidget.pointsTable->clear();
+  m_optionsWidget.pointsTable->setHorizontalHeaderItem(0, new QTableWidgetItem("Point ID") );
+  m_optionsWidget.pointsTable->setHorizontalHeaderItem(1, new QTableWidgetItem("X") );
+  m_optionsWidget.pointsTable->setHorizontalHeaderItem(2, new QTableWidgetItem("Y") );
+  m_optionsWidget.pointsTable->setHorizontalHeaderItem(3, new QTableWidgetItem("Z") );
+  m_optionsWidget.pointsTable->setHorizontalHeaderItem(4, new QTableWidgetItem("Timestamp (ms)") );
+  m_optionsWidget.pointsTable->setRowCount(m_namedInfoData.size());
+  index = 0;
+  for (i = m_namedInfoData.begin(); i != m_namedInfoData.end(); ++i) {
+    m_optionsWidget.pointsTable->setItem( index, 0, new QTableWidgetItem(QString::number(i.key())) );
+    m_optionsWidget.pointsTable->item( index, 0 )->setFlags(Qt::ItemIsSelectable);
+    m_optionsWidget.pointsTable->setItem( index, 1, new QTableWidgetItem(QString::number(i.value().getX())) );
+    m_optionsWidget.pointsTable->setItem( index, 2, new QTableWidgetItem(QString::number(i.value().getY())) );
+    m_optionsWidget.pointsTable->setItem( index, 3, new QTableWidgetItem(QString::number(i.value().getZ())) );
+    m_optionsWidget.pointsTable->setItem( index, 4, new QTableWidgetItem(QString::number(i.value().getCreationTime())) );
+    m_optionsWidget.pointsTable->item( index, 4 )->setFlags(Qt::ItemIsSelectable);
+    index++;
+  }
+
+}
+
+////////////
+// Protected
+////////////
+
+void rt3DPointBufferDataObject::setupGUI() {
+  m_optionsWidget.setupUi(getBaseWidget());
+
+  // Setup the points table
+
+  m_optionsWidget.pointsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+  m_optionsWidget.pointsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+  // Connect the buttons
+  connect( m_optionsWidget.pushXPlus, SIGNAL(clicked()), this, SLOT(transPlusX()) );
+  connect( m_optionsWidget.pushYPlus, SIGNAL(clicked()), this, SLOT(transPlusY()) );
+  connect( m_optionsWidget.pushZPlus, SIGNAL(clicked()), this, SLOT(transPlusZ()) );
+  connect( m_optionsWidget.pushXMinus, SIGNAL(clicked()), this, SLOT(transMinusX()) );
+  connect( m_optionsWidget.pushYMinus, SIGNAL(clicked()), this, SLOT(transMinusY()) );
+  connect( m_optionsWidget.pushZMinus, SIGNAL(clicked()), this, SLOT(transMinusZ()) );
+  connect( m_optionsWidget.rotateXPlus, SIGNAL(clicked()), this, SLOT(rotPlusX()) );
+  connect( m_optionsWidget.rotateYPlus, SIGNAL(clicked()), this, SLOT(rotPlusY()) );
+  connect( m_optionsWidget.rotateZPlus, SIGNAL(clicked()), this, SLOT(rotPlusZ()) );
+  connect( m_optionsWidget.rotateXMinus, SIGNAL(clicked()), this, SLOT(rotMinusX()) );
+  connect( m_optionsWidget.rotateYMinus, SIGNAL(clicked()), this, SLOT(rotMinusY()) );
+  connect( m_optionsWidget.rotateZMinus, SIGNAL(clicked()), this, SLOT(rotMinusZ()) );
+  connect( m_optionsWidget.scaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(scaleChanged(double)) );
+}
+
+void rt3DPointBufferDataObject::cleanupGUI() {
+
+}
+
+int rt3DPointBufferDataObject::getNextId() {
+  // Try to find the next available ID.
+  for (int ix1=0; ix1<INT_MAX; ix1++) {
+    if (!m_namedInfoData.contains(ix1)) {
+      return ix1;
+    }
+  }
+  return -1;
 }

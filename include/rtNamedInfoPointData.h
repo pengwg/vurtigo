@@ -27,6 +27,8 @@
 
 #include "rtBasic3DPointData.h"
 
+class rtCartoPointData;
+
 class rtNamedInfoPointData : public rtBasic3DPointData
 {
 public:
@@ -39,6 +41,9 @@ public:
   bool operator==(const rtNamedInfoPointData &other) const;
   //! Assignment operator
   rtNamedInfoPointData& operator=(const rtNamedInfoPointData& sp);
+
+  void fromBasic3DPoint(rtBasic3DPointData* pt);
+  void fromCartoPoint(rtCartoPointData* pt);
 
   //! Set the value along with the name.
   inline void setNamedValue(QString name, double value) {

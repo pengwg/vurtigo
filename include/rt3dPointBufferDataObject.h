@@ -105,6 +105,9 @@ public:
   void rotMinusZ();
   void scaleChanged(double val);
 
+  //! Slot called to update the table in the GUI
+  void updateGuiPointList();
+
  protected:
   // Properties
   //! List of points in 3D space
@@ -113,6 +116,13 @@ public:
   //! List of carto points in space
   QList<rtCartoPointData> m_cartoPointList;
 
+  //! List of all the points in BOTH lists.
+  /*!
+    Points are indexed by their ID. The ID should be unique for both lists.
+    This list is what is displayed in the GUI.
+  */
+  QHash<int, rtNamedInfoPointData> m_namedInfoData;
+
   //! Ui Interface
   Ui::rt3DPointBuffer m_optionsWidget;
 
@@ -120,9 +130,21 @@ public:
   double m_currentScale;
 
   // Functions
+  //! Set the GUI widgets.
+  /*!
+  */
   void setupGUI();
+
+  //! Clean the GUI widgets.
+  /*!
+  */
   void cleanupGUI();
   
+  //! Get the next unique ID that has not yet been assigned.
+  /*!
+    Returns -1 if all of the IDs have been used.
+    */
+  int getNextId();
 };
 
 #endif 

@@ -19,6 +19,7 @@
 *******************************************************************************/
 
 #include "rtNamedInfoPointData.h"
+#include "rtCartoPointData.h"
 
 rtNamedInfoPointData::rtNamedInfoPointData()
 {
@@ -41,4 +42,18 @@ rtNamedInfoPointData& rtNamedInfoPointData::operator=(const rtNamedInfoPointData
     m_infoMap = sp.m_infoMap;
   }
   return *this;
+}
+
+void rtNamedInfoPointData::fromBasic3DPoint(rtBasic3DPointData* pt) {
+  rtBasic3DPointData::operator=( (*pt) );
+}
+
+void rtNamedInfoPointData::fromCartoPoint(rtCartoPointData* pt) {
+  rtBasic3DPointData::operator=( (*pt) );
+  setNamedValue("Alpha", pt->getAlpha());
+  setNamedValue("Beta", pt->getBeta());
+  setNamedValue("Gamma", pt->getGamma());
+  setNamedValue("UniPolar", pt->getUniPolar());
+  setNamedValue("BiPolar", pt->getBiPolar());
+  setNamedValue("LAT", pt->getLAT());
 }

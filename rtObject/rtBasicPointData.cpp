@@ -36,7 +36,7 @@ rtBasicPointData::rtBasicPointData(const rtBasicPointData& sp) {
   m_pId = sp.m_pId;
   m_coords = sp.m_coords;
   m_pSize = sp.m_pSize;
-
+  m_timeStamp = sp.m_timeStamp;
   m_pProp = vtkProperty::New();
   m_pProp->DeepCopy(sp.m_pProp);
 }
@@ -46,7 +46,7 @@ rtBasicPointData::~rtBasicPointData() {
 }
 
 bool rtBasicPointData::operator==(const rtBasicPointData &other) const {
-  if (m_pId==other.m_pId &&  m_coords==other.m_coords && m_pSize == other.m_pSize && m_pProp == other.m_pProp)
+  if (m_pId==other.m_pId &&  m_coords==other.m_coords && m_pSize == other.m_pSize && m_pProp == other.m_pProp && m_timeStamp==other.m_timeStamp)
     return true;
   else
     return false;
@@ -57,7 +57,7 @@ rtBasicPointData& rtBasicPointData::operator=(const rtBasicPointData& sp) {
     m_pId = sp.m_pId;
     m_coords = sp.m_coords;
     m_pSize = sp.m_pSize;
-
+    m_timeStamp = sp.m_timeStamp;
     if(m_pProp) m_pProp->Delete();
     m_pProp = vtkProperty::New();
     m_pProp->DeepCopy(sp.m_pProp);

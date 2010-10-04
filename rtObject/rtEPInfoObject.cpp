@@ -131,7 +131,7 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
   double* transPointList = new double[ptList->getNumPoints()*4];
   for (int ix1=0; ix1<ptList->getNumPoints(); ix1++) {
     rtNamedInfoPointData pt = ptList->getPointAt(ix1);
-    pt.getTransformedPoint(currLocation);
+    pt.getPoint(currLocation);
     transPointList[ix1*3] = currLocation[0];
     transPointList[ix1*3+1] = currLocation[1];
     transPointList[ix1*3+2] = currLocation[2];
@@ -225,7 +225,7 @@ void rtEPInfoObject::updatePointPolyData() {
     scalars = vtkDataArray::CreateDataArray(VTK_DOUBLE);
     m_sphereList.append(temp);
     m_sphereScalarList.append(scalars);
-    pt.getTransformedPoint(currLocation);
+    pt.getPoint(currLocation);
     temp->SetCenter(currLocation[0], currLocation[1], currLocation[2]);
     poly = temp->GetOutput();
     poly->Update();
