@@ -522,8 +522,8 @@ void rtEPDataObject::cartoPointObjectChanged(int id) {
   rtObjectManager* objManager = rtApplication::instance().getObjectManager();
   rtRenderObject* renderObj;
   rt3DPointBufferDataObject* pointDataObject;
-  QList<rtCartoPointData> * pointData;
-  rtNamedInfoPointData namedInfoPoint;
+  QHash<int, rtNamedInfoPointData> * pointData;
+  QList<int> pointIds;
 
   // Not enabled by default
   m_optionsWidget.loadedDataGroupBox->setEnabled(false);
@@ -535,16 +535,19 @@ void rtEPDataObject::cartoPointObjectChanged(int id) {
       pointDataObject = static_cast<rt3DPointBufferDataObject*>(renderObj->getDataObject());
       if (pointDataObject) {
 
-        if (pointDataObject->getCartoPointListSize() > 0) {
+        if (pointDataObject->getNamedInfoHashSize() > 0) {
           m_optionsWidget.loadedDataGroupBox->setEnabled(true);
         }
 
-        pointData = pointDataObject->getCartoPointList();
-        m_EPInfoObject.clearPointList("Bi-Polar");
+        pointData = pointDataObject->getNamedInfoHash();
+        pointIds = pointData->keys();
+
+        // Clear the other previous list.
+        m_EPInfoObject.clearAllPointList();
+
         // Add the points
-        for (int ix1=0; ix1<pointData->size(); ix1++) {
-          namedInfoPoint = (*pointData)[ix1].toNamedInfoBiPolar();
-          this->addInfoPoint( namedInfoPoint );
+        for (int ix1=0; ix1<pointIds.size(); ix1++) {
+          this->addInfoPoint( (*pointData)[pointIds[ix1]] );
         }
 
       }

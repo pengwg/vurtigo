@@ -46,11 +46,11 @@ public:
   //! Get the size of the point list
   inline unsigned int getPointListSize() { return m_pointList.size(); }
 
-  //! Get a handle to the carto point list.
-  inline QList<rtCartoPointData>* getCartoPointList() { return &m_cartoPointList; }
+  //! Get a handle to the named info hash.
+  inline QHash<int, rtNamedInfoPointData>* getNamedInfoHash() { return &m_namedInfoData; }
 
-  //! Get the number of carto points available.
-  inline unsigned int getCartoPointListSize() { return m_cartoPointList.size(); }
+  //! Get the size of the hash
+  inline int getNamedInfoHashSize() { return m_namedInfoData.size(); }
 
   //! Get the list of point IDs that are part of the selected list.
   /*!
@@ -83,16 +83,12 @@ public:
   void removePoint(rtBasic3DPointData sp);
 
   void addCartoPoint(rtCartoPointData pt);
-  void removeCartoPoint(rtCartoPointData pt);
 
-  inline void removeAllPoints() { m_pointList.clear(); Modified(); }
-  inline void removeAllCartoPoints() { m_cartoPointList.clear(); Modified(); }
+  inline void removeAllPoints() { m_pointList.clear(); m_namedInfoData.clear(); Modified(); }
 
   void applyTransformToPoints(vtkTransform * t);
-  void applyTransformToCartoPoints(vtkTransform * t);
-
   void applyTranslateToPoints(double x, double y, double z);
-  void applyTranslateToCartoPoints(double x, double y, double z);
+
 
   void update();
 
@@ -117,20 +113,24 @@ public:
   //! Slot called when the table selection has been changed.
   void tableSelectionChanged();
 
+  //! Slot called when the contents of a cell has changed.
+  void tableCellChanged(int row, int col);
+
  protected:
   // Properties
   //! List of points in 3D space
   QList<rtBasic3DPointData> m_pointList;
 
-  //! List of carto points in space
-  QList<rtCartoPointData> m_cartoPointList;
 
-  //! List of all the points in BOTH lists.
+  //! List of all the points with extra tag information.
   /*!
     Points are indexed by their ID. The ID should be unique for both lists.
     This list is what is displayed in the GUI.
   */
   QHash<int, rtNamedInfoPointData> m_namedInfoData;
+
+  //! List of column headers.
+  QList<QString> m_columnHeaderList;
 
   //! List of selected items.
   QList<int> m_selectedItems;
@@ -157,6 +157,9 @@ public:
     Returns -1 if all of the IDs have been used.
     */
   int getNextId();
+
+  //! Update the list of column headers based on the current points.
+  void updateColumnHeaders();
 };
 
 #endif 

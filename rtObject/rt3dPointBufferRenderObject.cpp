@@ -80,7 +80,7 @@ void rt3DPointBufferRenderObject::update() {
       tempPipe->getPropertyHandle()->SetColor(1.0, 0.0, 1.0);
       tempPipe->getPropertyHandle()->SetOpacity(0.5);
       // Larger Radius
-      tempPipe->setRadius( (*pointList)[ix1].getPointSize()*1.5 );
+      tempPipe->setRadius( (*pointList)[ix1].getPointSize()*2.0 );
 
       m_pipeList.append(tempPipe);
       if (getVisible3D()) {
