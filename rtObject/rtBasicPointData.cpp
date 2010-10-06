@@ -30,6 +30,9 @@ rtBasicPointData::rtBasicPointData()
   m_coords.clear();
   m_pProp = vtkProperty::New();
   m_timeStamp = rtApplication::instance().getTimeManager()->getSystemTime();
+  m_redC = 0.5;
+  m_greenC = 0.5;
+  m_blueC = 0.5;
 }
 
 rtBasicPointData::rtBasicPointData(const rtBasicPointData& sp) {
@@ -39,6 +42,9 @@ rtBasicPointData::rtBasicPointData(const rtBasicPointData& sp) {
   m_timeStamp = sp.m_timeStamp;
   m_pProp = vtkProperty::New();
   m_pProp->DeepCopy(sp.m_pProp);
+  m_redC = sp.m_redC;
+  m_greenC = sp.m_greenC;
+  m_blueC = sp.m_blueC;
 }
 
 rtBasicPointData::~rtBasicPointData() {
@@ -46,7 +52,8 @@ rtBasicPointData::~rtBasicPointData() {
 }
 
 bool rtBasicPointData::operator==(const rtBasicPointData &other) const {
-  if (m_pId==other.m_pId &&  m_coords==other.m_coords && m_pSize == other.m_pSize && m_pProp == other.m_pProp && m_timeStamp==other.m_timeStamp)
+  if (m_pId==other.m_pId &&  m_coords==other.m_coords && m_pSize == other.m_pSize && m_pProp == other.m_pProp && m_timeStamp==other.m_timeStamp
+      && m_redC == other.m_redC &&  m_greenC == other.m_greenC &&  m_blueC == other.m_blueC )
     return true;
   else
     return false;
@@ -61,6 +68,9 @@ rtBasicPointData& rtBasicPointData::operator=(const rtBasicPointData& sp) {
     if(m_pProp) m_pProp->Delete();
     m_pProp = vtkProperty::New();
     m_pProp->DeepCopy(sp.m_pProp);
+    m_redC = sp.m_redC;
+    m_greenC = sp.m_greenC;
+    m_blueC = sp.m_blueC;
   }
 
   return *this;

@@ -65,11 +65,11 @@ public:
   /*!
     Values for r,g,b should be in the range [0,1].
     */
-  inline void setColor(double r, double g, double b) { m_pProp->SetColor(r,g,b); }
+  inline void setColor(double r, double g, double b) { m_pProp->SetColor(r,g,b); m_redC=r; m_greenC=g; m_blueC=b; }
 
-  inline void setColor(QColor c) { m_pProp->SetColor(c.redF(),c.greenF(),c.blueF()); }
+  inline void setColor(QColor c) { m_pProp->SetColor(c.redF(),c.greenF(),c.blueF()); m_redC=c.redF(); m_greenC=c.greenF(); m_blueC=c.blueF(); }
 
-  inline void getColor(double &r, double &g, double &b) { m_pProp->GetColor(r,g,b); }
+  inline void getColor(double &r, double &g, double &b) { r=m_redC; g=m_greenC; b=m_blueC; }
 
   inline QColor getColor() {
     double r,g,b;
@@ -86,6 +86,7 @@ protected:
   int m_pId;
   int m_timeStamp;
   double m_pSize;
+  double m_redC, m_greenC, m_blueC;
   std::vector<double> m_coords;
   vtkProperty *m_pProp;
 };

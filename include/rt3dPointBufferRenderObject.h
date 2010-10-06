@@ -19,12 +19,12 @@
 *******************************************************************************/
 #ifndef RT3D_POINT_BUFFER_RENDER_OBJECT_H
 #define RT3D_POINT_BUFFER_RENDER_OBJECT_H
+//Qt
+#include <QList>
+#include <QHash>
 
 #include "rtRenderObject.h"
 #include "rtSingle3DPointPipeline.h"
-
-//Qt
-#include <QList>
 
 //! A group of points in 3D that are rendered as a group of spheres.
 class rt3DPointBufferRenderObject : public rtRenderObject {
@@ -60,7 +60,14 @@ class rt3DPointBufferRenderObject : public rtRenderObject {
   //! Perform a proper cleanup on the m_pipeList object.
   void cleanupPipeList();
 
+  //! Change the size of the pipe list.
+  /*!
+    If the list is too long elements from the end will be removed. If it is too short elements will be added to the end.
+    */
+  void resizePipeList(int size);
+
  private:
+  //! List of point pipelines.
   QList<rtSingle3DPointPipeline*> m_pipeList;
 };
 

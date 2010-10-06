@@ -17,6 +17,16 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
+// Qt
+#include <QTime>
+
+//VTK
+#include "vtkSphereSource.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkActor.h"
+#include "vtkProperty.h"
+
+// Local
 #include "rt3dPointBufferRenderObject.h"
 #include "rt3dPointBufferDataObject.h"
 #include "rtObjectManager.h"
@@ -24,11 +34,7 @@
 #include "rtApplication.h"
 #include "rtBasic3DPointData.h"
 
-//VTK
-#include "vtkSphereSource.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkActor.h"
-#include "vtkProperty.h"
+
 
 rt3DPointBufferRenderObject::rt3DPointBufferRenderObject() {
   setObjectType(rtConstants::OT_3DPointBuffer);
@@ -50,43 +56,41 @@ void rt3DPointBufferRenderObject::update() {
   rt3DPointBufferDataObject *dObj = dynamic_cast<rt3DPointBufferDataObject*>(m_dataObj);
   rtSingle3DPointPipeline *tempPipe;
   double ptIn[3];
-
-  // Cleaup the old list.
-  cleanupPipeList();
-
-  // Get the new list
   QList<rtBasic3DPointData>* pointList = dObj->getPointList();
   QList<int>* selectedList = dObj->getSelectedItemsList();
+
+  // Find the total size of the list.
+  int totalActors = pointList->size() + selectedList->size();
+  int listPosition = 0;
+  double rc, gc, bc;
+  // Resize the list
+  resizePipeList(totalActors);
+
+  // Get the new list
   for (int ix1=0; ix1<pointList->size(); ix1++) {
 
-    tempPipe = new rtSingle3DPointPipeline();
+    tempPipe = m_pipeList[listPosition];
+    listPosition++;
 
     (*pointList)[ix1].getPoint(ptIn);
 
     tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
     tempPipe->setProperty( (*pointList)[ix1].getProperty() );
     tempPipe->setRadius( (*pointList)[ix1].getPointSize() );
-
-    m_pipeList.append(tempPipe);
-    if (getVisible3D()) {
-      rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getActor());
-    }
+    (*pointList)[ix1].getColor(rc, gc, bc);
+    tempPipe->getPropertyHandle()->SetColor(rc, gc, bc);
+    tempPipe->getPropertyHandle()->SetOpacity(1.0);
 
     // If this point is selected then add the selection sphere.
     if ( selectedList->contains((*pointList)[ix1].getPointId()) ) {
-      tempPipe = new rtSingle3DPointPipeline();
+      tempPipe = m_pipeList[listPosition];
+      listPosition++;
+      tempPipe->setProperty( (*pointList)[ix1].getProperty() );
       tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
-      tempPipe->getPropertyHandle()->SetRepresentationToSurface();
       tempPipe->getPropertyHandle()->SetColor(1.0, 0.0, 1.0);
       tempPipe->getPropertyHandle()->SetOpacity(0.5);
       // Larger Radius
       tempPipe->setRadius( (*pointList)[ix1].getPointSize()*2.0 );
-
-      m_pipeList.append(tempPipe);
-      if (getVisible3D()) {
-        rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getActor());
-      }
-
     }
 
   }
@@ -191,10 +195,30 @@ void rt3DPointBufferRenderObject::cleanupPipeList() {
   rtSingle3DPointPipeline *tempPipe;
 
   while(!m_pipeList.empty()) {
-    tempPipe = m_pipeList.takeFirst();
+    tempPipe = m_pipeList.takeLast();
     // Remove the item if it is currently being rendered.
     if (getVisible3D()) rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getActor());
     delete tempPipe;
+  }
+
+}
+
+void rt3DPointBufferRenderObject::resizePipeList(int size) {
+  rtSingle3DPointPipeline *tempPipe;
+
+  // Shrink it if it is too long
+  while(m_pipeList.size() > size) {
+    tempPipe = m_pipeList.takeLast();
+    // Remove the item if it is currently being rendered.
+    if (getVisible3D()) rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getActor());
+    delete tempPipe;
+  }
+
+  // Add elements if the list is too short.
+  while (m_pipeList.size() < size) {
+    tempPipe = new rtSingle3DPointPipeline();
+    m_pipeList.append(tempPipe);
+    if (getVisible3D()) rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getActor());
   }
 
 }
