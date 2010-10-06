@@ -43,6 +43,8 @@ public:
 
   void setProperty(vtkProperty* prop);
 
+  inline vtkProperty* getPropertyHandle() { return m_actor->GetProperty(); }
+
 protected:
   // VTK pipeline objects.
   vtkSphereSource* m_sphere;

@@ -52,6 +52,12 @@ public:
   //! Get the number of carto points available.
   inline unsigned int getCartoPointListSize() { return m_cartoPointList.size(); }
 
+  //! Get the list of point IDs that are part of the selected list.
+  /*!
+    When the user selects a point, or a group of points from the GUI list the IDs of those points are added to this list.
+    */
+  inline QList<int>* getSelectedItemsList() { return &m_selectedItems; }
+
   //! Get a handle to the point at a particular location in 3D.
   /*!
     \param x The X coord of the point to find.
@@ -108,6 +114,9 @@ public:
   //! Slot called to update the table in the GUI
   void updateGuiPointList();
 
+  //! Slot called when the table selection has been changed.
+  void tableSelectionChanged();
+
  protected:
   // Properties
   //! List of points in 3D space
@@ -122,6 +131,9 @@ public:
     This list is what is displayed in the GUI.
   */
   QHash<int, rtNamedInfoPointData> m_namedInfoData;
+
+  //! List of selected items.
+  QList<int> m_selectedItems;
 
   //! Ui Interface
   Ui::rt3DPointBuffer m_optionsWidget;

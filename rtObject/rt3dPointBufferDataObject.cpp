@@ -299,6 +299,19 @@ void rt3DPointBufferDataObject::updateGuiPointList() {
 
 }
 
+void rt3DPointBufferDataObject::tableSelectionChanged() {
+  QList<QTableWidgetItem *> selected;
+
+  selected = m_optionsWidget.pointsTable->selectedItems();
+  m_selectedItems.clear();
+  for (int ix1=0; ix1<selected.size(); ix1++) {
+    if (selected[ix1]->column() == 0) {
+      m_selectedItems.append( selected[ix1]->text().toInt() );
+    }
+  }
+  Modified();
+}
+
 ////////////
 // Protected
 ////////////
@@ -310,6 +323,8 @@ void rt3DPointBufferDataObject::setupGUI() {
 
   m_optionsWidget.pointsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
   m_optionsWidget.pointsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+  connect( m_optionsWidget.pointsTable, SIGNAL( itemSelectionChanged() ), this, SLOT( tableSelectionChanged() ) );
 
   // Connect the buttons
   connect( m_optionsWidget.pushXPlus, SIGNAL(clicked()), this, SLOT(transPlusX()) );

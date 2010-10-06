@@ -56,21 +56,39 @@ void rt3DPointBufferRenderObject::update() {
 
   // Get the new list
   QList<rtBasic3DPointData>* pointList = dObj->getPointList();
+  QList<int>* selectedList = dObj->getSelectedItemsList();
   for (int ix1=0; ix1<pointList->size(); ix1++) {
-    tempPipe = new rtSingle3DPointPipeline();
-    tempPipe->setResolution(20);
-    tempPipe->setRadius( (*pointList)[ix1].getPointSize() );
 
-    // Transform the points.
+    tempPipe = new rtSingle3DPointPipeline();
+
     (*pointList)[ix1].getPoint(ptIn);
 
     tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
     tempPipe->setProperty( (*pointList)[ix1].getProperty() );
+    tempPipe->setRadius( (*pointList)[ix1].getPointSize() );
 
     m_pipeList.append(tempPipe);
     if (getVisible3D()) {
       rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getActor());
     }
+
+    // If this point is selected then add the selection sphere.
+    if ( selectedList->contains((*pointList)[ix1].getPointId()) ) {
+      tempPipe = new rtSingle3DPointPipeline();
+      tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
+      tempPipe->getPropertyHandle()->SetRepresentationToSurface();
+      tempPipe->getPropertyHandle()->SetColor(1.0, 0.0, 1.0);
+      tempPipe->getPropertyHandle()->SetOpacity(0.5);
+      // Larger Radius
+      tempPipe->setRadius( (*pointList)[ix1].getPointSize()*1.5 );
+
+      m_pipeList.append(tempPipe);
+      if (getVisible3D()) {
+        rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getActor());
+      }
+
+    }
+
   }
 }
 
@@ -101,7 +119,7 @@ void rt3DPointBufferRenderObject::setRenderQuality(double quality) {
   else q = quality;
 
   for (int ix1=0; ix1<m_pipeList.size(); ix1++) {
-    m_pipeList[ix1]->setResolution(q*40.0f+5);
+    m_pipeList[ix1]->setResolution(q*10.0f+5);
   }
 }
 
