@@ -107,6 +107,9 @@ public:
   void rotMinusZ();
   void scaleChanged(double val);
 
+  //! Slot called when a new tag is added.
+  void addNewTagButton();
+
   //! Slot called to update the table in the GUI
   void updateGuiPointList();
 

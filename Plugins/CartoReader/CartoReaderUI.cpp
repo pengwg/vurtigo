@@ -192,7 +192,6 @@ void CartoReaderUI::saveAsPoints() {
         this->selectPointColor(pointList[ix1].getBiPolar(), tempColor);
         sp.getProperty()->SetColor(tempColor);
 
-        ptObj->addPoint(sp);
         ptObj->addCartoPoint(pointList[ix1]);
       }
       ptObj->Modified();
@@ -368,8 +367,6 @@ void CartoReaderUI::filterByTriggerDelay() {
 
       this->selectPointColor(pointList[ix1].getBiPolar(), tempColor);
       sp.getProperty()->SetColor(tempColor);
-
-      ptObj->addPoint(sp);
       ptObj->addCartoPoint(pointList[ix1]);
     }
   }

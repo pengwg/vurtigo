@@ -231,6 +231,19 @@ void rt3DPointBufferDataObject::scaleChanged(double val) {
   Modified();
 }
 
+void rt3DPointBufferDataObject::addNewTagButton() {
+  QString tagName = m_optionsWidget.addPropertyLineEdit->text();
+  tagName = tagName.trimmed();
+
+  if (tagName != "") {
+    if (!m_columnHeaderList.contains(tagName)) {
+      m_columnHeaderList.append(tagName);
+      Modified();
+      updateGuiPointList();
+    }
+  }
+}
+
 void rt3DPointBufferDataObject::updateGuiPointList() {
   QHash<int, rtNamedInfoPointData>::iterator i;
   QList<QString> tagList;
@@ -362,6 +375,11 @@ void rt3DPointBufferDataObject::tableCellChanged(int row, int col) {
 
 void rt3DPointBufferDataObject::setupGUI() {
   m_optionsWidget.setupUi(getBaseWidget());
+
+
+  // Buttons above the points table
+
+  connect( m_optionsWidget.addPropertyPushButton, SIGNAL(clicked()), this, SLOT(addNewTagButton()) );
 
   // Setup the points table
 
