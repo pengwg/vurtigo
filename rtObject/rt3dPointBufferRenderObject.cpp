@@ -40,8 +40,6 @@ rt3DPointBufferRenderObject::rt3DPointBufferRenderObject() {
   setObjectType(rtConstants::OT_3DPointBuffer);
   setName("Simple 3D Point Renderer");
 
-  // Clean the pipe list before the pipeline is set up.
-  cleanupPipeList();
   setupDataObject();
   setupPipeline();
 }
@@ -134,14 +132,8 @@ void rt3DPointBufferRenderObject::setupDataObject() {
 
 
 void rt3DPointBufferRenderObject::setupPipeline() {
-  //Create a dummy object in the pipeline
-  rtSingle3DPointPipeline *tempPipe;
-  tempPipe = new rtSingle3DPointPipeline();
-  tempPipe->setResolution(10);
-  tempPipe->setRadius(1);
-  tempPipe->setPosition(0.0f ,0.0f ,0.0f);
-
-  m_pipeList.append(tempPipe);
+  // Cleanup the pipe list.
+  cleanupPipeList();
   m_canRender3D = true;
 }
 
