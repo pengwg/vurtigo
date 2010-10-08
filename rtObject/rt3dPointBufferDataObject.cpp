@@ -274,12 +274,12 @@ void rt3DPointBufferDataObject::updateGuiPointList() {
   index = 0;
   for (i = m_namedInfoData.begin(); i != m_namedInfoData.end(); ++i) {
     m_optionsWidget.pointsTable->setItem( index, 0, new QTableWidgetItem(QString::number(i.key())) );
-    m_optionsWidget.pointsTable->item( index, 0 )->setFlags(Qt::ItemIsSelectable);
+    m_optionsWidget.pointsTable->item( index, 0 )->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     m_optionsWidget.pointsTable->setItem( index, 1, new QTableWidgetItem(QString::number(i.value().getX())) );
     m_optionsWidget.pointsTable->setItem( index, 2, new QTableWidgetItem(QString::number(i.value().getY())) );
     m_optionsWidget.pointsTable->setItem( index, 3, new QTableWidgetItem(QString::number(i.value().getZ())) );
     m_optionsWidget.pointsTable->setItem( index, 4, new QTableWidgetItem(QString::number(i.value().getCreationTime())) );
-    m_optionsWidget.pointsTable->item( index, 4 )->setFlags(Qt::ItemIsSelectable);
+    m_optionsWidget.pointsTable->item( index, 4 )->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
     // Do the custom headings as well.
     for (int ix1=0; ix1<m_columnHeaderList.size(); ix1++) {
