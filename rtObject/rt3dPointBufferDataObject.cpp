@@ -19,6 +19,11 @@
 *******************************************************************************/
 #include <climits>
 
+#include <QInputDialog>
+#include <QMessageBox>
+
+#include "rtApplication.h"
+#include "rtMessage.h"
 #include "rt3dPointBufferDataObject.h"
 
 //! Constructor
@@ -231,15 +236,40 @@ void rt3DPointBufferDataObject::scaleChanged(double val) {
   Modified();
 }
 
+void rt3DPointBufferDataObject::clearPointDataPressed() {
+  QMessageBox::StandardButton button;
+
+  button = QMessageBox::question(getBaseWidget(), QString("Clear All Data"),
+                        QString("This operation will delete all points and point data. The operation cannot be undone. Proceed?"),
+                        QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+  if (button == QMessageBox::Yes) {
+    m_pointList.clear();
+    m_namedInfoData.clear();
+    m_columnHeaderList.clear();
+    m_selectedItems.clear();
+    m_currentScale = 1.0;
+    updateGuiPointList();
+    Modified();
+  }
+}
+
 void rt3DPointBufferDataObject::addNewTagButton() {
-  QString tagName = m_optionsWidget.addPropertyLineEdit->text();
+  bool ok;
+  QString tagName = QInputDialog::getText(getBaseWidget(),
+                                          QString("New Property Name"),
+                                          QString("Enter the name of the new property:"),
+                                          QLineEdit::Normal, QString("NewProperty"), &ok);
   tagName = tagName.trimmed();
 
-  if (tagName != "") {
+  if (ok && !tagName.isEmpty()) {
     if (!m_columnHeaderList.contains(tagName)) {
       m_columnHeaderList.append(tagName);
       Modified();
       updateGuiPointList();
+    } else {
+      // Report as a warning.
+      rtApplication::instance().getMessageHandle()->warning( __LINE__, QString(__FILE__), QString("Property Name Already Exists. No New Property Created.") );
     }
   }
 }
@@ -378,7 +408,7 @@ void rt3DPointBufferDataObject::setupGUI() {
 
 
   // Buttons above the points table
-
+  connect( m_optionsWidget.clearDataPushButton, SIGNAL(clicked()), this, SLOT(clearPointDataPressed()) );
   connect( m_optionsWidget.addPropertyPushButton, SIGNAL(clicked()), this, SLOT(addNewTagButton()) );
 
   // Setup the points table

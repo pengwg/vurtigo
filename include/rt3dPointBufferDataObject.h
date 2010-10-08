@@ -107,6 +107,9 @@ public:
   void rotMinusZ();
   void scaleChanged(double val);
 
+  //! Slot called when the user chooses to clear the point data.
+  void clearPointDataPressed();
+
   //! Slot called when a new tag is added.
   void addNewTagButton();
 
