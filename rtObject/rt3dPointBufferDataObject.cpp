@@ -21,6 +21,7 @@
 
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QThread>
 
 #include "rtApplication.h"
 #include "rtMessage.h"
@@ -33,6 +34,8 @@ rt3DPointBufferDataObject::rt3DPointBufferDataObject()
   m_pointList.clear();
   setObjectType(rtConstants::OT_3DPointBuffer);
   setupGUI();
+
+  connect( this, SIGNAL(pointListModifiedSignal()), this, SLOT(pointListModifiedSlot()), Qt::QueuedConnection );
 }
 
 //! Destructor
@@ -73,14 +76,12 @@ rtBasic3DPointData* rt3DPointBufferDataObject::getPointAtIndex(int index) {
 void rt3DPointBufferDataObject::addPoint(rtBasic3DPointData sp) {
   rtNamedInfoPointData namedPt;
   int id = getNextId();
-
   if (id != -1) {
     sp.setPointId(id);
     m_pointList.append(sp);
     namedPt.fromBasic3DPoint(&sp);
     m_namedInfoData.insert(id, namedPt);
-    Modified();
-    updateGuiPointList();
+    emit pointListModifiedSignal();
   }
 }
 
@@ -92,8 +93,7 @@ void rt3DPointBufferDataObject::removePoint(rtBasic3DPointData sp) {
     i = m_pointList.indexOf(sp);
     m_namedInfoData.remove(sp.getPointId());
     m_pointList.removeAt(i);
-    Modified();
-    updateGuiPointList();
+    emit pointListModifiedSignal();
   }
 }
 
@@ -107,8 +107,7 @@ void rt3DPointBufferDataObject::addCartoPoint(rtCartoPointData pt) {
     m_pointList.append(pt);
     namedPt.fromCartoPoint(&pt);
     m_namedInfoData.insert(id, namedPt);
-    Modified();
-    updateGuiPointList();
+    emit pointListModifiedSignal();
   }
 }
 
@@ -128,8 +127,7 @@ void rt3DPointBufferDataObject::applyTransformToPoints(vtkTransform * t) {
     m_pointList[ix1].applyTransform(t);
     m_namedInfoData[m_pointList[ix1].getPointId()].applyTransform(t);
   }
-  Modified();
-  updateGuiPointList();
+  emit pointListModifiedSignal();
 }
 
 void rt3DPointBufferDataObject::applyTranslateToPoints(double x, double y, double z) {
@@ -137,8 +135,7 @@ void rt3DPointBufferDataObject::applyTranslateToPoints(double x, double y, doubl
     m_pointList[ix1].translate(x,y,z);
     m_namedInfoData[m_pointList[ix1].getPointId()].translate(x,y,z);
   }
-  Modified();
-  updateGuiPointList();
+  emit pointListModifiedSignal();
 }
 
 
@@ -249,8 +246,7 @@ void rt3DPointBufferDataObject::clearPointDataPressed() {
     m_columnHeaderList.clear();
     m_selectedItems.clear();
     m_currentScale = 1.0;
-    updateGuiPointList();
-    Modified();
+    emit pointListModifiedSignal();
   }
 }
 
@@ -265,8 +261,7 @@ void rt3DPointBufferDataObject::addNewTagButton() {
   if (ok && !tagName.isEmpty()) {
     if (!m_columnHeaderList.contains(tagName)) {
       m_columnHeaderList.append(tagName);
-      Modified();
-      updateGuiPointList();
+      emit pointListModifiedSignal();
     } else {
       // Report as a warning.
       rtApplication::instance().getMessageHandle()->warning( __LINE__, QString(__FILE__), QString("Property Name Already Exists. No New Property Created.") );
@@ -281,6 +276,9 @@ void rt3DPointBufferDataObject::updateGuiPointList() {
 
   // Disconnect the table so that we don't get all the changed events.
   disconnect( m_optionsWidget.pointsTable, SIGNAL( cellChanged(int,int) ), this, SLOT( tableCellChanged(int,int) ) );
+
+  // Lock to ensure that the list is not currently reserved by another thread.
+  this->lock();
 
   // Update the list of custom column headers.
   updateColumnHeaders();
@@ -299,7 +297,6 @@ void rt3DPointBufferDataObject::updateGuiPointList() {
   for (int ix1=0; ix1<m_columnHeaderList.size(); ix1++) {
     m_optionsWidget.pointsTable->setHorizontalHeaderItem(5+ix1, new QTableWidgetItem(m_columnHeaderList[ix1]) );
   }
-
   m_optionsWidget.pointsTable->setRowCount(m_namedInfoData.size());
   index = 0;
   for (i = m_namedInfoData.begin(); i != m_namedInfoData.end(); ++i) {
@@ -320,6 +317,9 @@ void rt3DPointBufferDataObject::updateGuiPointList() {
 
     index++;
   }
+
+  // Done modifications so we can unlock.
+  this->unlock();
 
   // Connect the table again at the end.
   connect( m_optionsWidget.pointsTable, SIGNAL( cellChanged(int,int) ), this, SLOT( tableCellChanged(int,int) ) );
@@ -397,6 +397,12 @@ void rt3DPointBufferDataObject::tableCellChanged(int row, int col) {
 
     }
   }
+}
+
+
+void rt3DPointBufferDataObject::pointListModifiedSlot() {
+  updateGuiPointList();
+  Modified();
 }
 
 ////////////

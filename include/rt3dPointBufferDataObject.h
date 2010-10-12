@@ -91,6 +91,8 @@ public:
 
 
   void update();
+ signals:
+  void pointListModifiedSignal();
 
  public slots:
   void transPlusX();
@@ -121,6 +123,12 @@ public:
 
   //! Slot called when the contents of a cell has changed.
   void tableCellChanged(int row, int col);
+
+  //! Called when the point list is modified.
+  /*!
+    The function is not called directly because it may be that the points are modified in a thread other than the GUI thread.
+    */
+  void pointListModifiedSlot();
 
  protected:
   // Properties

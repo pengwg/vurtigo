@@ -75,18 +75,13 @@ void rt3DPointBufferRenderObject::update() {
     tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
     tempPipe->setProperty( (*pointList)[ix1].getProperty() );
     tempPipe->setRadius( (*pointList)[ix1].getPointSize() );
-    (*pointList)[ix1].getColor(rc, gc, bc);
-    tempPipe->getPropertyHandle()->SetColor(rc, gc, bc);
-    tempPipe->getPropertyHandle()->SetOpacity(1.0);
 
     // If this point is selected then add the selection sphere.
     if ( selectedList->contains((*pointList)[ix1].getPointId()) ) {
       tempPipe = m_pipeList[listPosition];
       listPosition++;
-      tempPipe->setProperty( (*pointList)[ix1].getProperty() );
+      tempPipe->setProperty( (*pointList)[ix1].getSelectedProperty() );
       tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
-      tempPipe->getPropertyHandle()->SetColor(1.0, 0.0, 1.0);
-      tempPipe->getPropertyHandle()->SetOpacity(0.5);
       // Larger Radius
       tempPipe->setRadius( (*pointList)[ix1].getPointSize()*2.0 );
     }
