@@ -135,7 +135,19 @@ void rtCathRenderObject::update() {
     m_coneSource->SetDirection(coords[0]-direc[0], coords[1]-direc[1], coords[2]-direc[2]);
 
     for (int ix2=0; ix2<3; ix2++) {
+      // Remove old points
       m_spline[ix2]->RemoveAllPoints();
+
+      // Set the new tension.
+      m_spline[ix2]->SetDefaultTension(dObj->getTension());
+
+      // Set the new continuity parameter.
+      m_spline[ix2]->SetDefaultContinuity(dObj->getContinuity());
+
+      // Set the left and right values for the spline.
+      // This sets the curvature of the spline at the endpoints.
+      m_spline[ix2]->SetLeftValue(dObj->getTipValue());
+      m_spline[ix2]->SetRightValue(dObj->getEndValue());
     }
 
     for (int ix1=0; ix1<numLoc; ix1++) {
@@ -171,7 +183,7 @@ void rtCathRenderObject::update() {
                                m_spline[2]->Evaluate( ((double)numLoc-1.0f)/((double)m_numSplinePoints)*(double)ix1 ));
     }
 
-    m_splineFilter->SetRadius(0.2f);
+    m_splineFilter->SetRadius(dObj->getSplineThickness());
     m_splineLineData->Modified();
 
     m_sphereActor->VisibilityOn();
@@ -237,6 +249,8 @@ void rtCathRenderObject::setupPipeline() {
   // Create the x,y,z splines
   for (int ix1=0; ix1<3; ix1++) {
     m_spline[ix1] = vtkKochanekSpline::New();
+    m_spline[ix1]->SetLeftConstraint(1);
+    m_spline[ix1]->SetRightConstraint(1);
   }
 
   m_splineCellArray->InsertNextCell(m_numSplinePoints);

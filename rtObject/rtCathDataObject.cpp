@@ -21,7 +21,9 @@
 
 
 //! Constructor
-rtCathDataObject::rtCathDataObject() {
+rtCathDataObject::rtCathDataObject()
+ : m_tension(0.0), m_continuity(0.0), m_tipValue(0.0), m_endValue(0.0), m_splineThickness(3.0)
+{
   setObjectType(rtConstants::OT_Cath);
 
   // Allocate new objects
@@ -356,6 +358,12 @@ void rtCathDataObject::setupGUI() {
   connect(m_tipPropertyDlg, SIGNAL(propertyChanged()), this, SLOT(Modified()));
 
   connect(m_cathGuiSetup.snrSizeCheckBox, SIGNAL(stateChanged(int)),  this, SLOT(useSNRSizeChanged(int)));
+
+  connect( m_cathGuiSetup.thicknessSpinBox, SIGNAL(valueChanged(double)), this, SLOT(splineThicknessChanged(double)) );
+  connect( m_cathGuiSetup.tensionSpinBox, SIGNAL(valueChanged(double)), this, SLOT(tensionChanged(double)) );
+  connect( m_cathGuiSetup.continuitySpinBox, SIGNAL(valueChanged(double)), this, SLOT(continuityChanged(double)) );
+  connect( m_cathGuiSetup.tipSpinBox, SIGNAL(valueChanged(double)), this, SLOT(tipValueChanged(double)) );
+  connect( m_cathGuiSetup.endSpinBox, SIGNAL(valueChanged(double)), this, SLOT(endValueChanged(double)) );
 }
 
 //! Clean the GUI widgets.
@@ -511,4 +519,30 @@ void rtCathDataObject::updateCoilTable() {
     tempItem->setText(QString::number(dat.SNR));
     m_cathGuiSetup.pointsTable->setItem(ix1, 6, tempItem);
   }
+}
+
+
+void rtCathDataObject::splineThicknessChanged(double thickness) {
+  m_splineThickness = thickness;
+  Modified();
+}
+
+void rtCathDataObject::tensionChanged(double tension) {
+  m_tension = tension;
+  Modified();
+}
+
+void rtCathDataObject::continuityChanged(double continuity) {
+  m_continuity = continuity;
+  Modified();
+}
+
+void rtCathDataObject::tipValueChanged(double tip) {
+  m_tipValue = tip;
+  Modified();
+}
+
+void rtCathDataObject::endValueChanged(double end) {
+  m_endValue = end;
+  Modified();
 }

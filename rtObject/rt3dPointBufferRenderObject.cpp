@@ -60,7 +60,6 @@ void rt3DPointBufferRenderObject::update() {
   // Find the total size of the list.
   int totalActors = pointList->size() + selectedList->size();
   int listPosition = 0;
-  double rc, gc, bc;
   // Resize the list
   resizePipeList(totalActors);
 

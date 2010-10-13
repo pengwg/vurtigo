@@ -91,6 +91,21 @@ public:
   int getPointSize() { return m_pointSize; }
   bool useSNRSize() { return m_useSNRSize; }
 
+  inline double getTension() { return m_tension; }
+  inline void setTension(double t) { m_cathGuiSetup.tensionSpinBox->setValue(t); }
+
+  inline double getContinuity() { return m_continuity; }
+  inline void setContinuity(double c) { m_cathGuiSetup.continuitySpinBox->setValue(c); }
+
+  inline double getTipValue() { return m_tipValue; }
+  inline void setTipValue(double val) { m_cathGuiSetup.tipSpinBox->setValue(val); }
+
+  inline double getEndValue() { return m_endValue; }
+  inline void setEndValue(double val) { m_cathGuiSetup.endSpinBox->setValue(val); }
+
+  inline double getSplineThickness() { return m_splineThickness; }
+  inline void setSplineThickness(double thickness) { m_cathGuiSetup.thicknessSpinBox->setValue(thickness); }
+
  public slots:
   void splinePropertyDialog();
   void pointPropertyDialog();
@@ -103,6 +118,13 @@ public:
   void tableCellChanged(int row, int col);
 
   void updateCoilTable();
+
+  void splineThicknessChanged(double thickness);
+  void tensionChanged(double tension);
+  void continuityChanged(double continuity);
+  void tipValueChanged(double tip);
+  void endValueChanged(double end);
+
 signals:
   void updateCoilTableSignal();
  protected:
@@ -142,6 +164,17 @@ signals:
 
   //! Size multiplier for each of the points.
   int m_pointSize;
+
+  //! The tension of the spline.
+  double m_tension;
+
+  //! the continuity of the spline at the catheter points.
+  double m_continuity;
+
+  double m_tipValue;
+  double m_endValue;
+
+  double m_splineThickness;
 
   //! Use the SNR value to determine the size of the rendered coil.
   bool m_useSNRSize;
