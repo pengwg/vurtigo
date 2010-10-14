@@ -89,12 +89,17 @@ public:
   void applyTransformToPoints(vtkTransform * t);
   void applyTranslateToPoints(double x, double y, double z);
 
+  inline double getPointZoom() { return m_pointZoom; }
+  inline void setPointZoom(double zoom) { m_optionsWidget.pointZoomSlider->setValue(zoom*10.0); }
 
   void update();
  signals:
   void pointListModifiedSignal();
 
  public slots:
+  //! Slot called when the zoom slider is modified.
+  void pointZoomChanged(int zoom);
+
   void transPlusX();
   void transMinusX();
   void transPlusY();
@@ -153,7 +158,16 @@ public:
   Ui::rt3DPointBuffer m_optionsWidget;
 
   //! The current scale for this object
+  /*!
+    The scaling does not change the size of each point. It does change the spread of a set of points.
+    */
   double m_currentScale;
+
+  //! The current zoom for this object.
+  /*!
+    The zoom changes the visible size of the point. The actual size is unchanged.
+    */
+  double m_pointZoom;
 
   // Functions
   //! Set the GUI widgets.

@@ -73,7 +73,7 @@ void rt3DPointBufferRenderObject::update() {
 
     tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
     tempPipe->setProperty( (*pointList)[ix1].getProperty() );
-    tempPipe->setRadius( (*pointList)[ix1].getPointSize() );
+    tempPipe->setRadius( (*pointList)[ix1].getPointSize()*dObj->getPointZoom() );
 
     // If this point is selected then add the selection sphere.
     if ( selectedList->contains((*pointList)[ix1].getPointId()) ) {
@@ -82,7 +82,7 @@ void rt3DPointBufferRenderObject::update() {
       tempPipe->setProperty( (*pointList)[ix1].getSelectedProperty() );
       tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
       // Larger Radius
-      tempPipe->setRadius( (*pointList)[ix1].getPointSize()*2.0 );
+      tempPipe->setRadius( (*pointList)[ix1].getPointSize()*dObj->getPointZoom()*2.0 );
     }
 
   }

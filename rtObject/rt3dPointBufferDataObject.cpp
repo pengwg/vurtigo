@@ -29,7 +29,7 @@
 
 //! Constructor
 rt3DPointBufferDataObject::rt3DPointBufferDataObject()
-: m_currentScale(1.0)
+: m_currentScale(1.0), m_pointZoom(1.0)
 {
   m_pointList.clear();
   setObjectType(rtConstants::OT_3DPointBuffer);
@@ -117,7 +117,6 @@ void rt3DPointBufferDataObject::addCartoPoint(rtCartoPointData pt) {
   @todo Write the GUI
  */
 void rt3DPointBufferDataObject::update() {
-
 }
 
 void rt3DPointBufferDataObject::applyTransformToPoints(vtkTransform * t) {
@@ -143,6 +142,11 @@ void rt3DPointBufferDataObject::applyTranslateToPoints(double x, double y, doubl
 // Public slots
 /////////////
 
+void rt3DPointBufferDataObject::pointZoomChanged(int zoom) {
+  // Must change the range from [10,50] to [1.0,5.0]
+  m_pointZoom = ((double)zoom)/10.0f;
+  Modified();
+}
 
 void rt3DPointBufferDataObject::transPlusX() {
   applyTranslateToPoints(1.0, 0.0, 0.0);
@@ -414,6 +418,7 @@ void rt3DPointBufferDataObject::setupGUI() {
 
 
   // Buttons above the points table
+  connect( m_optionsWidget.pointZoomSlider, SIGNAL(valueChanged(int)), this, SLOT(pointZoomChanged(int)) );
   connect( m_optionsWidget.clearDataPushButton, SIGNAL(clicked()), this, SLOT(clearPointDataPressed()) );
   connect( m_optionsWidget.addPropertyPushButton, SIGNAL(clicked()), this, SLOT(addNewTagButton()) );
 
