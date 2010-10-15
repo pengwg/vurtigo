@@ -150,6 +150,13 @@ void rt3DVolumeRenderObject::update() {
     m_volumeActor->SetVisibility(0);
   }
 
+  // Check if the volume is pickable.
+  if ( dObj->isVolumePickable() ) {
+    m_volumeActor->PickableOn();
+  } else {
+    m_volumeActor->PickableOff();
+  }
+
   if ( rtApplication::instance().getMainWinHandle() ) {
     rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
@@ -507,7 +514,7 @@ void rt3DVolumeRenderObject::setupPipeline() {
   m_transFilter = vtkImageReslice::New();
   m_rayMapper = vtkVolumeRayCastMapper::New();
   m_volumeActor = vtkVolume::New();
-
+  m_volumeActor->PickableOff();
   //m_rayMapper->SetNumberOfThreads(16);
 
   m_outline = vtkOutlineFilter::New();

@@ -264,6 +264,17 @@ public:
   //! Create a new color transfer function and select that for rendering.
   void createNewCTF();
 
+  //! Determine if the ray cast volume is pickable
+  inline bool isVolumePickable() { return m_optionsWidget.volumePickableCheckBox->isChecked(); }
+
+  //! Set the volume as pickable or not.
+  inline void setVolumePickable(bool pick) {
+    if (pick != m_optionsWidget.volumePickableCheckBox->isChecked()) {
+      m_optionsWidget.volumePickableCheckBox->setChecked(pick);
+      Modified();
+    }
+  }
+
  signals:
   //! The volume has received new image data
   void newImageData();

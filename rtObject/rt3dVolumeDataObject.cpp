@@ -764,6 +764,9 @@ void rt3DVolumeDataObject::setupGUI() {
   connect(m_optionsWidget.zminSlider, SIGNAL(valueChanged(int)), this, SLOT(zminSliderChanged(int)));
   connect(m_optionsWidget.zmaxSlider, SIGNAL(valueChanged(int)), this, SLOT(zmaxSliderChanged(int)));
 
+  // Pickable volume
+  connect(m_optionsWidget.volumePickableCheckBox, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+
   // Window Level
   connect(m_optionsWidget.wlButton, SIGNAL(clicked()), this, SLOT(showWindowLevel()));
 
