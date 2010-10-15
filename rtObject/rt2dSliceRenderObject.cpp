@@ -264,11 +264,10 @@ void rt2DSliceRenderObject::update() {
 
   m_boxOutline.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2]);
   m_boxOutline.setTransform(dObj->getTransform());
-  m_boxOutline.update();
 
   m_control.setTransform(dObj->getTransform());
   m_control.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2] );
-
+  m_control.setObjectOfInterest(m_texturePlane.getActor());
   // Update the 2D as well
   m_imgCast->SetInput(dObj->getUCharData());
 

@@ -242,7 +242,7 @@ void rt3DVolumeRenderObject::resetAxialPlane() {
 
   m_planeControl[0].setTransform(m_boxOutline[0].getTransform());
   m_planeControl[0].setSize(bounds[3]-bounds[2], bounds[1]-bounds[0] );
-
+  m_planeControl[0].setObjectOfInterest(m_texturePlane[0].getActor());
   // Set the user transform from the data object.
   vtkTransform* tt = vtkTransform::New();
   tt->Concatenate(dObj->getTransform()->GetMatrix());
@@ -296,6 +296,7 @@ void rt3DVolumeRenderObject::resetSagittalPlane() {
   adjustReslice(1);
   m_planeControl[1].setTransform(m_boxOutline[1].getTransform());
   m_planeControl[1].setSize(bounds[3]-bounds[2], bounds[5]-bounds[4] );
+  m_planeControl[1].setObjectOfInterest(m_texturePlane[1].getActor());
 
   m_texturePlane[1].setUserTransform(tt);
   m_boxOutline[1].setUserTransform(tt);
@@ -344,6 +345,7 @@ void rt3DVolumeRenderObject::resetCoronalPlane() {
   adjustReslice(2);
   m_planeControl[2].setTransform(m_boxOutline[2].getTransform());
   m_planeControl[2].setSize(bounds[5]-bounds[4], bounds[1]-bounds[0] );
+  m_planeControl[2].setObjectOfInterest(m_texturePlane[2].getActor());
 
   m_texturePlane[2].setUserTransform(tt);
   m_boxOutline[2].setUserTransform(tt);
@@ -600,7 +602,6 @@ void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
     m_planeControl[m_currentPlane].getTransform(t);
 
     m_boxOutline[m_currentPlane].setTransform(t);
-    m_boxOutline[m_currentPlane].update();
     m_texturePlane[m_currentPlane].setTransform(t);
     m_texturePlane[m_currentPlane].update();
     adjustReslice(m_currentPlane);
@@ -649,7 +650,6 @@ void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event) {
     m_planeControl[m_currentPlane].getTransform(t);
 
     m_boxOutline[m_currentPlane].setTransform(t);
-    m_boxOutline[m_currentPlane].update();
     m_texturePlane[m_currentPlane].setTransform(t);
     m_texturePlane[m_currentPlane].update();
     adjustReslice(m_currentPlane);

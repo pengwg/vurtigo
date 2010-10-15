@@ -197,6 +197,7 @@ bool rt2DSliceDataObject::setTransform(float rotMatrix[9], float transMatrix[3],
   m_trans->Translate(transMatrix);
 
   if(mat) mat->Delete();
+  Modified();
   return true;
 }
 
@@ -207,7 +208,6 @@ bool rt2DSliceDataObject::setVtkMatrix(vtkMatrix4x4* m, bool asUser) {
   m_trans->SetMatrix(m);
   
   Modified();
-  
   return true;
 }
 

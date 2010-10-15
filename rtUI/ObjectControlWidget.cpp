@@ -71,7 +71,17 @@ ObjectControlWidget::ObjectControlWidget() {
   m_boxOutline.setOutlineColor(1.0f, 0.0f, 0.0f);
   m_boxOutline.setCorners(m_pointLocations[m_corners[0]], m_pointLocations[m_corners[1]], m_pointLocations[m_corners[2]], m_pointLocations[m_corners[3]]);
 
+  m_crosshair.setColor(1.0f, 0.0f, 0.0f);
+  m_crosshair.setCorners(m_pointLocations[m_corners[0]], m_pointLocations[m_corners[1]], m_pointLocations[m_corners[2]], m_pointLocations[m_corners[3]]);
+  m_crosshair.setVisible(false);
+
   m_currProp = NULL;
+
+  // Opacity starts off as 100% opaque.
+  setWidgetOpacity(1.0);
+
+  // No object of interest just yet.
+  m_objOfInterest = NULL;
 
   connect( rtApplication::instance().getMainWinHandle(), SIGNAL(cameraModeSignal(bool)), this, SLOT(cameraMode(bool)) );
   connect( rtApplication::instance().getMainWinHandle(), SIGNAL(interactionModeSignal(bool)), this, SLOT(interactionMode(bool)) );
@@ -143,6 +153,7 @@ void ObjectControlWidget::show() {
 
   ren->AddViewProp(m_pointActor);
   ren->AddViewProp(m_boxOutline.getActor());
+  ren->AddViewProp(m_crosshair.getActor());
 
   for (int ix1=0; ix1<3; ix1++) {
     ren->AddViewProp(m_diskActor[ix1]);
@@ -159,6 +170,7 @@ void ObjectControlWidget::hide() {
 
   ren->RemoveViewProp(m_pointActor);
   ren->RemoveViewProp(m_boxOutline.getActor());
+  ren->RemoveViewProp(m_crosshair.getActor());
 
   for (int ix1=0; ix1<3; ix1++) {
     ren->RemoveViewProp(m_diskActor[ix1]);
@@ -175,12 +187,30 @@ void ObjectControlWidget::setUserTransform(vtkTransform* t) {
   if (!t) return;
 
   m_boxOutline.setUserTransform(t);
+  m_crosshair.setUserTransform(t);
   m_pointActor->SetUserTransform(t);
   m_userTransform->Identity();
   m_userTransform->Concatenate(t);
 }
 
+void ObjectControlWidget::setWidgetOpacity(double op) {
+  if (op > 1.0) op = 1.0;
+  else if (op < 0.0) op = 0.0;
 
+  m_widgetOpacity = op;
+  m_pointActor->GetProperty()->SetOpacity(op);
+  m_diskActor[0]->GetProperty()->SetOpacity(op);
+  m_diskActor[1]->GetProperty()->SetOpacity(op);
+  m_diskActor[2]->GetProperty()->SetOpacity(op);
+}
+
+double ObjectControlWidget::getWidgetOpacity() {
+  return m_widgetOpacity;
+}
+
+/////////////////
+// Public Slots
+/////////////////
 void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
   if(!m_showing) return;
 
@@ -192,24 +222,25 @@ void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
     m_oldX = X;
     m_oldY = Y;
 
-    vtkPropCollection* col = vtkPropCollection::New();
-    vtkPropPicker* pick = vtkPropPicker::New();
-    vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
-    
-    col->AddItem(m_pointActor);
-    col->AddItem(m_diskActor[0]);
-    col->AddItem(m_diskActor[1]);
-    col->AddItem(m_diskActor[2]);
+    // Find the current prop and the position in 3D of the click.
+    m_currProp = getLocalPropAt(X, Y, m_clickPosition);
 
-    if (pick->PickProp(X, Y, ren, col) ) {
-      m_currProp = static_cast<vtkActor*>(pick->GetViewProp());  
-      pick->GetPickPosition(m_clickPosition);
+    if ( m_currProp ) {
+      // If the point is selected...
+      if (m_currProp == m_pointActor) {
+        m_pointActor->VisibilityOff();
+        m_crosshair.setVisible(true);
+        setWidgetOpacity(0.1);
+      }
 
       for (int ix1=0; ix1<3; ix1++) {
 
         // Check each rotating disk to see if one has been picked.
         if (m_currProp == m_diskActor[ix1]) {
           double pos2[3];
+
+          setWidgetOpacity(0.1);
+          m_diskActor[ix1]->GetProperty()->SetOpacity(1.0);
 
           m_position[ix1]->Inverse();
           m_position[ix1]->TransformPoint(m_clickPosition, pos2);
@@ -239,11 +270,39 @@ void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
       m_currProp->GetProperty()->SetColor(1.0, 0.0, 0.0);
     }
 
+    // Make the window 'dirty' so that it is rerendered
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
 
 void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
-  if(!m_showing || !event || !m_currProp) return;
+  if(!m_showing || !event) return;
+
+  if(event->buttons() == Qt::NoButton && !m_currProp) {
+    QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
+    int X = event->x();
+    int Y = winSize.height()-event->y();
+    double pos3D[3];
+    vtkActor* tempActor;
+
+    // Find the current prop and the position in 3D of the click.
+    tempActor = getLocalPropAt(X, Y, pos3D);
+
+    if (tempActor) {
+      setWidgetOpacity(1.0);
+    } else if ( pickedObjectOfInterest(X, Y) ) {
+      setWidgetOpacity(0.3);
+    } else {
+      setWidgetOpacity(0.01);
+    }
+
+    // Make the window 'dirty' so that it is rerendered
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+
+    return;
+  } else if (!m_currProp) {
+    return;
+  }
 
   QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
   int X = event->x();
@@ -303,6 +362,9 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
     m_transform->Translate(-pos[0], -pos[1], -pos[2]);
     m_transform->Translate(desiredPoint);
     m_transform->PreMultiply();
+
+    // Re-render
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   } else {
     vtkTransform* viewTransform = vtkTransform::New();
     vtkMatrix4x4* tempMatrix = vtkMatrix4x4::New();
@@ -328,9 +390,9 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
     double rotate=dotProd*3;
 
     if (rotate < 1.0 && rotate >= 0) {
-      rotate = 1.0f;
-    } else if (rotate > -1.0 && rotate <= 0) {
       rotate = -1.0f;
+    } else if (rotate > -1.0 && rotate <= 0) {
+      rotate = 1.0f;
     }
 
     if (m_currProp == m_diskActor[0]) {
@@ -343,6 +405,8 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
       movement->RotateWXYZ(rotate, rotateAxis[0], rotateAxis[1], rotateAxis[2]);
       movement->Translate(m_convertedLocations[4][0], m_convertedLocations[4][1], m_convertedLocations[4][2]);
       movement->PreMultiply();
+
+      rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
     } else if (m_currProp == m_diskActor[1]) {
       double rotateAxis[3];
       for (int ix1=0; ix1<3 ;ix1++) {
@@ -353,6 +417,8 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
       movement->RotateWXYZ(rotate, rotateAxis[0], rotateAxis[1], rotateAxis[2]);
       movement->Translate(m_convertedLocations[4][0], m_convertedLocations[4][1], m_convertedLocations[4][2]);
       movement->PreMultiply();
+
+      rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
     } else if (m_currProp == m_diskActor[2]) {
       double planeNormal[3];
 
@@ -365,6 +431,8 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
       movement->RotateWXYZ(rotate, -planeNormal[0], -planeNormal[1], -planeNormal[2]);
       movement->Translate(m_convertedLocations[4][0], m_convertedLocations[4][1], m_convertedLocations[4][2]);
       movement->PreMultiply();
+
+      rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
     }
   }
 
@@ -384,7 +452,18 @@ void ObjectControlWidget::mouseReleaseEvent(QMouseEvent* event) {
   if (event->button() == Qt::LeftButton) {
     // Clear the color
     m_currProp->GetProperty()->SetColor(1.0f, 1.0f, 1.0f);
+
+    // If the point is selected...
+    if (m_currProp == m_pointActor) {
+      m_pointActor->VisibilityOn();
+      m_crosshair.setVisible(false);    
+    }
+    setWidgetOpacity(1.0);
+
     m_currProp = NULL;
+
+    // Make the window 'dirty' so that it is rerendered
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
 
@@ -460,6 +539,11 @@ void ObjectControlWidget::placeMode(bool toggle) {
   if(toggle) hide();
 }
 
+
+//////////////
+// Protected
+//////////////
+
 void ObjectControlWidget::updateWidgetPosition() {
   for (int ix1=0; ix1<9; ix1++) {
     m_transform->TransformPoint(m_pointLocations[ix1], m_convertedLocations[ix1]);
@@ -470,6 +554,7 @@ void ObjectControlWidget::updateWidgetPosition() {
   m_touchPoint->SetRadius(std::max(m_xsize, m_ysize)*0.05);
 
   m_boxOutline.setCorners(m_convertedLocations[m_corners[0]], m_convertedLocations[m_corners[1]], m_convertedLocations[m_corners[2]], m_convertedLocations[m_corners[3]]);
+  m_crosshair.setCorners(m_convertedLocations[m_corners[0]], m_convertedLocations[m_corners[1]], m_convertedLocations[m_corners[2]], m_convertedLocations[m_corners[3]]);
 
   double pos[3];
   m_transform->GetPosition(pos);
@@ -493,4 +578,48 @@ void ObjectControlWidget::updateWidgetPosition() {
   for (int ix1=0; ix1<3; ix1++) {
     m_diskActor[ix1]->SetUserTransform(m_position[ix1]);
   }
+}
+
+vtkActor* ObjectControlWidget::getLocalPropAt(int x, int y, double clickPos[3]) {
+  vtkActor* result;
+  vtkPropCollection* col = vtkPropCollection::New();
+  vtkPropPicker* pick = vtkPropPicker::New();
+  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
+
+  col->AddItem(m_pointActor);
+  col->AddItem(m_diskActor[0]);
+  col->AddItem(m_diskActor[1]);
+  col->AddItem(m_diskActor[2]);
+
+  result = NULL;
+  if (pick->PickProp(x, y, ren, col) ) {
+      result = static_cast<vtkActor*>(pick->GetViewProp());
+      pick->GetPickPosition(clickPos);
+  }
+
+  if(col) col->Delete();
+  if(pick) pick->Delete();
+
+  return result;
+}
+
+bool ObjectControlWidget::pickedObjectOfInterest(int x, int y) {
+  if (!m_objOfInterest) return false;
+
+  vtkActor* result;
+  vtkPropCollection* col = vtkPropCollection::New();
+  vtkPropPicker* pick = vtkPropPicker::New();
+  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
+
+  col->AddItem(m_objOfInterest);
+
+  result = NULL;
+  if (pick->PickProp(x, y, ren, col) ) {
+      result = static_cast<vtkActor*>(pick->GetViewProp());
+  }
+
+  if(col) col->Delete();
+  if(pick) pick->Delete();
+
+  return result == m_objOfInterest;
 }

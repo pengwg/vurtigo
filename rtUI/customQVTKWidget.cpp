@@ -37,6 +37,9 @@ customQVTKWidget::customQVTKWidget(QWidget* parent, Qt::WFlags f) : QVTKWidget(p
   m_propChosen = NULL;
   m_interactionMode = CAMERA_MODE;
   m_forceSquare = false;
+
+  // This will send mouse move events even if nothing is clicked.
+  this->setMouseTracking(true);
 }
 
 customQVTKWidget::~customQVTKWidget() {
