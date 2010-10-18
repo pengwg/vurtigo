@@ -28,8 +28,10 @@
 #include <vtkWindowLevelLookupTable.h>
 #include <vtkTransform.h>
 
+#include "rtPolyData2D.h"
+
 //! The 2D surface where the image data is displayed.
-class rtTexture2DPlane
+class rtTexture2DPlane : public rtPolyData2D
 {
 public:
   //! Constructor
@@ -37,9 +39,6 @@ public:
 
   //! Destructor
   ~rtTexture2DPlane();
-
-  //! Get the actor for this plane.
-  vtkActor* getActor() { return m_textureActor; }
 
   //! Adjust the scalar range for the window level function.
   void setScalarRange(double min, double max);
@@ -49,51 +48,15 @@ public:
   //! Set the image data
   void setImageData(vtkImageData* img);
 
-  //! Set a new trasform for the texture.
-  /*!
-    The transform will be modified within the class but the GUI will not be updated until update() is called.
-    Don't forget to call update() for the changes to take effect.
-    \sa setSize()
-    \sa update()
-    */
-  void setTransform( vtkTransform* t );
-
-  //! Set new sizes for the texture
-  /*!
-    Modify the size. Will not take effect until update() is called.
-    \param xsize The size in the x direction. The height.
-    \param ysize The size in the y direction. he width.
-    \sa setTransform
-    \sa update()
-    */
-  void setSize( double xsize, double ysize );
-
-    //! Set the four points to the plane directly.
-  /*!
-    This is an alternate way to specify the position of the plane. Note that this function should not be used with setTransform and setSize.
-    The points are listed clockwise around the plane. The opposite point is not required. The update() call is NOT NEEDED as this function updates on the spot.
-    \param orig The origin
-    \param p1 Point clockwise of the origin
-    \param p2 Point counter-clockwise of the origin
-    */
-  void setCorners(double orig[3], double p1[3], double p2[3]);
-
   //! Update the widget.
-  void update();
-
-  void setUserTransform(vtkTransform* t) { m_textureActor->SetUserTransform(t); }
+  virtual void update();
 
 protected:
   vtkPlaneSource* m_texturePlane;
-  vtkPolyDataMapper* m_planeMapper;
-  vtkActor* m_textureActor;
   vtkTexture* m_texture;
   vtkImageMapToColors* m_imgMapToColors;
   vtkWindowLevelLookupTable* m_lookupTable;
 
-  double m_xsize;
-  double m_ysize;
-  vtkTransform* m_transform;
 };
 
 #endif // RTTEXTURE2DPLANE_H

@@ -1,3 +1,23 @@
+/*******************************************************************************
+    Vurtigo: Visualization software for interventional applications in medicine
+    Copyright (C) 2009 Sunnybrook Health Sciences Centre
+
+    This file is part of Vurtigo.
+
+    Vurtigo is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*******************************************************************************/
+
 #ifndef RTPOLYDATA2D_H
 #define RTPOLYDATA2D_H
 
@@ -45,6 +65,16 @@ class rtPolyData2D
     \param p2 Point counter-clockwise of the origin
     */
   void setCorners(double orig[3], double p1[3], double opp[3], double p2[3]);
+
+  //! Set the corners to the plane directly.
+  /*!
+    This is an alternate way to specify the position of the plane.
+    The points are listed clockwise around the plane. The opposite point is not required as it is calculated from the other three.
+    \param orig The origin
+    \param p1 Point clockwise of the origin
+    \param p2 Point counter-clockwise of the origin
+    */
+  void setCorners(double orig[3], double p1[3], double p2[3]);
 
   //! Set the x and y sizes for the outline.
   /*!
