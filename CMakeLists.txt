@@ -153,14 +153,15 @@ add_subdirectory(rtUI)
 add_subdirectory(rtObject)
 add_subdirectory(rtControl)
 add_subdirectory(rtPlugin)
+add_subdirectory(rtCustomWidgets)
 
-qt4_wrap_cpp(MOC_FILES_OUT ${RTOBJECT_MOC_FILES} ${RTCONTROL_MOC_FILES} ${RTUI_MOC_FILES} ${RTPLUGIN_MOC_FILES})
+qt4_wrap_cpp(MOC_FILES_OUT ${RTOBJECT_MOC_FILES} ${RTCONTROL_MOC_FILES} ${RTUI_MOC_FILES} ${RTPLUGIN_MOC_FILES} ${RTCUSTOMWIDGETS_MOC_FILES})
 
 set (MAIN_SRC_FILES
   rtMain.cpp
 )
 
-add_library(VurtigoBase SHARED ${RTOBJECT_SRC_FILES} ${RTCONTROL_SRC_FILES} ${RTUI_SRC_FILES} ${RTPLUGIN_SRC_FILES} ${MOC_FILES_OUT})
+add_library(VurtigoBase SHARED ${RTOBJECT_SRC_FILES} ${RTCONTROL_SRC_FILES} ${RTUI_SRC_FILES} ${RTPLUGIN_SRC_FILES} ${RTCUSTOMWIDGETS_SRC_FILES} ${MOC_FILES_OUT})
 target_link_libraries(VurtigoBase
   ${QT_LIBRARIES}
   vtkFiltering
