@@ -34,10 +34,6 @@
 #include <vtkParametricTorus.h>
 #include <vtkParametricFunctionSource.h>
 
-#include "rtBox2DOutline.h"
-#include "rtCrosshair2D.h"
-#include "rtSingle3DPointPipeline.h"
-
 //! Base class for widgets that control the movement of objects in 3D.
 class ObjectControlWidget : public QObject
 {

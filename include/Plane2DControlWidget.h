@@ -23,6 +23,11 @@
 
 #include "ObjectControlWidget.h"
 
+#include "rtBox2DOutline.h"
+#include "rtCrosshair2D.h"
+#include "rtSingle3DPointPipeline.h"
+#include "rtCompassWidgetPipeline.h"
+
 class Plane2DControlWidget : public ObjectControlWidget
 {
 public:
@@ -65,11 +70,7 @@ protected:
   rtBox2DOutline m_boxOutline;
 
   // The three rings.
-  vtkTransform *m_position[3];
-  vtkParametricTorus *m_torus[3];
-  vtkParametricFunctionSource *m_torusSrc[3];
-  vtkPolyDataMapper *m_diskMapper[3];
-  vtkActor *m_diskActor[3];
+  rtCompassWidgetPipeline m_compassWidget;
 
   //! The previous x location of the mouse
   int m_oldX;

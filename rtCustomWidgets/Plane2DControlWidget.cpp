@@ -28,19 +28,6 @@
 
 Plane2DControlWidget::Plane2DControlWidget()
 {
-  // Create the pipeline for the 3 rings
-  for (int ix1=0; ix1<3; ix1++) {
-    m_position[ix1] = vtkTransform::New();
-    m_torus[ix1] = vtkParametricTorus::New();
-    m_torusSrc[ix1] = vtkParametricFunctionSource::New();
-    m_diskMapper[ix1] = vtkPolyDataMapper::New();
-    m_diskActor[ix1] = vtkActor::New();
-
-    m_torusSrc[ix1]->SetParametricFunction(m_torus[ix1]);
-    m_diskMapper[ix1]->SetInputConnection(m_torusSrc[ix1]->GetOutputPort());
-    m_diskActor[ix1]->SetMapper(m_diskMapper[ix1]);
-  }
-
   m_boxOutline.setColor(1.0, 0.0, 0.0);
   m_crosshair.setColor(1.0, 0.0, 0.0);
   m_crosshair.setVisible(false);
@@ -49,13 +36,7 @@ Plane2DControlWidget::Plane2DControlWidget()
 }
 
 Plane2DControlWidget::~Plane2DControlWidget() {
-  for (int ix1=0; ix1<3; ix1++) {
-    m_position[ix1]->Delete();
-    m_torus[ix1]->Delete();
-    m_torusSrc[ix1]->Delete();
-    m_diskMapper[ix1]->Delete();
-    m_diskActor[ix1]->Delete();
-  }
+
 }
 
 void Plane2DControlWidget::sizeChanged() {
@@ -75,7 +56,7 @@ void Plane2DControlWidget::visibilityChanged() {
     ren->AddViewProp(m_crosshair.getActor());
 
     for (int ix1=0; ix1<3; ix1++) {
-      ren->AddViewProp(m_diskActor[ix1]);
+      ren->AddViewProp(m_compassWidget.getActor(ix1));
     }
   } else {
     // Widget is not showing
@@ -85,7 +66,7 @@ void Plane2DControlWidget::visibilityChanged() {
     ren->RemoveViewProp(m_crosshair.getActor());
 
     for (int ix1=0; ix1<3; ix1++) {
-      ren->RemoveViewProp(m_diskActor[ix1]);
+      ren->RemoveViewProp(m_compassWidget.getActor(ix1));
     }
   }
 
@@ -102,9 +83,9 @@ void Plane2DControlWidget::userTransformChanged() {
 
 void Plane2DControlWidget::widgetOpacityChanged() {
   m_centralSphere.getPropertyHandle()->SetOpacity(m_widgetOpacity);
-  m_diskActor[0]->GetProperty()->SetOpacity(m_widgetOpacity);
-  m_diskActor[1]->GetProperty()->SetOpacity(m_widgetOpacity);
-  m_diskActor[2]->GetProperty()->SetOpacity(m_widgetOpacity);
+  m_compassWidget.getActor(0)->GetProperty()->SetOpacity(m_widgetOpacity);
+  m_compassWidget.getActor(1)->GetProperty()->SetOpacity(m_widgetOpacity);
+  m_compassWidget.getActor(2)->GetProperty()->SetOpacity(m_widgetOpacity);
 }
 
 ///////////////////
@@ -133,34 +114,11 @@ void Plane2DControlWidget::mousePressEvent(QMouseEvent* event) {
       }
 
       for (int ix1=0; ix1<3; ix1++) {
-
         // Check each rotating disk to see if one has been picked.
-        if (m_currProp == m_diskActor[ix1]) {
-          double pos2[3];
-          double posDirec[3];
-
+        if (m_currProp == m_compassWidget.getActor(ix1)) {
           setWidgetOpacity(0.1);
-          m_diskActor[ix1]->GetProperty()->SetOpacity(1.0);
-
-          m_position[ix1]->Inverse();
-          m_position[ix1]->TransformPoint(m_clickPosition, pos2);
-          m_position[ix1]->Inverse();
-
-          if (pos2[0] > 0 && pos2[1] > 0) {
-            posDirec[0] = pos2[0]+50.0;
-            posDirec[1] = pos2[1]-50.0;
-          } else if (pos2[0] > 0 && pos2[1] <= 0) {
-            posDirec[0] = pos2[0]-50.0;
-            posDirec[1] = pos2[1]-50.0;
-          } else if (pos2[0] <= 0 && pos2[1] <= 0) {
-            posDirec[0] = pos2[0]-50.0;
-            posDirec[1] = pos2[1]+50.0;
-          } else {
-            posDirec[0] = pos2[0]+50.0;
-            posDirec[1] = pos2[1]+50.0;
-          }
-          posDirec[2] = pos2[2]+0.0f;
-          m_position[ix1]->TransformPoint(posDirec, m_positiveDirection);
+          m_compassWidget.getPropertyHandle(ix1)->SetOpacity(1.0);
+          m_compassWidget.getPositiveRotationDirection(ix1, m_clickPosition, m_positiveDirection);
         }
       }
     }
@@ -293,7 +251,7 @@ void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event) {
       rotate = 1.0f;
     }
 
-    if (m_currProp == m_diskActor[0]) {
+    if (m_currProp == m_compassWidget.getActor(0)) {
       double rotateAxis[3];
       for (int ix1=0; ix1<3 ;ix1++) {
         rotateAxis[ix1] = m_convertedLocations[7][ix1] - m_convertedLocations[4][ix1];
@@ -305,7 +263,7 @@ void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event) {
       movement->PreMultiply();
 
       rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
-    } else if (m_currProp == m_diskActor[1]) {
+    } else if (m_currProp == m_compassWidget.getActor(1)) {
       double rotateAxis[3];
       for (int ix1=0; ix1<3 ;ix1++) {
         rotateAxis[ix1] = m_convertedLocations[3][ix1] - m_convertedLocations[4][ix1];
@@ -317,7 +275,7 @@ void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event) {
       movement->PreMultiply();
 
       rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
-    } else if (m_currProp == m_diskActor[2]) {
+    } else if (m_currProp == m_compassWidget.getActor(2)) {
       double planeNormal[3];
 
       for (int ix1=0; ix1<3; ix1++) {
@@ -446,23 +404,21 @@ void Plane2DControlWidget::updateWidgetPosition() {
   for (int ix1=0; ix1<3; ix1++) {
 
     // Update Size too.
-    m_torus[ix1]->SetRingRadius(std::max(m_xsize, m_ysize)*0.375);
-    m_torus[ix1]->SetCrossSectionRadius(std::max(m_xsize, m_ysize)*0.015);
+    m_compassWidget.setRadius(ix1, std::max(m_xsize, m_ysize)*0.375);
+    m_compassWidget.setCrossSectionRadius(ix1, std::max(m_xsize, m_ysize)*0.015);
 
-    m_position[ix1]->Identity();
-    m_position[ix1]->Concatenate(m_userTransform);
-    m_position[ix1]->Translate(m_convertedLocations[4][0] - pos[0], m_convertedLocations[4][1] - pos[1], m_convertedLocations[4][2] - pos[2]);
-    m_position[ix1]->Concatenate(m_transform);
+    m_compassWidget.getPositionTransform(ix1)->Identity();
+    m_compassWidget.getPositionTransform(ix1)->Concatenate(m_userTransform);
+    m_compassWidget.getPositionTransform(ix1)->Translate(m_convertedLocations[4][0] - pos[0], m_convertedLocations[4][1] - pos[1], m_convertedLocations[4][2] - pos[2]);
+    m_compassWidget.getPositionTransform(ix1)->Concatenate(m_transform);
 
   }
 
-  m_position[0]->RotateX(90.0f);
-  m_position[1]->RotateY(90.0f);
-  m_position[2]->RotateZ(90.0f);
+  m_compassWidget.getPositionTransform(0)->RotateX(90.0f);
+  m_compassWidget.getPositionTransform(1)->RotateY(90.0f);
+  m_compassWidget.getPositionTransform(2)->RotateZ(90.0f);
 
-  for (int ix1=0; ix1<3; ix1++) {
-    m_diskActor[ix1]->SetUserTransform(m_position[ix1]);
-  }
+  m_compassWidget.applyPositionTransform();
 }
 
 vtkActor* Plane2DControlWidget::getLocalPropAt(int x, int y, double clickPos[3]) {
@@ -472,9 +428,9 @@ vtkActor* Plane2DControlWidget::getLocalPropAt(int x, int y, double clickPos[3])
   vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
 
   col->AddItem(m_centralSphere.getActor());
-  col->AddItem(m_diskActor[0]);
-  col->AddItem(m_diskActor[1]);
-  col->AddItem(m_diskActor[2]);
+  col->AddItem(m_compassWidget.getActor(0));
+  col->AddItem(m_compassWidget.getActor(1));
+  col->AddItem(m_compassWidget.getActor(2));
 
   result = NULL;
   if (pick->PickProp(x, y, ren, col) ) {
