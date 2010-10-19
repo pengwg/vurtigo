@@ -21,7 +21,7 @@
 #define RT_3D_VOLUME_RENDER_OBJECT_H
 
 #include "rtRenderObject.h"
-#include "ObjectControlWidget.h"
+#include "Plane2DControlWidget.h"
 #include "rtBox2DOutline.h"
 #include "rtTexture2DPlane.h"
 
@@ -106,7 +106,7 @@ public slots:
 
   int m_currentPlane;
 
-  ObjectControlWidget m_planeControl[3];
+  Plane2DControlWidget m_planeControl[3];
   vtkImageReslice* m_imgReslice[3];
 
   rtBox2DOutline m_boxOutline[3];

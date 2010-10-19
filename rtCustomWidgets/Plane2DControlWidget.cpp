@@ -18,49 +18,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 
-#include "ObjectControlWidget.h"
+#include <vtkRenderer.h>
+#include <vtkMath.h>
 
+#include "Plane2DControlWidget.h"
+#include "rtApplication.h"
 #include "rtMainWindow.h"
 #include "rtCameraControl.h"
-#include "rtApplication.h"
 
-#include <vtkRenderer.h>
-#include <vtkProperty.h>
-#include <vtkPropCollection.h>
-#include <vtkPlane.h>
-#include <vtkMath.h>
-#include <vtkWorldPointPicker.h>
-
-#include <algorithm>
-
-ObjectControlWidget::ObjectControlWidget() {
-  m_showing = false;
-  m_xsize = 1.0;
-  m_ysize = 1.0;
-  m_transform = vtkTransform::New();
-  m_transform->Identity();
-  m_userTransform = vtkTransform::New();
-  m_userTransform->Identity();
-
-  // Setup how the points are located around the widget
-  //////////////////////
-  // 0 1 2
-  // 3 4 5
-  // 6 7 8
-  ////////////////////
-  for (int ix1=0; ix1<3; ix1++) {
-    for (int ix2=0; ix2<3; ix2++) {
-      m_pointLocations[ix1+3*ix2][0] = ix1;
-      m_pointLocations[ix1+3*ix2][1] = ix2;
-      m_pointLocations[ix1+3*ix2][2] = 0.0f;  // The z is centered.
-    }
-  }
-
-  m_corners[0] = 0;
-  m_corners[1] = 2;
-  m_corners[2] = 8;
-  m_corners[3] = 6;
-
+Plane2DControlWidget::Plane2DControlWidget()
+{
   // Create the pipeline for the 3 rings
   for (int ix1=0; ix1<3; ix1++) {
     m_position[ix1] = vtkTransform::New();
@@ -69,49 +36,19 @@ ObjectControlWidget::ObjectControlWidget() {
     m_diskMapper[ix1] = vtkPolyDataMapper::New();
     m_diskActor[ix1] = vtkActor::New();
 
-    m_torus[ix1]->SetRingRadius(70.0);
-    m_torus[ix1]->SetCrossSectionRadius(2.0);
-
     m_torusSrc[ix1]->SetParametricFunction(m_torus[ix1]);
     m_diskMapper[ix1]->SetInputConnection(m_torusSrc[ix1]->GetOutputPort());
     m_diskActor[ix1]->SetMapper(m_diskMapper[ix1]);
   }
 
-  // Create the pipeline for the point.
-  m_touchPoint = vtkSphereSource::New();
-  m_pointMapper = vtkPolyDataMapper::New();
-  m_pointActor = vtkActor::New();
-
-  m_touchPoint->SetCenter(m_pointLocations[4]);
-  m_touchPoint->SetRadius(std::max(m_xsize, m_ysize)*0.1);
-
-  m_pointMapper->SetInputConnection(m_touchPoint->GetOutputPort());
-  m_pointActor->SetMapper(m_pointMapper);
-
-  m_boxOutline.setOutlineColor(1.0f, 0.0f, 0.0f);
-  m_boxOutline.setCorners(m_pointLocations[m_corners[0]], m_pointLocations[m_corners[1]], m_pointLocations[m_corners[2]], m_pointLocations[m_corners[3]]);
-
-  m_crosshair.setColor(1.0f, 0.0f, 0.0f);
-  m_crosshair.setCorners(m_pointLocations[m_corners[0]], m_pointLocations[m_corners[1]], m_pointLocations[m_corners[2]], m_pointLocations[m_corners[3]]);
+  m_boxOutline.setColor(1.0, 0.0, 0.0);
+  m_crosshair.setColor(1.0, 0.0, 0.0);
   m_crosshair.setVisible(false);
 
-  m_currProp = NULL;
-
-  // Opacity starts off as 100% opaque.
-  setWidgetOpacity(1.0);
-
-  // No object of interest just yet.
-  m_objOfInterest = NULL;
-
-  connect( rtApplication::instance().getMainWinHandle(), SIGNAL(cameraModeSignal(bool)), this, SLOT(cameraMode(bool)) );
-  connect( rtApplication::instance().getMainWinHandle(), SIGNAL(interactionModeSignal(bool)), this, SLOT(interactionMode(bool)) );
-  connect( rtApplication::instance().getMainWinHandle(), SIGNAL(placeModeSignal(bool)), this, SLOT(placeMode(bool)) );
+  updateWidgetPosition();
 }
 
-ObjectControlWidget::~ObjectControlWidget() {
-  m_transform->Delete();
-  m_userTransform->Delete();
-
+Plane2DControlWidget::~Plane2DControlWidget() {
   for (int ix1=0; ix1<3; ix1++) {
     m_position[ix1]->Delete();
     m_torus[ix1]->Delete();
@@ -119,119 +56,61 @@ ObjectControlWidget::~ObjectControlWidget() {
     m_diskMapper[ix1]->Delete();
     m_diskActor[ix1]->Delete();
   }
-
-
-  m_touchPoint->Delete();
-  m_pointMapper->Delete();
-  m_pointActor->Delete();
-
 }
 
-void ObjectControlWidget::setTransform(vtkTransform* input) {
-  if (!input || m_currProp) return;
+void Plane2DControlWidget::sizeChanged() {
+  updateWidgetPosition();
+}
 
-  m_transform->DeepCopy(input);
-  if(m_showing) {
+void Plane2DControlWidget::visibilityChanged() {
+  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
+
+  if (m_showing) {
+    // Widget is showing
+
     updateWidgetPosition();
-  }
-}
 
-void ObjectControlWidget::getTransform(vtkTransform* output) {
-  output->Identity();
-  output->Concatenate(m_transform);
-}
+    ren->AddViewProp(m_centralSphere.getActor());
+    ren->AddViewProp(m_boxOutline.getActor());
+    ren->AddViewProp(m_crosshair.getActor());
 
-void ObjectControlWidget::setSize(double xsize, double ysize) {
-  m_xsize = xsize/2.0f;
-  m_ysize = ysize/2.0f;
+    for (int ix1=0; ix1<3; ix1++) {
+      ren->AddViewProp(m_diskActor[ix1]);
+    }
+  } else {
+    // Widget is not showing
 
-  // When the size changes so do the point locations.
-  for (int ix1=0; ix1<3; ix1++) {
-    for (int ix2=0; ix2<3; ix2++) {
-      m_pointLocations[ix1+3*ix2][0] = (ix1)*m_xsize;
-      m_pointLocations[ix1+3*ix2][1] = (ix2)*m_ysize;
-      m_pointLocations[ix1+3*ix2][2] = 0.0f;  // The z is centered.
+    ren->RemoveViewProp(m_centralSphere.getActor());
+    ren->RemoveViewProp(m_boxOutline.getActor());
+    ren->RemoveViewProp(m_crosshair.getActor());
+
+    for (int ix1=0; ix1<3; ix1++) {
+      ren->RemoveViewProp(m_diskActor[ix1]);
     }
   }
-}
 
-
-double ObjectControlWidget::getXSize() {
-  return m_xsize*2.0f;
-}
-
-double ObjectControlWidget::getYSize() {
-  return m_ysize*2.0f;
-}
-
-void ObjectControlWidget::show() {
-  if(m_showing) return;
-  m_showing = true;
-
-  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
-  updateWidgetPosition();
-
-  ren->AddViewProp(m_pointActor);
-  ren->AddViewProp(m_boxOutline.getActor());
-  ren->AddViewProp(m_crosshair.getActor());
-
-  for (int ix1=0; ix1<3; ix1++) {
-    ren->AddViewProp(m_diskActor[ix1]);
-  }
   // Make the window 'dirty' so that it is rerendered
   rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
-void ObjectControlWidget::hide() {
-  if(!m_showing) return;
-  m_showing = false;
 
-  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
-
-  ren->RemoveViewProp(m_pointActor);
-  ren->RemoveViewProp(m_boxOutline.getActor());
-  ren->RemoveViewProp(m_crosshair.getActor());
-
-  for (int ix1=0; ix1<3; ix1++) {
-    ren->RemoveViewProp(m_diskActor[ix1]);
-  }
-  // Make the window 'dirty' so that it is rerendered
-  rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+void Plane2DControlWidget::userTransformChanged() {
+  m_boxOutline.setUserTransform(m_userTransform);
+  m_crosshair.setUserTransform(m_userTransform);
+  m_centralSphere.getActor()->SetUserTransform(m_userTransform);
 }
 
-bool ObjectControlWidget::isShowing() {
-  return m_showing;
+void Plane2DControlWidget::widgetOpacityChanged() {
+  m_centralSphere.getPropertyHandle()->SetOpacity(m_widgetOpacity);
+  m_diskActor[0]->GetProperty()->SetOpacity(m_widgetOpacity);
+  m_diskActor[1]->GetProperty()->SetOpacity(m_widgetOpacity);
+  m_diskActor[2]->GetProperty()->SetOpacity(m_widgetOpacity);
 }
 
-void ObjectControlWidget::setUserTransform(vtkTransform* t) {
-  if (!t) return;
-
-  m_boxOutline.setUserTransform(t);
-  m_crosshair.setUserTransform(t);
-  m_pointActor->SetUserTransform(t);
-  m_userTransform->Identity();
-  m_userTransform->Concatenate(t);
-}
-
-void ObjectControlWidget::setWidgetOpacity(double op) {
-  if (op > 1.0) op = 1.0;
-  else if (op < 0.0) op = 0.0;
-
-  m_widgetOpacity = op;
-  m_pointActor->GetProperty()->SetOpacity(op);
-  m_diskActor[0]->GetProperty()->SetOpacity(op);
-  m_diskActor[1]->GetProperty()->SetOpacity(op);
-  m_diskActor[2]->GetProperty()->SetOpacity(op);
-}
-
-double ObjectControlWidget::getWidgetOpacity() {
-  return m_widgetOpacity;
-}
-
-/////////////////
+///////////////////
 // Public Slots
-/////////////////
-void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
+///////////////////
+void Plane2DControlWidget::mousePressEvent(QMouseEvent* event) {
   if(!m_showing) return;
 
   if (event->button() == Qt::LeftButton && !m_currProp) {
@@ -247,8 +126,8 @@ void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
 
     if ( m_currProp ) {
       // If the point is selected...
-      if (m_currProp == m_pointActor) {
-        m_pointActor->VisibilityOff();
+      if (m_currProp == m_centralSphere.getActor()) {
+        m_centralSphere.getActor()->VisibilityOff();
         m_crosshair.setVisible(true);
         setWidgetOpacity(0.1);
       }
@@ -258,6 +137,7 @@ void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
         // Check each rotating disk to see if one has been picked.
         if (m_currProp == m_diskActor[ix1]) {
           double pos2[3];
+          double posDirec[3];
 
           setWidgetOpacity(0.1);
           m_diskActor[ix1]->GetProperty()->SetOpacity(1.0);
@@ -267,20 +147,20 @@ void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
           m_position[ix1]->Inverse();
 
           if (pos2[0] > 0 && pos2[1] > 0) {
-            m_positiveDirection[0] = pos2[0]+50.0;
-            m_positiveDirection[1] = pos2[1]-50.0;
+            posDirec[0] = pos2[0]+50.0;
+            posDirec[1] = pos2[1]-50.0;
           } else if (pos2[0] > 0 && pos2[1] <= 0) {
-            m_positiveDirection[0] = pos2[0]-50.0;
-            m_positiveDirection[1] = pos2[1]-50.0;
+            posDirec[0] = pos2[0]-50.0;
+            posDirec[1] = pos2[1]-50.0;
           } else if (pos2[0] <= 0 && pos2[1] <= 0) {
-            m_positiveDirection[0] = pos2[0]-50.0;
-            m_positiveDirection[1] = pos2[1]+50.0;
+            posDirec[0] = pos2[0]-50.0;
+            posDirec[1] = pos2[1]+50.0;
           } else {
-            m_positiveDirection[0] = pos2[0]+50.0;
-            m_positiveDirection[1] = pos2[1]+50.0;
+            posDirec[0] = pos2[0]+50.0;
+            posDirec[1] = pos2[1]+50.0;
           }
-          m_positiveDirection[2] = pos2[2]+0.0f;
-          m_position[ix1]->TransformPoint(m_positiveDirection, m_positiveDirectionT);
+          posDirec[2] = pos2[2]+0.0f;
+          m_position[ix1]->TransformPoint(posDirec, m_positiveDirection);
         }
       }
     }
@@ -295,7 +175,7 @@ void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
   }
 }
 
-void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
+void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event) {
   if(!m_showing || !event) return;
 
   if(event->buttons() == Qt::NoButton && !m_currProp) {
@@ -337,14 +217,12 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
   rtApplication::instance().getMainWinHandle()->getCameraUp(cameraUp);
   rtApplication::instance().getMainWinHandle()->getCameraForward(cameraForward);
 
-  normalDirectionT[0] = m_positiveDirectionT[0]-m_clickPosition[0];
-  normalDirectionT[1] = m_positiveDirectionT[1]-m_clickPosition[1];
-  normalDirectionT[2] = m_positiveDirectionT[2]-m_clickPosition[2];
+  normalDirectionT[0] = m_positiveDirection[0]-m_clickPosition[0];
+  normalDirectionT[1] = m_positiveDirection[1]-m_clickPosition[1];
+  normalDirectionT[2] = m_positiveDirection[2]-m_clickPosition[2];
   vtkMath::Normalize(normalDirectionT);
 
-  for (int ix1=0; ix1<9; ix1++) {
-    m_transform->TransformPoint(m_pointLocations[ix1], m_convertedLocations[ix1]);
-  }
+  updateConvertedLocations();
 
   double desiredPoint[3];
 
@@ -374,7 +252,7 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
   vtkTransform *movement = vtkTransform::New();
   movement->Identity();
 
-  if (m_currProp == m_pointActor) {
+  if (m_currProp == m_centralSphere.getActor()) {
     double pos[3];
 
     m_transform->PostMultiply();
@@ -467,16 +345,18 @@ void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
   m_oldY = Y;
 }
 
-void ObjectControlWidget::mouseReleaseEvent(QMouseEvent* event) {
+void Plane2DControlWidget::mouseReleaseEvent(QMouseEvent* event) {
   if(!m_showing || !m_currProp) return;
+
+
   if (event->button() == Qt::LeftButton) {
     // Clear the color
     m_currProp->GetProperty()->SetColor(1.0f, 1.0f, 1.0f);
 
     // If the point is selected...
-    if (m_currProp == m_pointActor) {
-      m_pointActor->VisibilityOn();
-      m_crosshair.setVisible(false);    
+    if (m_currProp == m_centralSphere.getActor()) {
+      m_centralSphere.getActor()->VisibilityOn();
+      m_crosshair.setVisible(false);
     }
     setWidgetOpacity(1.0);
 
@@ -487,26 +367,27 @@ void ObjectControlWidget::mouseReleaseEvent(QMouseEvent* event) {
   }
 }
 
-void ObjectControlWidget::mouseDoubleClickEvent(QMouseEvent* event) {
+void Plane2DControlWidget::mouseDoubleClickEvent(QMouseEvent* event) {
   if(!m_showing) return;
 
 }
 
-void ObjectControlWidget::keyPressEvent(QKeyEvent* event) {
+void Plane2DControlWidget::keyPressEvent(QKeyEvent* event) {
   if(!m_showing) return;
 
 }
 
-void ObjectControlWidget::keyReleaseEvent(QKeyEvent* event) {
+void Plane2DControlWidget::keyReleaseEvent(QKeyEvent* event) {
   if(!m_showing) return;
 
 }
 
-void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
+void Plane2DControlWidget::wheelEvent(QWheelEvent* event) {
   if(!m_showing) return;
   int numSteps = event->delta() / 32;
   double increment = 1.0;
 
+  // Make a smaller increment if the user is holding down shift.
   if (event->modifiers() & Qt::ShiftModifier)  increment = 0.1;
 
   vtkTransform *truePos = vtkTransform::New();
@@ -525,12 +406,11 @@ void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   sumSq = sqrt(sumSq);
 
   double cameraDirec[3];
-  double dotP=0.0f;
   rtApplication::instance().getMainWinHandle()->getCameraForward(cameraDirec);
 
   m_userTransform->MultiplyPoint(cameraDirec, cameraDirec);
 
-  dotP = zDirec[0]*cameraDirec[0]+zDirec[1]*cameraDirec[1]+zDirec[2]*cameraDirec[2];
+  double dotP = vtkMath::Dot(zDirec, cameraDirec);
   if (dotP > 0) {
     dotP = 1.0f;
   } else if (dotP < 0) {
@@ -547,31 +427,16 @@ void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   updateWidgetPosition();
 }
 
-void ObjectControlWidget::cameraMode(bool toggle) {
-  if (toggle) hide();
-}
 
-void ObjectControlWidget::interactionMode(bool toggle) {
-  if(!toggle) hide();
-}
-
-void ObjectControlWidget::placeMode(bool toggle) {
-  if(toggle) hide();
-}
-
-
-//////////////
+///////////////////
 // Protected
-//////////////
-
-void ObjectControlWidget::updateWidgetPosition() {
-  for (int ix1=0; ix1<9; ix1++) {
-    m_transform->TransformPoint(m_pointLocations[ix1], m_convertedLocations[ix1]);
-  }
+//////////////////
+void Plane2DControlWidget::updateWidgetPosition() {
+  updateConvertedLocations();
 
   // Put it in the middle of the plane.
-  m_touchPoint->SetCenter(m_convertedLocations[4]);
-  m_touchPoint->SetRadius(std::max(m_xsize, m_ysize)*0.05);
+  m_centralSphere.setPosition(m_convertedLocations[4]);
+  m_centralSphere.setRadius(std::max(m_xsize, m_ysize)*0.025);
 
   m_boxOutline.setCorners(m_convertedLocations[m_corners[0]], m_convertedLocations[m_corners[1]], m_convertedLocations[m_corners[2]], m_convertedLocations[m_corners[3]]);
   m_crosshair.setCorners(m_convertedLocations[m_corners[0]], m_convertedLocations[m_corners[1]], m_convertedLocations[m_corners[2]], m_convertedLocations[m_corners[3]]);
@@ -581,8 +446,8 @@ void ObjectControlWidget::updateWidgetPosition() {
   for (int ix1=0; ix1<3; ix1++) {
 
     // Update Size too.
-    m_torus[ix1]->SetRingRadius(std::max(m_xsize, m_ysize)*0.75);
-    m_torus[ix1]->SetCrossSectionRadius(std::max(m_xsize, m_ysize)*0.03);
+    m_torus[ix1]->SetRingRadius(std::max(m_xsize, m_ysize)*0.375);
+    m_torus[ix1]->SetCrossSectionRadius(std::max(m_xsize, m_ysize)*0.015);
 
     m_position[ix1]->Identity();
     m_position[ix1]->Concatenate(m_userTransform);
@@ -600,13 +465,13 @@ void ObjectControlWidget::updateWidgetPosition() {
   }
 }
 
-vtkActor* ObjectControlWidget::getLocalPropAt(int x, int y, double clickPos[3]) {
+vtkActor* Plane2DControlWidget::getLocalPropAt(int x, int y, double clickPos[3]) {
   vtkActor* result;
   vtkPropCollection* col = vtkPropCollection::New();
   vtkPropPicker* pick = vtkPropPicker::New();
   vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
 
-  col->AddItem(m_pointActor);
+  col->AddItem(m_centralSphere.getActor());
   col->AddItem(m_diskActor[0]);
   col->AddItem(m_diskActor[1]);
   col->AddItem(m_diskActor[2]);
@@ -621,25 +486,4 @@ vtkActor* ObjectControlWidget::getLocalPropAt(int x, int y, double clickPos[3]) 
   if(pick) pick->Delete();
 
   return result;
-}
-
-bool ObjectControlWidget::pickedObjectOfInterest(int x, int y) {
-  if (!m_objOfInterest) return false;
-
-  vtkActor* result;
-  vtkPropCollection* col = vtkPropCollection::New();
-  vtkPropPicker* pick = vtkPropPicker::New();
-  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
-
-  col->AddItem(m_objOfInterest);
-
-  result = NULL;
-  if (pick->PickProp(x, y, ren, col) ) {
-      result = static_cast<vtkActor*>(pick->GetViewProp());
-  }
-
-  if(col) col->Delete();
-  if(pick) pick->Delete();
-
-  return result == m_objOfInterest;
 }

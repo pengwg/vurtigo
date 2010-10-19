@@ -610,7 +610,6 @@ void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
 
     m_boxOutline[m_currentPlane].setTransform(t);
     m_texturePlane[m_currentPlane].setTransform(t);
-    m_texturePlane[m_currentPlane].update();
     adjustReslice(m_currentPlane);
 
     t->Delete();
@@ -658,7 +657,6 @@ void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event) {
 
     m_boxOutline[m_currentPlane].setTransform(t);
     m_texturePlane[m_currentPlane].setTransform(t);
-    m_texturePlane[m_currentPlane].update();
     adjustReslice(m_currentPlane);
 
     t->Delete();

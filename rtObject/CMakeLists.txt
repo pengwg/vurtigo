@@ -5,7 +5,6 @@ set ( RTOBJECT_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rtLabelDataObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtLabelRenderObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rt3dPointBufferDataObject.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/rtSingle3DPointPipeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rt3dPointBufferRenderObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtNoneDataObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtNoneRenderObject.cpp

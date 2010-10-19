@@ -39,6 +39,10 @@ void rtSingle3DPointPipeline::setPosition(double x, double y, double z) {
   m_sphere->SetCenter(x,y,z);
 }
 
+void rtSingle3DPointPipeline::setPosition(double coords[3]) {
+  m_sphere->SetCenter(coords);
+}
+
 void rtSingle3DPointPipeline::setRadius(double r) {
   if (r<=0.0) return;
   m_sphere->SetRadius(r);

@@ -21,7 +21,7 @@
 #define RT_2D_SLICE_RENDER_OBJECT_H
 
 #include "rtRenderObject.h"
-#include "ObjectControlWidget.h"
+#include "Plane2DControlWidget.h"
 #include "rtBox2DOutline.h"
 #include "rtTexture2DPlane.h"
 
@@ -74,7 +74,7 @@ public slots:
 
   rtTexture2DPlane m_texturePlane;
   rtBox2DOutline m_boxOutline;
-  ObjectControlWidget m_control;
+  Plane2DControlWidget m_control;
 
   vtkImageCast* m_imgCast;
   vtkImageMapper* m_imgMap;

@@ -260,7 +260,6 @@ void rt2DSliceRenderObject::update() {
   m_texturePlane.setLevel(dObj->getLevel());
   m_texturePlane.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2]);
   m_texturePlane.setTransform(dObj->getTransform());
-  m_texturePlane.update();
 
   m_boxOutline.setSize(bounds[1]-bounds[0], bounds[3]-bounds[2]);
   m_boxOutline.setTransform(dObj->getTransform());

@@ -36,7 +36,9 @@
 
 #include "rtBox2DOutline.h"
 #include "rtCrosshair2D.h"
+#include "rtSingle3DPointPipeline.h"
 
+//! Base class for widgets that control the movement of objects in 3D.
 class ObjectControlWidget : public QObject
 {
   Q_OBJECT
@@ -47,18 +49,27 @@ public:
   void setTransform(vtkTransform* input);
   void getTransform(vtkTransform* output);
 
-  void setSize(double xsize, double ysize);
-  double getXSize();
-  double getYSize();
+  void setSize(double xsize, double ysize, double zsize=0);
+  inline double getXSize() { return m_xsize; }
+  inline double getYSize() { return m_ysize; }
+  inline double getZSize() { return m_zsize; }
+
+  //! Function is called to force recalculation with new sizes.
+  virtual void sizeChanged();
 
   void show();
   void hide();
   bool isShowing();
 
+  //! Function called when the visibility flag has changed.
+  virtual void visibilityChanged();
+
   void setUserTransform(vtkTransform* t);
+  virtual void userTransformChanged();
 
   void setWidgetOpacity(double op);
   double getWidgetOpacity();
+  virtual void widgetOpacityChanged();
 
   inline vtkActor* getObjectOfInterest() { return m_objOfInterest; }
   inline void setObjectOfInterest(vtkActor* obj) { m_objOfInterest = obj; }
@@ -76,27 +87,26 @@ public slots:
   void interactionMode(bool);
   void placeMode(bool);
 protected:
+  //! Determine if this widget is being shown
   bool m_showing;
+
   vtkTransform* m_transform;
   vtkTransform* m_userTransform;
-  double m_xsize, m_ysize;
+  double m_xsize, m_ysize, m_zsize;
 
-  double m_pointLocations[9][3];
-  double m_convertedLocations[9][3];
+  //! The untranslated point locations as a grid.
+  double m_pointLocations[11][3];
+
+  //! The translated points into the new space.
+  double m_convertedLocations[11][3];
+
+  //! The central corners of the grid.
   int m_corners[4];
 
   vtkActor *m_currProp;
-  double m_clickPosition[3];
-  double m_positiveDirection[3];
-  double m_positiveDirectionT[3];
 
   //! The opacity of the widget.
   double m_widgetOpacity;
-
-  //! The previous x location of the mouse
-  int m_oldX;
-  //! The previous y location of the mouse
-  int m_oldY;
 
   //! The object that is going to be moved
   /*!
@@ -104,32 +114,16 @@ protected:
     */
   vtkActor* m_objOfInterest;
 
-  // Central sphere.
-  vtkSphereSource* m_touchPoint;
-  vtkPolyDataMapper* m_pointMapper;
-  vtkActor* m_pointActor;
+  //! Function called to do the update of the widget.
+  virtual void updateWidgetPosition();
 
-  // Crosshair
-  rtCrosshair2D m_crosshair;
 
-  // Box outline
-  rtBox2DOutline m_boxOutline;
-
-  // The three rings.
-  vtkTransform *m_position[3];
-  vtkParametricTorus *m_torus[3];
-  vtkParametricFunctionSource *m_torusSrc[3];
-  vtkPolyDataMapper *m_diskMapper[3];
-  vtkActor *m_diskActor[3];
-
-  void updateWidgetPosition();
-
-  //! Get the actor at a given x,y location
+  //! Update the converted locations array.
   /*!
-    If no actor is found the function returns NULL.
-    The click position parameter is loaded with the coordinates in 3-space of the pick location.
+    The update uses the point locations and the transform.
     */
-  vtkActor* getLocalPropAt(int x, int y, double clickPos[3]);
+  void updateConvertedLocations();
+
 
   //! Check if the object of interest is under the position x, y
   bool pickedObjectOfInterest(int x, int y);

@@ -36,6 +36,8 @@ public:
 
   void setPosition(double x, double y, double z);
 
+  void setPosition(double coords[3]);
+
   //! Set the radius of the displayed point.
   void setRadius(double r);
 
