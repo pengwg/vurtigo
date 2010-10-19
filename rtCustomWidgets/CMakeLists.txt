@@ -7,6 +7,7 @@ set ( RTCUSTOMWIDGETS_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rtSingle3DPointPipeline.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ObjectControlWidget.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Plane2DControlWidget.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Points3DControlWidget.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtCompassWidgetPipeline.cpp
   CACHE INTERNAL "Custom widgets that implement functionality above the standard VTK"
 )

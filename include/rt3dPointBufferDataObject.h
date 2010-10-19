@@ -92,6 +92,12 @@ public:
   inline double getPointZoom() { return m_pointZoom; }
   inline void setPointZoom(double zoom) { m_optionsWidget.pointZoomSlider->setValue(zoom*10.0); }
 
+  //! Get the center of the point list.
+  void getPointListCenter(double center[3]);
+
+  //! Get the sizes for the extents
+  void getPointListExtents(double extents[6]);
+
   void update();
  signals:
   void pointListModifiedSignal();

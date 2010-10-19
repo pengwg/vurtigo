@@ -138,6 +138,50 @@ void rt3DPointBufferDataObject::applyTranslateToPoints(double x, double y, doubl
 }
 
 
+void rt3DPointBufferDataObject::getPointListCenter(double center[3]) {
+  double tempPt[3];
+  double total = 0.0;
+
+  for (int ix1=0; ix1<m_pointList.size(); ix1++) {
+    m_namedInfoData[m_pointList[ix1].getPointId()].getPoint(tempPt);
+    total = total + 1.0;
+    for (int ix2=0; ix2<3; ix2++) {
+      center[ix2] = center[ix2]+tempPt[ix2];
+    }
+  }
+
+  for (int ix2=0; ix2<3; ix2++) {
+    center[ix2] = center[ix2]/total;
+  }
+}
+
+void rt3DPointBufferDataObject::getPointListExtents(double extents[6]) {
+  if (m_pointList.size() <= 0) return;
+
+  double tempPt[3];
+
+  // Get the value for the first point.
+  m_namedInfoData[m_pointList[0].getPointId()].getPoint(tempPt);
+
+  extents[0] = tempPt[0]; // minx
+  extents[1] = tempPt[0]; // maxx
+  extents[2] = tempPt[1];
+  extents[3] = tempPt[1];
+  extents[4] = tempPt[2];
+  extents[5] = tempPt[2];
+
+  for (int ix1=1; ix1<m_pointList.size(); ix1++) {
+    m_namedInfoData[m_pointList[ix1].getPointId()].getPoint(tempPt);
+    if ( tempPt[0] < extents[0] ) extents[0] = tempPt[0];
+    if ( tempPt[0] > extents[1] ) extents[1] = tempPt[0];
+    if ( tempPt[1] < extents[2] ) extents[2] = tempPt[1];
+    if ( tempPt[1] > extents[3] ) extents[3] = tempPt[1];
+    if ( tempPt[2] < extents[4] ) extents[4] = tempPt[2];
+    if ( tempPt[2] > extents[5] ) extents[5] = tempPt[2];
+  }
+}
+
+
 /////////////
 // Public slots
 /////////////

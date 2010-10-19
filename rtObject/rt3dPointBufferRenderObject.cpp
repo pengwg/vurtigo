@@ -40,12 +40,19 @@ rt3DPointBufferRenderObject::rt3DPointBufferRenderObject() {
   setObjectType(rtConstants::OT_3DPointBuffer);
   setName("Simple 3D Point Renderer");
 
+  m_currTransform = vtkTransform::New();
+  m_currTransform->Identity();
+
   setupDataObject();
   setupPipeline();
 }
 
 
 rt3DPointBufferRenderObject::~rt3DPointBufferRenderObject() {
+  if (m_currTransform) {
+    m_currTransform->Delete();
+    m_currTransform = NULL;
+  }
 }
 
 
@@ -96,6 +103,20 @@ bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren) {
       ren->AddViewProp( m_pipeList.at(ix1)->getActor() );
     }
   }
+
+  // Connect signals and slots for interaction.
+  customQVTKWidget* renWid;
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
+  // Connect mouse actions
+  connect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
+  connect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
+  connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
+  connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*)));
+  connect(renWid, SIGNAL(interKeyPress(QKeyEvent*)), this, SLOT(keyPressEvent(QKeyEvent*)));
+  connect(renWid, SIGNAL(interKeyRelease(QKeyEvent*)), this, SLOT(keyReleaseEvent(QKeyEvent*)));
+  connect(renWid, SIGNAL(interWheel(QWheelEvent*)), this, SLOT(wheelEvent(QWheelEvent*)));
+
+
   return true;
 }
 
@@ -105,6 +126,21 @@ bool rt3DPointBufferRenderObject::removeFromRenderer(vtkRenderer* ren) {
   for (int ix1=0; ix1<m_pipeList.count(); ix1++) {
     if (ren->HasViewProp( m_pipeList.at(ix1)->getActor() )) ren->RemoveViewProp( m_pipeList.at(ix1)->getActor() );
   }
+
+  customQVTKWidget* renWid;
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
+
+  // Disconnect mouse actions
+  disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
+  disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
+  disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
+  disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*)));
+  disconnect(renWid, SIGNAL(interKeyPress(QKeyEvent*)), this, SLOT(keyPressEvent(QKeyEvent*)));
+  disconnect(renWid, SIGNAL(interKeyRelease(QKeyEvent*)), this, SLOT(keyReleaseEvent(QKeyEvent*)));
+  disconnect(renWid, SIGNAL(interWheel(QWheelEvent*)), this, SLOT(wheelEvent(QWheelEvent*)));
+
+  if( m_controlWidget.isShowing() ) m_controlWidget.hide();
+
   return true;
 }
 
@@ -119,6 +155,114 @@ void rt3DPointBufferRenderObject::setRenderQuality(double quality) {
   }
 }
 
+////////////////
+// Public Slots
+////////////////
+
+void rt3DPointBufferRenderObject::mousePressEvent(QMouseEvent* event) {
+  if (!m_selectedProp) return;
+
+  if ( m_controlWidget.isShowing() ) {
+    m_controlWidget.mousePressEvent(event);
+    if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+  }
+}
+
+void rt3DPointBufferRenderObject::mouseMoveEvent(QMouseEvent* event) {
+  if (!m_selectedProp) return;
+  if (m_controlWidget.isShowing()) {
+    m_controlWidget.mouseMoveEvent(event);
+    if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+  }
+}
+
+void rt3DPointBufferRenderObject::mouseReleaseEvent(QMouseEvent* event) {
+  if (!m_selectedProp) return;
+
+  rt3DPointBufferDataObject* dObj = static_cast<rt3DPointBufferDataObject*>(m_dataObj);
+
+  if(!dObj) return;
+
+  if (m_controlWidget.isShowing()) {
+    vtkTransform *t = vtkTransform::New();
+    m_controlWidget.mouseReleaseEvent(event);
+    m_controlWidget.getTransform(t);
+
+    dObj->applyTransformToPoints( static_cast<vtkTransform*>(m_currTransform->GetInverse()) );
+    dObj->applyTransformToPoints(t);
+    m_currTransform->SetMatrix(t->GetMatrix());
+
+    t->Delete();
+
+    // Modify the data object so that the update function will be called.
+    m_dataObj->Modified();
+  }
+}
+
+void rt3DPointBufferRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
+  vtkProp* temp;
+  double midPoint[3];
+  double pointExt[6];
+
+  temp = rtApplication::instance().getMainWinHandle()->getSelectedProp();
+  rt3DPointBufferDataObject* dObj = static_cast<rt3DPointBufferDataObject*>(m_dataObj);
+  m_selectedProp = NULL;
+
+  if (m_controlWidget.isShowing())
+    m_controlWidget.hide();
+
+  if (temp && dObj) {
+    for (int ix1=0; ix1<m_pipeList.size(); ix1++) {
+      if ( temp == m_pipeList[ix1]->getActor() ) {
+        m_selectedProp = temp;
+
+        dObj->getPointListCenter(midPoint);
+        dObj->getPointListExtents(pointExt);
+
+        m_currTransform->Identity();
+        m_currTransform->Translate(midPoint[0]-(pointExt[1]-pointExt[0])/2.0, midPoint[1]-(pointExt[3]-pointExt[2])/2.0, midPoint[2]);
+        m_controlWidget.setTransform(m_currTransform);
+        m_controlWidget.setSize( pointExt[1]-pointExt[0], pointExt[3]-pointExt[2], pointExt[5]-pointExt[4] );
+
+        m_controlWidget.show();
+        break;
+      }
+    }
+  }
+
+  if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+}
+
+void rt3DPointBufferRenderObject::keyPressEvent(QKeyEvent* event) {
+  if (!m_selectedProp) return;
+}
+
+void rt3DPointBufferRenderObject::keyReleaseEvent(QKeyEvent* event) {
+  if (!m_selectedProp) return;
+}
+
+void rt3DPointBufferRenderObject::wheelEvent(QWheelEvent* event) {
+  if (!m_selectedProp) return;
+
+  if (m_controlWidget.isShowing()) {
+    vtkTransform *t = vtkTransform::New();
+    rt3DPointBufferDataObject* dObj = static_cast<rt3DPointBufferDataObject*>(m_dataObj);
+    if (dObj) {
+      m_controlWidget.wheelEvent(event);
+      m_controlWidget.getTransform(t);
+
+      dObj->applyTransformToPoints( static_cast<vtkTransform*>(m_currTransform->GetInverse()) );
+      dObj->applyTransformToPoints(t);
+      m_currTransform->SetMatrix(t->GetMatrix());
+    }
+    t->Delete();
+    if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+  }
+}
+
+//////////////////
+// Protected
+////////////////
 
 void rt3DPointBufferRenderObject::setupDataObject() {
   m_dataObj = new rt3DPointBufferDataObject();

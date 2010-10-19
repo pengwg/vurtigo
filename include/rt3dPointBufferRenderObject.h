@@ -23,11 +23,17 @@
 #include <QList>
 #include <QHash>
 
+// VTK
+#include <vtkTransform.h>
+
+// Local
 #include "rtRenderObject.h"
 #include "rtSingle3DPointPipeline.h"
+#include "Points3DControlWidget.h"
 
 //! A group of points in 3D that are rendered as a group of spheres.
 class rt3DPointBufferRenderObject : public rtRenderObject {
+  Q_OBJECT
 
  public:
   rt3DPointBufferRenderObject();
@@ -48,6 +54,15 @@ class rt3DPointBufferRenderObject : public rtRenderObject {
     */
   virtual void setRenderQuality(double quality);
 
+public slots:
+  virtual void mousePressEvent(QMouseEvent* event);
+  virtual void mouseMoveEvent(QMouseEvent* event);
+  virtual void mouseReleaseEvent(QMouseEvent* event);
+  virtual void mouseDoubleClickEvent(QMouseEvent* event);
+  virtual void keyPressEvent(QKeyEvent* event);
+  virtual void keyReleaseEvent(QKeyEvent* event);
+  virtual void wheelEvent(QWheelEvent* event);
+
  protected:
   //! Create the correct data object.
   void setupDataObject();
@@ -65,6 +80,10 @@ class rt3DPointBufferRenderObject : public rtRenderObject {
     If the list is too long elements from the end will be removed. If it is too short elements will be added to the end.
     */
   void resizePipeList(int size);
+
+  Points3DControlWidget m_controlWidget;
+
+  vtkTransform* m_currTransform;
 
  private:
   //! List of point pipelines.

@@ -46,6 +46,7 @@ set (RTOBJECT_MOC_FILES
   ${CMAKE_HOME_DIRECTORY}/include/rtRenderObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtLabelDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rt3dPointBufferDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rt3dPointBufferRenderObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtNoneDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtCathDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rt3dVolumeDataObject.h
