@@ -66,9 +66,6 @@ protected:
   // Crosshair
   rtCrosshair2D m_crosshair;
 
-  // Box outline
-  rtBox2DOutline m_boxOutline;
-
   // The three rings.
   rtCompassWidgetPipeline m_compassWidget;
 

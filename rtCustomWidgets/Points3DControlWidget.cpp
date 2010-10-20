@@ -28,7 +28,6 @@
 
 Points3DControlWidget::Points3DControlWidget()
 {
-  m_boxOutline.setColor(1.0, 0.0, 0.0);
   m_crosshair.setColor(1.0, 0.0, 0.0);
   m_crosshair.setVisible(false);
 
@@ -52,7 +51,6 @@ void Points3DControlWidget::visibilityChanged() {
     updateWidgetPosition();
 
     ren->AddViewProp(m_centralSphere.getActor());
-    ren->AddViewProp(m_boxOutline.getActor());
     ren->AddViewProp(m_crosshair.getActor());
 
     for (int ix1=0; ix1<3; ix1++) {
@@ -62,7 +60,6 @@ void Points3DControlWidget::visibilityChanged() {
     // Widget is not showing
 
     ren->RemoveViewProp(m_centralSphere.getActor());
-    ren->RemoveViewProp(m_boxOutline.getActor());
     ren->RemoveViewProp(m_crosshair.getActor());
 
     for (int ix1=0; ix1<3; ix1++) {
@@ -76,7 +73,6 @@ void Points3DControlWidget::visibilityChanged() {
 
 
 void Points3DControlWidget::userTransformChanged() {
-  m_boxOutline.setUserTransform(m_userTransform);
   m_crosshair.setUserTransform(m_userTransform);
   m_centralSphere.getActor()->SetUserTransform(m_userTransform);
 }
@@ -396,7 +392,6 @@ void Points3DControlWidget::updateWidgetPosition() {
   m_centralSphere.setPosition(m_convertedLocations[4]);
   m_centralSphere.setRadius(std::max(m_xsize, m_ysize)*0.025);
 
-  m_boxOutline.setCorners(m_convertedLocations[m_corners[0]], m_convertedLocations[m_corners[1]], m_convertedLocations[m_corners[2]], m_convertedLocations[m_corners[3]]);
   m_crosshair.setCorners(m_convertedLocations[m_corners[0]], m_convertedLocations[m_corners[1]], m_convertedLocations[m_corners[2]], m_convertedLocations[m_corners[3]]);
 
   double pos[3];

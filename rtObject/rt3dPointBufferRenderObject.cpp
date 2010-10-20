@@ -170,9 +170,22 @@ void rt3DPointBufferRenderObject::mousePressEvent(QMouseEvent* event) {
 
 void rt3DPointBufferRenderObject::mouseMoveEvent(QMouseEvent* event) {
   if (!m_selectedProp) return;
+
+  rt3DPointBufferDataObject* dObj = static_cast<rt3DPointBufferDataObject*>(m_dataObj);
+
+  if(!dObj) return;
+
   if (m_controlWidget.isShowing()) {
+    vtkTransform *t = vtkTransform::New();
     m_controlWidget.mouseMoveEvent(event);
-    if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+    m_controlWidget.getTransform(t);
+
+    dObj->applyTransformToPoints( static_cast<vtkTransform*>(m_currTransform->GetInverse()) );
+    dObj->applyTransformToPoints(t);
+    m_currTransform->SetMatrix(t->GetMatrix());
+
+    t->Delete();
+    m_dataObj->Modified();
   }
 }
 
@@ -222,7 +235,7 @@ void rt3DPointBufferRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
         m_currTransform->Identity();
         m_currTransform->Translate(midPoint[0]-(pointExt[1]-pointExt[0])/2.0, midPoint[1]-(pointExt[3]-pointExt[2])/2.0, midPoint[2]);
         m_controlWidget.setTransform(m_currTransform);
-        m_controlWidget.setSize( pointExt[1]-pointExt[0], pointExt[3]-pointExt[2], pointExt[5]-pointExt[4] );
+        m_controlWidget.setSize( (pointExt[1]-pointExt[0])*2.0, (pointExt[3]-pointExt[2])*2.0, (pointExt[5]-pointExt[4])*2.0 );
 
         m_controlWidget.show();
         break;
