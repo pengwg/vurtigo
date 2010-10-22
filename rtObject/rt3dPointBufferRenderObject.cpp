@@ -171,44 +171,24 @@ void rt3DPointBufferRenderObject::mousePressEvent(QMouseEvent* event) {
 void rt3DPointBufferRenderObject::mouseMoveEvent(QMouseEvent* event) {
   if (!m_selectedProp) return;
 
-  rt3DPointBufferDataObject* dObj = static_cast<rt3DPointBufferDataObject*>(m_dataObj);
-
-  if(!dObj) return;
-
   if (m_controlWidget.isShowing()) {
     vtkTransform *t = vtkTransform::New();
     m_controlWidget.mouseMoveEvent(event);
     m_controlWidget.getTransform(t);
-
-    dObj->applyTransformToPoints( static_cast<vtkTransform*>(m_currTransform->GetInverse()) );
-    dObj->applyTransformToPoints(t);
-    m_currTransform->SetMatrix(t->GetMatrix());
-
+    setControlTransform(t);
     t->Delete();
-    m_dataObj->Modified();
   }
 }
 
 void rt3DPointBufferRenderObject::mouseReleaseEvent(QMouseEvent* event) {
   if (!m_selectedProp) return;
 
-  rt3DPointBufferDataObject* dObj = static_cast<rt3DPointBufferDataObject*>(m_dataObj);
-
-  if(!dObj) return;
-
   if (m_controlWidget.isShowing()) {
     vtkTransform *t = vtkTransform::New();
     m_controlWidget.mouseReleaseEvent(event);
     m_controlWidget.getTransform(t);
-
-    dObj->applyTransformToPoints( static_cast<vtkTransform*>(m_currTransform->GetInverse()) );
-    dObj->applyTransformToPoints(t);
-    m_currTransform->SetMatrix(t->GetMatrix());
-
+    setControlTransform(t);
     t->Delete();
-
-    // Modify the data object so that the update function will be called.
-    m_dataObj->Modified();
   }
 }
 
@@ -216,6 +196,7 @@ void rt3DPointBufferRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
   vtkProp* temp;
   double midPoint[3];
   double pointExt[6];
+  double widgetSize[3];
 
   temp = rtApplication::instance().getMainWinHandle()->getSelectedProp();
   rt3DPointBufferDataObject* dObj = static_cast<rt3DPointBufferDataObject*>(m_dataObj);
@@ -232,10 +213,15 @@ void rt3DPointBufferRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
         dObj->getPointListCenter(midPoint);
         dObj->getPointListExtents(pointExt);
 
+        widgetSize[0] = (pointExt[1]-pointExt[0])*2.0;
+        widgetSize[1] = (pointExt[3]-pointExt[2])*2.0;
+        widgetSize[2] = (pointExt[5]-pointExt[4])*2.0;
+
+
         m_currTransform->Identity();
-        m_currTransform->Translate(midPoint[0]-(pointExt[1]-pointExt[0])/2.0, midPoint[1]-(pointExt[3]-pointExt[2])/2.0, midPoint[2]);
+        m_currTransform->Translate(midPoint[0]- widgetSize[0]/2.0, midPoint[1]-widgetSize[1]/2.0, midPoint[2]);
         m_controlWidget.setTransform(m_currTransform);
-        m_controlWidget.setSize( (pointExt[1]-pointExt[0])*2.0, (pointExt[3]-pointExt[2])*2.0, (pointExt[5]-pointExt[4])*2.0 );
+        m_controlWidget.setSize( widgetSize[0], widgetSize[1], widgetSize[2] );
 
         m_controlWidget.show();
         break;
@@ -259,15 +245,9 @@ void rt3DPointBufferRenderObject::wheelEvent(QWheelEvent* event) {
 
   if (m_controlWidget.isShowing()) {
     vtkTransform *t = vtkTransform::New();
-    rt3DPointBufferDataObject* dObj = static_cast<rt3DPointBufferDataObject*>(m_dataObj);
-    if (dObj) {
-      m_controlWidget.wheelEvent(event);
-      m_controlWidget.getTransform(t);
-
-      dObj->applyTransformToPoints( static_cast<vtkTransform*>(m_currTransform->GetInverse()) );
-      dObj->applyTransformToPoints(t);
-      m_currTransform->SetMatrix(t->GetMatrix());
-    }
+    m_controlWidget.wheelEvent(event);
+    m_controlWidget.getTransform(t);
+    setControlTransform(t);
     t->Delete();
     if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
@@ -364,4 +344,23 @@ void rt3DPointBufferRenderObject::resizePipeList(int size) {
     if (getVisible3D()) rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getActor());
   }
 
+}
+
+
+void rt3DPointBufferRenderObject::setControlTransform(vtkTransform* t) {
+  if (!t) return;
+
+  rt3DPointBufferDataObject* dObj = static_cast<rt3DPointBufferDataObject*>(m_dataObj);
+  if(!dObj) return;
+
+  vtkTransform *tFinal = vtkTransform::New();
+
+  tFinal->Identity();
+  tFinal->Concatenate( t );
+  tFinal->Concatenate( static_cast<vtkTransform*>(m_currTransform->GetInverse()) );
+  dObj->applyTransformToPoints(tFinal);
+  m_currTransform->SetMatrix(t->GetMatrix());
+
+  m_dataObj->Modified();
+  tFinal->Delete();
 }

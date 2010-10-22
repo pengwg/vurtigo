@@ -81,6 +81,9 @@ public slots:
     */
   void resizePipeList(int size);
 
+  //! Set the new transform that arrived from the control widget.
+  void setControlTransform(vtkTransform* t);
+
   Points3DControlWidget m_controlWidget;
 
   vtkTransform* m_currTransform;

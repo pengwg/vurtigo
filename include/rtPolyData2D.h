@@ -39,13 +39,13 @@ class rtPolyData2D
   ~rtPolyData2D();
 
   //! Get a pointer to the actor object so it can be displayed
-  inline vtkActor* getActor() { return m_actor; }
+  inline vtkActor* const getActor() { return m_actor; }
 
   //! Get a pointer to the actor's property object
-  inline vtkProperty* getProperty() { return m_property; }
+  inline vtkProperty* const getProperty() { return m_property; }
 
   //! Get the transform.
-  vtkTransform* getTransform() { return m_transform; }
+  inline vtkTransform* const getTransform() { return m_transform; }
 
   //! Set a new trasform.
   /*!

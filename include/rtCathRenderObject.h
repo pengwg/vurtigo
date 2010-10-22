@@ -20,22 +20,24 @@
 #ifndef RT_CATH_RENDER_OBJECT_H
 #define RT_CATH_RENDER_OBJECT_H
 
-#include "rtRenderObject.h"
-
-#include "vtkActor.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkTubeFilter.h"
-#include "vtkPolyData.h"
-#include "vtkCellArray.h"
-#include "vtkPoints.h"
-#include "vtkKochanekSpline.h"
-
+// VTK
+#include <vtkActor.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkTubeFilter.h>
+#include <vtkPolyData.h>
+#include <vtkCellArray.h>
+#include <vtkPoints.h>
+#include <vtkKochanekSpline.h>
 #include <vtkAppendPolyData.h>
 #include <vtkSphereSource.h>
 #include <vtkConeSource.h>
 #include <vtkSmartPointer.h>
 
 #include <QList>
+
+// Local
+#include "rtRenderObject.h"
+#include "rtArrowPipeline.h"
 
 //! The catheter render object
 /*!
@@ -62,6 +64,8 @@ class rtCathRenderObject : public rtRenderObject {
   void update();
 
   // Spline Pipeline
+  rtArrowPipeline m_cathArrow;
+
   int m_numSplinePoints;
   vtkSmartPointer<vtkActor> m_splineActor;
   vtkSmartPointer<vtkPolyDataMapper> m_splineMapper;
@@ -69,6 +73,7 @@ class rtCathRenderObject : public rtRenderObject {
   vtkSmartPointer<vtkPolyData> m_splineLineData;
   vtkSmartPointer<vtkCellArray> m_splineCellArray;
   vtkSmartPointer<vtkPoints> m_splinePoints;
+
   vtkSmartPointer<vtkKochanekSpline> m_spline[3];
 
   // Spheres Pipeline
