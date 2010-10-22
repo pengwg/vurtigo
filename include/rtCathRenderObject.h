@@ -57,6 +57,9 @@ class rtCathRenderObject : public rtRenderObject {
   virtual bool removeFromRenderer(vtkRenderer* ren);
   virtual bool getObjectLocation(double loc[6]);
 
+  void visibilityOn();
+  void visibilityOff();
+
  protected:
   void setupDataObject();
   void setupPipeline();
@@ -66,14 +69,6 @@ class rtCathRenderObject : public rtRenderObject {
   // Spline Pipeline
   rtArrowPipeline m_cathArrow;
 
-  int m_numSplinePoints;
-  vtkSmartPointer<vtkActor> m_splineActor;
-  vtkSmartPointer<vtkPolyDataMapper> m_splineMapper;
-  vtkSmartPointer<vtkTubeFilter> m_splineFilter;
-  vtkSmartPointer<vtkPolyData> m_splineLineData;
-  vtkSmartPointer<vtkCellArray> m_splineCellArray;
-  vtkSmartPointer<vtkPoints> m_splinePoints;
-
   vtkSmartPointer<vtkKochanekSpline> m_spline[3];
 
   // Spheres Pipeline
@@ -81,11 +76,6 @@ class rtCathRenderObject : public rtRenderObject {
   vtkSmartPointer<vtkAppendPolyData> m_sphereAppend;
   vtkSmartPointer<vtkPolyDataMapper> m_sphereMapper;
   vtkSmartPointer<vtkActor> m_sphereActor;
-
-  // Cath Tip Pipeline
-  vtkSmartPointer<vtkConeSource> m_coneSource;
-  vtkSmartPointer<vtkPolyDataMapper> m_coneMapper;
-  vtkSmartPointer<vtkActor> m_coneActor;
 
  private:
 

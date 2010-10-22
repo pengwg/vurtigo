@@ -31,14 +31,7 @@ rtCathRenderObject::rtCathRenderObject() {
 
 
 rtCathRenderObject::~rtCathRenderObject() {
-  // Spline Pipeline
-  if (m_splineActor) m_splineActor->Delete();
-  if (m_splineMapper) m_splineMapper->Delete();
-  if (m_splineFilter) m_splineFilter->Delete();
-  if (m_splineLineData) m_splineLineData->Delete();
-  if (m_splineCellArray) m_splineCellArray->Delete();
-  if (m_splinePoints) m_splinePoints->Delete();
-
+  // Splines
   for (int ix1=0; ix1<3; ix1++) {
     if (m_spline[ix1]) m_spline[ix1]->Delete();
   }
@@ -50,11 +43,6 @@ rtCathRenderObject::~rtCathRenderObject() {
   if (m_sphereAppend) m_sphereAppend->Delete();
   if (m_sphereMapper) m_sphereMapper->Delete();
   if (m_sphereActor) m_sphereActor->Delete();
-
-  // Cath Tip Pipeline
-  if (m_coneSource) m_coneSource->Delete();
-  if (m_coneMapper) m_coneMapper->Delete();
-  if (m_coneActor) m_coneActor->Delete();
 }
 
 
@@ -74,9 +62,7 @@ void rtCathRenderObject::update() {
   // Check if there are no locations.
   if (numLoc == 0) {
     // Empty Catheter. Just skip the rendering by turning off all visibility.
-    if(m_splineActor) m_splineActor->VisibilityOff();
-    if(m_sphereActor) m_sphereActor->VisibilityOff();
-    if(m_coneActor) m_coneActor->VisibilityOff();
+    visibilityOff();
     return;
   }
 
@@ -118,21 +104,22 @@ void rtCathRenderObject::update() {
     temp->SetThetaResolution(50);
     temp->SetPhiResolution(50);
 
+    // Just the spheres need to be rendered so turn everythign off and then turn the spheres back on.
+    visibilityOff();
     m_sphereActor->VisibilityOn();
-    m_splineActor->VisibilityOff();
-    m_coneActor->VisibilityOff();
+
   } else if (numLoc > 1) {
     // Multiple locations. Render everyting.
     double direc[3];
-    m_coneSource->SetCenter(coords);
-    m_coneSource->SetRadius(1.0f);
-    m_coneSource->SetHeight(1.0f);
-    m_coneSource->SetResolution(50);
+    m_cathArrow.setConeCenter(coords);
+    m_cathArrow.setConeRadius(2.0f);
+    m_cathArrow.setConeHeight(2.0f);
+    m_cathArrow.setConeResolution(50);
 
     loc = dObj->getLocationList().value(1);
     dObj->getPositionAtLocation(loc, direc);
 
-    m_coneSource->SetDirection(coords[0]-direc[0], coords[1]-direc[1], coords[2]-direc[2]);
+    m_cathArrow.setConeDirection(coords[0]-direc[0], coords[1]-direc[1], coords[2]-direc[2]);
 
     for (int ix2=0; ix2<3; ix2++) {
       // Remove old points
@@ -174,23 +161,18 @@ void rtCathRenderObject::update() {
     m_spline[1]->Compute();
     m_spline[2]->Compute();
 
-    m_splinePoints->Reset();
-    m_splinePoints->SetNumberOfPoints (m_numSplinePoints+1);
-    for (int ix1=0; ix1<=m_numSplinePoints; ix1++) {
-      m_splinePoints->SetPoint(ix1,
-                               m_spline[0]->Evaluate( ((double)numLoc-1.0f)/((double)m_numSplinePoints)*(double)ix1 ),
-                               m_spline[1]->Evaluate( ((double)numLoc-1.0f)/((double)m_numSplinePoints)*(double)ix1 ),
-                               m_spline[2]->Evaluate( ((double)numLoc-1.0f)/((double)m_numSplinePoints)*(double)ix1 ));
+    m_cathArrow.clearPointList();
+    m_cathArrow.setNumPoints(40);
+    for (int ix1=0; ix1<m_cathArrow.getNumPoints(); ix1++) {
+      m_cathArrow.setPoint(ix1,
+                               m_spline[0]->Evaluate( ((double)numLoc-1.0f)/((double)m_cathArrow.getNumPoints())*(double)ix1 ),
+                               m_spline[1]->Evaluate( ((double)numLoc-1.0f)/((double)m_cathArrow.getNumPoints())*(double)ix1 ),
+                               m_spline[2]->Evaluate( ((double)numLoc-1.0f)/((double)m_cathArrow.getNumPoints())*(double)ix1 ));
     }
 
-    m_splineFilter->SetRadius(dObj->getSplineThickness());
-    m_splineLineData->Modified();
-
-    m_sphereActor->VisibilityOn();
-    m_splineActor->VisibilityOn();
-    m_coneActor->VisibilityOn();
+    m_cathArrow.setTubeThickness(dObj->getSplineThickness());
+    visibilityOn();
   }
-
 }
 
 //! Add this object to the given renderer.
@@ -200,11 +182,11 @@ bool rtCathRenderObject::addToRenderer(vtkRenderer* ren) {
   if (!ren->HasViewProp(m_sphereActor)) {
     ren->AddViewProp(m_sphereActor);
   }
-  if (!ren->HasViewProp(m_splineActor)) {
-    ren->AddViewProp(m_splineActor);
+  if (!ren->HasViewProp(m_cathArrow.getTubeActor())) {
+    ren->AddViewProp(m_cathArrow.getTubeActor());
   }
-  if (!ren->HasViewProp(m_coneActor)) {
-    ren->AddViewProp(m_coneActor);
+  if (!ren->HasViewProp(m_cathArrow.getConeActor())) {
+    ren->AddViewProp(m_cathArrow.getConeActor());
   }
   return true;
 }
@@ -216,11 +198,11 @@ bool rtCathRenderObject::removeFromRenderer(vtkRenderer* ren) {
   if (ren->HasViewProp(m_sphereActor)) {
     ren->RemoveViewProp(m_sphereActor);
   }
-  if (ren->HasViewProp(m_splineActor)) {
-    ren->RemoveViewProp(m_splineActor);
+  if (ren->HasViewProp(m_cathArrow.getTubeActor())) {
+    ren->RemoveViewProp(m_cathArrow.getTubeActor());
   }
-  if (ren->HasViewProp(m_coneActor)) {
-    ren->RemoveViewProp(m_coneActor);
+  if (ren->HasViewProp(m_cathArrow.getConeActor())) {
+    ren->RemoveViewProp(m_cathArrow.getConeActor());
   }
   return true;
 }
@@ -235,16 +217,10 @@ void rtCathRenderObject::setupDataObject() {
 void rtCathRenderObject::setupPipeline() {
   rtCathDataObject* dObj = static_cast<rtCathDataObject*>(m_dataObj);
 
-
   // Spline Pipeline
-  m_numSplinePoints = 40;
-
-  m_splineActor = vtkActor::New();
-  m_splineMapper = vtkPolyDataMapper::New();
-  m_splineFilter = vtkTubeFilter::New();
-  m_splineLineData = vtkPolyData::New();
-  m_splineCellArray = vtkCellArray::New();
-  m_splinePoints = vtkPoints::New();
+  m_cathArrow.setNumPoints(40);
+  m_cathArrow.getTubeActor()->SetProperty(dObj->getSplineProperty());
+  m_cathArrow.getConeActor()->SetProperty(dObj->getTipProperty());
 
   // Create the x,y,z splines
   for (int ix1=0; ix1<3; ix1++) {
@@ -252,20 +228,6 @@ void rtCathRenderObject::setupPipeline() {
     m_spline[ix1]->SetLeftConstraint(1);
     m_spline[ix1]->SetRightConstraint(1);
   }
-
-  m_splineCellArray->InsertNextCell(m_numSplinePoints);
-  for (int ix1=0; ix1<m_numSplinePoints; ix1++) {
-    m_splineCellArray->InsertCellPoint(ix1);
-  }
-
-  m_splinePoints->SetDataTypeToDouble ();
-  m_splineLineData->SetPoints(m_splinePoints);
-  m_splineLineData->SetLines(m_splineCellArray);
-  m_splineFilter->SetInput(m_splineLineData);
-  m_splineFilter->SetNumberOfSides(50);
-  m_splineMapper->SetInput(m_splineFilter->GetOutput());
-  m_splineActor->SetMapper(m_splineMapper);
-  m_splineActor->SetProperty( dObj->getSplineProperty() );
 
   // Spheres Pipeline
   m_sphereAppend = vtkAppendPolyData::New();
@@ -276,22 +238,10 @@ void rtCathRenderObject::setupPipeline() {
   m_sphereActor->SetMapper(m_sphereMapper);
   m_sphereActor->SetProperty( dObj->getPointProperty() );
 
-  // Cath Tip Pipeline
-  m_coneSource = vtkConeSource::New() ;
-  m_coneMapper = vtkPolyDataMapper::New();
-  m_coneActor = vtkActor::New();
-
-  m_coneMapper->SetInput(m_coneSource->GetOutput());
-  m_coneActor->SetMapper(m_coneMapper);
-  m_coneActor->SetProperty( dObj->getTipProperty() );
-
   m_canRender3D = true;
 
   // But set their visibility to off
-  m_splineActor->VisibilityOff();
-  m_sphereActor->VisibilityOff();
-  m_coneActor->VisibilityOff();
-
+  visibilityOff();
 }
 
 //! The position of the catheter tip is returned.
@@ -301,4 +251,16 @@ bool rtCathRenderObject::getObjectLocation(double loc[6]) {
   m_sphereActor->GetBounds(loc);
 
   return true;
+}
+
+void rtCathRenderObject::visibilityOn() {
+  m_sphereActor->VisibilityOn();
+  m_cathArrow.tubeVisibilityOn();
+  m_cathArrow.coneVisibilityOn();
+}
+
+void rtCathRenderObject::visibilityOff() {
+  m_sphereActor->VisibilityOff();
+  m_cathArrow.tubeVisibilityOff();
+  m_cathArrow.coneVisibilityOff();
 }

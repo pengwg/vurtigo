@@ -1,7 +1,7 @@
 #include "rtTubePipeline.h"
 
 rtTubePipeline::rtTubePipeline()
-{
+{ 
   // Create the vtk objects
   m_tubePoints = vtkPoints::New();
   m_tubeCellArray = vtkCellArray::New();
@@ -31,6 +31,8 @@ rtTubePipeline::rtTubePipeline()
   m_tubeMapper->SetInput(m_tubeFilter->GetOutput());
 
   m_tubeActor->SetMapper(m_tubeMapper);
+
+  setTubeRenderQuality(0.5);
 }
 
 rtTubePipeline::~rtTubePipeline() {
@@ -40,4 +42,16 @@ rtTubePipeline::~rtTubePipeline() {
   m_tubeFilter->Delete();
   m_tubeMapper->Delete();
   m_tubeActor->Delete();
+}
+
+void rtTubePipeline::setNumPoints(int size) {
+  m_tubePoints->SetNumberOfPoints(size);
+
+  // Setup the cell array
+  m_tubeCellArray->Reset();
+  m_tubeCellArray->InsertNextCell(size);
+  for (int ix1=0; ix1<size; ix1++) {
+    m_tubeCellArray->InsertCellPoint(ix1);
+  }
+  m_tubePolyData->Modified();
 }
