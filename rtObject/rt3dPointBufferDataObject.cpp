@@ -64,6 +64,16 @@ rtBasic3DPointData* rt3DPointBufferDataObject::getPointWithId(int id) {
   return res;
 }
 
+void rt3DPointBufferDataObject::removePointWithId(int id) {
+  for (int ix1=0; ix1<m_pointList.size(); ix1++) {
+    if (m_pointList[ix1].getPointId() == id) {
+      m_pointList.removeAt(ix1);
+      break;
+    }
+  }
+
+}
+
 rtBasic3DPointData* rt3DPointBufferDataObject::getPointAtIndex(int index) {
    if ((index < 0) || (index >= m_pointList.size()))
       return NULL;
@@ -298,6 +308,17 @@ void rt3DPointBufferDataObject::clearPointDataPressed() {
   }
 }
 
+void rt3DPointBufferDataObject::removeSelectedPoints() {
+  if (m_selectedItems.isEmpty()) return;
+
+  for (int ix1=0; ix1<m_selectedItems.size(); ix1++) {
+    m_namedInfoData.remove( m_selectedItems[ix1] );
+    removePointWithId( m_selectedItems[ix1] );
+  }
+  m_selectedItems.clear();
+  emit pointListModifiedSignal();
+}
+
 void rt3DPointBufferDataObject::addNewTagButton() {
   bool ok;
   QString tagName = QInputDialog::getText(getBaseWidget(),
@@ -464,6 +485,7 @@ void rt3DPointBufferDataObject::setupGUI() {
   // Buttons above the points table
   connect( m_optionsWidget.pointZoomSlider, SIGNAL(valueChanged(int)), this, SLOT(pointZoomChanged(int)) );
   connect( m_optionsWidget.clearDataPushButton, SIGNAL(clicked()), this, SLOT(clearPointDataPressed()) );
+  connect( m_optionsWidget.deleteSelectedButton, SIGNAL(clicked()), this, SLOT(removeSelectedPoints()) );
   connect( m_optionsWidget.addPropertyPushButton, SIGNAL(clicked()), this, SLOT(addNewTagButton()) );
 
   // Setup the points table

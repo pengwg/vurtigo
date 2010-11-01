@@ -73,6 +73,9 @@ public:
     */
   rtBasic3DPointData* getPointWithId(int id);
   
+  //! Remove the point with a given id.
+  void removePointWithId(int id);
+
   //! Get a handle to a point at a particular index
   /*!
     \return The handle to the point or 0 if the point is not found.
@@ -122,6 +125,9 @@ public:
 
   //! Slot called when the user chooses to clear the point data.
   void clearPointDataPressed();
+
+  //! Slot called when the user wants to delete the selected points.
+  void removeSelectedPoints();
 
   //! Slot called when a new tag is added.
   void addNewTagButton();
