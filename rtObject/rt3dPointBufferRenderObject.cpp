@@ -61,35 +61,36 @@ void rt3DPointBufferRenderObject::update() {
   rt3DPointBufferDataObject *dObj = dynamic_cast<rt3DPointBufferDataObject*>(m_dataObj);
   rtSingle3DPointPipeline *tempPipe;
   double ptIn[3];
-  QList<rtBasic3DPointData>* pointList = dObj->getPointList();
+  QHash<int, rtNamedInfoPointData>* pointList = dObj->getNamedInfoHash();
+  QList<int> hashKeys = pointList->keys();
   QList<int>* selectedList = dObj->getSelectedItemsList();
 
   // Find the total size of the list.
-  int totalActors = pointList->size() + selectedList->size();
+  int totalActors = hashKeys.size() + selectedList->size();
   int listPosition = 0;
   // Resize the list
   resizePipeList(totalActors);
 
   // Get the new list
-  for (int ix1=0; ix1<pointList->size(); ix1++) {
+  for (int ix1=0; ix1<hashKeys.size(); ix1++) {
 
     tempPipe = m_pipeList[listPosition];
     listPosition++;
 
-    (*pointList)[ix1].getPoint(ptIn);
+    (*pointList)[hashKeys[ix1]].getPoint(ptIn);
 
     tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
-    tempPipe->setProperty( (*pointList)[ix1].getProperty() );
-    tempPipe->setRadius( (*pointList)[ix1].getPointSize()*dObj->getPointZoom() );
+    tempPipe->setProperty( (*pointList)[hashKeys[ix1]].getProperty() );
+    tempPipe->setRadius( (*pointList)[hashKeys[ix1]].getPointSize()*dObj->getPointZoom() );
 
     // If this point is selected then add the selection sphere.
-    if ( selectedList->contains((*pointList)[ix1].getPointId()) ) {
+    if ( selectedList->contains((*pointList)[hashKeys[ix1]].getPointId()) ) {
       tempPipe = m_pipeList[listPosition];
       listPosition++;
-      tempPipe->setProperty( (*pointList)[ix1].getSelectedProperty() );
+      tempPipe->setProperty( (*pointList)[hashKeys[ix1]].getSelectedProperty() );
       tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
       // Larger Radius
-      tempPipe->setRadius( (*pointList)[ix1].getPointSize()*dObj->getPointZoom()*2.0 );
+      tempPipe->setRadius( (*pointList)[hashKeys[ix1]].getPointSize()*dObj->getPointZoom()*2.0 );
     }
 
   }
@@ -273,42 +274,7 @@ bool rt3DPointBufferRenderObject::getObjectLocation(double loc[6]) {
   rt3DPointBufferDataObject *dObj = dynamic_cast<rt3DPointBufferDataObject*>(m_dataObj);
   if (!dObj) return false;
 
-  QList<rtBasic3DPointData>* ptList = dObj->getPointList();
-  if (!ptList) return false;
-  if (ptList->count() <= 0) return false;
-
-  // Just use the first point as the default.
-  int ptSize = (*ptList)[0].getPointSize();
-  loc[0] = (*ptList)[0].getX() - ptSize; loc[1] = (*ptList)[0].getX() + ptSize; // x
-  loc[2] = (*ptList)[0].getY() - ptSize; loc[3] = (*ptList)[0].getY() + ptSize; // y
-  loc[4] = (*ptList)[0].getZ() - ptSize; loc[5] = (*ptList)[0].getZ() + ptSize; // z
-
-  for (int ix1=1; ix1<ptList->count(); ix1++) {
-    // X
-    double xVal = (*ptList)[ix1].getX();
-    double yVal = (*ptList)[ix1].getY();
-    double zVal = (*ptList)[ix1].getZ();
-
-    if ( ( xVal - ptSize ) < loc[0]) {
-      loc[0] = xVal - ptSize;
-    } else if ( (xVal + ptSize) > loc[1]) {
-      loc[1] = xVal + ptSize;
-    }
-
-    // Y
-    if ( (yVal - ptSize) < loc[2]) {
-      loc[2] = yVal - ptSize;
-    } else if ( (yVal + ptSize) > loc[3]) {
-      loc[3] = yVal + ptSize;
-    }
-
-    // Z
-    if ( (zVal - ptSize) < loc[4]) {
-      loc[4] = zVal - ptSize;
-    } else if ( (zVal + ptSize) > loc[5]) {
-      loc[5] = zVal + ptSize;
-    }
-  }
+  dObj->getPointListExtents(loc);
 
   return true;
 }

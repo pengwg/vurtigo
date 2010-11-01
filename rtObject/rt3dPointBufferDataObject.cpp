@@ -31,7 +31,7 @@
 rt3DPointBufferDataObject::rt3DPointBufferDataObject()
 : m_currentScale(1.0), m_pointZoom(1.0)
 {
-  m_pointList.clear();
+  removeAllPoints();
   setObjectType(rtConstants::OT_3DPointBuffer);
   setupGUI();
 
@@ -40,45 +40,43 @@ rt3DPointBufferDataObject::rt3DPointBufferDataObject()
 
 //! Destructor
 rt3DPointBufferDataObject::~rt3DPointBufferDataObject() {
-  m_pointList.clear();
+  removeAllPoints();
   cleanupGUI();
 }
 
-rtBasic3DPointData* rt3DPointBufferDataObject::getPointAt(double x, double y, double z) {
-  rtBasic3DPointData* res = 0;
-  for (int ix1=0; ix1<m_pointList.size(); ix1++) {
-    if (m_pointList[ix1].getX() == x && m_pointList[ix1].getY() == y && m_pointList[ix1].getZ() == z) {
-      res = &(m_pointList[ix1]);
+rtNamedInfoPointData* rt3DPointBufferDataObject::getPointAt(double x, double y, double z) {
+  QList<int> keyList = m_namedInfoData.keys();
+
+  rtNamedInfoPointData* res = 0;
+  for (int ix1=0; ix1<keyList.size(); ix1++) {
+    if (m_namedInfoData[keyList[ix1]].getX() == x && m_namedInfoData[keyList[ix1]].getY() == y && m_namedInfoData[keyList[ix1]].getZ() == z) {
+      res = &(m_namedInfoData[keyList[ix1]]);
     }
   }
   return res;
 }
 
-rtBasic3DPointData* rt3DPointBufferDataObject::getPointWithId(int id) {
-  rtBasic3DPointData* res = 0;
-  for (int ix1=0; ix1<m_pointList.size(); ix1++) {
-    if (m_pointList[ix1].getPointId() == id) {
-      res = &(m_pointList[ix1]);
-    }
+rtNamedInfoPointData* rt3DPointBufferDataObject::getPointWithId(int id) {
+  rtNamedInfoPointData* res = 0;
+  if ( m_namedInfoData.contains(id) ) {
+    res = &(m_namedInfoData[id]);
   }
   return res;
 }
 
 void rt3DPointBufferDataObject::removePointWithId(int id) {
-  for (int ix1=0; ix1<m_pointList.size(); ix1++) {
-    if (m_pointList[ix1].getPointId() == id) {
-      m_pointList.removeAt(ix1);
-      break;
-    }
+  if ( m_namedInfoData.contains(id) ) {
+    m_namedInfoData.remove(id);
   }
-
 }
 
-rtBasic3DPointData* rt3DPointBufferDataObject::getPointAtIndex(int index) {
-   if ((index < 0) || (index >= m_pointList.size()))
-      return NULL;
+rtNamedInfoPointData* rt3DPointBufferDataObject::getPointAtIndex(int index) {
+  QList<int> keyList = m_namedInfoData.keys();
+
+  if ((index < 0) || (index >= keyList.size()))
+    return NULL;
       
-    return &m_pointList[index];
+  return &m_namedInfoData[keyList[index]];
 }
 
 
@@ -88,24 +86,12 @@ void rt3DPointBufferDataObject::addPoint(rtBasic3DPointData sp) {
   int id = getNextId();
   if (id != -1) {
     sp.setPointId(id);
-    m_pointList.append(sp);
     namedPt.fromBasic3DPoint(&sp);
     m_namedInfoData.insert(id, namedPt);
     emit pointListModifiedSignal();
   }
 }
 
-//! Remove a point from the list
-void rt3DPointBufferDataObject::removePoint(rtBasic3DPointData sp) {
-  int i;
-
-  if (m_pointList.contains(sp)) {
-    i = m_pointList.indexOf(sp);
-    m_namedInfoData.remove(sp.getPointId());
-    m_pointList.removeAt(i);
-    emit pointListModifiedSignal();
-  }
-}
 
 void rt3DPointBufferDataObject::addCartoPoint(rtCartoPointData pt) {
   rtNamedInfoPointData namedPt;
@@ -114,7 +100,6 @@ void rt3DPointBufferDataObject::addCartoPoint(rtCartoPointData pt) {
   if (id != -1) {
     pt.setPointId(id);
     // Append to the regular point list.
-    m_pointList.append(pt);
     namedPt.fromCartoPoint(&pt);
     m_namedInfoData.insert(id, namedPt);
     emit pointListModifiedSignal();
@@ -129,20 +114,22 @@ void rt3DPointBufferDataObject::addCartoPoint(rtCartoPointData pt) {
 void rt3DPointBufferDataObject::update() {
 }
 
+
 void rt3DPointBufferDataObject::applyTransformToPoints(vtkTransform * t) {
   if (!t) return;
 
-  for (int ix1=0; ix1<m_pointList.size(); ix1++) {
-    m_pointList[ix1].applyTransform(t);
-    m_namedInfoData[m_pointList[ix1].getPointId()].applyTransform(t);
+  QList<int> keyList = m_namedInfoData.keys();
+
+  for (int ix1=0; ix1<keyList.size(); ix1++) {
+    m_namedInfoData[keyList[ix1]].applyTransform(t);
   }
   emit pointListModifiedSignal();
 }
 
 void rt3DPointBufferDataObject::applyTranslateToPoints(double x, double y, double z) {
-  for (int ix1=0; ix1<m_pointList.size(); ix1++) {
-    m_pointList[ix1].translate(x,y,z);
-    m_namedInfoData[m_pointList[ix1].getPointId()].translate(x,y,z);
+  QList<int> keyList = m_namedInfoData.keys();
+  for (int ix1=0; ix1<keyList.size(); ix1++) {
+    m_namedInfoData[keyList[ix1]].translate(x,y,z);
   }
   emit pointListModifiedSignal();
 }
@@ -151,9 +138,10 @@ void rt3DPointBufferDataObject::applyTranslateToPoints(double x, double y, doubl
 void rt3DPointBufferDataObject::getPointListCenter(double center[3]) {
   double tempPt[3];
   double total = 0.0;
+  QList<int> keyList = m_namedInfoData.keys();
 
-  for (int ix1=0; ix1<m_pointList.size(); ix1++) {
-    m_namedInfoData[m_pointList[ix1].getPointId()].getPoint(tempPt);
+  for (int ix1=0; ix1<keyList.size(); ix1++) {
+    m_namedInfoData[keyList[ix1]].getPoint(tempPt);
     total = total + 1.0;
     for (int ix2=0; ix2<3; ix2++) {
       center[ix2] = center[ix2]+tempPt[ix2];
@@ -166,12 +154,13 @@ void rt3DPointBufferDataObject::getPointListCenter(double center[3]) {
 }
 
 void rt3DPointBufferDataObject::getPointListExtents(double extents[6]) {
-  if (m_pointList.size() <= 0) return;
+  QList<int> keyList = m_namedInfoData.keys();
+  if (keyList.size() <= 0) return;
 
   double tempPt[3];
 
   // Get the value for the first point.
-  m_namedInfoData[m_pointList[0].getPointId()].getPoint(tempPt);
+  m_namedInfoData[keyList[0]].getPoint(tempPt);
 
   extents[0] = tempPt[0]; // minx
   extents[1] = tempPt[0]; // maxx
@@ -180,8 +169,8 @@ void rt3DPointBufferDataObject::getPointListExtents(double extents[6]) {
   extents[4] = tempPt[2];
   extents[5] = tempPt[2];
 
-  for (int ix1=1; ix1<m_pointList.size(); ix1++) {
-    m_namedInfoData[m_pointList[ix1].getPointId()].getPoint(tempPt);
+  for (int ix1=1; ix1<keyList.size(); ix1++) {
+    m_namedInfoData[keyList[ix1]].getPoint(tempPt);
     if ( tempPt[0] < extents[0] ) extents[0] = tempPt[0];
     if ( tempPt[0] > extents[1] ) extents[1] = tempPt[0];
     if ( tempPt[1] < extents[2] ) extents[2] = tempPt[1];
@@ -299,12 +288,7 @@ void rt3DPointBufferDataObject::clearPointDataPressed() {
                         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
   if (button == QMessageBox::Yes) {
-    m_pointList.clear();
-    m_namedInfoData.clear();
-    m_columnHeaderList.clear();
-    m_selectedItems.clear();
-    m_currentScale = 1.0;
-    emit pointListModifiedSignal();
+    removeAllPoints();
   }
 }
 

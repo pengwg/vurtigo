@@ -40,11 +40,8 @@ public:
   rt3DPointBufferDataObject();
   ~rt3DPointBufferDataObject();
 
-  //! Get the handle to the point list.
-  inline QList<rtBasic3DPointData>* getPointList() { return &m_pointList; }
-
   //! Get the size of the point list
-  inline unsigned int getPointListSize() { return m_pointList.size(); }
+  inline unsigned int getPointListSize() { return m_namedInfoData.keys().size(); }
 
   //! Get a handle to the named info hash.
   inline QHash<int, rtNamedInfoPointData>* getNamedInfoHash() { return &m_namedInfoData; }
@@ -65,13 +62,13 @@ public:
     \param z The Z coord of the point to find.
     \return The handle to the point or 0 if the point is not found.
     */
-  rtBasic3DPointData* getPointAt(double x, double y, double z);
+  rtNamedInfoPointData* getPointAt(double x, double y, double z);
 
   //! Get a handle to a point with a partiucular Id.
   /*!
     \return The handle to the point or 0 if the point is not found.
     */
-  rtBasic3DPointData* getPointWithId(int id);
+  rtNamedInfoPointData* getPointWithId(int id);
   
   //! Remove the point with a given id.
   void removePointWithId(int id);
@@ -80,14 +77,18 @@ public:
   /*!
     \return The handle to the point or 0 if the point is not found.
     */
-  rtBasic3DPointData* getPointAtIndex(int index);
+  rtNamedInfoPointData* getPointAtIndex(int index);
 
   void addPoint(rtBasic3DPointData sp);
-  void removePoint(rtBasic3DPointData sp);
-
   void addCartoPoint(rtCartoPointData pt);
 
-  inline void removeAllPoints() { m_pointList.clear(); m_namedInfoData.clear(); Modified(); }
+  inline void removeAllPoints() {
+    m_namedInfoData.clear();
+    m_columnHeaderList.clear();
+    m_selectedItems.clear();
+    m_currentScale = 1.0;
+    emit pointListModifiedSignal();
+  }
 
   void applyTransformToPoints(vtkTransform * t);
   void applyTranslateToPoints(double x, double y, double z);
@@ -152,13 +153,10 @@ public:
 
  protected:
   // Properties
-  //! List of points in 3D space
-  QList<rtBasic3DPointData> m_pointList;
-
 
   //! List of all the points with extra tag information.
   /*!
-    Points are indexed by their ID. The ID should be unique for both lists.
+    Points are indexed by their ID. The ID should be unique.
     This list is what is displayed in the GUI.
   */
   QHash<int, rtNamedInfoPointData> m_namedInfoData;
