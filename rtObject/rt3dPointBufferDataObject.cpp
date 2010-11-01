@@ -319,6 +319,14 @@ void rt3DPointBufferDataObject::removeSelectedPoints() {
   emit pointListModifiedSignal();
 }
 
+
+void rt3DPointBufferDataObject::createNewPoint() {
+  rtBasic3DPointData newPt;
+  newPt.setPoint(0.0, 0.0, 0.0);
+  newPt.setColor(1.0, 0.0, 0.0);
+  addPoint(newPt);
+}
+
 void rt3DPointBufferDataObject::addNewTagButton() {
   bool ok;
   QString tagName = QInputDialog::getText(getBaseWidget(),
@@ -486,6 +494,7 @@ void rt3DPointBufferDataObject::setupGUI() {
   connect( m_optionsWidget.pointZoomSlider, SIGNAL(valueChanged(int)), this, SLOT(pointZoomChanged(int)) );
   connect( m_optionsWidget.clearDataPushButton, SIGNAL(clicked()), this, SLOT(clearPointDataPressed()) );
   connect( m_optionsWidget.deleteSelectedButton, SIGNAL(clicked()), this, SLOT(removeSelectedPoints()) );
+  connect( m_optionsWidget.newPointButton, SIGNAL(clicked()), this, SLOT(createNewPoint()) );
   connect( m_optionsWidget.addPropertyPushButton, SIGNAL(clicked()), this, SLOT(addNewTagButton()) );
 
   // Setup the points table

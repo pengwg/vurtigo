@@ -129,6 +129,9 @@ public:
   //! Slot called when the user wants to delete the selected points.
   void removeSelectedPoints();
 
+  //! Slot called when the user wants to add a new point.
+  void createNewPoint();
+
   //! Slot called when a new tag is added.
   void addNewTagButton();
 
