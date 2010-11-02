@@ -146,8 +146,7 @@ rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objTy
     dataO->setObjName(objName);
     dataO->update();
     m_objectHash.insert(nextID, temp);
-    if ( rtApplication::instance().getMainWinHandle() )
-      rtApplication::instance().getMainWinHandle()->updateObjectList(&m_objectHash);
+    updateGuiObjectList();
 
     QList<QString> twoDViews = temp->get2DViewNameList();
     for (int ix1=0; ix1<twoDViews.size(); ix1++) {
@@ -280,6 +279,11 @@ int rtObjectManager::getNumObjectsOfType(rtConstants::rtObjectType objType) {
   }
 
   return numObj;
+}
+
+void rtObjectManager::updateGuiObjectList() {
+  if ( rtApplication::instance().getMainWinHandle() )
+    rtApplication::instance().getMainWinHandle()->updateObjectList(&m_objectHash);
 }
 
 int rtObjectManager::getNextID() {

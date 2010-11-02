@@ -22,10 +22,14 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QThread>
+#include <QString>
+#include <QFileDialog>
 
 #include "rtApplication.h"
+#include "rtMainWindow.h"
 #include "rtMessage.h"
 #include "rt3dPointBufferDataObject.h"
+#include "rtObjectManager.h"
 
 //! Constructor
 rt3DPointBufferDataObject::rt3DPointBufferDataObject()
@@ -112,6 +116,99 @@ void rt3DPointBufferDataObject::addCartoPoint(rtCartoPointData pt) {
   @todo Write the GUI
  */
 void rt3DPointBufferDataObject::update() {
+}
+
+bool rt3DPointBufferDataObject::saveFile(QFile *file) {
+  if (!file->open(QIODevice::WriteOnly | QIODevice::Text))
+    return false;
+
+  QXmlStreamWriter writer(file);
+  writer.setAutoFormatting(true);
+  writer.writeStartDocument();
+  writer.writeStartElement("VurtigoFile");
+  rtDataObject::saveHeader(&writer, getObjectType(), getObjName());
+
+  QList<int> idList = m_namedInfoData.keys();
+
+  writer.writeStartElement("BufferData");
+  writer.writeTextElement( "numPoints", QString::number(m_namedInfoData.size()) );
+  writer.writeTextElement( "scaling", QString::number(m_currentScale) );
+  writer.writeTextElement( "zoom", QString::number(m_pointZoom) );
+  writer.writeEndElement(); // BufferData
+
+  for (int ix1=0; ix1<idList.size(); ix1++) {
+    rtNamedInfoPointData temp = m_namedInfoData[idList[ix1]];
+    QList<QString> tagList = temp.getTagList();
+
+    writer.writeStartElement("InfoPoint");
+    writer.writeTextElement( "id", QString::number(idList[ix1]) );
+    writer.writeTextElement( "timestamp", QString::number(temp.getCreationTime()) );
+    writer.writeTextElement( "size", QString::number(temp.getPointSize()) );
+    writer.writeTextElement( "x", QString::number(temp.getX()) );
+    writer.writeTextElement( "y", QString::number(temp.getY()) );
+    writer.writeTextElement( "z", QString::number(temp.getZ()) );
+    saveVtkProperty(&writer, temp.getProperty(), "Property");
+    saveVtkProperty(&writer, temp.getSelectedProperty(), "SelectedProperty");
+
+    for (int ix2=0; ix2<tagList.size(); ix2++) {
+      writer.writeStartElement( "CustomTag" );
+      writer.writeAttribute( "tag", tagList[ix2] );
+      writer.writeAttribute( "value", QString::number(temp.getValue(tagList[ix2])) );
+      writer.writeEndElement(); // CustomTag
+    }
+
+    writer.writeEndElement(); //InfoPoint
+  }
+
+
+  writer.writeEndElement(); // VurtigoFile
+  writer.writeEndDocument();
+
+  file->close();
+  return true;
+}
+
+bool rt3DPointBufferDataObject::loadFile(QFile *file) {
+  if (!file->open(QIODevice::ReadOnly | QIODevice::Text))
+    return false;
+
+  bool nameChanged=false;
+  QXmlStreamReader reader(file);
+  rtConstants::rtObjectType objType;
+  QString objName="";
+
+  // Remove previous points before adding the new ones.
+  removeAllPoints();
+
+  while (!reader.atEnd()) {
+    if(reader.readNext() == QXmlStreamReader::StartElement) {
+      if (reader.name() == "FileInfo") {
+        rtDataObject::loadHeader(&reader, objType, objName);
+
+        if ( objType != this->getObjectType() ) {
+          rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Object Type for data file is wrong."));
+          break;
+        } else if ( objName != "" && objName != this->getObjName() ) {
+          setObjName(objName);
+          nameChanged = true;
+        }
+      } else if (reader.name() == "BufferData") {
+        loadBufferData(&reader);
+      } else if (reader.name() == "InfoPoint") {
+        loadInfoPoint(&reader);
+      }
+    }
+  }
+
+  if (reader.hasError()) {
+    file->close();
+    return false;
+  }
+
+  file->close();
+  emit pointListModifiedSignal();
+  if (nameChanged) rtApplication::instance().getObjectManager()->updateGuiObjectList();
+  return true;
 }
 
 
@@ -291,6 +388,31 @@ void rt3DPointBufferDataObject::clearPointDataPressed() {
     removeAllPoints();
   }
 }
+
+
+void rt3DPointBufferDataObject::loadThisObject() {
+  QFile file;
+  QString name;
+
+  name = QFileDialog::getOpenFileName(getBaseWidget(), "Select Files To Open:");
+  file.setFileName(name);
+
+  if (file.exists()) {
+    this->loadFile(&file);
+  }
+}
+
+
+void rt3DPointBufferDataObject::saveThisObject() {
+  QString fName="";
+  QFile file;
+
+  // Find the file name
+  fName = QFileDialog::getSaveFileName(getBaseWidget(), "Save As...");
+  file.setFileName(fName);
+  this->saveFile(&file);
+}
+
 
 void rt3DPointBufferDataObject::removeSelectedPoints() {
   if (m_selectedItems.isEmpty()) return;
@@ -481,6 +603,10 @@ void rt3DPointBufferDataObject::setupGUI() {
   connect( m_optionsWidget.newPointButton, SIGNAL(clicked()), this, SLOT(createNewPoint()) );
   connect( m_optionsWidget.addPropertyPushButton, SIGNAL(clicked()), this, SLOT(addNewTagButton()) );
 
+  // Load and save buttons.
+  connect( m_optionsWidget.loadButton, SIGNAL(clicked()), this, SLOT(loadThisObject()) );
+  connect( m_optionsWidget.saveButton, SIGNAL(clicked()), this, SLOT(saveThisObject()) );
+
   // Setup the points table
 
   m_optionsWidget.pointsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -530,4 +656,75 @@ void rt3DPointBufferDataObject::updateColumnHeaders() {
         m_columnHeaderList.append(tagList[ix1]);
     }
   }
+}
+
+
+int rt3DPointBufferDataObject::loadBufferData(QXmlStreamReader* reader) {
+  if (!reader) return 0;
+
+  if ( !(reader->name()=="BufferData" || reader->isStartElement()) ) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to load Buffer Data from file."));
+    return 0;
+  }
+
+  int numPoints = 0;
+  while ( reader->name() != "BufferData" || !reader->isEndElement() ) {
+    if(reader->readNext() == QXmlStreamReader::StartElement) {
+      if (reader->name() == "numPoints") {
+        numPoints = getIntFromString(reader->readElementText(), 0);
+      } else if (reader->name() == "scalng") {
+        m_currentScale = getDoubleFromString(reader->readElementText(), 1.0);
+        m_optionsWidget.scaleSpinBox->setValue(m_currentScale);
+      } else if (reader->name() == "zoom") {
+        m_pointZoom = getDoubleFromString(reader->readElementText(), 1.0);
+        m_optionsWidget.pointZoomSlider->setValue(m_pointZoom * 10.0);
+      }
+    }
+  }
+  return numPoints;
+}
+
+void rt3DPointBufferDataObject::loadInfoPoint(QXmlStreamReader* reader) {
+  if (!reader) return;
+
+  if ( !(reader->name()=="InfoPoint" || reader->isStartElement()) ) {
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to load Info Point from file."));
+    return;
+  }
+
+  // Create an empty point.
+  rtNamedInfoPointData temp;
+  vtkProperty* inputProp = vtkProperty::New();
+  QString propName;
+  while ( reader->name() != "InfoPoint" || !reader->isEndElement() ) {
+    if(reader->readNext() == QXmlStreamReader::StartElement) {
+      if (reader->name() == "id") {
+        temp.setPointId( getIntFromString( reader->readElementText(), getNextId() ) );
+      } else if (reader->name() == "timestamp") {
+        temp.setCreationTime( getDoubleFromString(reader->readElementText(), 0.0) );
+      } else if (reader->name() == "size") {
+        temp.setPointSize( getDoubleFromString(reader->readElementText(), 1.0) );
+      } else if (reader->name() == "x") {
+        temp.setX( getDoubleFromString(reader->readElementText(), 0.0) );
+      } else if (reader->name() == "y") {
+        temp.setY( getDoubleFromString(reader->readElementText(), 0.0) );
+      } else if (reader->name() == "z") {
+        temp.setZ( getDoubleFromString(reader->readElementText(), 0.0) );
+      } else if (reader->name() == "VtkProperty") {
+        // Read each of the two properties.
+        loadVtkProperty(reader, inputProp, propName);
+        if (propName == "Property") {
+          temp.getProperty()->DeepCopy(inputProp);
+        } else if (propName == "SelectedProperty") {
+          temp.getSelectedProperty()->DeepCopy(inputProp);
+        }
+      } else if (reader->name() == "CustomTag") {
+        QXmlStreamAttributes attribs = reader->attributes();
+        temp.setNamedValue(attribs.value("tag").toString(), getDoubleFromString(attribs.value("value").toString(), 0.0));
+      }
+    }
+  }
+  inputProp->Delete();
+  m_namedInfoData.insert(temp.getPointId(), temp);
+
 }

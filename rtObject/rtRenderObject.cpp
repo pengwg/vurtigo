@@ -99,6 +99,15 @@ void rtRenderObject::updateTreeItem() {
   }
 }
 
+void rtRenderObject::uncheckTreeItem() {
+  if (m_treeItem) {
+    if (m_treeItem->checkState(2) == Qt::Checked || m_visible3D) {
+      m_visible3D = false;
+      m_treeItem->setCheckState(2,Qt::Unchecked);
+    }
+  }
+}
+
 void rtRenderObject::setVisible3D(bool v) {
   if( !rtApplication::instance().getTimeManager() ) return;
 

@@ -46,7 +46,14 @@ public:
   //! Assignment operator
   rtBasicPointData& operator=(const rtBasicPointData& sp);
 
+  //! Get the timestamp for when this point was created.
   inline int getCreationTime() { return m_timeStamp; }
+
+  //! Get a new timestamp for this point.
+  /*!
+    In general, this function should be avoided. However, when points are loaded from file the timestamps are also loaded and so this function is required.
+    */
+  inline void setCreationTime(int time) { m_timeStamp = time; }
 
   inline int getPointId() { return m_pId; }
   inline void setPointId(int id) { m_pId = id; }

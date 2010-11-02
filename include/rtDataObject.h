@@ -29,6 +29,9 @@
 #include <QFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
+
+#include <vtkProperty.h>
+
 #include "objTypes.h"
 
 //! Data object base class [abstract class]
@@ -160,6 +163,19 @@ Q_OBJECT
     \param name The variable where the object name will be stored. Blank string if the name read has failed.
     */
   static void loadHeader(QXmlStreamReader *reader, rtConstants::rtObjectType &type, QString &name);
+
+
+  //! Save a vtkProperty type of object.
+  static void saveVtkProperty(QXmlStreamWriter *writer, vtkProperty* prop, QString name);
+
+  //! Load a vtkProperty type of object.
+  static void loadVtkProperty(QXmlStreamReader *reader, vtkProperty* prop, QString &name);
+
+  //! Convert a string to an integer or use a defualt value.
+  static int getIntFromString(QString str, int defVal=0);
+
+  //! Convert a string to a double or use a default value.
+  static double getDoubleFromString(QString str, double defVal=0.0);
 
  public slots:
   //! The object was just modified. Adjust the time.

@@ -103,6 +103,13 @@ public:
   void getPointListExtents(double extents[6]);
 
   void update();
+
+  //! Save this data object to file.
+  virtual bool saveFile(QFile *file);
+
+  //! Load this data object from file.
+  virtual bool loadFile(QFile *file);
+
  signals:
   void pointListModifiedSignal();
 
@@ -126,6 +133,12 @@ public:
 
   //! Slot called when the user chooses to clear the point data.
   void clearPointDataPressed();
+
+  //! Slot called when the user wants to load an object into this object.
+  void loadThisObject();
+
+  //! Slot called when the user wants to save this object.
+  void saveThisObject();
 
   //! Slot called when the user wants to delete the selected points.
   void removeSelectedPoints();
@@ -201,6 +214,15 @@ public:
 
   //! Update the list of column headers based on the current points.
   void updateColumnHeaders();
+
+  //! The buffer data tag has been reached.
+  /*!
+    \return The number of points to follow this buffer data.
+    */
+  int loadBufferData(QXmlStreamReader* reader);
+
+  //! Each info point tag is read by this function.
+  void loadInfoPoint(QXmlStreamReader* reader);
 };
 
 #endif 

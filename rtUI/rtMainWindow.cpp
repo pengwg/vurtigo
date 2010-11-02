@@ -436,6 +436,9 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
     return;
   }
 
+  // Check that the changed element was indeed the checkbox.
+  if (column != 2) return;
+
   // Get the object
   temp = rtApplication::instance().getObjectManager()->getObjectWithID(current->text(1).toInt());
 

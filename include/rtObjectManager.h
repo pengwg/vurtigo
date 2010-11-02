@@ -53,6 +53,9 @@ class rtObjectManager : public QObject {
   //! Get a pointer to the 2D object hash.
   inline QMultiHash<int, QString>* get2DObjectNameHash() { return &m_list2DHash; }
 
+  //! Force an update of the object list in the GUI.
+  void updateGuiObjectList();
+
   //! Get the next unused ID.
   /*!
     @return The next unused ID

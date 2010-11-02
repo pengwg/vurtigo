@@ -77,6 +77,7 @@ Q_OBJECT
 
   QTreeWidgetItem* getTreeItem() { return m_treeItem; }
   virtual void updateTreeItem();
+  virtual void uncheckTreeItem();
 
   void setVisible3D(bool v);
   bool getVisible3D(){ return m_visible3D; }
