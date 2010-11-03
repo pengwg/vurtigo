@@ -327,6 +327,8 @@
    <addaction name="actionCamera_Mode"/>
    <addaction name="actionInteraction_Mode"/>
    <addaction name="actionPlacement_Mode"/>
+   <addaction name="separator"/>
+   <addaction name="action3D_Dual_View"/>
   </widget>
   <action name="actionQuit">
    <property name="text">
@@ -499,6 +501,14 @@
   <action name="actionTimer_Options">
    <property name="text">
     <string>Timer Options</string>
+   </property>
+  </action>
+  <action name="action3D_Dual_View">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>3D Dual View</string>
    </property>
   </action>
  </widget>

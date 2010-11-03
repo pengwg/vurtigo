@@ -150,6 +150,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void viewChangedMixed();
   void viewChanged3DOnly();
   void viewChanged2DOnly();
+  void toggle3DDualView(bool dual);
   void loadPluginFile();
 
   void addNewObject();
@@ -213,6 +214,9 @@ signals:
   vtkRenderer *m_renderer3D;
   vtkCellPicker *m_cellPicker;
   rtCameraControl *m_cameraControl;
+
+  vtkRenderer * m_localRenderer3D;
+  rtCameraControl *m_localCameraControl;
 
   // The Axes in the corner
   vtkAxesActor *m_axesActor;

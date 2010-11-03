@@ -162,7 +162,6 @@ void rtTimeManager::removeFromWatchList(rtRenderObject* obj) {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtTimeManager::removeFromWatchList() start") );
 #endif
-  std::cout << "removeFromWatchList" << std::endl;
   int index=-1;
   index = m_watchList.indexOf(obj);
 

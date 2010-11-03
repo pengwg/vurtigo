@@ -26,8 +26,8 @@
 #include "rtMainWindow.h"
 #include "customQVTKWidget.h"
 
-rtCameraControl::rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWid)
-  : m_camera(cam), m_eventWidget(eventWid), m_leftMouseDown(false), m_rightMouseDown(false), m_midMouseDown(false), m_scrollWheelMotion(true), m_cameraInMotion(false)
+rtCameraControl::rtCameraControl(vtkCamera* cam, vtkRenderer* renderer, customQVTKWidget* eventWid)
+  : m_camera(cam), m_renderer(renderer), m_eventWidget(eventWid), m_leftMouseDown(false), m_rightMouseDown(false), m_midMouseDown(false), m_scrollWheelMotion(true), m_cameraInMotion(false)
 {
   connectEvents();
   m_cameraPosList.clear();
@@ -112,7 +112,7 @@ void rtCameraControl::setViewAngle(double angle) {
 
   if ( angle != m_camera->GetViewAngle() ) {
     m_camera->SetViewAngle(angle);
-    rtApplication::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+    m_renderer->ResetCameraClippingRange();
     rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
@@ -129,6 +129,20 @@ double rtCameraControl::getViewAngle() {
 // PUBLIC SLOTS
 ///////////////
 void rtCameraControl::mousePress(QMouseEvent* ev) {
+  double vp[4];
+  m_renderer->GetViewport(vp);
+
+  m_lastPoint = ev->pos();
+
+  // Convert the Qt x, y to VTK viewport.
+  QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
+  double X = ((double)ev->x()/(double)winSize.width());
+  double Y = ((double)(winSize.height()-ev->y())/(double)winSize.height());
+
+  // Ignore clicks outside the viewport
+  if ( X < vp[0] || X > vp[2] || Y < vp[1] || Y > vp[3]) return;
+
+
   if (ev->button() == Qt::LeftButton) {
     m_leftMouseDown = true;
   } else if (ev->button() == Qt::RightButton) {
@@ -136,8 +150,6 @@ void rtCameraControl::mousePress(QMouseEvent* ev) {
   } else if (ev->button() == Qt::MidButton) {
     m_midMouseDown = true;
   }
-
-  m_lastPoint = ev->pos();
 }
 
 void rtCameraControl::mouseMove(QMouseEvent* ev) {
@@ -149,7 +161,7 @@ void rtCameraControl::mouseMove(QMouseEvent* ev) {
     m_camera->Elevation((double)(m_lastPoint.y() - newPt.y())/(-3.0f));
     m_camera->Azimuth((double)(m_lastPoint.x() - newPt.x())/3.0f);
     m_lastPoint = newPt;
-    rtApplication::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+    m_renderer->ResetCameraClippingRange();
     rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   } else if (m_rightMouseDown) {
     // Translate the camera
@@ -177,7 +189,7 @@ void rtCameraControl::mouseMove(QMouseEvent* ev) {
     m_camera->SetPosition(pos);
     m_camera->SetFocalPoint(foc);
     m_lastPoint = newPt;
-    rtApplication::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+    m_renderer->ResetCameraClippingRange();
     rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
@@ -191,7 +203,7 @@ void rtCameraControl::mouseRelease(QMouseEvent* ev) {
     m_midMouseDown = false;
   }
 
-  rtApplication::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+  m_renderer->ResetCameraClippingRange();
   rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
@@ -233,6 +245,18 @@ void rtCameraControl::wheel(QWheelEvent* ev) {
     return;
   }
 
+  double vp[4];
+  m_renderer->GetViewport(vp);
+
+  // Convert the Qt x, y to VTK viewport.
+  QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
+  double X = ((double)ev->x()/(double)winSize.width());
+  double Y = ((double)(winSize.height()-ev->y())/(double)winSize.height());
+
+  // Ignore wheel movements outside the viewport
+  if ( X < vp[0] || X > vp[2] || Y < vp[1] || Y > vp[3]) return;
+
+
   m_scrollTimer.stop();
   m_scrollWheelMotion = true;
   connect(&m_scrollTimer, SIGNAL(timeout()), this, SLOT(wheelFinished()));
@@ -240,13 +264,13 @@ void rtCameraControl::wheel(QWheelEvent* ev) {
 
   m_camera->Dolly(1.0+((double)ev->delta())/1200.0f);
   m_camera->OrthogonalizeViewUp();
-  rtApplication::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+  m_renderer->ResetCameraClippingRange();
   rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
 void rtCameraControl::wheelFinished() {
   m_scrollWheelMotion = false;
-  rtApplication::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
+  m_renderer->ResetCameraClippingRange();
   rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 

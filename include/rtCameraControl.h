@@ -30,6 +30,7 @@
 
 #include <vtkCamera.h>
 #include <vtkMatrix4x4.h>
+#include <vtkRenderer.h>
 
 class customQVTKWidget;
 
@@ -59,9 +60,10 @@ public:
   //! Constructor
   /*!
     \param cam The vtkCamera type object that is the camera from the main 3D view
+    \param renderer The renderer associated with this camera.
     \param eventWidget The QVTK widget where the rendering is performed. This widget also receives all of the mouse events that interact with the 3D scene.
     */
-  rtCameraControl(vtkCamera* cam, customQVTKWidget* eventWidget);
+  rtCameraControl(vtkCamera* cam, vtkRenderer* renderer, customQVTKWidget* eventWidget);
 
   //! Check if the camera is moving at this moment.
   /*!
@@ -140,6 +142,9 @@ public slots:
 protected:
   //! The pointer to the vtk camera object in the main 3D view.
   vtkCamera* m_camera;
+
+  //! The handle to the vtk renderer associated with this camera.
+  vtkRenderer* m_renderer;
 
   //! Pointer the QVTK widget.
   customQVTKWidget* m_eventWidget;

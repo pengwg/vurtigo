@@ -76,11 +76,22 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_renWin3D->StereoCapableWindowOn();
 #endif
 
+  // Create the local renderer
+  m_localRenderer3D = vtkRenderer::New();
+  m_renWin3D->AddRenderer(m_localRenderer3D);
+  // But give it a zero viewport
+  m_localRenderer3D->SetViewport(0.0, 0.0, 0.0, 0.0);
+
+  // Create the main renderer
   m_renderer3D = vtkRenderer::New();
   m_renWin3D->AddRenderer(m_renderer3D);
+  m_renderer3D->SetViewport(0.0, 0.0, 1.0, 1.0);
 
-  m_cameraControl = new rtCameraControl( m_renderer3D->GetActiveCamera(), m_render3DVTKWidget );
+  m_cameraControl = new rtCameraControl( m_renderer3D->GetActiveCamera(), m_renderer3D, m_render3DVTKWidget );
   m_cameraControl->setToDefaultPosition();
+
+  m_localCameraControl = new rtCameraControl( m_localRenderer3D->GetActiveCamera(), m_localRenderer3D, m_render3DVTKWidget );
+  m_localCameraControl->setToDefaultPosition();
 
   m_movingQuality = 0.5f;
   m_stillQuality = 1.0f;
@@ -98,6 +109,9 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   m_orientationWidget->SetInteractor( m_inter3D );
   m_orientationWidget->SetViewport( 0.75, 0.0, 1.0, 0.25 );
+
+  // Start with a single view.
+  action3D_Dual_View->setChecked(false);
 
   m_axesProperties = new rtAxesProperties();
 
@@ -165,6 +179,7 @@ rtMainWindow::~rtMainWindow() {
   m_cellPicker->Delete();
 
   if (m_cameraControl) delete m_cameraControl;
+  if (m_localCameraControl) delete m_localCameraControl;
 
   clearPluginList();
   clearObjectList();
@@ -184,6 +199,7 @@ rtMainWindow::~rtMainWindow() {
   if (m_objectBrowseLayout) delete m_objectBrowseLayout;
 
   if (m_renderer3D) m_renderer3D->Delete();
+  if (m_localRenderer3D) m_localRenderer3D->Delete();
   if (m_axesActor) m_axesActor->Delete();
   if (m_propAssembly) m_propAssembly->Delete();
   if (m_orientationWidget) {
@@ -444,11 +460,11 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
 
   // If the box is checked then add it to the renderer.
   if (current->checkState(column) == Qt::Checked) {
-    if ( temp->addToRenderer(m_renderer3D) ) {
+    if ( temp->addToRenderer(m_renderer3D) && temp->addToRenderer(m_localRenderer3D) ) {
       m_renderFlag3D = true;
     }
   } else {
-    if ( temp->removeFromRenderer(m_renderer3D) ) {
+    if ( temp->removeFromRenderer(m_renderer3D) && temp->removeFromRenderer(m_localRenderer3D) ) {
       m_renderFlag3D = true;
     }
   }
@@ -491,6 +507,7 @@ void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
   if (temp->getObjectLocation(loc)) {
     // Location is valid
     m_renderer3D->ResetCamera(loc);
+    m_localRenderer3D->ResetCamera(loc);
     m_renderFlag3D = true;
   }
 
@@ -512,8 +529,9 @@ void rtMainWindow::addRenderItem(vtkProp* prop) {
     return;
   }
 
-  if (!m_renderer3D->HasViewProp(prop)) {
+  if ( !m_renderer3D->HasViewProp(prop) || !m_localRenderer3D->HasViewProp(prop) ) {
     m_renderer3D->AddViewProp(prop);
+    m_localRenderer3D->AddViewProp(prop);
     m_renderFlag3D = true;
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
@@ -535,8 +553,9 @@ void rtMainWindow::removeRenderItem(vtkProp* prop) {
     return;
   }
 
-  if (m_renderer3D->HasViewProp(prop)) {
+  if (m_renderer3D->HasViewProp(prop) || m_localRenderer3D->HasViewProp(prop)) {
     m_renderer3D->RemoveViewProp(prop);
+    m_localRenderer3D->RemoveViewProp(prop);
     m_renderFlag3D = true;
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
@@ -744,6 +763,7 @@ void rtMainWindow::connectSignals() {
   connect(actionCamera_Mode, SIGNAL(toggled(bool)), this, SLOT(cameraModeToggled(bool)));
   connect(actionInteraction_Mode, SIGNAL(toggled(bool)), this, SLOT(interactionModeToggled(bool)));
   connect(actionPlacement_Mode, SIGNAL(toggled(bool)), this, SLOT(placeModeToggled(bool)));
+  connect(action3D_Dual_View, SIGNAL(toggled(bool)), this, SLOT(toggle3DDualView(bool)));
 
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::connectSignals() end") );
@@ -854,6 +874,23 @@ void rtMainWindow::viewChanged2DOnly() {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::viewChanged2DOnly() end") );
 #endif
+}
+
+void rtMainWindow::toggle3DDualView(bool dual) {
+  if (dual) {
+    m_renderer3D->SetViewport(0.0, 0.0, 0.5, 1.0);
+    m_localRenderer3D->SetViewport(0.5, 0.0, 1.0, 1.0);
+    m_localRenderer3D->DrawOn();
+
+    m_orientationWidget->SetViewport( 0.25, 0.0, 0.5, 0.25 );
+  } else {
+    m_renderer3D->SetViewport(0.0, 0.0, 1.0, 1.0);
+    m_localRenderer3D->SetViewport(0.0, 0.0, 0.0, 0.0);
+    m_localRenderer3D->DrawOff();
+
+    m_orientationWidget->SetViewport( 0.75, 0.0, 1.0, 0.25 );
+  }
+  m_renderFlag3D = true;
 }
 
 //! Update  the lists for all the 2D windows.
@@ -1134,6 +1171,7 @@ void rtMainWindow::removeSelectedObject() {
   // Get the object
   temp = rtApplication::instance().getObjectManager()->getObjectWithID(current->text(1).toInt());
   temp->removeFromRenderer(m_renderer3D);
+  temp->removeFromRenderer(m_localRenderer3D);
   m_renderFlag3D = true;
   rtApplication::instance().getObjectManager()->removeObject(current->text(1).toInt());
 #ifdef DEBUG_VERBOSE_MODE_ON
