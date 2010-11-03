@@ -481,6 +481,13 @@ void rt3DVolumeRenderObject::update3PlaneStatus() {
     m_texturePlane[2].getActor()->SetVisibility(0);
   }
 
+  m_boxOutline[0].getActor()->GetProperty()->SetOpacity(dObj->getAxialOpacity());
+  m_texturePlane[0].getActor()->GetProperty()->SetOpacity(dObj->getAxialOpacity());
+  m_boxOutline[1].getActor()->GetProperty()->SetOpacity(dObj->getSagittalOpacity());
+  m_texturePlane[1].getActor()->GetProperty()->SetOpacity(dObj->getSagittalOpacity());
+  m_boxOutline[2].getActor()->GetProperty()->SetOpacity(dObj->getCoronalOpacity());
+  m_texturePlane[2].getActor()->GetProperty()->SetOpacity(dObj->getCoronalOpacity());
+
   // Fix the user transforms for the 3 planes
   vtkTransform* tt = vtkTransform::New();
   tt->Concatenate(dObj->getTransform()->GetMatrix());

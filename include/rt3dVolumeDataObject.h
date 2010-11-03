@@ -139,6 +139,33 @@ public:
   //! Check if the 3D coronal slice is being shown
   bool getCoronal3D() { return m_optionsWidget.checkCoronal3D->isChecked(); }
 
+  //! Get the opacity of the axial slice.
+  inline double getAxialOpacity() { return ((double)m_optionsWidget.axialOpacitySlider->value())/100.0; }
+  inline double getSagittalOpacity() { return ((double)m_optionsWidget.sagittalOpacitySlider->value())/100.0; }
+  inline double getCoronalOpacity() { return ((double)m_optionsWidget.coronalOpacitySlider->value())/100.0; }
+
+  inline void setAxialOpacity(double v) {
+    if ( v<0.0 ) v=0.0;
+    else if ( v>1.0 ) v = 1.0;
+    m_optionsWidget.axialOpacitySlider->setValue(v*100);
+    Modified();
+  }
+
+  inline void setSagittalOpacity(double v) {
+    if ( v<0.0 ) v=0.0;
+    else if ( v>1.0 ) v = 1.0;
+    m_optionsWidget.sagittalOpacitySlider->setValue(v*100);
+    Modified();
+  }
+
+  inline void setCoronalOpacity(double v) {
+    if ( v<0.0 ) v=0.0;
+    else if ( v>1.0 ) v = 1.0;
+    m_optionsWidget.coronalOpacitySlider->setValue(v*100);
+    Modified();
+  }
+
+
   //! Check if valid data exists in the data object.
   /*!
     When the data obejct is created the data is not valid. When new image data is copied into the data object then it becomes valid.

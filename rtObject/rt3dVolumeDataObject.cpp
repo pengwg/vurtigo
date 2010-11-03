@@ -791,6 +791,11 @@ void rt3DVolumeDataObject::setupGUI() {
   connect(m_optionsWidget.sagittalResetButton, SIGNAL(clicked()), this, SLOT(sagittalResetSlot()));
   connect(m_optionsWidget.coronalResetButton, SIGNAL(clicked()), this, SLOT(coronalResetSlot()));
 
+  // 2D plane opacity sliders
+  connect(m_optionsWidget.axialOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(Modified()));
+  connect(m_optionsWidget.sagittalOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(Modified()));
+  connect(m_optionsWidget.coronalOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(Modified()));
+
   // Watch for new objects to update the lists.
   connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(newObjectCreated(int)));
   connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(oldObjectRemoved(int)));

@@ -176,7 +176,10 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 rtMainWindow::~rtMainWindow() {
   m_renderFlag3D = false;
 
-  m_cellPicker->Delete();
+  if (m_cellPicker) m_cellPicker->Delete();
+
+  // Add the second renderer back before cleanup.
+  if (m_renWin3D) m_renWin3D->AddRenderer(m_localRenderer3D);
 
   if (m_cameraControl) delete m_cameraControl;
   if (m_localCameraControl) delete m_localCameraControl;
@@ -881,13 +884,13 @@ void rtMainWindow::toggle3DDualView(bool dual) {
     m_renderer3D->SetViewport(0.0, 0.0, 0.5, 1.0);
     m_localRenderer3D->SetViewport(0.5, 0.0, 1.0, 1.0);
     m_localRenderer3D->DrawOn();
-
+    m_renWin3D->AddRenderer(m_localRenderer3D);
     m_orientationWidget->SetViewport( 0.25, 0.0, 0.5, 0.25 );
   } else {
     m_renderer3D->SetViewport(0.0, 0.0, 1.0, 1.0);
     m_localRenderer3D->SetViewport(0.0, 0.0, 0.0, 0.0);
     m_localRenderer3D->DrawOff();
-
+    m_renWin3D->RemoveRenderer(m_localRenderer3D);
     m_orientationWidget->SetViewport( 0.75, 0.0, 1.0, 0.25 );
   }
   m_renderFlag3D = true;
