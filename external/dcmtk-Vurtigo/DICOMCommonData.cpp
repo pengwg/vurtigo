@@ -78,7 +78,6 @@ void DICOMCommonData::readData(DcmDataset* datSet) {
 
   // Get the patient name.
   if (!datSet->findAndGetOFString(DCM_PatientsName, temp).good()) {
-    m_warning = true;
     m_patientsName = "ANONYMOUS";
   } else {
     m_patientsName = temp.c_str();

@@ -78,7 +78,6 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   // Create the local renderer
   m_localRenderer3D = vtkRenderer::New();
-  m_renWin3D->AddRenderer(m_localRenderer3D);
   // But give it a zero viewport
   m_localRenderer3D->SetViewport(0.0, 0.0, 0.0, 0.0);
 
