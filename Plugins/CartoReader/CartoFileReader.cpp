@@ -164,7 +164,7 @@ bool CartoFileReader::readXmlFile(QString fName) {
     if ( xml.tokenType() == QXmlStreamReader::StartElement) {
       if ( xml.name() == "map_data" ) {
         inMapData = true;
-      } else if (xml.name() == "item" && inMapData) {
+      } else if (xml.name() == "trck_pts" && inMapData) {
         strList = xml.readElementText().split(" ");
         pt.setPointId( currId );
         currId++;
