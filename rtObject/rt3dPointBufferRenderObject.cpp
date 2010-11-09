@@ -152,7 +152,7 @@ void rt3DPointBufferRenderObject::setRenderQuality(double quality) {
   else q = quality;
 
   for (int ix1=0; ix1<m_pipeList.size(); ix1++) {
-    m_pipeList[ix1]->setResolution(q*10.0f+5);
+    m_pipeList[ix1]->setResolution(q*8.0f+5);
   }
 }
 

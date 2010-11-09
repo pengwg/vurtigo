@@ -132,10 +132,10 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
   for (int ix1=0; ix1<ptList->getNumPoints(); ix1++) {
     rtNamedInfoPointData pt = ptList->getPointAt(ix1);
     pt.getPoint(currLocation);
-    transPointList[ix1*3] = currLocation[0];
-    transPointList[ix1*3+1] = currLocation[1];
-    transPointList[ix1*3+2] = currLocation[2];
-    transPointList[ix1*3+3] = pt.getValue(m_currentPropertyName);
+    transPointList[ix1*4] = currLocation[0];
+    transPointList[ix1*4+1] = currLocation[1];
+    transPointList[ix1*4+2] = currLocation[2];
+    transPointList[ix1*4+3] = pt.getValue(m_currentPropertyName);
   }
 
   for (vtkIdType currID=0; currID<numPts; currID++) {
@@ -144,15 +144,17 @@ bool rtEPInfoObject::updateScalars(vtkPolyData* data) {
     data->GetPoint(currID, tempPT);
 
     for (int ix1=0; ix1<ptList->getNumPoints(); ix1++) {
-      currLocation[0] = transPointList[ix1*3];
-      currLocation[1] = transPointList[ix1*3+1];
-      currLocation[2] = transPointList[ix1*3+2];
+      currLocation[0] = transPointList[ix1*4];
+      currLocation[1] = transPointList[ix1*4+1];
+      currLocation[2] = transPointList[ix1*4+2];
 
       currDist = vtkMath::Distance2BetweenPoints(tempPT, currLocation);
       if (currDist < 0.01) currDist = 0.01;
       if (currDist < m_radius) {
-        val += (((double)(transPointList[ix1*3+3] - ptList->getMinValue()))/propValueDiff)*(m_radius/currDist);
-        weightSum += (m_radius/currDist);
+        //val += (((double)(transPointList[ix1*3+3] - ptList->getMinValue()))/propValueDiff)*(((double)m_radius)/currDist);
+        //weightSum += ((double)m_radius/currDist);
+        val += (((double)(transPointList[ix1*4+3] - ptList->getMinValue()))/propValueDiff);
+        weightSum += 1.0;
       }
     }
     val = val/weightSum;

@@ -199,7 +199,6 @@ bool CartoFileReader::readXmlFile(QString fName) {
           if (ix1==0) pt.setLAT( strList.at(ix1).toInt() );
           pt.setLATArray(strList.at(ix1).toInt(), ix1);
         }
-
       }
     } // StartElement
 
