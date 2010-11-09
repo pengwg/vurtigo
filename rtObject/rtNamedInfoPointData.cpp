@@ -50,10 +50,15 @@ void rtNamedInfoPointData::fromBasic3DPoint(rtBasic3DPointData* pt) {
 
 void rtNamedInfoPointData::fromCartoPoint(rtCartoPointData* pt) {
   rtBasic3DPointData::operator=( (*pt) );
+  setNamedValue("Trigger Delay", pt->getTriggerDelay());
   setNamedValue("Alpha", pt->getAlpha());
   setNamedValue("Beta", pt->getBeta());
   setNamedValue("Gamma", pt->getGamma());
   setNamedValue("UniPolar", pt->getUniPolar());
   setNamedValue("BiPolar", pt->getBiPolar());
   setNamedValue("LAT", pt->getLAT());
+  for (int ix1=0; ix1<RT_CARTO_POINT_DATA_LAT_SIZE; ix1++) {
+    setNamedValue(QString("LATv") + QString::number(ix1), pt->getLATArray(ix1));
+  }
+  setNamedValue("Point Number", pt->getPointNumber());
 }

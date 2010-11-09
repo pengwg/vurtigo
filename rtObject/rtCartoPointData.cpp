@@ -21,8 +21,11 @@
 #include "rtCartoPointData.h"
 
 rtCartoPointData::rtCartoPointData()
- : m_alpha(0.0), m_beta(0.0), m_gamma(0.0), m_uniPolar(0.0), m_biPolar(0.0), m_LAT(0)
+ : m_alpha(0.0), m_beta(0.0), m_gamma(0.0), m_uniPolar(0.0), m_biPolar(0.0), m_LAT(0), m_pointNum(0)
 {
+  for (int ix1=0; ix1<RT_CARTO_POINT_DATA_LAT_SIZE; ix1++) {
+    m_LATArray[ix1] = 0;
+  }
 }
 
 rtCartoPointData::rtCartoPointData(const rtCartoPointData& sp)
@@ -34,6 +37,10 @@ rtCartoPointData::rtCartoPointData(const rtCartoPointData& sp)
   m_uniPolar = sp.m_uniPolar;
   m_biPolar = sp.m_biPolar;
   m_LAT = sp.m_LAT;
+  m_pointNum = sp.m_pointNum;
+  for (int ix1=0; ix1<RT_CARTO_POINT_DATA_LAT_SIZE; ix1++) {
+    m_LATArray[ix1] = sp.m_LATArray[ix1];
+  }
 }
 
 bool rtCartoPointData::operator==(const rtCartoPointData &other) const {
@@ -45,6 +52,10 @@ bool rtCartoPointData::operator==(const rtCartoPointData &other) const {
   res = res && m_uniPolar == other.m_uniPolar;
   res = res && m_biPolar == other.m_biPolar;
   res = res && m_LAT == other.m_LAT;
+  res = res && m_pointNum == other.m_pointNum;
+  for (int ix1=0; ix1<RT_CARTO_POINT_DATA_LAT_SIZE; ix1++) {
+    res = res && m_LATArray[ix1] == other.m_LATArray[ix1];
+  }
   return res;
 }
 
@@ -57,6 +68,10 @@ rtCartoPointData& rtCartoPointData::operator=(const rtCartoPointData& sp) {
     m_uniPolar = sp.m_uniPolar;
     m_biPolar = sp.m_biPolar;
     m_LAT = sp.m_LAT;
+    m_pointNum = sp.m_pointNum;
+    for (int ix1=0; ix1<RT_CARTO_POINT_DATA_LAT_SIZE; ix1++) {
+      m_LATArray[ix1] = sp.m_LATArray[ix1];
+    }
   }
   return *this;
 }
@@ -71,5 +86,25 @@ rtNamedInfoPointData rtCartoPointData::toNamedInfoBiPolar() {
   res.setPointSize(this->getPointSize());
   res.getProperty()->DeepCopy(this->getProperty());
   res.setNamedValue("Bi-Polar", this->getBiPolar());
+  return res;
+}
+
+rtNamedInfoPointData rtCartoPointData::toNamedInfo() {
+  rtNamedInfoPointData res;
+
+  res.setPointId(this->getPointId());
+  res.setX(this->getX());
+  res.setY(this->getY());
+  res.setZ(this->getZ());
+  res.setPointSize(this->getPointSize());
+  res.getProperty()->DeepCopy(this->getProperty());
+  res.setNamedValue("Trigger Delay", this->getTriggerDelay());
+  res.setNamedValue("Point Number", this->getPointNumber());
+  res.setNamedValue("Alpha", this->getAlpha());
+  res.setNamedValue("Beta", this->getBeta());
+  res.setNamedValue("Gamma", this->getGamma());
+  res.setNamedValue("Uni-Polar", this->getUniPolar());
+  res.setNamedValue("Bi-Polar", this->getBiPolar());
+  res.setNamedValue("LAT", this->getLAT());
   return res;
 }

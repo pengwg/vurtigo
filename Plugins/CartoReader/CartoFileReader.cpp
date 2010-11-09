@@ -141,10 +141,11 @@ bool CartoFileReader::readFile(QString fName) {
 
 bool CartoFileReader::readXmlFile(QString fName) {
   if (fName.size() < 1) return false;
-  bool inMapData=false;
   QFile f(fName);
   QFileInfo fInfo(fName);
   int currId;
+  int currPointVal = 0;
+  bool ok;
 
   if (!f.exists()) {
     std::cout << "Specified File does not exist. " << std::endl;
@@ -168,9 +169,13 @@ bool CartoFileReader::readXmlFile(QString fName) {
   while (!xml.atEnd()) {
     xml.readNext();
 
+    // Check for a start element.
     if ( xml.tokenType() == QXmlStreamReader::StartElement) {
-      if ( xml.name() == "map_data" ) {
-        inMapData = true;
+      if ( xml.name() == "item" ) {
+        QXmlStreamAttributes attribs = xml.attributes();
+        QString textVal = attribs.value("point").toString();
+        currPointVal = textVal.toInt(&ok);
+        if (!ok) currPointVal = 0;
       } else if (xml.name() == "trck_pts" ) {
         strList = xml.readElementText().split(" ");
         pt.setPointId( currId );
@@ -180,18 +185,31 @@ bool CartoFileReader::readXmlFile(QString fName) {
         pt.setZ( strList.at(2).toDouble() );
         pt.setBiPolar( strList.at(4).toDouble() );
         pt.setTriggerDelay( strList.at(7).toInt() );
+        pt.setPointNumber(currPointVal);
 
         // Zero everything else
         pt.setAlpha( 0.0 );
         pt.setBeta( 0.0 );
         pt.setGamma( 0.0 );
         pt.setUniPolar( 0.0 );
-        pt.setLAT( 0 );
+      } else if (xml.name() == "time_buff") {
+        strList = xml.readElementText().split(" ");
 
+        for (int ix1=0; ( ix1<RT_CARTO_POINT_DATA_LAT_SIZE && ix1<strList.size() ); ix1++) {
+          if (ix1==0) pt.setLAT( strList.at(ix1).toInt() );
+          pt.setLATArray(strList.at(ix1).toInt(), ix1);
+        }
+
+      }
+    } // StartElement
+
+    // Check for an end element
+    if ( xml.tokenType() == QXmlStreamReader::EndElement) {
+      // Check if this item is finished.
+      if ( xml.name() == "item" ) {
         // Ensure that at least one element is non-zero.
         if ( pt.getX() != 0.0 || pt.getY() != 0.0 || pt.getZ() != 0.0 || pt.getBiPolar() != 0.0 || pt.getTriggerDelay() != 0.0 ) {
           m_pointList.insert(pt.getPointId(), pt);
-
 
           if (firstPoint) {
             m_minUniPolar = pt.getUniPolar();
@@ -226,13 +244,8 @@ bool CartoFileReader::readXmlFile(QString fName) {
           }
         }
       }
-    }
+    } // EndElement
 
-    if ( xml.tokenType() == QXmlStreamReader::EndElement) {
-      if ( xml.name() == "map_data" ) {
-        inMapData = false;
-      }
-    }
   }
   if (xml.hasError()) {
 
