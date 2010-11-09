@@ -42,7 +42,6 @@ public slots:
   void loadXmlFile();
   void saveAsPoints();
   void saveAsSurface();
-  void tableSelection();
   void filterByTriggerDelay();
 
 protected:

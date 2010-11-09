@@ -73,7 +73,6 @@ void CartoReaderUI::connectSignals() {
   connect(loadXMLPushButton, SIGNAL(clicked()), this, SLOT(loadXmlFile()));
   connect(saveAsPointsPushButton, SIGNAL(clicked()), this, SLOT(saveAsPoints()));
   connect(saveAsSurfacePushButton, SIGNAL(clicked()), this, SLOT(saveAsSurface()));
-  connect(filePointsTableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(tableSelection()));
   connect(filterNowPushButton, SIGNAL(clicked()), this, SLOT(filterByTriggerDelay()));
 }
 
@@ -291,42 +290,6 @@ void CartoReaderUI::saveAsSurface() {
         surfObj[ix1]->setNewGeometry(&ptList, &linkList);
         surfObj[ix1]->Modified();
         surfObj[ix1]->unlock();
-      }
-    }
-  }
-}
-
-void CartoReaderUI::tableSelection() {
-  int row = filePointsTableWidget->currentRow();
-  int col = filePointsTableWidget->currentColumn();
-  rtBasic3DPointData* pt;
-
-  // Sanity check.
-  if (row<0 || col <0) return;
-
-  QTableWidgetItem* item = filePointsTableWidget->item(row, 0);
-  if (m_pts >=0) {
-    rt3DPointBufferDataObject* ptObj = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pts));
-    if (ptObj) {
-
-      // Remove the old point.
-      if (m_currPointSelection >= 0) {
-        pt = ptObj->getPointWithId(m_currPointSelection);
-        if (pt) {
-          ptObj->lock();
-          pt->setPointSize( 1.0 );
-          ptObj->Modified();
-          ptObj->unlock();
-        }
-      }
-
-      m_currPointSelection = item->text().toInt();
-      pt = ptObj->getPointWithId(m_currPointSelection);
-      if (pt) {
-        ptObj->lock();
-        pt->setPointSize( 3.0 );
-        ptObj->Modified();
-        ptObj->unlock();
       }
     }
   }

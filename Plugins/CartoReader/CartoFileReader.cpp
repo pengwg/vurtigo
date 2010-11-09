@@ -146,8 +146,15 @@ bool CartoFileReader::readXmlFile(QString fName) {
   QFileInfo fInfo(fName);
   int currId;
 
-  if (!f.exists()) return false;
-  if (!f.open(QIODevice::ReadOnly)) return false;
+  if (!f.exists()) {
+    std::cout << "Specified File does not exist. " << std::endl;
+    return false;
+  }
+
+  if (!f.open(QIODevice::ReadOnly)) {
+    std::cout << "Failed to open given file. " << std::endl;
+    return false;
+  }
 
   m_dataName=fInfo.fileName();
   rtCartoPointData pt;
@@ -164,7 +171,7 @@ bool CartoFileReader::readXmlFile(QString fName) {
     if ( xml.tokenType() == QXmlStreamReader::StartElement) {
       if ( xml.name() == "map_data" ) {
         inMapData = true;
-      } else if (xml.name() == "trck_pts" && inMapData) {
+      } else if (xml.name() == "trck_pts" ) {
         strList = xml.readElementText().split(" ");
         pt.setPointId( currId );
         currId++;
