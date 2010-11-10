@@ -181,8 +181,8 @@ bool CartoFileReader::readXmlFile(QString fName) {
         pt.setPointId( currId );
         currId++;
         pt.setX( strList.at(0).toDouble() );
-        pt.setY( strList.at(1).toDouble() );
-        pt.setZ( strList.at(2).toDouble() );
+        pt.setY( -strList.at(1).toDouble() );
+        pt.setZ( -strList.at(2).toDouble() );
         pt.setBiPolar( strList.at(4).toDouble() );
         pt.setTriggerDelay( strList.at(7).toInt() );
         pt.setPointNumber(currPointVal);
@@ -253,7 +253,7 @@ bool CartoFileReader::readXmlFile(QString fName) {
   f.close();
 
   // Center the points around the origin.
-  centerPoints();
+  //centerPoints();
 
   // The file is now loaded.
   m_fileLoaded=true;
