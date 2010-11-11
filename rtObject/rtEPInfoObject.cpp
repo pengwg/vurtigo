@@ -26,10 +26,15 @@
 rtEPInfoObject::rtEPInfoObject()
  : m_radius(25)
 {
+  // Setup the default color transfer function.
+  // The colors are the same as the default CARTO colors.
   m_defaultColorFunc = vtkColorTransferFunction::New();
-  m_defaultColorFunc->AddRGBPoint(0.0, 0.0, 0.0, 1.0);
-  m_defaultColorFunc->AddRGBPoint(0.5, 0.5, 0.5, 0.5);
-  m_defaultColorFunc->AddRGBPoint(1.0, 1.0, 0.0, 0.0);
+  m_defaultColorFunc->AddRGBPoint(0.0, 1.0, 0.0, 0.0);
+  m_defaultColorFunc->AddRGBPoint(0.3, 1.0, 1.0, 0.0);
+  m_defaultColorFunc->AddRGBPoint(0.4, 0.0, 1.0, 0.0);
+  m_defaultColorFunc->AddRGBPoint(0.6, 0.0, 1.0, 1.0);
+  m_defaultColorFunc->AddRGBPoint(0.7, 0.0, 0.0, 1.0);
+  m_defaultColorFunc->AddRGBPoint(1.0, 1.0, 0.0, 1.0);
 
   m_currentPropertyName = "";
 
