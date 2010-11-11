@@ -28,6 +28,7 @@
 #include "rt2dSliceDataObject.h"
 #include "rtMessage.h"
 #include "rtApplication.h"
+#include "rtTimeManager.h"
 
 using namespace std;
 
@@ -92,6 +93,11 @@ void GenericMode::runMode() {
   msg << "Re-size image data array: " << tt.elapsed();
   rtApplication::instance().getMessageHandle()->bench(msg.str());
 */
+
+  // Get the trigger time.
+  int triggerT = m_sender->getTrig();
+  // Set the trigger delay for the application.
+  rtApplication::instance().getTimeManager()->setGlobalTriggerDelay(triggerT);
 
   // Read all the relevant planes
   for (int ix1=0; ix1<m_planeList.count(); ix1++) {
