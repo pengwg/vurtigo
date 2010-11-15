@@ -33,8 +33,17 @@ Q_OBJECT
 public:
   ObjectSelectionComboBox();
 
+  //! Include a type of object into this list.
   void addObjectType(rtConstants::rtObjectType type);
+
+  //! Remove a type of object from this list.
   void removeObjectType(rtConstants::rtObjectType type);
+
+  //! Return the ID of the current object.
+  /*!
+    \return The id of the currenly selected object. Returns -1 if no object is selected.
+    */
+  inline int getCurrentObjectId() { return m_currentObjectIndex; }
 
 public slots:
   void objectCreated(int id);

@@ -27,10 +27,16 @@
 CathTrackingUI::CathTrackingUI() {
   setupUi(this);
 
+  m_cathComboBox.addObjectType(rtConstants::OT_Cath);
+  m_planeComboBox.addObjectType(rtConstants::OT_2DObject);
+
+  this->gridLayout->addWidget(&m_cathComboBox, 0, 1, 1, 2);
+  this->gridLayout->addWidget(&m_planeComboBox, 1, 1, 1, 2);
+
   m_trackList.clear();
 
-  populateLists();
   connectSignals();
+  updateCheckableStatus();
 }
 
 CathTrackingUI::~CathTrackingUI() {
@@ -42,11 +48,9 @@ CathTrackingUI::~CathTrackingUI() {
 }
 
 void CathTrackingUI::connectSignals() {
-  connect( rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(objectAdded(int)) );
-  connect( rtApplication::instance().getObjectManager(), SIGNAL(objectRemoved(int)), this, SLOT(objectRemoved(int)) );
 
-  connect( cathComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(cathChanged(int)) );
-  connect( planeComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(planeChanged(int)) );
+  connect( &m_cathComboBox, SIGNAL(objectSelectionChanged(int)), this, SLOT(cathChanged(int)) );
+  connect( &m_planeComboBox, SIGNAL(objectSelectionChanged(int)), this, SLOT(planeChanged(int)) );
 
   connect( trackLocSpinBox, SIGNAL(valueChanged(int)), this, SLOT(trackLocationChanged(int)) );
   connect( trackOffsetDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(trackOffsetChanged(double)) );
@@ -54,116 +58,70 @@ void CathTrackingUI::connectSignals() {
   connect( trackGroupBox, SIGNAL(toggled(bool)), this, SLOT(trackChanged(bool)));
 }
 
-
-void CathTrackingUI::populateLists() {
-  QList<int> cathObjs;
-  QList<int> planeObjs;
-  rt2DSliceDataObject* slice=NULL;
-  rtCathDataObject* cath=NULL;
-
-  planeObjs = rtBaseHandle::instance().getObjectsOfType(rtConstants::OT_2DObject);
-  cathObjs = rtBaseHandle::instance().getObjectsOfType(rtConstants::OT_Cath);
-
-  cathComboBox->clear();
-  planeComboBox->clear();
-
-  for (int ix1=0; ix1<planeObjs.size(); ix1++) {
-    slice = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeObjs[ix1]));
-    if (slice) {
-      m_planeObjectMap.insert(ix1, slice);
-      planeComboBox->insertItem(ix1, QString::number(planeObjs[ix1])+slice->getObjName());
-    }
-  }
-
-  for (int ix1=0; ix1<cathObjs.size(); ix1++) {
-    cath = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathObjs[ix1]));
-    if (cath) {
-      m_cathObjectMap.insert(ix1, cath);
-      cathComboBox->insertItem(ix1, QString::number(cathObjs[ix1])+cath->getObjName());
-    }
-  }
-  updateCheckableStatus();
-}
-
-
 void CathTrackingUI::updateCheckableStatus() {
-  int cathPos, planePos;
-  cathPos = cathComboBox->currentIndex();
-  planePos = planeComboBox->currentIndex();
-  if (cathPos < 0 || planePos < 0) {
-    trackGroupBox->setEnabled(false);
+  int cathId, planeId;
+  rt2DSliceDataObject* planePtr = NULL;
+  rtCathDataObject* cathPtr = NULL;
+
+  cathId = m_cathComboBox.getCurrentObjectId();
+  planeId = m_planeComboBox.getCurrentObjectId();
+
+  if (cathId >= 0) {
+    cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
   }
-  else {
+
+  if (planeId >= 0) {
+    planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
+  }
+
+  if ( !cathPtr || !planePtr ) {
+    trackGroupBox->setEnabled(false);
+  } else {
     trackGroupBox->setEnabled(true);
   }
 }
 
-
-void CathTrackingUI::objectAdded(int objID) {
-  rtDataObject *data=NULL;
-  rt2DSliceDataObject *slice=NULL;
-  rtCathDataObject *cath=NULL;
-
-  data = rtBaseHandle::instance().getObjectWithID(objID);
-  if (!data) return;
-
-  if ( data->getObjectType() == rtConstants::OT_2DObject ) {
-    slice = static_cast<rt2DSliceDataObject*>(data);
-    if (!slice) return;
-    m_planeObjectMap.insert(m_planeObjectMap.count(), slice);
-    planeComboBox->insertItem(planeComboBox->count(), QString::number(objID)+slice->getObjName());
-  }
-
-  if ( data->getObjectType() == rtConstants::OT_Cath ) {
-    cath = static_cast<rtCathDataObject*>(data);
-    if (!cath) return;
-    m_cathObjectMap.insert(m_cathObjectMap.count(), cath);
-    cathComboBox->insertItem(cathComboBox->count(), QString::number(objID)+cath->getObjName());
-  }
-  updateCheckableStatus();
-}
-
-//! The object manager has removed an object. It could be of a type we are interesed in.
-void CathTrackingUI::objectRemoved(int objID) {
-  int cathPos, planePos;
-
-  cathPos = cathComboBox->currentIndex();
-  planePos = planeComboBox->currentIndex();
-
-  populateLists();
-
-  if ( cathPos >= 0 && cathPos < cathComboBox->count() ) cathComboBox->setCurrentIndex(cathPos);
-  if ( planePos >= 0 && planePos < planeComboBox->count() ) planeComboBox->setCurrentIndex(planePos);
-  updateCheckableStatus();
-}
-
-
 void CathTrackingUI::cathChanged(int newpos) {
+  updateCheckableStatus();
   trackingPairChanged();
+
 }
 
 void CathTrackingUI::planeChanged(int newpos) {
+  updateCheckableStatus();
   trackingPairChanged();
 }
 
+
 void CathTrackingUI::trackingPairChanged() {
-  int cathPos, planePos;
+  int cathId, planeId;
+  rt2DSliceDataObject* planePtr = NULL;
+  rtCathDataObject* cathPtr = NULL;
   TrackData* td;
 
-  cathPos = cathComboBox->currentIndex();
-  planePos = planeComboBox->currentIndex();
+  cathId = m_cathComboBox.getCurrentObjectId();
+  planeId = m_planeComboBox.getCurrentObjectId();
+
+  if (cathId >= 0) {
+    cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
+  }
+
+  if (planeId >= 0) {
+    planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
+  }
 
   // Not relevant if at least one does not exist.
-  if (cathPos < 0 || planePos < 0) {
+  if ( !planePtr || !cathPtr ) {
     updateCheckableStatus();
     trackGroupBox->setChecked(false);
     trackLocSpinBox->setValue(0);
     trackOffsetDoubleSpinBox->setValue(0.0);
   } else {
-    td = getPair( m_planeObjectMap.value(planePos), m_cathObjectMap.value(cathPos) );
+    td = getPair( planePtr, cathPtr );
     trackGroupBox->setChecked(td->isTracking());
     trackLocSpinBox->setValue(td->getLocation());
     trackOffsetDoubleSpinBox->setValue(td->getOffset());
+    td->update();
   }
 }
 
@@ -190,51 +148,82 @@ TrackData* CathTrackingUI::getPair(rt2DSliceDataObject* slice, rtCathDataObject*
 
 
 void CathTrackingUI::trackLocationChanged(int loc) {
-  int cathPos, planePos;
+  int cathId, planeId;
+  rt2DSliceDataObject* planePtr = NULL;
+  rtCathDataObject* cathPtr = NULL;
   TrackData* td;
 
-  cathPos = cathComboBox->currentIndex();
-  planePos = planeComboBox->currentIndex();
+  cathId = m_cathComboBox.getCurrentObjectId();
+  planeId = m_planeComboBox.getCurrentObjectId();
+
+  if (cathId >= 0) {
+    cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
+  }
+
+  if (planeId >= 0) {
+    planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
+  }
 
   // Not relevant if at least one does not exist.
-  if (cathPos >= 0 && planePos >= 0) {
-    td = getPair( m_planeObjectMap.value(planePos), m_cathObjectMap.value(cathPos) );
+  if (planePtr && cathPtr) {
+    td = getPair( planePtr, cathPtr );
     td->setLocation(trackLocSpinBox->value());
-    if(td->isTracking()) td->update();
+    td->update();
   }
 
 }
 
 
 void CathTrackingUI::trackOffsetChanged(double offset) {
-  int cathPos, planePos;
+  int cathId, planeId;
+  rt2DSliceDataObject* planePtr = NULL;
+  rtCathDataObject* cathPtr = NULL;
   TrackData* td;
 
-  cathPos = cathComboBox->currentIndex();
-  planePos = planeComboBox->currentIndex();
+  cathId = m_cathComboBox.getCurrentObjectId();
+  planeId = m_planeComboBox.getCurrentObjectId();
+
+  if (cathId >= 0) {
+    cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
+  }
+
+  if (planeId >= 0) {
+    planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
+  }
 
   // Not relevant if at least one does not exist.
-  if (cathPos >= 0 && planePos >= 0) {
-    td = getPair( m_planeObjectMap.value(planePos), m_cathObjectMap.value(cathPos) );
+  if (planePtr && cathPtr) {
+    td = getPair( planePtr, cathPtr );
     td->setOffest( trackOffsetDoubleSpinBox->value() );
-    if(td->isTracking()) td->update();
+    td->update();
   }
 }
 
 
-void CathTrackingUI::trackChanged(bool track) {
-  int cathPos, planePos;
-  TrackData* td;
 
-  cathPos = cathComboBox->currentIndex();
-  planePos = planeComboBox->currentIndex();
+void CathTrackingUI::trackChanged(bool track) {
+  int cathId, planeId;
+  rt2DSliceDataObject* planePtr = NULL;
+  rtCathDataObject* cathPtr = NULL;
+  TrackData* td = NULL;
+
+  cathId = m_cathComboBox.getCurrentObjectId();
+  planeId = m_planeComboBox.getCurrentObjectId();
+
+  if (cathId >= 0) {
+    cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
+  }
+
+  if (planeId >= 0) {
+    planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
+  }
 
   // Not relevant if at least one does not exist.
-  if (cathPos < 0 || planePos < 0) return;
-
-  td = getPair( m_planeObjectMap.value(planePos), m_cathObjectMap.value(cathPos) );
-  if (td) {
-    td->setTracking(track);
-    if(track) td->update();
+  if (planePtr && cathPtr) {
+    td = getPair( planePtr, cathPtr );
+    if (td) {
+      td->setTracking(track);
+      td->update();
+    }
   }
 }

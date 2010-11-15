@@ -79,7 +79,6 @@ void TrackData::setTracking(bool t) {
 
 void TrackData::update() {
   if (!m_cath || !m_slice) return;
-  if (!m_tracking) return;
 
   bool skipUpdate = true;
   int numLoc;
@@ -101,18 +100,20 @@ void TrackData::update() {
   skipUpdate = skipUpdate && ( m_tracking == m_old_tracking );
   skipUpdate = skipUpdate && ( findDistance(m_old_position, pos) <= 1 );
 
-  if (skipUpdate) return;
+  if (!skipUpdate) {
+    if (m_tracking) {
+      m_slice->setPlaneCenter(pos);
+      m_slice->pushPlaneBy(m_offset);
+    }
 
-  m_slice->setPlaneCenter(pos);
-  m_slice->pushPlaneBy(m_offset);
-
-  // Set the variables to "old" status after the update.
-  m_old_location = m_location;
-  m_old_offset = m_offset;
-  m_old_tracking = m_tracking;
-  m_old_position[0] = pos[0];
-  m_old_position[1] = pos[1];
-  m_old_position[2] = pos[2];
+    // Set the variables to "old" status after the update.
+    m_old_location = m_location;
+    m_old_offset = m_offset;
+    m_old_tracking = m_tracking;
+    m_old_position[0] = pos[0];
+    m_old_position[1] = pos[1];
+    m_old_position[2] = pos[2];
+  }
 }
 
  double TrackData::findDistance(double a[3], double b[3]) {

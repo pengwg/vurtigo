@@ -28,6 +28,7 @@
 #include "TrackData.h"
 #include "rt2dSliceDataObject.h"
 #include "rtCathDataObject.h"
+#include "ObjectSelectionComboBox.h"
 
 class CathTrackingUI : public QWidget, public Ui::CathTracking
 {
@@ -38,9 +39,6 @@ public:
   ~CathTrackingUI();
 
 public slots:
-  void objectAdded(int);
-  void objectRemoved(int);
-
   void cathChanged(int);
   void planeChanged(int);
 
@@ -51,11 +49,13 @@ public slots:
 
 protected:
   void connectSignals();
-  void populateLists();
   void updateCheckableStatus();
   void trackingPairChanged();
 
   TrackData* getPair(rt2DSliceDataObject*, rtCathDataObject*);
+
+  ObjectSelectionComboBox m_cathComboBox;
+  ObjectSelectionComboBox m_planeComboBox;
 
   //! Map the combo box indices to the catheter objects.
   QMap<int, rt2DSliceDataObject*> m_planeObjectMap;
