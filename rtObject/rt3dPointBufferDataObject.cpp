@@ -442,8 +442,9 @@ void rt3DPointBufferDataObject::filterPoints() {
 
   filterD.setPointList(&m_namedInfoData);
 
-  int pointsToRemove = filterD.exec();
-
+  if ( filterD.exec() == QDialog::Accepted) {
+    emit pointListModifiedSignal();
+  }
 }
 
 void rt3DPointBufferDataObject::createNewPoint() {

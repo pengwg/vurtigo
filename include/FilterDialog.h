@@ -22,6 +22,7 @@ public slots:
   void filterButton();
   void cancelButton();
   void filterOpChanged(int op);
+  void filterByChanged(int by);
 
 protected:
   void changeEvent(QEvent *e);
