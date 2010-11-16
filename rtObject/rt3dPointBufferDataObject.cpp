@@ -30,6 +30,7 @@
 #include "rtMessage.h"
 #include "rt3dPointBufferDataObject.h"
 #include "rtObjectManager.h"
+#include "FilterDialog.h"
 
 //! Constructor
 rt3DPointBufferDataObject::rt3DPointBufferDataObject()
@@ -436,6 +437,14 @@ void rt3DPointBufferDataObject::removeSelectedPoints() {
   emit pointListModifiedSignal();
 }
 
+void rt3DPointBufferDataObject::filterPoints() {
+  FilterDialog filterD(getBaseWidget());
+
+  filterD.setPointList(&m_namedInfoData);
+
+  int pointsToRemove = filterD.exec();
+
+}
 
 void rt3DPointBufferDataObject::createNewPoint() {
   rtBasic3DPointData newPt;
@@ -611,6 +620,7 @@ void rt3DPointBufferDataObject::setupGUI() {
   connect( m_optionsWidget.pointZoomSlider, SIGNAL(valueChanged(int)), this, SLOT(pointZoomChanged(int)) );
   connect( m_optionsWidget.clearDataPushButton, SIGNAL(clicked()), this, SLOT(clearPointDataPressed()) );
   connect( m_optionsWidget.deleteSelectedButton, SIGNAL(clicked()), this, SLOT(removeSelectedPoints()) );
+  connect( m_optionsWidget.filterPushButton, SIGNAL(clicked()), this, SLOT(filterPoints()) );
   connect( m_optionsWidget.newPointButton, SIGNAL(clicked()), this, SLOT(createNewPoint()) );
   connect( m_optionsWidget.addPropertyPushButton, SIGNAL(clicked()), this, SLOT(addNewTagButton()) );
 

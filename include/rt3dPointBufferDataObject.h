@@ -144,6 +144,9 @@ public:
   //! Slot called when the user wants to delete the selected points.
   void removeSelectedPoints();
 
+  //! Slot called when the filter points button is pressed.
+  void filterPoints();
+
   //! Slot called when the user wants to add a new point.
   void createNewPoint();
 

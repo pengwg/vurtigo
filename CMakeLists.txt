@@ -141,6 +141,7 @@ set (UI_FILES
   rtUI/EPOptions.ui
   rtUI/cineWidget.ui
   rtUI/rt3DPointBuffer.ui
+  rtUI/FilterDialog.ui
 )
 
 
