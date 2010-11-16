@@ -57,6 +57,16 @@ class customQVTKWidget : public QVTKWidget {
     */
   vtkProp* getChosenProp() { return m_propChosen; }
 
+  //! Calculate the position of Qt X,Y into vtk X,Y,Z
+  void calculateQtToVtk(int qtCoords[2], double vtkCoords[3]);
+
+  //! Get the current mouse position
+  void getCurrentMousePosition(double pos[3]) {
+    pos[0] = m_currentMousePosition[0];
+    pos[1] = m_currentMousePosition[1];
+    pos[2] = m_currentMousePosition[2];
+  }
+
 signals:
   void cameraMousePress(QMouseEvent*);
   void cameraMouseMove(QMouseEvent*);
@@ -135,6 +145,9 @@ signals:
 
   //! The type of interaction the user has selected.
   InteractionMode m_interactionMode;
+
+  //! The current mouse position in x,y,z
+  double m_currentMousePosition[3];
 };
 
 #endif

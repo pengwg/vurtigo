@@ -251,7 +251,9 @@ signals:
   //! The class that displays all of the help menu windows.
   rtHelpManager *m_helpManager;
 
+  //////////////////////
   // Protected functions
+  /////////////////////////
 
   //! Connect signals to slots for the main window.
   void connectSignals();

@@ -32,6 +32,7 @@
 #include "vtkProp3DCollection.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkPropPicker.h"
+#include "vtkCellPicker.h"
 
 customQVTKWidget::customQVTKWidget(QWidget* parent, Qt::WFlags f) : QVTKWidget(parent, f) {
   m_propChosen = NULL;
@@ -40,9 +41,32 @@ customQVTKWidget::customQVTKWidget(QWidget* parent, Qt::WFlags f) : QVTKWidget(p
 
   // This will send mouse move events even if nothing is clicked.
   this->setMouseTracking(true);
+
+  // Set the cursor for the QVTK widgets to the arrow cursor.
+  this->setCursor(Qt::ArrowCursor);
 }
 
 customQVTKWidget::~customQVTKWidget() {
+}
+
+void customQVTKWidget::calculateQtToVtk(int qtCoords[2], double vtkCoords[3]) {
+  vtkCellPicker* pick = vtkCellPicker::New();
+  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
+  int xVal, yVal;
+
+  xVal = qtCoords[0];
+  yVal = this->height() - qtCoords[1];
+
+  pick->SetTolerance(0.01);
+  if (pick->Pick(xVal, yVal, 0.0,  ren) ) {
+    pick->GetPickPosition(vtkCoords);
+  } else {
+    vtkCoords[0] = 0.0;
+    vtkCoords[1] = 0.0;
+    vtkCoords[2] = 0.0;
+  }
+
+  if(pick) pick->Delete();
 }
 
 void customQVTKWidget::resizeEvent(QResizeEvent* event) {
@@ -87,6 +111,29 @@ void customQVTKWidget::mousePressEvent(QMouseEvent* event) {
 }
 
 void customQVTKWidget::mouseMoveEvent(QMouseEvent* event) {
+
+  if( event->modifiers() & Qt::ShiftModifier ) {
+    // Use the cross cursor when shift is down.
+    this->setCursor(Qt::CrossCursor);
+
+    int qtCoords[2];
+    qtCoords[0] = event->x();
+    qtCoords[1] = event->y();
+    calculateQtToVtk(qtCoords, m_currentMousePosition);
+
+    QString result("(");
+    result += QString::number(m_currentMousePosition[0]);
+    result += QString(", ");
+    result += QString::number(m_currentMousePosition[1]);
+    result += QString(", ");
+    result += QString::number(m_currentMousePosition[2]);
+    result += QString(")");
+
+    rtApplication::instance().getMainWinHandle()->statusBar()->showMessage( result );
+  } else {
+    // Set this back to the default.
+    this->setCursor(Qt::ArrowCursor);
+  }
 
   switch(m_interactionMode) {
     case(CAMERA_MODE):
