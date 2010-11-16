@@ -66,6 +66,7 @@ rtTimeManager::rtTimeManager() {
   m_cardiacCycleSlowdown = 1.0f;
   m_cardiacCycleLength = 800;
   m_globalTriggerDelay = 0;
+  m_globalResp = 0;
 
   m_appTime.start();
 

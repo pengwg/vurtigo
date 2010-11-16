@@ -60,7 +60,10 @@ class rtTimeManager : public QObject {
   /*! This delay will be ignored if the simulation delay is running.
     \sa m_useSimulatedTrigger
     */
-  void setGlobalTriggerDelay(int delay) { m_globalTriggerDelay=delay; }
+  inline void setGlobalTriggerDelay(int delay) { m_globalTriggerDelay=delay; }
+
+  //! Set the global resp
+  inline void setGlobalResp(int resp) { m_globalResp = resp; }
 
   //! Get the trigger delay.
   /*!
@@ -71,6 +74,9 @@ If the m_useSimulatedTrigger is true then the simulated mode is run otherwise in
 \sa setGlobalTriggerDelay
     */
   int getTriggerDelay();
+
+  //! Get the global value for the respiratory.
+  inline int getGlobalResp() { return m_globalResp; }
 
   //! Get the phase number given that there are n total phases.
   int getPhaseForNumPhases(int n);
@@ -108,7 +114,11 @@ If the m_useSimulatedTrigger is true then the simulated mode is run otherwise in
   Ui::rtTimeOptionsDialog m_dialogOptions;
   QDialog m_timeDialog;
 
+  //! The cardiac trigger delay to be used for the whole application.
   int m_globalTriggerDelay;
+
+  //! The global respiratory value to be used for the whole application.
+  int m_globalResp;
 
   //! The application time.
   QTime m_appTime;

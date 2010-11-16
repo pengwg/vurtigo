@@ -99,6 +99,7 @@ rtNamedInfoPointData rtCartoPointData::toNamedInfo() {
   res.setPointSize(this->getPointSize());
   res.getProperty()->DeepCopy(this->getProperty());
   res.setNamedValue("Trigger Delay", this->getTriggerDelay());
+  res.setNamedValue("Resp", this->getResp());
   res.setNamedValue("Point Number", this->getPointNumber());
   res.setNamedValue("Alpha", this->getAlpha());
   res.setNamedValue("Beta", this->getBeta());

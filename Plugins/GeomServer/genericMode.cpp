@@ -96,8 +96,11 @@ void GenericMode::runMode() {
 
   // Get the trigger time.
   int triggerT = m_sender->getTrig();
+  int respR = m_sender->getResp();
+
   // Set the trigger delay for the application.
   rtApplication::instance().getTimeManager()->setGlobalTriggerDelay(triggerT);
+  rtApplication::instance().getTimeManager()->setGlobalResp(respR);
 
   // Read all the relevant planes
   for (int ix1=0; ix1<m_planeList.count(); ix1++) {

@@ -22,6 +22,7 @@
 #include <cmath>
 
 #include "rtBasic3DPointData.h"
+#include "rt3DTimePointData.h"
 
 #include "vtkTransform.h"
 #include "vtkMatrix4x4.h"
@@ -65,7 +66,7 @@ void HistoryData::savePoint()
       return;
       
    // create a point at this position
-    rtBasic3DPointData p;
+    rt3DTimePointData p;
 
     p.setPoint(pos);
 
@@ -75,7 +76,7 @@ void HistoryData::savePoint()
     p.getProperty()->SetOpacity(0.5);
     
     m_points->lock();
-    m_points->addPoint(p);
+    m_points->addTimePoint(p);
     m_points->Modified();
     m_points->unlock();
   }
@@ -110,7 +111,7 @@ void HistoryData::doAutoTrack()
       return;
       
    // create a point at this position
-    rtBasic3DPointData p;
+    rt3DTimePointData p;
     
     p.setPoint(pos);
 
@@ -125,7 +126,7 @@ void HistoryData::doAutoTrack()
     m_prevAutoTrackPoint = p;
     
     m_points->lock();
-    m_points->addPoint(p);
+    m_points->addTimePoint(p);
     m_points->Modified();
     m_points->unlock();
   }

@@ -20,6 +20,7 @@
 
 #include "rtNamedInfoPointData.h"
 #include "rtCartoPointData.h"
+#include "rt3DTimePointData.h"
 
 rtNamedInfoPointData::rtNamedInfoPointData()
 {
@@ -48,9 +49,16 @@ void rtNamedInfoPointData::fromBasic3DPoint(rtBasic3DPointData* pt) {
   rtBasic3DPointData::operator=( (*pt) );
 }
 
+void rtNamedInfoPointData::fromTimePoint(rt3DTimePointData* pt) {
+  rtBasic3DPointData::operator=( (*pt) );
+  setNamedValue("Trigger Delay", pt->getTriggerDelay());
+  setNamedValue("Resp", pt->getResp());
+}
+
 void rtNamedInfoPointData::fromCartoPoint(rtCartoPointData* pt) {
   rtBasic3DPointData::operator=( (*pt) );
   setNamedValue("Trigger Delay", pt->getTriggerDelay());
+  setNamedValue("Resp", pt->getResp());
   setNamedValue("Alpha", pt->getAlpha());
   setNamedValue("Beta", pt->getBeta());
   setNamedValue("Gamma", pt->getGamma());

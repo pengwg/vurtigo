@@ -28,6 +28,7 @@
 #include "rtBasic3DPointData.h"
 
 class rtCartoPointData;
+class rt3DTimePointData;
 
 class rtNamedInfoPointData : public rtBasic3DPointData
 {
@@ -43,6 +44,7 @@ public:
   rtNamedInfoPointData& operator=(const rtNamedInfoPointData& sp);
 
   void fromBasic3DPoint(rtBasic3DPointData* pt);
+  void fromTimePoint(rt3DTimePointData* pt);
   void fromCartoPoint(rtCartoPointData* pt);
 
   //! Set the value along with the name.

@@ -96,6 +96,17 @@ void rt3DPointBufferDataObject::addPoint(rtBasic3DPointData sp) {
   }
 }
 
+void rt3DPointBufferDataObject::addTimePoint(rt3DTimePointData pt) {
+  rtNamedInfoPointData namedPt;
+  int id = getNextId();
+  if (id != -1) {
+    pt.setPointId(id);
+    // Append to the regular point list.
+    namedPt.fromTimePoint(&pt);
+    m_namedInfoData.insert(id, namedPt);
+    emit pointListModifiedSignal();
+  }
+}
 
 void rt3DPointBufferDataObject::addCartoPoint(rtCartoPointData pt) {
   rtNamedInfoPointData namedPt;

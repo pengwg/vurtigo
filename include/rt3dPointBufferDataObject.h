@@ -80,6 +80,7 @@ public:
   rtNamedInfoPointData* getPointAtIndex(int index);
 
   void addPoint(rtBasic3DPointData sp);
+  void addTimePoint(rt3DTimePointData pt);
   void addCartoPoint(rtCartoPointData pt);
 
   inline void removeAllPoints() {

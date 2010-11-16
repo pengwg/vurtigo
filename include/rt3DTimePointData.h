@@ -37,13 +37,16 @@ public:
 
   inline void setTriggerDelay(unsigned int td) { m_triggerDelay = td; }
   inline void setPhase(unsigned int phase) { m_phase = phase; }
+  inline void setResp(unsigned int resp) { m_resp = resp; }
 
   inline unsigned int getTriggerDelay() { return m_triggerDelay; }
   inline unsigned int getPhase() { return m_phase; }
+  inline unsigned int getResp() { return m_resp; }
 
 protected:
   unsigned int m_triggerDelay;
   unsigned int m_phase;
+  unsigned int m_resp;
 };
 
 #endif // RT3DTIMEPOINTDATA_H
