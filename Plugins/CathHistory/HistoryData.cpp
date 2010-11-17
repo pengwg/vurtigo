@@ -28,6 +28,7 @@
 #include "vtkMatrix4x4.h"
 
 HistoryData::HistoryData(rtCathDataObject* cath, rt3DPointBufferDataObject* points)
+ : m_pointSize(1)
 {
   m_cath   = cath;
   m_points = points;
@@ -70,7 +71,7 @@ void HistoryData::savePoint()
 
     p.setPoint(pos);
 
-    p.setPointSize(3);
+    p.setPointSize(m_pointSize);
 
     p.setColor(1, 0, 0); // red
     p.getProperty()->SetOpacity(0.5);
@@ -118,7 +119,7 @@ void HistoryData::doAutoTrack()
     if (rtBasic3DPointData::findDistance(p, m_prevAutoTrackPoint) < m_autoTrackDistanceThreshold)
       return;
 
-    p.setPointSize(3);
+    p.setPointSize(m_pointSize);
 
     p.setColor(1, 0, 0); // red
     p.getProperty()->SetOpacity(0.5);

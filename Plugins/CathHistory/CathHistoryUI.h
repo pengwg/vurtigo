@@ -40,6 +40,7 @@ public:
 public slots:
   void objectAdded(int);
   void objectRemoved(int);
+  void pointSizeChanged(int);
 
   void cathChanged(int);
   

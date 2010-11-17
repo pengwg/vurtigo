@@ -55,6 +55,8 @@ void CathHistoryUI::connectSignals() {
   connect( rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(objectAdded(int)) );
   connect( rtApplication::instance().getObjectManager(), SIGNAL(objectRemoved(int)), this, SLOT(objectRemoved(int)) );
 
+  connect( pointSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(pointSizeChanged(int)) );
+
   connect( cathComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(cathChanged(int)) );
   
   connect( cathAutoTrackCheckBox, SIGNAL(toggled(bool)), this, SLOT(cathAutoTrackChanged(bool)));
@@ -121,6 +123,12 @@ void CathHistoryUI::objectRemoved(int objID) {
   updateCheckableStatus();
 }
 
+void CathHistoryUI::pointSizeChanged(int size) {
+  if (m_historyRecorder) {
+    m_historyRecorder->setPointSize(size);
+  }
+}
+
 void CathHistoryUI::cathChanged(int newpos) {
   trackingPairChanged();
   
@@ -142,10 +150,12 @@ void CathHistoryUI::trackingPairChanged() {
     rtCathDataObject *cath = m_cathObjectMap.value(cathPos);
     rt3DPointBufferDataObject *points = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_points));
 
-    if (m_historyRecorder == NULL)
+    if (m_historyRecorder == NULL) {
       m_historyRecorder = new HistoryData(cath, points);
-    else
+      m_historyRecorder->setPointSize(pointSizeSlider->value());
+    } else {
       m_historyRecorder->setCathObject(cath);
+    }
   }
   
   updateCheckableStatus();

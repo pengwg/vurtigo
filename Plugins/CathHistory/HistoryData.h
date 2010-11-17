@@ -42,6 +42,9 @@ class HistoryData : public QObject
     
     void setAutoTrack(bool fEnabled);
     
+    inline int getPointSize() { return m_pointSize; }
+    inline void setPointSize(int sz) { if (sz > 0) m_pointSize = sz; }
+
  public slots:
     void savePoint();
     void doAutoTrack();
@@ -53,6 +56,8 @@ class HistoryData : public QObject
   bool m_fAutoTrack;
   rtBasic3DPointData m_prevAutoTrackPoint;
   float m_autoTrackDistanceThreshold;
+
+  int m_pointSize;
   
 };
 
