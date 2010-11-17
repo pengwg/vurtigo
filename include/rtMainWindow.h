@@ -20,13 +20,12 @@
 #ifndef RT_MAIN_WINDOW_H
 #define RT_MAIN_WINDOW_H
 
-#include <vtkRenderWindowInteractor.h>
-#include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkAxesActor.h>
 #include <vtkPropAssembly.h>
 #include <vtkProp.h>
 #include <vtkCellPicker.h>
+class vtkRenderWindow;
 
 // Remove the conflict with AssertMacros.h
 // Conflict occurs in OSX
@@ -79,16 +78,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   //! Get the pointer to the render window
   vtkRenderWindow* getRenderWindow();
 
-  //! Get the interactor for the render window
-  /*!
-    The vtk style interactor is not widely used in Vurtigo.
-    */
-  vtkRenderWindowInteractor* getInteractor();
-
   //! Get the pointer to the renderer
   vtkRenderer* getRenderer();
   QTreeWidget* getObjectTree();
-  vtkCellPicker* getGlobalCellPicker() { return m_cellPicker; }
   customQVTKWidget* getRenderWidget() { return m_render3DVTKWidget; }
 
   void updateObjectList(QHash<int, rtRenderObject*>*);
@@ -209,10 +201,8 @@ signals:
   QHBoxLayout m_only3DLayout;
   QHBoxLayout m_only2DLayout;
 
-  vtkRenderWindowInteractor *m_inter3D;
   vtkRenderWindow *m_renWin3D;
   vtkRenderer *m_renderer3D;
-  vtkCellPicker *m_cellPicker;
   rtCameraControl *m_cameraControl;
 
   vtkRenderer * m_localRenderer3D;
@@ -259,6 +249,8 @@ signals:
   void connectSignals();
 
   void setupObjectTree();
+
+  //! Create a list of object types and add them to the object list.
   void populateObjectTypeNames();
 
   void setViewType(rtAxesProperties::ViewType);

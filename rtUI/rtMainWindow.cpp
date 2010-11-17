@@ -21,11 +21,13 @@
 #include <QApplication>
 #include <QFileDialog>
 
+#include <vtkRenderWindow.h>
 #include <vtkCamera.h>
 #include <vtkCaptionActor2D.h>
 #include <vtkPropAssembly.h>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
+#include <vtkRenderWindowInteractor.h>
 
 #include <iostream>
 #include <cmath>
@@ -45,7 +47,6 @@
 #include "rtApplication.h"
 #include "rtTimeManager.h"
 
-#define USE_NEW_MESSAGES
 
 rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
@@ -55,7 +56,6 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   setupUi(this);
 
-  m_cellPicker = vtkCellPicker::New();
   m_helpManager = NULL;
   m_currentObjectWidget = NULL;
   m_currentPluginWidget = NULL;
@@ -66,8 +66,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_render3DVTKWidget->setMinimumSize(300,300);
   m_render3DLayout = new QHBoxLayout();
   m_render3DLayout->setContentsMargins(0,0,0,0);
-  m_inter3D = m_render3DVTKWidget->GetInteractor();
-  m_renWin3D = m_inter3D->GetRenderWindow();
+  m_renWin3D = m_render3DVTKWidget->GetRenderWindow();
 
   // Stereo rendering causes bugs in OSX.
 #ifdef Q_WS_MAC
@@ -99,14 +98,18 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_propAssembly = vtkPropAssembly::New();
   m_orientationWidget = new rtOrientationMarkerWidget(m_render3DVTKWidget);
 
-#ifdef USE_NEW_MESSAGES
-  m_inter3D->Disable();
-#endif
-
   m_propAssembly->AddPart( m_axesActor );
   m_orientationWidget->SetOrientationMarker(m_propAssembly);
 
-  m_orientationWidget->SetInteractor( m_inter3D );
+  // This is a bit of a hack.
+  // Vurtigo does not use the vtk style interactor to get mouse events.
+  // However, the vtk Widget that is used for orientation does need it otherwise a seg-fault occurs.
+  // Note that the interactor is disabled!
+  vtkRenderWindowInteractor* inter3D = m_render3DVTKWidget->GetInteractor();
+  inter3D->Disable();
+  m_orientationWidget->SetInteractor( inter3D );
+  // End hack
+
   m_orientationWidget->SetViewport( 0.75, 0.0, 1.0, 0.25 );
 
   // Start with a single view.
@@ -175,8 +178,6 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 rtMainWindow::~rtMainWindow() {
   m_renderFlag3D = false;
 
-  if (m_cellPicker) m_cellPicker->Delete();
-
   // Add the second renderer back before cleanup.
   if (m_renWin3D) m_renWin3D->AddRenderer(m_localRenderer3D);
 
@@ -237,13 +238,6 @@ vtkRenderWindow* rtMainWindow::getRenderWindow() {
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::getRenderWindow(): ").append( QString::number((long)m_renWin3D, 16) ) );
 #endif
   return m_renWin3D;
-}
-
-vtkRenderWindowInteractor* rtMainWindow::getInteractor() {
-#ifdef DEBUG_VERBOSE_MODE_ON
-  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::getInteractor(): ").append( QString::number((long)m_inter3D, 16) ) );
-#endif
-  return m_inter3D;
 }
 
 //! Get the vtkRenderer object for the 3D view. 
