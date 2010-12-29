@@ -27,10 +27,12 @@
 TrackData::TrackData(rtCathDataObject* cath, rt2DSliceDataObject* slice)
 {
   m_location = 0;
-  m_offset = 0.0f;
+  m_offset = 1.0f;
   m_tracking = false;
   m_cath = cath;
   m_slice = slice;
+
+  m_sliceOnly = false;
 
   m_old_location = 0;
   m_old_offset = 0.0;
@@ -51,6 +53,14 @@ bool TrackData::equivalentTo(rtCathDataObject* cath, rt2DSliceDataObject* slice)
 
 bool TrackData::isTracking() {
   return m_tracking;
+}
+
+bool TrackData::isSliceOnly() {
+  return m_sliceOnly;
+}
+
+void TrackData::setSliceOnly(bool value) {
+  m_sliceOnly = value;
 }
 
 void TrackData::setTrackingOn() {
@@ -83,6 +93,7 @@ void TrackData::update() {
   bool skipUpdate = true;
   int numLoc;
   double pos[3];
+  double pos_new[3];
   QList<int> locs;
 
   numLoc = m_cath->getNumLocations();
@@ -100,20 +111,50 @@ void TrackData::update() {
   skipUpdate = skipUpdate && ( m_tracking == m_old_tracking );
   skipUpdate = skipUpdate && ( findDistance(m_old_position, pos) <= 1 );
 
-  if (!skipUpdate) {
-    if (m_tracking) {
-      m_slice->setPlaneCenter(pos);
-      m_slice->pushPlaneBy(m_offset);
+// xxxxxxxxxxxxxxxxxxxxxxxxxxxx  if (skipUpdate) return;
+
+//  std::cout << "TrackData::Update pos={" << pos[0] << " " << pos[1] << " " << pos[2] << "}" << "offset = " << m_offset << endl;
+  
+  if (m_sliceOnly)
+   // find nearest point along line from old center in normal direction 
+    {
+      double oldPos[3];
+      double normal[3];
+      
+      m_slice->getPlaneCenter(oldPos);
+      m_slice->getPlaneNormal(normal);
+     
+     // projection of point onto plane: P_proj = P_0 + [(P' - P_0 . N) / (N . N)] * N
+      double d1[3];
+      d1[0] = pos[0] - oldPos[0];
+      d1[1] = pos[1] - oldPos[1];
+      d1[2] = pos[2] - oldPos[2];
+      
+      double dd1 = d1[0] * normal[0] + d1[1] * normal[1] + d1[2] * normal[2];
+      double dd2 = normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2];
+      
+      pos_new[0] = oldPos[0] + (dd1/dd2) * normal[0];
+      pos_new[1] = oldPos[1] + (dd1/dd2) * normal[1];
+      pos_new[2] = oldPos[2] + (dd1/dd2) * normal[2];
+    }
+  else
+   // move plane center exactly to catheter tip
+    {
+      pos_new[0] = pos[0];
+      pos_new[1] = pos[1];
+      pos_new[2] = pos[2];
     }
 
-    // Set the variables to "old" status after the update.
-    m_old_location = m_location;
-    m_old_offset = m_offset;
-    m_old_tracking = m_tracking;
-    m_old_position[0] = pos[0];
-    m_old_position[1] = pos[1];
-    m_old_position[2] = pos[2];
-  }
+  m_slice->setPlaneCenter(pos_new, true);    /* EthanB 2010-09-10 - switched asUser to true */
+  m_slice->pushPlaneBy(m_offset, true);  /* EthanB 2010-09-10 - switched asUser to true */
+
+  // Set the variables to "old" status after the update.
+  m_old_location = m_location;
+  m_old_offset = m_offset;
+  m_old_tracking = m_tracking;
+  m_old_position[0] = pos[0];
+  m_old_position[1] = pos[1];
+  m_old_position[2] = pos[2];
 }
 
  double TrackData::findDistance(double a[3], double b[3]) {

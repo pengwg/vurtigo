@@ -56,6 +56,8 @@ void CathTrackingUI::connectSignals() {
   connect( trackOffsetDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(trackOffsetChanged(double)) );
 
   connect( trackGroupBox, SIGNAL(toggled(bool)), this, SLOT(trackChanged(bool)));
+  
+  connect( sliceOnlyCheckBox, SIGNAL(toggled(bool)), this, SLOT(sliceOnlyChanged(bool)));
 }
 
 void CathTrackingUI::updateCheckableStatus() {
@@ -76,8 +78,11 @@ void CathTrackingUI::updateCheckableStatus() {
 
   if ( !cathPtr || !planePtr ) {
     trackGroupBox->setEnabled(false);
-  } else {
+    sliceOnlyCheckBox->setEnabled(false);
+  }
+  else {
     trackGroupBox->setEnabled(true);
+    sliceOnlyCheckBox->setEnabled(true);
   }
 }
 
@@ -115,13 +120,14 @@ void CathTrackingUI::trackingPairChanged() {
     updateCheckableStatus();
     trackGroupBox->setChecked(false);
     trackLocSpinBox->setValue(0);
-    trackOffsetDoubleSpinBox->setValue(0.0);
+    trackOffsetDoubleSpinBox->setValue(1.0); // offset by 1 mm in the camera direction (to aid visibility)
+    sliceOnlyCheckBox->setChecked(false);
   } else {
     td = getPair( planePtr, cathPtr );
     trackGroupBox->setChecked(td->isTracking());
     trackLocSpinBox->setValue(td->getLocation());
     trackOffsetDoubleSpinBox->setValue(td->getOffset());
-    td->update();
+    sliceOnlyCheckBox->setChecked(td->isSliceOnly());
   }
 }
 
@@ -224,6 +230,33 @@ void CathTrackingUI::trackChanged(bool track) {
     if (td) {
       td->setTracking(track);
       td->update();
+	  
+    }
+  }
+}
+
+void CathTrackingUI::sliceOnlyChanged(bool value) {
+  int cathId, planeId;
+  rt2DSliceDataObject* planePtr = NULL;
+  rtCathDataObject* cathPtr = NULL;
+  TrackData* td = NULL;
+
+  cathId = m_cathComboBox.getCurrentObjectId();
+  planeId = m_planeComboBox.getCurrentObjectId();
+
+  if (cathId >= 0) {
+    cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
+  }
+
+  if (planeId >= 0) {
+    planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
+  }
+
+  // Not relevant if at least one does not exist.
+  if (planePtr && cathPtr) {
+    td = getPair( planePtr, cathPtr );
+    if (td) {
+	  td->setSliceOnly(value);
     }
   }
 }

@@ -46,6 +46,8 @@ public slots:
   void trackOffsetChanged(double);
 
   void trackChanged(bool);
+  
+  void sliceOnlyChanged(bool);
 
 protected:
   void connectSignals();

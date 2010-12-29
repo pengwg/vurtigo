@@ -45,6 +45,9 @@ class TrackData : public QObject
     void setTrackingOn();
     void setTrackingOff();
     void setTracking(bool t);
+    
+    bool isSliceOnly();
+    void setSliceOnly(bool value);
 
     rt2DSliceDataObject* getSliceObject() { return m_slice; }
     rtCathDataObject* getCathObject() { return m_cath; }
@@ -57,6 +60,7 @@ class TrackData : public QObject
   int m_location;
   double m_offset;
   bool m_tracking;
+  bool m_sliceOnly;
   rt2DSliceDataObject* m_slice;
   rtCathDataObject* m_cath;
 
