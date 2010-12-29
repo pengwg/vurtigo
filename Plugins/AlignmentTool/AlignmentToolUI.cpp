@@ -49,7 +49,7 @@ AlignmentToolUI::AlignmentToolUI() {
 //  pointTarget->setVisible3D(true);
   
  // create entry (initial) point
-  p.setPoint(100, 100, 100);
+  p.setPoint(10, 10, 10);
   p.setPointSize(1);
   p.getProperty()->SetOpacity(0.5);
   p.setColor(1, 1, 0); // yellow
@@ -61,7 +61,7 @@ AlignmentToolUI::AlignmentToolUI() {
 //  pointEntry->setVisible3D(true);
 
 // create aiming point
-  p.setPoint(200, 200, 200);
+  p.setPoint(20, 20, 20);
   p.setPointSize(1);
   p.getProperty()->SetOpacity(0); // invisible for now
   p.setColor(0, 1, 0); // green
@@ -74,8 +74,11 @@ AlignmentToolUI::AlignmentToolUI() {
  // initial distance from insertion point to aiming plane
   aimingOffsetDoubleSpinBox->setValue(50);
 
+ // initial distance from target point to monitoring plane 
+  monitoringOffsetDoubleSpinBox->setValue(0);
+
  // initial depth is undefined
-  depthEdit->setText(""); 
+  depthEdit->setText("");
 
   populateLists();
   connectSignals();
@@ -89,6 +92,7 @@ void AlignmentToolUI::connectSignals() {
   connect( rtApplication::instance().getObjectManager(), SIGNAL(objectRemoved(int)), this, SLOT(objectRemoved(int)) );
 
   connect( aimingOffsetDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(aimingOffsetChanged(double)) );
+  connect( monitoringOffsetDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(monitoringOffsetChanged(double)) );
 
   rt3DPointBufferDataObject *pointTarget = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pointTarget));
   rt3DPointBufferDataObject *pointEntry = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_pointEntry));
@@ -96,35 +100,46 @@ void AlignmentToolUI::connectSignals() {
   connect(pointEntry, SIGNAL(objectChanged(int)), this, SLOT(pointMoved()));
   connect(pointTarget, SIGNAL(objectChanged(int)), this, SLOT(pointMoved()));
   
-  connect(aimingPlaneComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(planeIndexChanged(int)) );
-  connect(monitoringPlane1ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(planeIndexChanged(int)) );
-  connect(monitoringPlane2ComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(planeIndexChanged(int)) );
+  connect(aimingPlaneComboBox,      SIGNAL(currentIndexChanged(int)), this, SLOT(planeIndexChanged(int)) );
+  connect(trajPlane1ComboBox,       SIGNAL(currentIndexChanged(int)), this, SLOT(planeIndexChanged(int)) );
+  connect(trajPlane2ComboBox,       SIGNAL(currentIndexChanged(int)), this, SLOT(planeIndexChanged(int)) );
+  connect(monitoringPlaneComboBox,  SIGNAL(currentIndexChanged(int)), this, SLOT(planeIndexChanged(int)) );
   
   connect( updatePlanesCheckBox, SIGNAL(toggled(bool)), this, SLOT(updatePlanesChanged(bool)) );
+
+  connect( aimingPlaneVisibleCheckBox,     SIGNAL(toggled(bool)), this, SLOT(planeVisibilityCheckBoxChanged(bool)) );
+  connect( trajPlane1VisibleCheckBox,      SIGNAL(toggled(bool)), this, SLOT(planeVisibilityCheckBoxChanged(bool)) );
+  connect( trajPlane2VisibleCheckBox,      SIGNAL(toggled(bool)), this, SLOT(planeVisibilityCheckBoxChanged(bool)) );
+  connect( monitoringPlaneVisibleCheckBox, SIGNAL(toggled(bool)), this, SLOT(planeVisibilityCheckBoxChanged(bool)) );
 }
 
 
-void AlignmentToolUI::populateLists() {
+int AlignmentToolUI::populateLists() {
   QList<int> planeObjs;
   rt2DSliceDataObject* slice=NULL;
 
   planeObjs = rtBaseHandle::instance().getObjectsOfType(rtConstants::OT_2DObject);
 
   aimingPlaneComboBox->clear();
-  monitoringPlane1ComboBox->clear();
-  monitoringPlane2ComboBox->clear();
+  trajPlane1ComboBox->clear();
+  trajPlane2ComboBox->clear();
+  monitoringPlaneComboBox->clear();
 
   for (int ix1=0; ix1<planeObjs.size(); ix1++) {
     slice = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeObjs[ix1]));
     if (slice) {
       m_planeObjectMap.insert(ix1, slice);
       
-      aimingPlaneComboBox->insertItem(ix1, QString::number(planeObjs[ix1])+slice->getObjName());
-      monitoringPlane1ComboBox->insertItem(ix1, QString::number(planeObjs[ix1])+slice->getObjName());
-      monitoringPlane2ComboBox->insertItem(ix1, QString::number(planeObjs[ix1])+slice->getObjName());
+      QString num = QString::number(planeObjs[ix1])+slice->getObjName();
+      
+      aimingPlaneComboBox->insertItem(ix1, num);
+      trajPlane1ComboBox->insertItem(ix1, num);
+      trajPlane2ComboBox->insertItem(ix1, num);
+      monitoringPlaneComboBox->insertItem(ix1, num);
     }
   }
-
+  
+  return planeObjs.size();
 }
 
 void AlignmentToolUI::objectAdded(int objID) {
@@ -138,11 +153,33 @@ void AlignmentToolUI::objectAdded(int objID) {
     slice = static_cast<rt2DSliceDataObject*>(data);
     if (!slice) return;
     m_planeObjectMap.insert(m_planeObjectMap.count(), slice);
+    
+    QString num = QString::number(objID)+slice->getObjName();
 
-    aimingPlaneComboBox->insertItem(aimingPlaneComboBox->count(), QString::number(objID)+slice->getObjName());
-    monitoringPlane1ComboBox->insertItem(monitoringPlane1ComboBox->count(), QString::number(objID)+slice->getObjName());
-    monitoringPlane2ComboBox->insertItem(monitoringPlane2ComboBox->count(), QString::number(objID)+slice->getObjName());
+    aimingPlaneComboBox->insertItem(aimingPlaneComboBox->count(),           num);
+    trajPlane1ComboBox->insertItem(trajPlane1ComboBox->count(),             num);
+    trajPlane2ComboBox->insertItem(trajPlane2ComboBox->count(),             num);
+    monitoringPlaneComboBox->insertItem(monitoringPlaneComboBox->count(),   num);
   }
+  
+ // force initial plane selections if we not set
+  int aimingPlaneIndex     = aimingPlaneComboBox->currentIndex();
+  int trajPlane1Index     = trajPlane1ComboBox->currentIndex();
+  int trajPlane2Index      = trajPlane2ComboBox->currentIndex();
+  int monitoringPlaneIndex = monitoringPlaneComboBox->currentIndex();
+  if (
+      (aimingPlaneComboBox->count() == 4) &&
+      (aimingPlaneIndex == 0) && 
+      (trajPlane1Index == 0)  && 
+      (trajPlane2Index == 0)  && 
+      (monitoringPlaneIndex == 0)
+     )
+    {
+      aimingPlaneComboBox->setCurrentIndex(0); 
+      trajPlane1ComboBox->setCurrentIndex(1); 
+      trajPlane2ComboBox->setCurrentIndex(2); 
+      monitoringPlaneComboBox->setCurrentIndex(3); 
+    }
 
 }
 
@@ -150,8 +187,9 @@ void AlignmentToolUI::objectAdded(int objID) {
 void AlignmentToolUI::objectRemoved(int objID) {
  // save previous selection indices
   int aimingPlanePos      = aimingPlaneComboBox->currentIndex();
-  int monitoringPlane1Pos = monitoringPlane1ComboBox->currentIndex();
-  int monitoringPlane2Pos = monitoringPlane2ComboBox->currentIndex();
+  int trajPlane1Pos       = trajPlane1ComboBox->currentIndex();
+  int trajPlane2Pos       = trajPlane2ComboBox->currentIndex();
+  int monitoringPlanePos  = monitoringPlaneComboBox->currentIndex();
 
  // update lists
   populateLists();
@@ -160,17 +198,20 @@ void AlignmentToolUI::objectRemoved(int objID) {
   if ( aimingPlanePos >= 0 && aimingPlanePos < aimingPlaneComboBox->count() ) 
     aimingPlaneComboBox->setCurrentIndex(aimingPlanePos);
 
-  if ( monitoringPlane1Pos >= 0 && monitoringPlane1Pos < monitoringPlane1ComboBox->count() ) 
-    monitoringPlane1ComboBox->setCurrentIndex(monitoringPlane1Pos);
-    
-  if ( monitoringPlane2Pos >= 0 && monitoringPlane2Pos < monitoringPlane2ComboBox->count() ) 
-    monitoringPlane2ComboBox->setCurrentIndex(monitoringPlane2Pos);    
+  if ( trajPlane1Pos >= 0 && trajPlane1Pos < trajPlane1ComboBox->count() ) 
+    trajPlane1ComboBox->setCurrentIndex(trajPlane1Pos);
+
+  if ( trajPlane2Pos >= 0 && trajPlane2Pos < trajPlane2ComboBox->count() ) 
+    trajPlane2ComboBox->setCurrentIndex(trajPlane2Pos);    
+
+  if ( monitoringPlanePos >= 0 && monitoringPlanePos < monitoringPlaneComboBox->count() ) 
+    monitoringPlaneComboBox->setCurrentIndex(monitoringPlanePos);    
+
 }
 
 void AlignmentToolUI::pointMoved()
   {
-    if (m_fAutoUpdate)
-      update();
+    update();
   }
 
 void AlignmentToolUI::update() {
@@ -187,24 +228,30 @@ void AlignmentToolUI::update() {
   rtBasic3DPointData pointTarget = *pointBufTarget->getPointAtIndex(0);
   rtBasic3DPointData pointEntry  = *pointBufEntry->getPointAtIndex(0);
 
-// get point positions
- double entryPoint[3], targetPoint[3];
- pointEntry.getPoint(entryPoint);
- pointTarget.getPoint(targetPoint);
+ // get point positions
+  double entryPoint[3], targetPoint[3];
+  pointEntry.getPoint(entryPoint);
+  pointTarget.getPoint(targetPoint);
 
  // update "insertion depth" display
   double insertionDepth = rtBasic3DPointData::findDistance(pointTarget, pointEntry);
   depthEdit->setText(QString::number(insertionDepth, 'f', 3)); 
+  
+ // give up if target point equals entry point
+  if (insertionDepth == 0)
+    return;
 
  // get indices to planes
-  int aimingPlanePos = aimingPlaneComboBox->currentIndex();
-  int monitoringPlane1Pos = monitoringPlane1ComboBox->currentIndex();
-  int monitoringPlane2Pos = monitoringPlane2ComboBox->currentIndex();
+  int aimingPlanePos     = aimingPlaneComboBox->currentIndex();
+  int trajPlane1Pos      = trajPlane1ComboBox->currentIndex();
+  int trajPlane2Pos      = trajPlane2ComboBox->currentIndex();
+  int monitoringPlanePos = monitoringPlaneComboBox->currentIndex();
   
  // get pointers to slice objects (aiming and monitoring)
-  rt2DSliceDataObject* sliceAiming      = m_planeObjectMap.value(aimingPlanePos);
-  rt2DSliceDataObject* sliceMonitoring1 = m_planeObjectMap.value(monitoringPlane1Pos);
-  rt2DSliceDataObject* sliceMonitoring2 = m_planeObjectMap.value(monitoringPlane2Pos);
+  rt2DSliceDataObject* sliceAiming     = m_planeObjectMap.value(aimingPlanePos);
+  rt2DSliceDataObject* sliceTraj1      = m_planeObjectMap.value(trajPlane1Pos);
+  rt2DSliceDataObject* sliceTraj2      = m_planeObjectMap.value(trajPlane2Pos);
+  rt2DSliceDataObject* sliceMonitoring = m_planeObjectMap.value(monitoringPlanePos);
 
  // get aiming plane offset distance
   double aimingPlaneOffset = aimingOffsetDoubleSpinBox->value();
@@ -227,6 +274,10 @@ void AlignmentToolUI::update() {
   p_pointAiming->getProperty()->SetOpacity(0.5); // make visible
   pointBufAiming->Modified();
   
+ // skip out now if the "update planes" flag isn't set
+  if (!m_fAutoUpdate)
+    return;
+
  // find up vector for aiming plane
   double aimingUp[3];
   aimingUp[0] = 0; aimingUp[1] = 0; aimingUp[2] = 0;
@@ -254,7 +305,7 @@ void AlignmentToolUI::update() {
       sliceAiming->setPlaneUp(aimingUp, true);
     }
   
- // first monitoring plane should contain the vector and the z axis
+ // first trajectory plane should contain the vector and the z axis
   double perp1[3];
   perp1[0] = 0;  perp1[1] = 0; perp1[2] = 1;
   double norm1[3];
@@ -262,14 +313,14 @@ void AlignmentToolUI::update() {
   double up1[3];
   vtkMath::Cross(aimingVector, norm1, up1);
   
- // if they're parallel (ambigious), then use the insertion vector and the y axis
+ // if they're parallel (ambigious), then instead make it contain the insertion vector and the y axis
   if (vtkMath::Norm(norm1) == 0) 
     {
       perp1[0] = 0;  perp1[1] = 1; perp1[2] = 0;
       vtkMath::Cross(aimingVector, perp1, norm1);
     }
     
- // second monitoring plane should contain the vector and the normal to the first plane
+ // second trajectory plane should contain the aiming vector and the normal to the first plane
   double perp2[3];
   perp2[0] = norm1[0]; perp2[1] = norm1[1]; perp2[2] = norm1[2];
   double norm2[3];
@@ -277,7 +328,7 @@ void AlignmentToolUI::update() {
   double up2[3];
   vtkMath::Cross(aimingVector, norm2, up2);
   
- // if they're parallel, then use the insertion vector and the x axis
+ // if they're parallel, then instead use make it contain the insertion vector and the x axis
   if (vtkMath::Norm(norm2) == 0) 
     {
       perp2[0] = 1;  perp2[1] = 0; perp2[2] = 0;
@@ -285,32 +336,53 @@ void AlignmentToolUI::update() {
     }  
   
  // select center point for monitoring planes (halfway between entry and target point)
-  double monitoringCenterPoint[3];
-  monitoringCenterPoint[0] = (targetPoint[0] + entryPoint[0]) / 2;
-  monitoringCenterPoint[1] = (targetPoint[1] + entryPoint[1]) / 2;
-  monitoringCenterPoint[2] = (targetPoint[2] + entryPoint[2]) / 2;
+  double trajCenterPoint[3];
+  trajCenterPoint[0] = (targetPoint[0] + entryPoint[0]) / 2;
+  trajCenterPoint[1] = (targetPoint[1] + entryPoint[1]) / 2;
+  trajCenterPoint[2] = (targetPoint[2] + entryPoint[2]) / 2;
     
- // set monitoring planes
- if (sliceMonitoring1 && (vtkMath::Norm(norm1) != 0) && (sliceMonitoring1 != sliceAiming))
+ // set trajectory-aligned planes
+ if (sliceTraj1 && (vtkMath::Norm(norm1) != 0) && (sliceTraj1 != sliceAiming))
    {
-     sliceMonitoring1->setPlaneCenter(monitoringCenterPoint, true);
-     sliceMonitoring1->setPlaneNormal(norm1, true);
-     sliceMonitoring1->setPlaneUp(up1, true);
+     sliceTraj1->setPlaneCenter(trajCenterPoint, true);
+     sliceTraj1->setPlaneNormal(norm1, true);
+     sliceTraj1->setPlaneUp(up1, true);
    }
 
- if (sliceMonitoring2 && (vtkMath::Norm(norm2) != 0)  && (sliceMonitoring1 != sliceAiming) && (sliceMonitoring2 != sliceMonitoring1))
+ if (sliceTraj2 && (vtkMath::Norm(norm2) != 0)  && (sliceTraj1 != sliceAiming) && (sliceTraj2 != sliceTraj1))
    {
-     sliceMonitoring2->setPlaneCenter(monitoringCenterPoint, true);
-     sliceMonitoring2->setPlaneNormal(norm2, true);
-     sliceMonitoring2->setPlaneUp(up2, true);
+     sliceTraj2->setPlaneCenter(trajCenterPoint, true);
+     sliceTraj2->setPlaneNormal(norm2, true);
+     sliceTraj2->setPlaneUp(up2, true);
+   }
+ 
+ // get monitoring plane offset distance
+  double monitoringPlaneOffset = monitoringOffsetDoubleSpinBox->value();
+  
+ // get "monitoring point" by backing off monitoringPlaneOffset from the target point in the direction of the aimingVector (plus is deeper)
+  double monitoringPoint[3];
+  monitoringPoint[0] = targetPoint[0] + monitoringPlaneOffset*aimingVector[0];
+  monitoringPoint[1] = targetPoint[1] + monitoringPlaneOffset*aimingVector[1];
+  monitoringPoint[2] = targetPoint[2] + monitoringPlaneOffset*aimingVector[2]; 
+
+ // set monitoring plane
+ if (sliceMonitoring && (vtkMath::Norm(aimingVector) != 0) && (sliceMonitoring != sliceAiming) && (sliceMonitoring != sliceTraj1) && (sliceMonitoring != sliceTraj2))
+   {
+     sliceMonitoring->setPlaneCenter(monitoringPoint, true);
+     sliceMonitoring->setPlaneNormal(aimingVector, true);
+     sliceMonitoring->setPlaneUp(aimingUp, true);
    }
   
 }
 
 void AlignmentToolUI::aimingOffsetChanged(double offset) {
-  if (m_fAutoUpdate)
-    update();
+  update();
 }
+
+void AlignmentToolUI::monitoringOffsetChanged(double offset) {
+  update();
+}
+
 
 void AlignmentToolUI::updatePlanesChanged(bool value)
   {
@@ -323,6 +395,9 @@ void AlignmentToolUI::updatePlanesChanged(bool value)
 void AlignmentToolUI::planeIndexChanged(int index)
  // we don't know which combo box triggered this, but it doesn't matter - the behavior is the same
   {
-    if (m_fAutoUpdate)
-      update();
+    update();
+  }
+
+void AlignmentToolUI::planeVisibilityCheckBoxChanged()
+  {
   }

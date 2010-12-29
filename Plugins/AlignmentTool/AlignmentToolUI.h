@@ -43,6 +43,7 @@ public slots:
   void objectRemoved(int);
 
   void aimingOffsetChanged(double);
+  void monitoringOffsetChanged(double);
   
   void pointMoved();
 
@@ -51,9 +52,11 @@ public slots:
   void updatePlanesChanged(bool);
   void planeIndexChanged(int);
 
+  void planeVisibilityCheckBoxChanged();
+
 protected:
   void connectSignals();
-  void populateLists();
+  int  populateLists();
 
   //! Map the combo box indices to the catheter objects.
   QMap<int, rt2DSliceDataObject*> m_planeObjectMap;
