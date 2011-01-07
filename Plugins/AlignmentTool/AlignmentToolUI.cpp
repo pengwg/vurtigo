@@ -21,6 +21,7 @@
 #include "rtObjectManager.h"
 #include "rtBaseHandle.h"
 #include "rtApplication.h"
+#include "rtRenderObject.h"
 
 #include <QList>
 #include <vtkMath.h>
@@ -398,6 +399,72 @@ void AlignmentToolUI::planeIndexChanged(int index)
     update();
   }
 
-void AlignmentToolUI::planeVisibilityCheckBoxChanged()
+void AlignmentToolUI::planeVisibilityCheckBoxChanged(bool dummy)
   {
+   // get indices to planes
+    int indexAimingPlane     = aimingPlaneComboBox->currentIndex();
+    int indexTrajPlane1      = trajPlane1ComboBox->currentIndex();
+    int indexTrajPlane2      = trajPlane2ComboBox->currentIndex();
+    int indexMonitoringPlane = monitoringPlaneComboBox->currentIndex();
+
+   // get pointers to slice objects 
+    rt2DSliceDataObject* sliceAiming     = m_planeObjectMap.value(indexAimingPlane);
+    rt2DSliceDataObject* sliceTraj1      = m_planeObjectMap.value(indexTrajPlane1);
+    rt2DSliceDataObject* sliceTraj2      = m_planeObjectMap.value(indexTrajPlane2);
+    rt2DSliceDataObject* sliceMonitoring = m_planeObjectMap.value(indexMonitoringPlane);
+    
+   // get object identifiers
+    int idAimingPlane          = sliceAiming     ? sliceAiming->getId()     : -1;
+    int idTrajPlane1           = sliceTraj1      ? sliceTraj1->getId()      : -1;
+    int idTrajPlane2           = sliceTraj2      ? sliceTraj2->getId()      : -1;
+    int idMonitoringPlane      = sliceMonitoring ? sliceMonitoring->getId() : -1;
+
+    if (sliceAiming)
+      rtBaseHandle::instance().setObjectVisible3D(idAimingPlane, aimingPlaneVisibleCheckBox->isChecked());
+      
+    if (sliceTraj1)
+      rtBaseHandle::instance().setObjectVisible3D(idTrajPlane1, trajPlane1VisibleCheckBox->isChecked());
+
+    if (sliceTraj2)
+      rtBaseHandle::instance().setObjectVisible3D(idTrajPlane2, trajPlane2VisibleCheckBox->isChecked());
+
+    if (sliceMonitoring)
+      rtBaseHandle::instance().setObjectVisible3D(idMonitoringPlane, monitoringPlaneVisibleCheckBox->isChecked());
+
+/*    
+   // get render objects
+    rtRenderObject *renderAimingPlane     = rtBaseHandle::instance().getRenderObjectWithID(idAimingPlane);
+    rtRenderObject *renderTrajPlane1      = rtBaseHandle::instance().getRenderObjectWithID(idTrajPlane1);
+    rtRenderObject *renderTrajPlane2      = rtBaseHandle::instance().getRenderObjectWithID(idTrajPlane2);
+    rtRenderObject *renderMonitoringPlane = rtBaseHandle::instance().getRenderObjectWithID(idMonitoringPlane);
+    
+   // set visibility
+    if (renderAimingPlane)
+      {
+        renderAimingPlane->setVisible3D(aimingPlaneVisibleCheckBox->isChecked());
+        sliceAiming->Modified();
+        renderAimingPlane->updateTreeItem();
+      }
+
+    if (renderTrajPlane1)
+      {
+        renderTrajPlane1->setVisible3D(trajPlane1VisibleCheckBox->isChecked());
+        sliceTraj1->Modified();
+        renderTrajPlane1->updateTreeItem();
+      }
+
+    if (renderTrajPlane2)
+      {
+        renderTrajPlane2->setVisible3D(trajPlane2VisibleCheckBox->isChecked());
+        sliceTraj2->Modified();
+        renderTrajPlane2->updateTreeItem();
+      }
+
+    if (renderMonitoringPlane)
+      {
+        renderMonitoringPlane->setVisible3D(monitoringPlaneVisibleCheckBox->isChecked());
+        sliceMonitoring->Modified();
+        renderMonitoringPlane->updateTreeItem();
+      }
+*/      
   }

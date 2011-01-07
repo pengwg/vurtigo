@@ -52,7 +52,7 @@ public slots:
   void updatePlanesChanged(bool);
   void planeIndexChanged(int);
 
-  void planeVisibilityCheckBoxChanged();
+  void planeVisibilityCheckBoxChanged(bool);
 
 protected:
   void connectSignals();
