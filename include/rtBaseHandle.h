@@ -29,6 +29,7 @@
 #include <QThread>
 
 class rtDataObject;
+class rtRenderObject;
 
 #include "vtkRenderWindow.h"
 #include "vtkImageData.h"
@@ -107,6 +108,14 @@ Only one thread may request the creation (or removal) of an object at a time.
  */
   const rtDataObject* const getROObjectWithID(int ID);
 
+  //! Get the render object corresponding with the data object that has this ID
+  /*!
+  Each object in the base has a unique ID. This function requests a pointer to the render object corresponding to the data object that has a certain ID. The object may be modified but the pointer cannot be changed. 
+  @param ID The id number of the requested object.
+  @return A pointer to the object or NULL if no object with this ID exists or the reqested object is Read-Only.
+  */
+  rtRenderObject* const getRenderObjectWithID(int ID);
+
   //! Add a watch to clicks on the main 3D window.
 /*!
   The plugin can register with the base to receive a callback every time the user sets a point in the 3D view.
@@ -171,6 +180,10 @@ The use of the vtkRenderWindow object in a thread other than the main Vurtigo re
   rtBaseHandle(const rtBaseHandle&);
   //! Private equals operator.
   rtBaseHandle& operator=(const rtBaseHandle&);
+  
+
+ public:
+  void setObjectVisible3D(int idObj, bool fVisible);
 
 };
 

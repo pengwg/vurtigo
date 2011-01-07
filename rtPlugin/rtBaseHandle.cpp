@@ -142,6 +142,11 @@ const rtDataObject* const rtBaseHandle::getROObjectWithID(int ID) {
   return NULL;
 }
 
+rtRenderObject* const rtBaseHandle::getRenderObjectWithID(int ID) {
+  return rtApplication::instance().getObjectManager()->getObjectWithID(ID);
+}
+
+
 bool rtBaseHandle::watchClick(int pluginID, bool watch) {
   bool res;
 
@@ -184,3 +189,26 @@ void rtBaseHandle::forceRenderUpdate(int objID) {
     temp->tryUpdate();
   }
 }
+
+void rtBaseHandle::setObjectVisible3D(int idObj, bool fVisible)
+  {
+    rtRenderObject *pRenderObj = getRenderObjectWithID(idObj);
+    if (!pRenderObj)
+      {
+        cerr << "ERROR: rtBaseHandle::setObjectVisible3D - idObj " << idObj << " does not exist!" << endl;
+        return;
+      }
+      
+    rtDataObject   *pDataObj   = pRenderObj->getDataObject();
+
+    if (!pDataObj)
+      {
+        cerr << "ERROR: rtBaseHandle::setObjectVisible3D - idObj " << idObj << " has no data object!" << endl;
+        return;
+      }
+    
+    pRenderObj->setVisible3D(fVisible);
+    pDataObj->Modified();
+    pRenderObj->updateTreeItem();
+    
+  }
