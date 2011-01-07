@@ -34,7 +34,7 @@
 
 //! Constructor
 rt3DPointBufferDataObject::rt3DPointBufferDataObject()
-: m_currentScale(1.0), m_pointZoom(1.0)
+: m_currentScale(1.0), m_pointZoom(1.0), m_saveFileName("")
 {
   removeAllPoints();
   setObjectType(rtConstants::OT_3DPointBuffer);
@@ -416,12 +416,13 @@ void rt3DPointBufferDataObject::loadThisObject() {
 
 
 void rt3DPointBufferDataObject::saveThisObject() {
-  QString fName="";
   QFile file;
 
-  // Find the file name
-  fName = QFileDialog::getSaveFileName(getBaseWidget(), "Save As...");
-  file.setFileName(fName);
+  if (m_saveFileName.isEmpty()) {
+    // Find the file name
+    m_saveFileName = QFileDialog::getSaveFileName(getBaseWidget(), "Save As...");
+  }
+  file.setFileName(m_saveFileName);
   this->saveFile(&file);
 }
 

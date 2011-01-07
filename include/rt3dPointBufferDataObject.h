@@ -199,6 +199,9 @@ public:
     */
   double m_pointZoom;
 
+  //! The filename to save to if one has been chosen
+  QString m_saveFileName;
+
   // Functions
   //! Set the GUI widgets.
   /*!
