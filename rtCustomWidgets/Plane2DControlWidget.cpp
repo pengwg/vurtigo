@@ -342,7 +342,7 @@ void Plane2DControlWidget::keyReleaseEvent(QKeyEvent* event) {
 
 void Plane2DControlWidget::wheelEvent(QWheelEvent* event) {
   if(!m_showing) return;
-  int numSteps = event->delta() / 32;
+  double numSteps = event->delta() / 120; // Changed by Ethan 2011-01-04 (maybe we want 12 for 1 cm?)
   double increment = 1.0;
 
   // Make a smaller increment if the user is holding down shift.
