@@ -423,6 +423,16 @@ void rt3DPointBufferDataObject::saveThisObject() {
     m_saveFileName = QFileDialog::getSaveFileName(getBaseWidget(), "Save As...");
   }
   file.setFileName(m_saveFileName);
+  m_optionsWidget.filename->setText(QString("Saved to: " + QFileInfo(m_saveFileName).fileName()));
+  this->saveFile(&file);
+}
+
+void rt3DPointBufferDataObject::saveAsThisObject() {
+  QFile file;
+  m_saveFileName = QFileDialog::getSaveFileName(getBaseWidget(), "Save As...");
+
+  file.setFileName(m_saveFileName);
+  m_optionsWidget.filename->setText(QString("Saved to: " + QFileInfo(m_saveFileName).fileName()));
   this->saveFile(&file);
 }
 
@@ -629,6 +639,7 @@ void rt3DPointBufferDataObject::setupGUI() {
   // Load and save buttons.
   connect( m_optionsWidget.loadButton, SIGNAL(clicked()), this, SLOT(loadThisObject()) );
   connect( m_optionsWidget.saveButton, SIGNAL(clicked()), this, SLOT(saveThisObject()) );
+  connect( m_optionsWidget.saveasButton,SIGNAL(clicked()), this, SLOT(saveAsThisObject()));
 
   // Setup the points table
 

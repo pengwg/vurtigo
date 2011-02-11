@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>365</width>
-    <height>571</height>
+    <height>577</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,6 +27,94 @@
        <string>Point List</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
+       <item row="1" column="0">
+        <widget class="QPushButton" name="loadButton">
+         <property name="toolTip">
+          <string>Load 3D points</string>
+         </property>
+         <property name="text">
+          <string>Load</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="saveButton">
+         <property name="toolTip">
+          <string>Save points to current file</string>
+         </property>
+         <property name="text">
+          <string>Save</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" colspan="2">
+        <widget class="QSlider" name="pointZoomSlider">
+         <property name="minimum">
+          <number>10</number>
+         </property>
+         <property name="maximum">
+          <number>50</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>Point Zoom:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QPushButton" name="addPropertyPushButton">
+         <property name="text">
+          <string>Add Property</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QPushButton" name="filterPushButton">
+         <property name="text">
+          <string>Filter Points</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QPushButton" name="deleteSelectedButton">
+         <property name="text">
+          <string>Delete Selected</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QPushButton" name="newPointButton">
+         <property name="text">
+          <string>New Point</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="clearDataPushButton">
+         <property name="toolTip">
+          <string/>
+         </property>
+         <property name="text">
+          <string>Clear Data</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QPushButton" name="saveasButton">
+         <property name="toolTip">
+          <string>Save points to new file</string>
+         </property>
+         <property name="text">
+          <string>Save As...</string>
+         </property>
+        </widget>
+       </item>
        <item row="7" column="0" colspan="3">
         <widget class="QTableWidget" name="pointsTable">
          <property name="horizontalScrollBarPolicy">
@@ -35,6 +123,9 @@
          <property name="editTriggers">
           <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
          </property>
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>85</number>
+         </attribute>
          <attribute name="horizontalHeaderDefaultSectionSize">
           <number>85</number>
          </attribute>
@@ -80,72 +171,25 @@
          </column>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QPushButton" name="loadButton">
+       <item row="8" column="0" colspan="3">
+        <widget class="QLabel" name="filename">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>300</width>
+           <height>18</height>
+          </size>
+         </property>
          <property name="text">
-          <string>Load</string>
+          <string>filename</string>
          </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QPushButton" name="saveButton">
-         <property name="text">
-          <string>Save</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1" colspan="2">
-        <widget class="QSlider" name="pointZoomSlider">
-         <property name="minimum">
-          <number>10</number>
-         </property>
-         <property name="maximum">
-          <number>50</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>Point Zoom:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="2">
-        <widget class="QPushButton" name="addPropertyPushButton">
-         <property name="text">
-          <string>Add Property</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QPushButton" name="clearDataPushButton">
-         <property name="text">
-          <string>Clear Data</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="deleteSelectedButton">
-         <property name="text">
-          <string>Delete Selected</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QPushButton" name="newPointButton">
-         <property name="text">
-          <string>New Point</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QPushButton" name="filterPushButton">
-         <property name="text">
-          <string>Filter Points</string>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
