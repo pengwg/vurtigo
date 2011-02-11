@@ -24,6 +24,8 @@
 #include <sstream>
 #include "arguments.h"
 #include "SenderSimp.h"
+#include "rtApplication.h"
+#include "rtTimeManager.h"
 
 using namespace std;
 
@@ -154,11 +156,20 @@ void GeomServerUI::serverConnect() {
       args->port = portLineEdit->text().toInt();
 
   senderThread.serverConnect();
+  // give the connection a bit of time to establish
+  senderThread.wait(5);
+  // If we are connected to the server we can turn off simulated trigger times
+  if( senderThread.getSender()->isConnected() )
+  {
+      rtApplication::instance().getTimeManager()->triggerTimeSourceChanged(false);
+  }
 }
 
 //! Disonnect from server
 void GeomServerUI::serverDisconnect() {
   senderThread.serverDisconnect();
+  // If we are disconnecting from the server we should enable simulated trigger times
+  rtApplication::instance().getTimeManager()->triggerTimeSourceChanged(true);
 }
 
 
