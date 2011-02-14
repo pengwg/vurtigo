@@ -34,7 +34,8 @@ Q_OBJECT
   };
 
   enum CoordType {
-    CT_PATIENT,
+    CT_HFS,
+    CT_FFS,
     CT_VTK
   };
 

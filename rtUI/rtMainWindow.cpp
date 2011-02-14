@@ -1196,10 +1196,15 @@ void rtMainWindow::setViewType(rtAxesProperties::ViewType vt) {
 
 void rtMainWindow::setCoordType(rtAxesProperties::CoordType ct) {
   switch (ct) {
-    case (rtAxesProperties::CT_PATIENT):
+    case (rtAxesProperties::CT_HFS):
     m_axesActor->SetXAxisLabelText("Left");
     m_axesActor->SetYAxisLabelText("Posterior");
     m_axesActor->SetZAxisLabelText("Superior");
+    break;
+    case (rtAxesProperties::CT_FFS):
+    m_axesActor->SetXAxisLabelText("Right");
+    m_axesActor->SetYAxisLabelText("Anterior");
+    m_axesActor->SetZAxisLabelText("Inferior");
     break;
     case (rtAxesProperties::CT_VTK):
     m_axesActor->SetXAxisLabelText("X");

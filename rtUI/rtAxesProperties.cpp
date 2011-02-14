@@ -26,10 +26,10 @@ rtAxesProperties::rtAxesProperties(QWidget *parent, Qt::WindowFlags flags) {
 
   m_changed=false;
   m_viewType = VT_VISIBLE;
-  m_coordType = CT_PATIENT;
+  m_coordType = CT_FFS;
 
   visibleComboBox->setCurrentIndex(1);
-  coordComboBox->setCurrentIndex(0);
+  coordComboBox->setCurrentIndex(1);
 }
 
 //! Destructor
@@ -58,9 +58,12 @@ void rtAxesProperties::settingsChanged() {
 
   switch (ct) {
   case 0:
-    m_coordType = CT_PATIENT;
+    m_coordType = CT_HFS;
     break;
   case 1:
+    m_coordType = CT_FFS;
+    break;
+  case 2:
     m_coordType = CT_VTK;
     break;
   }

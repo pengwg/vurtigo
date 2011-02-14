@@ -56,6 +56,11 @@
      </item>
      <item>
       <property name="text">
+       <string>Feet First Supine</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
        <string>VTK</string>
       </property>
      </item>
