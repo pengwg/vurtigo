@@ -36,6 +36,7 @@ void GeomServerUI::setupSlots() {
   connect(numPlanesSpinBox, SIGNAL(valueChanged(int)), this, SLOT(numPlanesChanged(int)));
   connect(numCathSpinBox, SIGNAL(valueChanged(int)), this, SLOT(numCathChanged(int)));
   connect(cathZeroCheckBox, SIGNAL(toggled(bool)), this, SLOT(cathZeroOnlyChanged(bool)));
+  connect(senderThread.getSender(), SIGNAL(isNowConnected(char *, int)), this, SLOT(serverConnectDo(char *, int)));
 }
 
 //! Set defaults of the UI state
@@ -156,13 +157,6 @@ void GeomServerUI::serverConnect() {
       args->port = portLineEdit->text().toInt();
 
   senderThread.serverConnect();
-  // give the connection a bit of time to establish
-  senderThread.wait(5);
-  // If we are connected to the server we can turn off simulated trigger times
-  if( senderThread.getSender()->isConnected() )
-  {
-      rtApplication::instance().getTimeManager()->triggerTimeSourceChanged(false);
-  }
 }
 
 //! Disonnect from server
@@ -170,6 +164,12 @@ void GeomServerUI::serverDisconnect() {
   senderThread.serverDisconnect();
   // If we are disconnecting from the server we should enable simulated trigger times
   rtApplication::instance().getTimeManager()->triggerTimeSourceChanged(true);
+  connectstat->setText(QString("Connection Closed"));
+}
+
+void GeomServerUI::serverConnectDo(char *host, int port) {
+  rtApplication::instance().getTimeManager()->triggerTimeSourceChanged(false);
+  connectstat->setText(QString("Established " + QString(host) + ":" + QString::number(port)));
 }
 
 

@@ -69,6 +69,19 @@
     </widget>
    </item>
    <item>
+    <widget class="QLabel" name="connectstat">
+     <property name="maximumSize">
+      <size>
+       <width>250</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Connection Closed</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="objectListGroupBox">
      <property name="title">
       <string>Object List</string>

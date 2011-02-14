@@ -56,6 +56,7 @@ bool SenderSimp::connectAndMessage() {
     sender.disconnect();
     return false;
   } else {
+    emit isNowConnected(args.hostname,args.port);
     cout << "Connection with: " << args.hostname << ":" << args.port << " established." << endl;
     return true;
   }

@@ -54,6 +54,9 @@ class SenderSimp : public QObject {
     void print();
     void runReadMode();
 
+signals:
+    void isNowConnected(char *,int);
+
 protected:
   //! Sends info, needed by Generic Mode
   GeometrySender sender;
