@@ -148,6 +148,13 @@ The use of the vtkRenderWindow object in a thread other than the main Vurtigo re
   */
   void forceRenderUpdate(int objID);
 
+  //! Toggle the visibility of an object in the 3d view
+  /*!
+    This will also check/uncheck the 3D box for the given object in the Object Browser. It will only have an effect if the object can be rendered in 3D.
+    @param idObj The ID of the object
+    @param fVisible true to view the object in 3d, false otherwise
+    */
+  void setObjectVisible3D(int idObj, bool fVisible);
  public slots:
   //! This runs in the main execution thread to request an object.
   void requestNewObjectSlot(rtConstants::rtObjectType, QString);
@@ -182,8 +189,6 @@ The use of the vtkRenderWindow object in a thread other than the main Vurtigo re
   rtBaseHandle& operator=(const rtBaseHandle&);
   
 
- public:
-  void setObjectVisible3D(int idObj, bool fVisible);
 
 };
 

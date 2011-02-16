@@ -88,7 +88,7 @@ void rtRenderObject::updateTreeItem() {
     // Only show the 3D checkbox if the 3D can be rendered.
     if (m_canRender3D) {
       m_treeItem->setText(2, "3D");
-      if (m_visible3D/* || m_treeItem->checkState(2) == Qt::Checked*/) { // EthanB removed "|| m_treeItem->checkState(2) == Qt::Checked" 2011-01-07 to allow programmatic unchecking
+      if (m_visible3D) {
         m_treeItem->setCheckState(2,Qt::Checked);
       } else {
         m_treeItem->setCheckState(2,Qt::Unchecked);

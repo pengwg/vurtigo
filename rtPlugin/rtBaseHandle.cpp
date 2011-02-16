@@ -24,6 +24,7 @@
 #include "rtPluginLoader.h"
 #include "rtMainWindow.h"
 #include "rtApplication.h"
+#include "rtMessage.h"
 
 #include <QCoreApplication>
 
@@ -195,7 +196,7 @@ void rtBaseHandle::setObjectVisible3D(int idObj, bool fVisible)
     rtRenderObject *pRenderObj = getRenderObjectWithID(idObj);
     if (!pRenderObj)
       {
-        cerr << "ERROR: rtBaseHandle::setObjectVisible3D - idObj " << idObj << " does not exist!" << endl;
+        rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtBaseHandle::setObjectVisible3D - idObj  ").append(QString::number(idObj)).append(" does not exist!"));
         return;
       }
       
@@ -203,7 +204,7 @@ void rtBaseHandle::setObjectVisible3D(int idObj, bool fVisible)
 
     if (!pDataObj)
       {
-        cerr << "ERROR: rtBaseHandle::setObjectVisible3D - idObj " << idObj << " has no data object!" << endl;
+        rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtBaseHandle::setObjectVisible3D - idObj  ").append(QString::number(idObj)).append(" has no data object!"));
         return;
       }
     
