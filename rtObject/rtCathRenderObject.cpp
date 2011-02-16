@@ -99,13 +99,21 @@ void rtCathRenderObject::update() {
     // The the first and only sphere.
     temp = m_sphereList.value(0);
     temp->SetCenter(coords);
-     if (dObj->useSNRSize()) {
-      temp->SetRadius(25.0f*((double)dObj->getPointSize())/SNR);
-    } else {
-      temp->SetRadius( ((double)dObj->getPointSize())/10.0f );
-    }
     temp->SetThetaResolution(50);
     temp->SetPhiResolution(50);
+    temp->SetRadius( ((double)dObj->getPointSize())/10.0f );
+    if (dObj->useSNRSize()) {
+        if ( SNR <= dObj->getBadSNR())
+        { m_sphereActor->GetProperty()->SetColor(1.0,0.0,0.0); }
+        else if ( SNR <= dObj->getGoodSNR() )
+        { m_sphereActor->GetProperty()->SetColor(1.0,1.0,0.5); }
+        else
+        { m_sphereActor->GetProperty()->SetColor(0.0,1.0,0.0); }
+    } else {
+        //refresh back to user given properties
+        dObj->refreshProperties();
+    }
+
 
     // Just the spheres need to be rendered so turn everythign off and then turn the spheres back on.
     visibilityOff();
@@ -147,13 +155,21 @@ void rtCathRenderObject::update() {
 
       temp = m_sphereList.value(ix1);
       temp->SetCenter(coords);
-      if (dObj->useSNRSize()) {
-        temp->SetRadius(25.0f*((double)dObj->getPointSize())/SNR);
-      } else {
-        temp->SetRadius( ((double)dObj->getPointSize())/10.0f );
-      }
       temp->SetThetaResolution(50);
       temp->SetPhiResolution(50);
+      temp->SetRadius( ((double)dObj->getPointSize())/10.0f );
+      if (dObj->useSNRSize()) {
+          if ( SNR <= dObj->getBadSNR() )
+          { m_sphereActor->GetProperty()->SetColor(1.0,0.0,0.0); }
+          else if ( SNR <= dObj->getGoodSNR())
+          { m_sphereActor->GetProperty()->SetColor(1.0,1.0,0.5); }
+          else
+          { m_sphereActor->GetProperty()->SetColor(0.0,1.0,0.0); }
+      } else {
+          //refresh back to user given properties
+          dObj->refreshProperties();
+      }
+
 
       for (int ix2=0; ix2<3; ix2++) {
         m_spline[ix2]->AddPoint(ix1,coords[ix2]);

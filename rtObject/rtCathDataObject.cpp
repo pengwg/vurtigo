@@ -22,7 +22,7 @@
 
 //! Constructor
 rtCathDataObject::rtCathDataObject()
- : m_tension(0.0), m_continuity(0.0), m_tipValue(0.0), m_endValue(0.0), m_splineThickness(3.0)
+ : m_tension(0.0), m_continuity(0.0), m_tipValue(0.0), m_endValue(0.0), m_splineThickness(1.0)
 {
   setObjectType("OT_Cath");
 
@@ -335,6 +335,8 @@ void rtCathDataObject::setupGUI() {
   // setup the use SNR checkbox.
   m_useSNRSize = false;
   m_cathGuiSetup.snrSizeCheckBox->setChecked(m_useSNRSize);
+  m_badSNR = m_cathGuiSetup.badSpin->value();
+  m_goodSNR = m_cathGuiSetup.goodSpin->value();
 
   // Setup the points table.
   m_cathGuiSetup.pointsTable->setColumnWidth(0, 60);
@@ -358,6 +360,8 @@ void rtCathDataObject::setupGUI() {
   connect(m_tipPropertyDlg, SIGNAL(propertyChanged()), this, SLOT(Modified()));
 
   connect(m_cathGuiSetup.snrSizeCheckBox, SIGNAL(stateChanged(int)),  this, SLOT(useSNRSizeChanged(int)));
+  connect(m_cathGuiSetup.badSpin, SIGNAL(valueChanged(int)), this, SLOT(badSNRChanged(int)));
+  connect(m_cathGuiSetup.goodSpin, SIGNAL(valueChanged(int)), this, SLOT(goodSNRChanged(int)));
 
   connect( m_cathGuiSetup.thicknessSpinBox, SIGNAL(valueChanged(double)), this, SLOT(splineThicknessChanged(double)) );
   connect( m_cathGuiSetup.tensionSpinBox, SIGNAL(valueChanged(double)), this, SLOT(tensionChanged(double)) );
@@ -397,8 +401,12 @@ void rtCathDataObject::pointSizeChanged(int size) {
 void rtCathDataObject::useSNRSizeChanged(int status) {
   if (status == Qt::Unchecked) {
     m_useSNRSize = false;
+    m_cathGuiSetup.badSpin->setEnabled(false);
+    m_cathGuiSetup.goodSpin->setEnabled(false);
   } else {
     m_useSNRSize = true;
+    m_cathGuiSetup.badSpin->setEnabled(true);
+    m_cathGuiSetup.goodSpin->setEnabled(true);
   }
   Modified();
 }
@@ -544,5 +552,26 @@ void rtCathDataObject::tipValueChanged(double tip) {
 
 void rtCathDataObject::endValueChanged(double end) {
   m_endValue = end;
+  Modified();
+}
+
+void rtCathDataObject::badSNRChanged(int value) {
+    if (value < m_goodSNR) {
+        m_badSNR = value;
+    } else {
+        m_badSNR = m_goodSNR - 1;
+        m_cathGuiSetup.badSpin->setValue(m_badSNR);
+    }
+
+  Modified();
+}
+
+void rtCathDataObject::goodSNRChanged(int value) {
+    if (value > m_badSNR) {
+        m_goodSNR = value;
+    } else {
+        m_goodSNR = m_badSNR + 1;
+        m_cathGuiSetup.goodSpin->setValue(m_goodSNR);
+    }
   Modified();
 }

@@ -83,6 +83,7 @@ public:
   vtkProperty* getSplineProperty() { return m_splineProperty; }
   vtkProperty* getPointProperty() { return m_pointProperty; }
   vtkProperty* getTipProperty() { return m_tipProperty; }
+  void refreshProperties() { m_pointPropertyDlg->settingsChanged(); }
 
   // Estimation Type
   EstimationType getEstimationType() { return m_eType; }
@@ -106,6 +107,12 @@ public:
   inline double getSplineThickness() { return m_splineThickness; }
   inline void setSplineThickness(double thickness) { m_cathGuiSetup.thicknessSpinBox->setValue(thickness); }
 
+  inline int getBadSNR() { return m_badSNR; }
+  inline void setBadSNR(int value) { m_cathGuiSetup.badSpin->setValue(value); }
+
+  inline int getGoodSNR() { return m_goodSNR; }
+  inline void setGoodSNR(int value) { m_cathGuiSetup.goodSpin->setValue(value); }
+
  public slots:
   void splinePropertyDialog();
   void pointPropertyDialog();
@@ -124,6 +131,8 @@ public:
   void continuityChanged(double continuity);
   void tipValueChanged(double tip);
   void endValueChanged(double end);
+  void badSNRChanged(int value);
+  void goodSNRChanged(int value);
 
 signals:
   void updateCoilTableSignal();
@@ -178,6 +187,8 @@ signals:
 
   //! Use the SNR value to determine the size of the rendered coil.
   bool m_useSNRSize;
+  int m_badSNR;
+  int m_goodSNR;
 
   //! The objects that sets the widgets for the cath options.
   Ui::cathOptions m_cathGuiSetup;
