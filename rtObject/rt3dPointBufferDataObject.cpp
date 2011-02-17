@@ -295,8 +295,8 @@ void rt3DPointBufferDataObject::getPointListExtents(double extents[6]) {
 /////////////
 
 void rt3DPointBufferDataObject::pointZoomChanged(int zoom) {
-  // Must change the range from [10,50] to [1.0,5.0]
-  m_pointZoom = ((double)zoom)/10.0f;
+  // Must change the range from [1,40] to [0.25,10.0]
+  m_pointZoom = ((double)zoom)/4.0f;
   Modified();
 }
 

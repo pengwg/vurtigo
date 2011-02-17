@@ -50,10 +50,13 @@
        <item row="0" column="1" colspan="2">
         <widget class="QSlider" name="pointZoomSlider">
          <property name="minimum">
-          <number>10</number>
+          <number>1</number>
          </property>
          <property name="maximum">
-          <number>50</number>
+          <number>40</number>
+         </property>
+         <property name="value">
+          <number>4</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -123,6 +126,9 @@
          <property name="editTriggers">
           <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
          </property>
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>85</number>
+         </attribute>
          <attribute name="horizontalHeaderDefaultSectionSize">
           <number>85</number>
          </attribute>
