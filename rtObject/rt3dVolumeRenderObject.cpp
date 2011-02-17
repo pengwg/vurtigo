@@ -364,6 +364,15 @@ void rt3DVolumeRenderObject::resetCoronalPlane() {
   m_dataObj->Modified();
 }
 
+void rt3DVolumeRenderObject::setBoundBox(bool status) {
+    if (status) {
+        m_outlineActor->SetVisibility(1);
+    }
+    else {
+        m_outlineActor->SetVisibility(0);
+    }
+}
+
 void rt3DVolumeRenderObject::setRenderQuality(double quality) {
   if (!rtApplication::instance().getMainWinHandle()) return;
   double qual;
@@ -511,6 +520,7 @@ void rt3DVolumeRenderObject::setupDataObject() {
   connect(temp, SIGNAL(axialResetSignal()), this, SLOT(resetAxialPlane()));
   connect(temp, SIGNAL(sagittalResetSignal()), this, SLOT(resetSagittalPlane()));
   connect(temp, SIGNAL(coronalResetSignal()), this, SLOT(resetCoronalPlane()));
+  connect(temp, SIGNAL(boundBoxSignal(bool)), this, SLOT(setBoundBox(bool)));
 }
 
 

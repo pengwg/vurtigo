@@ -286,6 +286,9 @@ public:
   //! The slider for the max z value has changed
   void zmaxSliderChanged(int);
 
+  //! The checkbox for viewing the bounding box was pressed
+  void boundBoxChanged(bool);
+
   //! Create a new piecewisefunction and select it for the rendering
   void createNewPWF();
   //! Create a new color transfer function and select that for rendering.
@@ -309,6 +312,8 @@ public:
   void axialResetSignal();
   void sagittalResetSignal();
   void coronalResetSignal();
+  // Tell the render object to turn on/off bounding box
+  void boundBoxSignal(bool);
 
  protected:
   /////////////
