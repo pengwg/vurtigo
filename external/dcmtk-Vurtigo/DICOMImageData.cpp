@@ -42,6 +42,12 @@
 DICOMImageData::DICOMImageData() {
   m_shortData = NULL;
   m_trigList = NULL;
+  //initialize
+  m_imagesPerCycle = 0;
+  m_cardiacPhase = 0;
+  m_sine = 0;
+  m_numElements = 0;
+  m_triggerTime = 0;
 }
 
 DICOMImageData::~DICOMImageData() {
@@ -89,7 +95,8 @@ bool DICOMImageData::readFile(QString fName) {
     } else if ( m_commonData.getModality() == QString("MR") && m_commonData.getManufacturer() == QString("HeartVista, Inc.")) {
       // HeartVista, Inc.
       std::cout << "Warning: HeartVista DICOM file. This type of file does not contain a complete tag set. " << std::endl;
-      result = readHeartVista_MR(datSet) && result;
+      //result = readHeartVista_MR(datSet) && result;
+      result = readGE_MR(datSet) && result;
     } else if  ( m_commonData.getModality() == QString("CT") && m_commonData.getManufacturer() == QString("Philips") ) {
       result = readPhilips_CT(datSet) && result;
     } else {

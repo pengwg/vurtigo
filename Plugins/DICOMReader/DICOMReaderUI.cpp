@@ -53,21 +53,30 @@ void DICOMReaderUI::newDirectory() {
     m_lastDir = directoryEdit->text();
 
     // Use the custom reader too.
-    bool ok = m_customReader.setDirectory(m_lastDir);
+    bool okDir = m_customReader.setDirectory(m_lastDir);
+    bool okVol = false;
+    if (okDir) {
+        // Try to create the volume.
+        okVol = m_customReader.createVolume(m_customReader.getDICOMImageData());
+    }
     infoBrowser->clear();
-    if (ok) {
+    if (okDir && okVol) {
       infoBrowser->append(m_customReader.getComments());
-
-      // Try to create the volume.
-      m_customReader.createVolume(m_customReader.getDICOMImageData());
 
       createVolumeButton->setEnabled(true);
       nameLineEdit->setText(m_customReader.getDefaultName());
       nameLineEdit->setEnabled(true);
     } else {
-      infoBrowser->append("Error!");
       createVolumeButton->setEnabled(false);
       nameLineEdit->setEnabled(false);
+      if (!okDir)
+      {
+          infoBrowser->append("Error with directory!");
+      }
+      if (!okVol)
+      {
+          infoBrowser->append("Could not create volume!");
+      }
     }
 
   }
