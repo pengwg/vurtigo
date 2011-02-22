@@ -64,6 +64,24 @@ void rtAxesProperties::settingsChanged() {
     m_coordType = CT_FFS;
     break;
   case 2:
+    m_coordType = CT_HFP;
+    break;
+  case 3:
+    m_coordType = CT_FFP;
+    break;
+  case 4:
+    m_coordType = CT_HFDR;
+    break;
+  case 5:
+    m_coordType = CT_FFDR;
+    break;
+  case 6:
+    m_coordType = CT_HFDL;
+    break;
+  case 7:
+    m_coordType = CT_FFDL;
+    break;
+  case 8:
     m_coordType = CT_VTK;
     break;
   }

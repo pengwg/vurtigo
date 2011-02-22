@@ -1203,7 +1203,37 @@ void rtMainWindow::setCoordType(rtAxesProperties::CoordType ct) {
     break;
     case (rtAxesProperties::CT_FFS):
     m_axesActor->SetXAxisLabelText("Right");
+    m_axesActor->SetYAxisLabelText("Posterior");
+    m_axesActor->SetZAxisLabelText("Inferior");
+    break;
+    case (rtAxesProperties::CT_HFP):
+    m_axesActor->SetXAxisLabelText("Right");
     m_axesActor->SetYAxisLabelText("Anterior");
+    m_axesActor->SetZAxisLabelText("Superior");
+    break;
+    case (rtAxesProperties::CT_FFP):
+    m_axesActor->SetXAxisLabelText("Left");
+    m_axesActor->SetYAxisLabelText("Anterior");
+    m_axesActor->SetZAxisLabelText("Inferior");
+    break;
+    case (rtAxesProperties::CT_HFDR):
+    m_axesActor->SetXAxisLabelText("Posterior");
+    m_axesActor->SetYAxisLabelText("Right");
+    m_axesActor->SetZAxisLabelText("Superior");
+    break;
+    case (rtAxesProperties::CT_FFDR):
+    m_axesActor->SetXAxisLabelText("Anterior");
+    m_axesActor->SetYAxisLabelText("Right");
+    m_axesActor->SetZAxisLabelText("Inferior");
+    break;
+    case (rtAxesProperties::CT_HFDL):
+    m_axesActor->SetXAxisLabelText("Anterior");
+    m_axesActor->SetYAxisLabelText("Left");
+    m_axesActor->SetZAxisLabelText("Superior");
+    break;
+    case (rtAxesProperties::CT_FFDL):
+    m_axesActor->SetXAxisLabelText("Posterior");
+    m_axesActor->SetYAxisLabelText("Left");
     m_axesActor->SetZAxisLabelText("Inferior");
     break;
     case (rtAxesProperties::CT_VTK):

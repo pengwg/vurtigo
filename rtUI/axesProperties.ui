@@ -51,12 +51,42 @@
     <widget class="QComboBox" name="coordComboBox">
      <item>
       <property name="text">
-       <string>Head First Supine</string>
+       <string>HFS - Head First Supine</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Feet First Supine</string>
+       <string>FFS - Feet First Supine</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>HFP - Head First Prone</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>FFP - Feet First Prone</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>HFDR - Head First Decubitus Right</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>FFDR - Feet First Decubitus Right</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>HFDL - Head First Decubitus Left</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>FFDL - Feet First Decubitus Left</string>
       </property>
      </item>
      <item>

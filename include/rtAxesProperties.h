@@ -36,6 +36,12 @@ Q_OBJECT
   enum CoordType {
     CT_HFS,
     CT_FFS,
+    CT_HFP,
+    CT_FFP,
+    CT_HFDR,
+    CT_FFDR,
+    CT_HFDL,
+    CT_FFDL,
     CT_VTK
   };
 
