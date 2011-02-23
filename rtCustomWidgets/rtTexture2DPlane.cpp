@@ -44,6 +44,11 @@ rtTexture2DPlane::rtTexture2DPlane() {
   m_mapper->SetInput(m_texturePlane->GetOutput());
 
   m_actor->SetTexture(m_texture);
+  // For slices we don't need "real" lighting. Just Ambient.
+  m_actor->GetProperty()->SetAmbient(1.0);
+  m_actor->GetProperty()->SetDiffuse(0.0);
+  m_actor->GetProperty()->SetSpecular(0.0);
+
   m_imgMapToColors->SetLookupTable(m_lookupTable);
 }
 
