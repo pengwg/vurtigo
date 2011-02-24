@@ -904,7 +904,11 @@ void rtMainWindow::update2DWindowLists(QMultiHash<int, QString>* hash) {
 #endif
 }
 
+void rtMainWindow::setCoordManual(int ct) {
 
+    m_axesProperties->setCoordType(ct);
+    setCoordType( m_axesProperties->getCoordType() );
+}
 
 //! Bring up the dialog that gives the options for the axes widget
 void rtMainWindow::showAxesOptions() {

@@ -52,6 +52,7 @@ Q_OBJECT
 
   ViewType getViewType() { return m_viewType; }
   CoordType getCoordType() { return m_coordType; }
+  void setCoordType(int ct);
 
  public slots:
   void settingsChanged();

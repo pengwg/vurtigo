@@ -22,6 +22,8 @@
 #include "rtRenderObject.h"
 #include "objTypes.h"
 #include "buildParam.h"
+#include "rtApplication.h"
+#include "rtMainWindow.h"
 
 #include "rtColorFuncDataObject.h"
 #include "rtColorFuncRenderObject.h"
@@ -537,6 +539,7 @@ void rt3DVolumeDataObject::updateInfoText() {
   ts << "Number of Frames:" << m_imgUShortCast->GetOutput()->GetNumberOfScalarComponents() << " \n";
   ts << "Memory Used:     " << m_imgUShortCast->GetOutput()->GetActualMemorySize() << " kB \n";
   ts << "Slice Spacing:   [" << spacing[0] << ", " << spacing[1] << ", " << spacing[2] << "] \n";
+  ts << "Patient Position:[" << m_commonData.getPatientPosition() << "] \n";
   ts.flush();
 
   m_optionsWidget.volumeInfoTextEdit->setPlainText(infoText);
@@ -552,6 +555,27 @@ void rt3DVolumeDataObject::updateInfoText() {
   annotate << "Study Date:      " << m_commonData.getStudyDate().toString("dd.MM.yyyy") << " \n";
   annotate << "Study Time:      " << m_commonData.getStudyTime().toString("hh:mm:ss") << " \n";
   annotate.flush();
+
+  //Change Coordinate Axes depending on patient position info in the Volume
+  QString ct = m_commonData.getPatientPosition();
+  if (ct == "HFS")
+       rtApplication::instance().getMainWinHandle()->setCoordManual(0);
+  else if (ct == "FFS")
+      rtApplication::instance().getMainWinHandle()->setCoordManual(1);
+  else if (ct == "HFP")
+      rtApplication::instance().getMainWinHandle()->setCoordManual(2);
+  else if (ct == "FFP")
+      rtApplication::instance().getMainWinHandle()->setCoordManual(3);
+  else if (ct == "HFDR")
+      rtApplication::instance().getMainWinHandle()->setCoordManual(4);
+  else if (ct == "FFDR")
+      rtApplication::instance().getMainWinHandle()->setCoordManual(5);
+  else if (ct == "HFDL")
+      rtApplication::instance().getMainWinHandle()->setCoordManual(6);
+  else if (ct == "FFDL")
+      rtApplication::instance().getMainWinHandle()->setCoordManual(7);
+  else
+      rtApplication::instance().getMainWinHandle()->setCoordManual(8);
 }
 
 void rt3DVolumeDataObject::cropStatusChanged(bool status) {

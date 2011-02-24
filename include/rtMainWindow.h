@@ -135,6 +135,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   //! Get the class that controls the camera position and movement.
   rtCameraControl* getCameraControl() { return m_cameraControl; }
 
+  void setCoordManual(int ct);
+
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
   void itemChanged(QTreeWidgetItem * current, int column);

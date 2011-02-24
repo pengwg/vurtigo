@@ -36,6 +36,13 @@ rtAxesProperties::rtAxesProperties(QWidget *parent, Qt::WindowFlags flags) {
 rtAxesProperties::~rtAxesProperties() {
 }
 
+//! Set the coordinate axes
+void rtAxesProperties::setCoordType(int ct)
+{
+    coordComboBox->setCurrentIndex(ct);
+    settingsChanged();
+}
+
 //! The user has clicked on OK so the changes will be made.
 void rtAxesProperties::settingsChanged() {
   m_changed=true;
