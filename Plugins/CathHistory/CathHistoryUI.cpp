@@ -31,6 +31,11 @@ CathHistoryUI::CathHistoryUI() {
   
   m_historyRecorder = NULL;
 
+  m_numPoints = pointsSpin->value();
+  m_interval = intervalSpin->value();
+  m_timer = new QTimer(this);
+  m_counter = 0;
+
   markButton->setEnabled(false);
   
   updateCheckableStatus();
@@ -48,6 +53,9 @@ CathHistoryUI::~CathHistoryUI() {
     {
       // delete it somehow
     }
+
+  if (m_timer != NULL)
+      delete m_timer;
  
 }
 
@@ -62,6 +70,8 @@ void CathHistoryUI::connectSignals() {
   connect( cathAutoTrackCheckBox, SIGNAL(toggled(bool)), this, SLOT(cathAutoTrackChanged(bool)));
 
   connect( markButton, SIGNAL(clicked()), this, SLOT(mark()));
+  connect( pointsSpin, SIGNAL(valueChanged(int)), this, SLOT(pointsChanged(int)));
+  connect ( intervalSpin, SIGNAL(valueChanged(int)), this, SLOT(intervalChanged(int)));
 }
 
 void CathHistoryUI::updateCheckableStatus() {
@@ -161,9 +171,40 @@ void CathHistoryUI::trackingPairChanged() {
   updateCheckableStatus();
 }
 
-void CathHistoryUI::mark() {
-  if (m_historyRecorder != NULL)
-    m_historyRecorder->savePoint();
+void CathHistoryUI::mark()
+{
+    if (m_historyRecorder != NULL && m_counter == 0)
+    {
+        if (m_interval == 0)
+        {
+            for (int ix1=0; ix1<m_numPoints; ix1++)
+                 m_historyRecorder->savePoint();
+        }
+        else
+        {
+            m_historyRecorder->savePoint();
+            m_counter++;
+            connect(m_timer, SIGNAL(timeout()), this, SLOT(markNow()));
+            m_timer->start(m_interval);
+        }
+
+    }
+}
+
+void CathHistoryUI::markNow()
+{
+    if (m_counter >= m_numPoints)
+    {
+        m_timer->stop();
+        m_counter = 0;
+        disconnect(m_timer, SIGNAL(timeout()), this, SLOT(markNow()));
+
+    }
+    else
+    {
+        m_historyRecorder->savePoint();
+        m_counter++;
+    }
 }
 
 void CathHistoryUI::cathAutoTrackChanged(bool value) {

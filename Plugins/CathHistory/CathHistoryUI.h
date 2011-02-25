@@ -23,6 +23,7 @@
 #include <QWidget>
 #include <QString>
 #include <QMap>
+#include <QTimer>
 #include <ui_CathHistory.h>
 
 #include "HistoryData.h"
@@ -43,8 +44,10 @@ public slots:
   void pointSizeChanged(int);
 
   void cathChanged(int);
-  
   void mark();
+  void markNow();
+  void pointsChanged(int num) {m_numPoints = num;}
+  void intervalChanged(int interval) {m_interval = interval;}
   
   void cathAutoTrackChanged(bool);
 
@@ -58,8 +61,22 @@ protected:
   //! Map the combo box indices to the plane objects.
   QMap<int, rtCathDataObject*> m_cathObjectMap;
 
+  //! The ID of the 3DPointBuffer Object we are connected to
   int m_points;
-  
+
+  //! Number of points in a marking set
+  int m_numPoints;
+
+  //! Interval between point marks in milliseconds
+  int m_interval;
+
+  //! A timer to count the interval between points in a marked set
+  QTimer *m_timer;
+
+  //! A counter used to keep track of points in a set
+  int m_counter;
+
+  //! The cath history data object
   HistoryData *m_historyRecorder;
 
 };
