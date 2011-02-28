@@ -143,6 +143,9 @@ public:
   //! Slot called when the user wants to save this object with a new filename
   void saveAsThisObject();
 
+  //! Slot called when the object has been saved
+  void savedObject();
+
   //! Slot called when the user wants to delete the selected points.
   void removeSelectedPoints();
 

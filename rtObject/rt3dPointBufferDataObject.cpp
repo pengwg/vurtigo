@@ -424,6 +424,7 @@ void rt3DPointBufferDataObject::saveThisObject() {
   }
   file.setFileName(m_saveFileName);
   m_optionsWidget.filename->setText(QString("Saved to: " + QFileInfo(m_saveFileName).fileName()));
+  QTimer::singleShot(2000, this, SLOT(savedObject()));
   this->saveFile(&file);
 }
 
@@ -433,9 +434,14 @@ void rt3DPointBufferDataObject::saveAsThisObject() {
 
   file.setFileName(m_saveFileName);
   m_optionsWidget.filename->setText(QString("Saved to: " + QFileInfo(m_saveFileName).fileName()));
+  QTimer::singleShot(2000, this, SLOT(savedObject()));
   this->saveFile(&file);
 }
 
+void rt3DPointBufferDataObject::savedObject()
+{
+    m_optionsWidget.filename->setText(QString(""));
+}
 
 void rt3DPointBufferDataObject::removeSelectedPoints() {
   if (m_selectedItems.isEmpty()) return;
