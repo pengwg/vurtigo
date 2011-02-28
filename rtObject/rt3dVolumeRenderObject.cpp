@@ -597,24 +597,39 @@ bool rt3DVolumeRenderObject::getObjectLocation(double loc[6]) {
 }
 
 void rt3DVolumeRenderObject::mousePressEvent(QMouseEvent* event) {
-  if (!m_selectedProp || m_currentPlane == -1) return;
+  if (!m_selectedProp || m_currentPlane == -1)
+    {
+       if (m_selectedProp == rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+           rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMousePress(event);
+      return;
+  }
 
   if (m_planeControl[m_currentPlane].isShowing()) {
     m_planeControl[m_currentPlane].mousePressEvent(event);
     if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
-  }
+  }     
 }
 
 void rt3DVolumeRenderObject::mouseMoveEvent(QMouseEvent* event) {
-  if (!m_selectedProp || m_currentPlane == -1) return;
+  if (!m_selectedProp || m_currentPlane == -1)
+    {
+      if (m_selectedProp == rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+          rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseMove(event);
+      return;
+  }
   if (m_planeControl[m_currentPlane].isShowing()) {
     m_planeControl[m_currentPlane].mouseMoveEvent(event);
     if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
-  }
+  } 
 }
 
 void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
-  if (!m_selectedProp || m_currentPlane == -1) return;
+  if (!m_selectedProp || m_currentPlane == -1)
+    {
+       if (m_selectedProp == rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+           rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseRelease(event);
+       return;
+   }
 
   rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
 
@@ -666,7 +681,12 @@ void rt3DVolumeRenderObject::keyReleaseEvent(QKeyEvent* event) {
 }
 
 void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event) {
-  if (!m_selectedProp || m_currentPlane == -1) return;
+  if (!m_selectedProp || m_currentPlane == -1)
+    {
+      if (m_selectedProp == rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+          rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseWheel(event);
+      return;
+  }
   if (m_planeControl[m_currentPlane].isShowing()) {
     vtkTransform *t = vtkTransform::New();
     m_planeControl[m_currentPlane].wheelEvent(event);

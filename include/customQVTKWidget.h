@@ -67,6 +67,18 @@ class customQVTKWidget : public QVTKWidget {
     pos[2] = m_currentMousePosition[2];
   }
 
+  //! Want Camera to take over processing this mouse press event
+  void camTakeOverMousePress(QMouseEvent *ev) { emit cameraMousePress(ev);}
+
+  //! Want Camera to take over processing this mouse move event
+  void camTakeOverMouseMove(QMouseEvent *ev) { emit cameraMouseMove(ev);}
+
+  //! Want Camera to take over processing this mouse release event
+  void camTakeOverMouseRelease(QMouseEvent *ev) { emit cameraMouseRelease(ev);}
+
+  //! Want Camera to take over processing this mouse wheel event
+  void camTakeOverMouseWheel(QWheelEvent *ev) { emit cameraWheel(ev);}
+
 signals:
   void cameraMousePress(QMouseEvent*);
   void cameraMouseMove(QMouseEvent*);

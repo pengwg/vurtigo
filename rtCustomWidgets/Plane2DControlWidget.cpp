@@ -127,6 +127,11 @@ void Plane2DControlWidget::mousePressEvent(QMouseEvent* event) {
     if (m_currProp) {
       m_currProp->GetProperty()->SetColor(1.0, 0.0, 0.0);
     }
+    // we clicked on thin air
+    else
+    {
+        rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMousePress(event);
+    }
 
     // Make the window 'dirty' so that it is rerendered
     rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
@@ -159,6 +164,7 @@ void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event) {
 
     return;
   } else if (!m_currProp) {
+      rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseMove(event);
     return;
   }
 
@@ -304,7 +310,12 @@ void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void Plane2DControlWidget::mouseReleaseEvent(QMouseEvent* event) {
-  if(!m_showing || !m_currProp) return;
+  if(!m_showing || !m_currProp)
+    {
+      // we released over nothing
+      if (m_showing) rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseRelease(event);
+      return;
+  }
 
 
   if (event->button() == Qt::LeftButton) {
