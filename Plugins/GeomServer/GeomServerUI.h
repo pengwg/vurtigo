@@ -43,6 +43,8 @@ class GeomServerUI : public QWidget, private Ui::MainUI {
     QList<SenderThread::ListObject> m_cathList;
     int m_numPlanes, m_numCath;
 
+    bool m_triggerState;
+
     void updateObjectList();
     void updateListGUI();
     void updateReaderObject();

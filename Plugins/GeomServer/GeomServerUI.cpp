@@ -162,12 +162,13 @@ void GeomServerUI::serverConnect() {
 //! Disonnect from server
 void GeomServerUI::serverDisconnect() {
   senderThread.serverDisconnect();
-  // If we are disconnecting from the server we should enable simulated trigger times
-  rtApplication::instance().getTimeManager()->triggerTimeSourceChanged(true);
+  // If we are disconnecting from the server we should return to state it was before
+  rtApplication::instance().getTimeManager()->triggerTimeSourceChanged(m_triggerState);
   connectstat->setText(QString("Connection Closed"));
 }
 
 void GeomServerUI::serverConnectDo(char *host, int port) {
+  m_triggerState = rtApplication::instance().getTimeManager()->getSimulatedTrigger();
   rtApplication::instance().getTimeManager()->triggerTimeSourceChanged(false);
   connectstat->setText(QString("Established " + QString(host) + ":" + QString::number(port)));
 }

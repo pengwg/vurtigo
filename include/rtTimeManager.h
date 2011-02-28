@@ -81,6 +81,9 @@ If the m_useSimulatedTrigger is true then the simulated mode is run otherwise in
   //! Get the phase number given that there are n total phases.
   int getPhaseForNumPhases(int n);
 
+  //! If we are using simulated triggers
+  bool getSimulatedTrigger() {return m_useSimulatedTrigger; }
+
  public slots:
   //! Time to update the render window.
   void renderTimeout();
