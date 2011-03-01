@@ -38,6 +38,8 @@
 rt2DSliceRenderObject::rt2DSliceRenderObject() {
   setObjectType(rtConstants::OT_2DObject);
   setName("2DSlice Renderer");
+  // initialize!!!
+  m_selectedProp = NULL;
   setupDataObject();
   setupPipeline();
 }
@@ -136,21 +138,39 @@ bool rt2DSliceRenderObject::getObjectLocation(double loc[6]) {
 //////////////////
 
 void rt2DSliceRenderObject::mousePressEvent(QMouseEvent* event) {
-  if (!m_selectedProp) return;
+  if (!m_selectedProp)
+    {
+      // if nothing is selected
+       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+            rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMousePress(event);
+      return;
+  }
   if (m_control.isShowing()) {
     m_control.mousePressEvent(event);
   }
 }
 
 void rt2DSliceRenderObject::mouseMoveEvent(QMouseEvent* event) {
-  if (!m_selectedProp) return;
+  if (!m_selectedProp)
+    {
+      // if nothing is selected
+       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+            rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseMove(event);
+      return;
+  }
   if (m_control.isShowing()) {
     m_control.mouseMoveEvent(event);
   }
 }
 
 void rt2DSliceRenderObject::mouseReleaseEvent(QMouseEvent* event) {
-  if (!m_selectedProp) return;
+  if (!m_selectedProp)
+    {
+      // if nothing is selected
+       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+            rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseRelease(event);
+      return;
+  }
   if (m_control.isShowing()) {
     vtkTransform *t = vtkTransform::New();
     rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
@@ -196,7 +216,13 @@ void rt2DSliceRenderObject::keyReleaseEvent(QKeyEvent* event) {
 }
 
 void rt2DSliceRenderObject::wheelEvent(QWheelEvent* event) {
-  if (!m_selectedProp) return;
+  if (!m_selectedProp)
+    {
+      // if nothing is selected
+       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+            rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseWheel(event);
+      return;
+  }
   if (m_control.isShowing()) {
     vtkTransform *t = vtkTransform::New();
     rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);

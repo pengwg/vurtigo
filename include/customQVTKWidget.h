@@ -25,6 +25,8 @@
 #include "vtkProp.h"
 
 #include <QObject>
+#include <QMouseEvent>
+#include <QWheelEvent>
 
 class rtRenderObject;
 
@@ -67,17 +69,20 @@ class customQVTKWidget : public QVTKWidget {
     pos[2] = m_currentMousePosition[2];
   }
 
+  //if we are processing it for the first time, do it once and then ignore all subsequent calls for this event (prevents multiple objects
+  // from requesting the camera to handle all their non-interactive mouse events)
+
   //! Want Camera to take over processing this mouse press event
-  void camTakeOverMousePress(QMouseEvent *ev) { emit cameraMousePress(ev);}
+  void camTakeOverMousePress(QMouseEvent *ev) { if (ev->isAccepted()) { emit cameraMousePress(ev); ev->ignore();} }
 
   //! Want Camera to take over processing this mouse move event
-  void camTakeOverMouseMove(QMouseEvent *ev) { emit cameraMouseMove(ev);}
+  void camTakeOverMouseMove(QMouseEvent *ev) { if (ev->isAccepted()) { emit cameraMouseMove(ev); ev->ignore();} }
 
   //! Want Camera to take over processing this mouse release event
-  void camTakeOverMouseRelease(QMouseEvent *ev) { emit cameraMouseRelease(ev);}
+  void camTakeOverMouseRelease(QMouseEvent *ev) {if (ev->isAccepted()) { emit cameraMouseRelease(ev); ev->ignore();} }
 
   //! Want Camera to take over processing this mouse wheel event
-  void camTakeOverMouseWheel(QWheelEvent *ev) { emit cameraWheel(ev);}
+  void camTakeOverMouseWheel(QWheelEvent *ev) { if (ev->isAccepted()) { emit cameraWheel(ev); ev->ignore();} }
 
 signals:
   void cameraMousePress(QMouseEvent*);

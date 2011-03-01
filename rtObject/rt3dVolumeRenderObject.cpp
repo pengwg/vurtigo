@@ -599,7 +599,8 @@ bool rt3DVolumeRenderObject::getObjectLocation(double loc[6]) {
 void rt3DVolumeRenderObject::mousePressEvent(QMouseEvent* event) {
   if (!m_selectedProp || m_currentPlane == -1)
     {
-       if (m_selectedProp == rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+     // if nothing is selected
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
            rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMousePress(event);
       return;
   }
@@ -613,7 +614,8 @@ void rt3DVolumeRenderObject::mousePressEvent(QMouseEvent* event) {
 void rt3DVolumeRenderObject::mouseMoveEvent(QMouseEvent* event) {
   if (!m_selectedProp || m_currentPlane == -1)
     {
-      if (m_selectedProp == rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+     // if nothing is selected
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
           rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseMove(event);
       return;
   }
@@ -626,7 +628,8 @@ void rt3DVolumeRenderObject::mouseMoveEvent(QMouseEvent* event) {
 void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
   if (!m_selectedProp || m_currentPlane == -1)
     {
-       if (m_selectedProp == rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+      // if nothing is selected
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
            rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseRelease(event);
        return;
    }
@@ -683,7 +686,8 @@ void rt3DVolumeRenderObject::keyReleaseEvent(QKeyEvent* event) {
 void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event) {
   if (!m_selectedProp || m_currentPlane == -1)
     {
-      if (m_selectedProp == rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+      //if nothing is selected
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
           rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseWheel(event);
       return;
   }

@@ -43,6 +43,9 @@ rt3DPointBufferRenderObject::rt3DPointBufferRenderObject() {
   m_currTransform = vtkTransform::New();
   m_currTransform->Identity();
 
+  // initialize!
+  m_selectedProp = NULL;
+
   setupDataObject();
   setupPipeline();
 }
@@ -161,7 +164,13 @@ void rt3DPointBufferRenderObject::setRenderQuality(double quality) {
 ////////////////
 
 void rt3DPointBufferRenderObject::mousePressEvent(QMouseEvent* event) {
-  if (!m_selectedProp) return;
+  if (!m_selectedProp)
+    {
+      //if nothing is selected
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+          rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMousePress(event);
+      return;
+  }
 
   if ( m_controlWidget.isShowing() ) {
     m_controlWidget.mousePressEvent(event);
@@ -170,7 +179,13 @@ void rt3DPointBufferRenderObject::mousePressEvent(QMouseEvent* event) {
 }
 
 void rt3DPointBufferRenderObject::mouseMoveEvent(QMouseEvent* event) {
-  if (!m_selectedProp) return;
+  if (!m_selectedProp)
+    {
+      //if nothing is selected
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+          rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseMove(event);
+      return;
+  }
 
   if (m_controlWidget.isShowing()) {
     vtkTransform *t = vtkTransform::New();
@@ -182,7 +197,13 @@ void rt3DPointBufferRenderObject::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void rt3DPointBufferRenderObject::mouseReleaseEvent(QMouseEvent* event) {
-  if (!m_selectedProp) return;
+  if (!m_selectedProp)
+    {
+      //if nothing is selected
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+          rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseRelease(event);
+      return;
+  }
 
   if (m_controlWidget.isShowing()) {
     vtkTransform *t = vtkTransform::New();
@@ -242,7 +263,13 @@ void rt3DPointBufferRenderObject::keyReleaseEvent(QKeyEvent* event) {
 }
 
 void rt3DPointBufferRenderObject::wheelEvent(QWheelEvent* event) {
-  if (!m_selectedProp) return;
+  if (!m_selectedProp)
+    {
+      //if nothing is selected
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
+          rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseWheel(event);
+      return;
+  }
 
   if (m_controlWidget.isShowing()) {
     vtkTransform *t = vtkTransform::New();

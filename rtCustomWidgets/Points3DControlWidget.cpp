@@ -123,6 +123,11 @@ void Points3DControlWidget::mousePressEvent(QMouseEvent* event) {
     if (m_currProp) {
       m_currProp->GetProperty()->SetColor(1.0, 0.0, 0.0);
     }
+    // widget is showing but we clicked on thin air
+    else
+    {
+        rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMousePress(event);
+    }
 
     // Make the window 'dirty' so that it is rerendered
     rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
@@ -155,7 +160,9 @@ void Points3DControlWidget::mouseMoveEvent(QMouseEvent* event) {
 
     return;
   } else if (!m_currProp) {
-    return;
+      // widget is showing but we moved with no part of the widget assigned
+      rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseMove(event);
+      return;
   }
 
   QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
@@ -300,7 +307,11 @@ void Points3DControlWidget::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void Points3DControlWidget::mouseReleaseEvent(QMouseEvent* event) {
-  if(!m_showing || !m_currProp) return;
+  if(!m_showing || !m_currProp)
+    {
+      rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseRelease(event);
+      return;
+  }
 
 
   if (event->button() == Qt::LeftButton) {
