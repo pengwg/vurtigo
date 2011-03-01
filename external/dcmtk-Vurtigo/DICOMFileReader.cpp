@@ -202,6 +202,7 @@ bool DICOMFileReader::createVolume(QList<DICOMImageData*>* imgData) {
   m_vtkImgData->SetNumberOfScalarComponents(numFrames);
   m_vtkImgData->AllocateScalars();
 
+
   // Get the position of the first slice.
   double pos[3];
   pos[0] = ENTRY_FLIPS[locIdx][0]*imgData->at(0)->getImagePosition(0);
@@ -293,6 +294,24 @@ bool DICOMFileReader::createVolume(QList<DICOMImageData*>* imgData) {
   m_matrix->SetElement(0, 3, pos[0]);
   m_matrix->SetElement(1, 3, pos[1]);
   m_matrix->SetElement(2, 3, pos[2]);
+
+  double angle = 0;
+  // if we need to rotate right
+  if ((locIdx == 5) || (locIdx == 6))
+      angle = 90;
+  // if we need to rotate left
+  else if ((locIdx == 4) || (locIdx == 7))
+      angle = -90;
+
+   vtkTransform *t = vtkTransform::New();
+   t->Identity();
+   t->RotateZ(angle);
+   t->Concatenate(m_matrix);
+   t->Update();
+   m_matrix->DeepCopy(t->GetMatrix());
+   t->Delete();
+
+
 
   return true;
 }
