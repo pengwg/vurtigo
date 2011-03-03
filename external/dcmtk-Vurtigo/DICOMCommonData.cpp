@@ -28,6 +28,9 @@
 #endif
 #endif
 
+// for backwards compatibility with DCMTK
+#define DCM_PATIENT_NAME DcmTagKey(0x0010, 0x0010)
+
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/ofstd/ofstring.h"
 #include "dcmtk/dcmdata/dcdatset.h"
@@ -77,7 +80,7 @@ void DICOMCommonData::readData(DcmDataset* datSet) {
   OFString temp;
 
   // Get the patient name.
-  if (!datSet->findAndGetOFString(DCM_PatientsName, temp).good()) {
+  if (!datSet->findAndGetOFString(DCM_PATIENT_NAME, temp).good()) {
     m_patientsName = "ANONYMOUS";
   } else {
     m_patientsName = temp.c_str();

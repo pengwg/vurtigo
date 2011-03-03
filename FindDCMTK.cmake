@@ -132,6 +132,10 @@ ENDMACRO(FIND_DCMTK_LIBS)
 #config
 FIND_INCLUDE_DIR(DCMTK_config_INCLUDE_DIR config osconfig.h)
 
+#oflog
+FIND_INCLUDE_DIR(DCMTK_oflog_INCLUDE_DIR oflog oflog.h)
+FIND_DCMTK_LIBS(DCMTK_oflog_LIBRARY oflog)
+
 # ofstd
 FIND_INCLUDE_DIR(DCMTK_ofstd_INCLUDE_DIR ofstd ofstdinc.h)
 FIND_DCMTK_LIBS(DCMTK_ofstd_LIBRARY ofstd)
@@ -173,7 +177,7 @@ IF( DCMTK_dcmimgle_LIBRARY )
     SET( DCMTK_LIBRARIES
         ${DCMTK_dcmimgle_LIBRARY}
         ${DCMTK_dcmdata_LIBRARY}
-        ${DCMTK_ofstd_LIBRARY}
+        ${DCMTK_ofstd_LIBRARY}       
         ${DCMTK_config_LIBRARY}
     )
 
@@ -184,6 +188,13 @@ IF( DCMTK_dcmimgle_LIBRARY )
     IF(DCMTK_dcmnet_LIBRARY)
         LIST(APPEND DCMTK_LIBRARIES ${DCMTK_dcmnet_LIBRARY})
     ENDIF(DCMTK_dcmnet_LIBRARY)
+
+    IF( DCMTK_oflog_INCLUDE_DIR )
+    IF( DCMTK_oflog_LIBRARY )
+        LIST(APPEND DCMTK_INCLUDE_DIR ${DCMTK_oflog_INCLUDE_DIR} )
+        LIST(APPEND DCMTK_LIBRARIES ${DCMTK_oflog_LIBRARY} )
+    ENDIF( DCMTK_oflog_LIBRARY )
+    ENDIF( DCMTK_oflog_INCLUDE_DIR )
 
     # Optional DCMTK Support:
     # define user configurable options and paths to external libraries which might be used

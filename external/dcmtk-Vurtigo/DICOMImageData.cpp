@@ -217,8 +217,6 @@ bool DICOMImageData::readGE_MR(DcmDataset* datSet) {
     m_triggerTime = 0;
   }
 
-  datSet->findAndGetUint16(DCM_PixelRepresentation, m_sine).good();
-  datSet->findAndGetUint32(DCM_PixelDataGroupLength, m_pixelGroupLen).good();
   datSet->findAndGetUint16Array(DCM_PixelData, temp, &m_numElements, false).good();
 
   if (m_numElements != (unsigned long)( m_commonData.getNumRows()*m_commonData.getNumCols() ) && m_numElements > 0) {
@@ -255,8 +253,6 @@ bool DICOMImageData::readPhilips_MR(DcmDataset* datSet) {
      m_cardiacPhase = 1;
   }
 
-  datSet->findAndGetUint16(DCM_PixelRepresentation, m_sine).good();
-  datSet->findAndGetUint32(DCM_PixelDataGroupLength, m_pixelGroupLen).good();
   datSet->findAndGetUint16Array(DCM_PixelData, temp, &m_numElements, false).good();
 
   if (m_numElements != (unsigned long)( m_commonData.getNumRows()*m_commonData.getNumCols() ) && m_numElements > 0) {
