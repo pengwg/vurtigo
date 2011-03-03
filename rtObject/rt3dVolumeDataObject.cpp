@@ -691,6 +691,11 @@ void rt3DVolumeDataObject::zmaxSliderChanged(int val) {
   }
 }
 
+void rt3DVolumeDataObject::boundBoxChanged(bool status) {
+    emit boundBoxSignal(status);
+    Modified();
+}
+
 
 void rt3DVolumeDataObject::createNewPWF() {
   rtObjectManager* oManage = rtApplication::instance().getObjectManager();
@@ -799,6 +804,9 @@ void rt3DVolumeDataObject::setupGUI() {
 
   // Global ray cast volume switch
   connect(m_optionsWidget.groupRayCastVolume, SIGNAL(toggled(bool)), this, SLOT(Modified()));
+
+  // Bounding Box switch
+  connect(m_optionsWidget.boundBox, SIGNAL(toggled(bool)), this, SLOT(boundBoxChanged(bool)));
 
   // Surface functions.
   connect(m_optionsWidget.radioComposite, SIGNAL(toggled(bool)), this, SLOT(surfaceFunctionChanged()));

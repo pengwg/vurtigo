@@ -79,6 +79,8 @@ public slots:
   virtual void resetSagittalPlane();
   virtual void resetCoronalPlane();
 
+  virtual void setBoundBox(bool);
+
  protected:
   void setupDataObject();
   void setupPipeline();
