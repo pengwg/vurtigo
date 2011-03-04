@@ -29,9 +29,11 @@ CathTrackingUI::CathTrackingUI() {
 
   m_cathComboBox.addObjectType(rtConstants::OT_Cath);
   m_planeComboBox.addObjectType(rtConstants::OT_2DObject);
+  m_volumeComboBox.addObjectType(rtConstants::OT_3DObject);
 
   this->gridLayout->addWidget(&m_cathComboBox, 0, 1, 1, 2);
   this->gridLayout->addWidget(&m_planeComboBox, 1, 1, 1, 2);
+  this->gridLayout->addWidget(&m_volumeComboBox,2, 1, 1, 2);
 
   m_trackList.clear();
 
@@ -51,6 +53,7 @@ void CathTrackingUI::connectSignals() {
 
   connect( &m_cathComboBox, SIGNAL(objectSelectionChanged(int)), this, SLOT(cathChanged(int)) );
   connect( &m_planeComboBox, SIGNAL(objectSelectionChanged(int)), this, SLOT(planeChanged(int)) );
+  connect( &m_volumeComboBox, SIGNAL(objectSelectionChanged(int)),this, SLOT(volumeChanged(int)));
 
   connect( trackLocSpinBox, SIGNAL(valueChanged(int)), this, SLOT(trackLocationChanged(int)) );
   connect( trackOffsetDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(trackOffsetChanged(double)) );
@@ -61,12 +64,14 @@ void CathTrackingUI::connectSignals() {
 }
 
 void CathTrackingUI::updateCheckableStatus() {
-  int cathId, planeId;
+  int cathId, planeId, volId;
   rt2DSliceDataObject* planePtr = NULL;
   rtCathDataObject* cathPtr = NULL;
+  rt3DVolumeDataObject* volPtr = NULL;
 
   cathId = m_cathComboBox.getCurrentObjectId();
   planeId = m_planeComboBox.getCurrentObjectId();
+  volId = m_volumeComboBox.getCurrentObjectId();
 
   if (cathId >= 0) {
     cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
@@ -76,36 +81,62 @@ void CathTrackingUI::updateCheckableStatus() {
     planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
   }
 
-  if ( !cathPtr || !planePtr ) {
+  if (volId >= 0)
+  {
+      volPtr = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(volId));
+  }
+
+  /*if ( !cathPtr || !planePtr ) {
     trackGroupBox->setEnabled(false);
     sliceOnlyCheckBox->setEnabled(false);
   }
   else {
     trackGroupBox->setEnabled(true);
     sliceOnlyCheckBox->setEnabled(true);
+  }*/
+  if (cathPtr && (planePtr || volPtr))
+  {
+      trackGroupBox->setEnabled(true);
+      if (planePtr) { sliceOnlyCheckBox->setEnabled(true); }
+  }
+  else
+  {
+      trackGroupBox->setEnabled(false);
+      sliceOnlyCheckBox->setEnabled(false);
   }
 }
 
 void CathTrackingUI::cathChanged(int newpos) {
   updateCheckableStatus();
   trackingPairChanged();
+  updateInfo();
 
 }
 
 void CathTrackingUI::planeChanged(int newpos) {
   updateCheckableStatus();
   trackingPairChanged();
+  updateInfo();
+}
+
+void CathTrackingUI::volumeChanged(int newpos)
+{
+    updateCheckableStatus();
+    trackingPairChanged();
+    updateInfo();
 }
 
 
 void CathTrackingUI::trackingPairChanged() {
-  int cathId, planeId;
+  int cathId, planeId, volId;
   rt2DSliceDataObject* planePtr = NULL;
   rtCathDataObject* cathPtr = NULL;
+  rt3DVolumeDataObject* volPtr = NULL;
   TrackData* td;
 
   cathId = m_cathComboBox.getCurrentObjectId();
   planeId = m_planeComboBox.getCurrentObjectId();
+  volId = m_volumeComboBox.getCurrentObjectId();
 
   if (cathId >= 0) {
     cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
@@ -115,8 +146,13 @@ void CathTrackingUI::trackingPairChanged() {
     planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
   }
 
+  if (volId >= 0)
+  {
+      volPtr = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(volId));
+  }
+
   // Not relevant if at least one does not exist.
-  if ( !planePtr || !cathPtr ) {
+  /*if ( !planePtr || !cathPtr ) {
     updateCheckableStatus();
     trackGroupBox->setChecked(false);
     trackLocSpinBox->setValue(0);
@@ -129,16 +165,43 @@ void CathTrackingUI::trackingPairChanged() {
     trackOffsetDoubleSpinBox->setValue(td->getOffset());
     sliceOnlyCheckBox->setChecked(td->isSliceOnly());
   }
+  */
+  if (cathPtr && (planePtr || volPtr))
+  {
+      if (planePtr)
+      {
+          td = getPairCP( planePtr, cathPtr );
+          trackGroupBox->setChecked(td->isTracking());
+          trackLocSpinBox->setValue(td->getLocation());
+          trackOffsetDoubleSpinBox->setValue(td->getOffset());
+          sliceOnlyCheckBox->setChecked(td->isSliceOnly());
+      }
+      if (volPtr)
+      {
+          td = getPairCV( volPtr, cathPtr );
+          trackGroupBox->setChecked(td->isTracking());
+          trackLocSpinBox->setValue(td->getLocation());
+          trackOffsetDoubleSpinBox->setValue(td->getOffset());
+      }
+  }
+  else
+  {
+      updateCheckableStatus();
+      trackGroupBox->setChecked(false);
+      trackLocSpinBox->setValue(0);
+      trackOffsetDoubleSpinBox->setValue(1.0); // offset by 1 mm in the camera direction (to aid visibility)
+      sliceOnlyCheckBox->setChecked(false);
+  }
 }
 
 //! Get the object corresponding to a slice, catheter pair.
-TrackData* CathTrackingUI::getPair(rt2DSliceDataObject* slice, rtCathDataObject* cath) {
+TrackData* CathTrackingUI::getPairCP(rt2DSliceDataObject* slice, rtCathDataObject* cath) {
   TrackData* res = NULL;
 
   if (!slice || !cath) return res;
 
   for (int ix1=0; ix1<m_trackList.count(); ix1++) {
-    if ( m_trackList[ix1]->equivalentTo(cath, slice) ) {
+    if ( m_trackList[ix1]->equivalentCPTo(cath, slice) ) {
       res = m_trackList[ix1];
     }
   }
@@ -149,18 +212,72 @@ TrackData* CathTrackingUI::getPair(rt2DSliceDataObject* slice, rtCathDataObject*
     m_trackList.append(res);
   }
 
+
   return res;
+}
+
+//! Get the object corresponding to a volume, catheter pair
+TrackData* CathTrackingUI::getPairCV(rt3DVolumeDataObject* vol, rtCathDataObject* cath) {
+  TrackData* res = NULL;
+
+  if (!vol || !cath) return res;
+
+  for (int ix1=0; ix1<m_trackList.count(); ix1++) {
+    if ( m_trackList[ix1]->equivalentCVTo(cath, vol) ) {
+      res = m_trackList[ix1];
+    }
+  }
+
+  // Object does not exist yet. Create one!
+  if (!res) {
+    res = new TrackData(cath, vol);
+    m_trackList.append(res);
+  }
+
+
+  return res;
+}
+
+void CathTrackingUI::updateInfo()
+{
+    QString infoText;
+    QTextStream ts(&infoText, QIODevice::WriteOnly);
+
+    trackedPairs->clear();
+    ts << "Tracked pair status: \n";
+    ts << "---------------------\n";
+
+    for (int ix1=0; ix1<m_trackList.count(); ix1++)
+    {
+        ts << "Cath: " << m_trackList[ix1]->getCathObject()->getObjName() << " " << QString::number(m_trackList[ix1]->getCathObject()->getId()) << " , ";
+        if (m_trackList[ix1]->getSliceObject())
+            ts << "Slice: " << m_trackList[ix1]->getSliceObject()->getObjName() << " " << QString::number(m_trackList[ix1]->getSliceObject()->getId()) ;
+        else if (m_trackList[ix1]->getVolObject())
+            ts << "Volume: " << m_trackList[ix1]->getVolObject()->getObjName() << " " << QString::number(m_trackList[ix1]->getVolObject()->getId()) ;
+        ts << "  Tracked: ";
+        if (m_trackList[ix1]->isTracking())
+            ts << "ON";
+        else
+            ts << "OFF";
+        ts << "\n\n";
+    }
+    ts.flush();
+
+    trackedPairs->setPlainText(infoText);
+    trackedPairs->setFont(QFont("Courier"));
 }
 
 
 void CathTrackingUI::trackLocationChanged(int loc) {
-  int cathId, planeId;
+  int cathId, planeId, volId;
   rt2DSliceDataObject* planePtr = NULL;
   rtCathDataObject* cathPtr = NULL;
+  rt3DVolumeDataObject* volPtr = NULL;
   TrackData* td;
 
   cathId = m_cathComboBox.getCurrentObjectId();
   planeId = m_planeComboBox.getCurrentObjectId();
+  volId = m_volumeComboBox.getCurrentObjectId();
 
   if (cathId >= 0) {
     cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
@@ -170,69 +287,114 @@ void CathTrackingUI::trackLocationChanged(int loc) {
     planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
   }
 
+  if (volId >= 0)
+  {
+      volPtr = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(volId));
+  }
+
   // Not relevant if at least one does not exist.
   if (planePtr && cathPtr) {
-    td = getPair( planePtr, cathPtr );
+    td = getPairCP( planePtr, cathPtr );
     td->setLocation(trackLocSpinBox->value());
     td->update();
   }
+  if (volPtr && cathPtr)
+  {
+      td = getPairCV(volPtr, cathPtr);
+      td->setLocation(trackLocSpinBox->value());
+      td->update();
+  }
+  updateInfo();
 
 }
 
 
 void CathTrackingUI::trackOffsetChanged(double offset) {
-  int cathId, planeId;
-  rt2DSliceDataObject* planePtr = NULL;
-  rtCathDataObject* cathPtr = NULL;
-  TrackData* td;
+    int cathId, planeId, volId;
+    rt2DSliceDataObject* planePtr = NULL;
+    rtCathDataObject* cathPtr = NULL;
+    rt3DVolumeDataObject* volPtr = NULL;
+    TrackData* td;
 
-  cathId = m_cathComboBox.getCurrentObjectId();
-  planeId = m_planeComboBox.getCurrentObjectId();
+    cathId = m_cathComboBox.getCurrentObjectId();
+    planeId = m_planeComboBox.getCurrentObjectId();
+    volId = m_volumeComboBox.getCurrentObjectId();
 
-  if (cathId >= 0) {
-    cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
-  }
+    if (cathId >= 0) {
+      cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
+    }
 
-  if (planeId >= 0) {
-    planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
-  }
+    if (planeId >= 0) {
+      planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
+    }
+
+    if (volId >= 0)
+    {
+        volPtr = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(volId));
+    }
 
   // Not relevant if at least one does not exist.
   if (planePtr && cathPtr) {
-    td = getPair( planePtr, cathPtr );
+    td = getPairCP( planePtr, cathPtr );
     td->setOffest( trackOffsetDoubleSpinBox->value() );
     td->update();
   }
+
+  if (volPtr && cathPtr)
+  {
+      td = getPairCV( volPtr, cathPtr );
+      td->setOffest( trackOffsetDoubleSpinBox->value() );
+      td->update();
+  }
+  updateInfo();
 }
 
 
 
 void CathTrackingUI::trackChanged(bool track) {
-  int cathId, planeId;
-  rt2DSliceDataObject* planePtr = NULL;
-  rtCathDataObject* cathPtr = NULL;
-  TrackData* td = NULL;
+    int cathId, planeId, volId;
+    rt2DSliceDataObject* planePtr = NULL;
+    rtCathDataObject* cathPtr = NULL;
+    rt3DVolumeDataObject* volPtr = NULL;
+    TrackData* td;
 
-  cathId = m_cathComboBox.getCurrentObjectId();
-  planeId = m_planeComboBox.getCurrentObjectId();
+    cathId = m_cathComboBox.getCurrentObjectId();
+    planeId = m_planeComboBox.getCurrentObjectId();
+    volId = m_volumeComboBox.getCurrentObjectId();
 
-  if (cathId >= 0) {
-    cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
-  }
+    if (cathId >= 0) {
+      cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
+    }
 
-  if (planeId >= 0) {
-    planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
-  }
+    if (planeId >= 0) {
+      planePtr = static_cast<rt2DSliceDataObject*>(rtBaseHandle::instance().getObjectWithID(planeId));
+    }
+
+    if (volId >= 0)
+    {
+        volPtr = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(volId));
+    }
 
   // Not relevant if at least one does not exist.
   if (planePtr && cathPtr) {
-    td = getPair( planePtr, cathPtr );
+    td = getPairCP( planePtr, cathPtr );
     if (td) {
       td->setTracking(track);
       td->update();
 	  
     }
   }
+
+  if (volPtr && cathPtr)
+  {
+      td = getPairCV( volPtr, cathPtr );
+      if (td) {
+        td->setTracking(track);
+        td->update();
+
+      }
+  }
+  updateInfo();
 }
 
 void CathTrackingUI::sliceOnlyChanged(bool value) {
@@ -254,9 +416,10 @@ void CathTrackingUI::sliceOnlyChanged(bool value) {
 
   // Not relevant if at least one does not exist.
   if (planePtr && cathPtr) {
-    td = getPair( planePtr, cathPtr );
+    td = getPairCP( planePtr, cathPtr );
     if (td) {
 	  td->setSliceOnly(value);
     }
   }
+  updateInfo();
 }

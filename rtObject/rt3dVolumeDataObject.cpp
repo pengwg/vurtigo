@@ -76,6 +76,11 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   // Setup the interpolation
   m_interpolationType = 1; // Linear interp
 
+  // Distances are 0
+  m_movePoint[0] = 0;
+  m_movePoint[1] = 0;
+  m_movePoint[2] = 0;
+
   m_cineFrame = new QTimer(this);
   connect( m_cineFrame,SIGNAL(timeout()), this, SLOT(nextVisibleComponent()) );
 

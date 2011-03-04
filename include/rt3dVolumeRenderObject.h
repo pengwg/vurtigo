@@ -81,6 +81,14 @@ public slots:
 
   virtual void setBoundBox(bool);
 
+  virtual void movePlanes();
+  virtual void moveAxialNormal(double);
+  virtual void moveAxialAxial(double);
+  virtual void moveSagittalNormal(double);
+  virtual void moveSagittalSagittal(double);
+  virtual void moveCoronalNormal(double);
+  virtual void moveCoronalCoronal(double);
+
  protected:
   void setupDataObject();
   void setupPipeline();

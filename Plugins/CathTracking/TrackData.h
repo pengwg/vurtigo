@@ -23,6 +23,7 @@
 #include <QObject>
 #include "rt2dSliceDataObject.h"
 #include "rtCathDataObject.h"
+#include "rt3dVolumeDataObject.h"
 
 
 class TrackData : public QObject
@@ -31,9 +32,11 @@ class TrackData : public QObject
 
  public:
     TrackData(rtCathDataObject* cath, rt2DSliceDataObject* slice);
+    TrackData(rtCathDataObject* cath, rt3DVolumeDataObject* vol);
     ~TrackData();
 
-    bool equivalentTo(rtCathDataObject* cath, rt2DSliceDataObject* slice);
+    bool equivalentCPTo(rtCathDataObject* cath, rt2DSliceDataObject* slice);
+    bool equivalentCVTo(rtCathDataObject* cath, rt3DVolumeDataObject* vol);
 
     int getLocation() { return m_location; }
     void setLocation(int loc) { m_location = loc; }
@@ -51,6 +54,7 @@ class TrackData : public QObject
 
     rt2DSliceDataObject* getSliceObject() { return m_slice; }
     rtCathDataObject* getCathObject() { return m_cath; }
+    rt3DVolumeDataObject* getVolObject() {return m_vol; }
 
  public slots:
     //! Update is called when the catheter starts tracking and when it has moved.
@@ -63,6 +67,7 @@ class TrackData : public QObject
   bool m_sliceOnly;
   rt2DSliceDataObject* m_slice;
   rtCathDataObject* m_cath;
+  rt3DVolumeDataObject *m_vol;
 
   // Check if the catheter has really changed.
   int m_old_location;

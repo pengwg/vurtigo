@@ -58,7 +58,7 @@ void ObjectSelectionComboBox::objectCreated(int id) {
   rtRenderObject* renderObj = objManagerHandle->getObjectWithID(id);
   if (renderObj) {
     if ( m_objectTypes.contains(renderObj->getObjectType()) ) {
-      this->addItem(renderObj->getDataObject()->getObjName(), id);
+        this->addItem(renderObj->getDataObject()->getObjName() + " " + QString::number(id), id);
     }
   }
 }
@@ -126,7 +126,7 @@ void ObjectSelectionComboBox::updateComboList() {
     for (int ix2=0; ix2<tempObjList.size(); ix2++) {
       renderObj = objManagerHandle->getObjectWithID(tempObjList[ix2]);
       if (renderObj) {
-        this->addItem(renderObj->getDataObject()->getObjName(), tempObjList[ix2]);
+          this->addItem(renderObj->getDataObject()->getObjName() + " " + QString::number(tempObjList[ix2]), tempObjList[ix2]);
       }
     }
   }

@@ -28,6 +28,7 @@
 #include "TrackData.h"
 #include "rt2dSliceDataObject.h"
 #include "rtCathDataObject.h"
+#include "rt3dVolumeDataObject.h"
 #include "ObjectSelectionComboBox.h"
 
 class CathTrackingUI : public QWidget, public Ui::CathTracking
@@ -41,6 +42,7 @@ public:
 public slots:
   void cathChanged(int);
   void planeChanged(int);
+  void volumeChanged(int);
 
   void trackLocationChanged(int);
   void trackOffsetChanged(double);
@@ -54,16 +56,24 @@ protected:
   void updateCheckableStatus();
   void trackingPairChanged();
 
-  TrackData* getPair(rt2DSliceDataObject*, rtCathDataObject*);
+  TrackData* getPairCP(rt2DSliceDataObject*, rtCathDataObject*);
+  TrackData* getPairCV(rt3DVolumeDataObject*, rtCathDataObject*);
+
+  // update the status of the tracking pairs
+  void updateInfo();
 
   ObjectSelectionComboBox m_cathComboBox;
   ObjectSelectionComboBox m_planeComboBox;
+  ObjectSelectionComboBox m_volumeComboBox;
 
   //! Map the combo box indices to the catheter objects.
   QMap<int, rt2DSliceDataObject*> m_planeObjectMap;
 
   //! Map the combo box indices to the plane objects.
   QMap<int, rtCathDataObject*> m_cathObjectMap;
+
+  //! Map the combo box indices to the volume objects
+  QMap<int, rt3DVolumeDataObject*> m_volumeObjectMap;
 
   QList<TrackData*> m_trackList;
 

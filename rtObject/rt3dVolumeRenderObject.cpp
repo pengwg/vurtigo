@@ -521,6 +521,13 @@ void rt3DVolumeRenderObject::setupDataObject() {
   connect(temp, SIGNAL(sagittalResetSignal()), this, SLOT(resetSagittalPlane()));
   connect(temp, SIGNAL(coronalResetSignal()), this, SLOT(resetCoronalPlane()));
   connect(temp, SIGNAL(boundBoxSignal(bool)), this, SLOT(setBoundBox(bool)));
+  connect(temp, SIGNAL(slicePlaneMoveSignal()), this, SLOT(movePlanes()));
+  connect(temp, SIGNAL(axialNormal(double)),this,SLOT(moveAxialNormal(double)));
+  connect(temp, SIGNAL(axialAxial(double)),this,SLOT(moveAxialAxial(double)));
+  connect(temp, SIGNAL(sagittalNormal(double)),this,SLOT(moveSagittalNormal(double)));
+  connect(temp, SIGNAL(sagittalSagittal(double)),this,SLOT(moveSagittalSagittal(double)));
+  connect(temp, SIGNAL(coronalNormal(double)),this,SLOT(moveCoronalNormal(double)));
+  connect(temp, SIGNAL(coronalCoronal(double)),this,SLOT(moveCoronalCoronal(double)));
 }
 
 
@@ -704,6 +711,112 @@ void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event) {
 
     if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
+}
+
+void rt3DVolumeRenderObject::movePlanes()
+{
+    //calculate distance from point to each plane
+    // move the plane
+
+    rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
+
+    double normal[3];
+    double orig[3];
+    double newPos[3];
+    double sub[3];
+    double dist;
+    double bounds[6];
+
+    dObj->getMovePoint(newPos);
+
+    dObj->getTransform()->TransformPoint(newPos,newPos);
+
+    // if we are out of bounds, don't move
+    dObj->getImageData()->GetBounds(bounds);
+    if ((newPos[0] < bounds[0]) || (newPos[0] > bounds[1]) || (newPos[1] < bounds[2]) || (newPos[1] > bounds[3]) || (newPos[2] < bounds[4]) || (newPos[2] > bounds[5])) return;
+
+    //AXIAL
+
+    m_boxOutline[0].getNormal(normal);
+    m_boxOutline[0].getMidpoint(orig);
+    vtkMath::Normalize(normal);
+
+    vtkMath::Subtract(newPos,orig,sub);
+    dist = vtkMath::Dot(sub,normal);
+
+    moveAxialNormal(dist + dObj->getMoveOffset());
+
+    //SAGITTAL
+
+    m_boxOutline[1].getNormal(normal);
+    m_boxOutline[1].getMidpoint(orig);
+    vtkMath::Normalize(normal);
+
+    vtkMath::Subtract(newPos,orig,sub);
+    dist = vtkMath::Dot(sub,normal);
+
+    moveSagittalNormal(dist + dObj->getMoveOffset());
+
+    //CORONAL
+
+    m_boxOutline[2].getNormal(normal);
+    m_boxOutline[2].getMidpoint(orig);
+    vtkMath::Normalize(normal);
+
+    vtkMath::Subtract(newPos,orig,sub);
+    dist = vtkMath::Dot(sub,normal);
+
+    moveCoronalNormal(dist + dObj->getMoveOffset());
+
+
+}
+
+void rt3DVolumeRenderObject::moveAxialNormal(double dist)
+{
+    vtkTransform *t = vtkTransform::New();
+    t->DeepCopy(m_boxOutline[0].getTransform());
+    t->Translate(0,0, dist);
+    m_boxOutline[0].setTransform(t);
+    m_texturePlane[0].setTransform(t);
+    adjustReslice(0);
+    t->Delete();
+}
+
+void rt3DVolumeRenderObject::moveAxialAxial(double dist)
+{
+
+}
+
+void rt3DVolumeRenderObject::moveSagittalNormal(double dist)
+{
+    vtkTransform *t = vtkTransform::New();
+    t->DeepCopy(m_boxOutline[1].getTransform());
+    t->Translate(0,0, dist);
+    m_boxOutline[1].setTransform(t);
+    m_texturePlane[1].setTransform(t);
+    adjustReslice(1);
+    t->Delete();
+}
+
+void rt3DVolumeRenderObject::moveSagittalSagittal(double dist)
+{
+
+}
+
+void rt3DVolumeRenderObject::moveCoronalNormal(double dist)
+{
+    vtkTransform *t = vtkTransform::New();
+    t->DeepCopy(m_boxOutline[2].getTransform());
+    t->Translate(0,0, dist);
+    m_boxOutline[2].setTransform(t);
+    m_texturePlane[2].setTransform(t);
+    adjustReslice(2);
+    t->Delete();
+}
+
+void rt3DVolumeRenderObject::moveCoronalCoronal(double dist)
+{
+
 }
 
 ////////////

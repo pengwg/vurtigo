@@ -220,6 +220,48 @@ public:
     return m_planeTransform[id]->DeepCopy(t);
   }
 
+  //! Move the three planes so that all three planes intersect with the point
+  void movePlanestoPoint(double point[3],double offset) {
+      if ( (m_movePoint[0] != point[0]) || (m_movePoint[1] != point[1]) || (m_movePoint[2] != point[2]))
+      {
+          m_movePoint[0] = point[0];
+          m_movePoint[1] = point[1];
+          m_movePoint[2] = point[2];
+          m_moveOffset = offset;
+          Modified();
+          emit slicePlaneMoveSignal();
+      }
+  }
+
+  //! move the axial slice along its own normal
+  void moveAxialAlongNormal(double dist) {emit axialNormal(dist);}
+
+  //! move the axial slice along the axial direction
+  void moveAxial(double dist) {emit axialAxial(dist);}
+
+  //! move the sagittal slice along its own normal
+  void moveSagittalAlongNormal(double dist) {emit sagittalNormal(dist);}
+
+  //! move the sagittal slice along the sagittal direction
+  void moveSagittal(double dist) {emit sagittalSagittal(dist);}
+
+  //! move the coronal slice along its own normal
+  void moveCoronalAlongNormal(double dist) {emit coronalNormal(dist);}
+
+  //! move the coronal slice along the coronal direction
+  void moveCoronal(double dist) {emit coronalCoronal(dist);}
+
+
+  //! Get the move Point
+  void getMovePoint(double point[3]) {
+      point[0] = m_movePoint[0];
+      point[1] = m_movePoint[1];
+      point[2] = m_movePoint[2];
+  }
+
+  //! Get the move offset
+  double getMoveOffset() {return m_moveOffset;}
+
  public slots:
   //! Slot called when the user changes the surface function.
   void surfaceFunctionChanged();
@@ -315,6 +357,14 @@ public:
   // Tell the render object to turn on/off bounding box
   void boundBoxSignal(bool);
 
+  void slicePlaneMoveSignal();
+  void axialNormal(double);
+  void axialAxial(double);
+  void sagittalNormal(double);
+  void sagittalSagittal(double);
+  void coronalNormal(double);
+  void coronalCoronal(double);
+
  protected:
   /////////////
   // Functions
@@ -382,6 +432,12 @@ public:
 
   //! Positions for the three planes
   vtkTransform* m_planeTransform[3];
+
+  //! The point to move the three planes to
+  double m_movePoint[3];
+
+  //! The offset of the move point
+  double m_moveOffset;
 
 
 };
