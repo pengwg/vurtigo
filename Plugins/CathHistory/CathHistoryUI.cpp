@@ -35,8 +35,11 @@ CathHistoryUI::CathHistoryUI() {
   m_interval = intervalSpin->value();
   m_timer = new QTimer(this);
   m_counter = 0;
+  m_set = 0;
 
   markButton->setEnabled(false);
+  pointsSpin->setEnabled(false);
+  intervalSpin->setEnabled(false);
   
   updateCheckableStatus();
 
@@ -77,6 +80,12 @@ void CathHistoryUI::connectSignals() {
 void CathHistoryUI::updateCheckableStatus() {
   int cathPos;
   cathPos = cathComboBox->currentIndex();
+  if (cathPos >= 0)
+  {
+      markButton->setEnabled(true);
+      pointsSpin->setEnabled(true);
+      intervalSpin->setEnabled(true);
+  }
   
   cathAutoTrackCheckBox->setEnabled((cathPos < 0) ? false : true);
 }
@@ -153,9 +162,13 @@ void CathHistoryUI::trackingPairChanged() {
   if (cathPos < 0 || m_points < 0) {
    // no selection
     markButton->setEnabled(false);
+    pointsSpin->setEnabled(false);
+    intervalSpin->setEnabled(false);
   } else {
    // valid selection
     markButton->setEnabled(true);
+    pointsSpin->setEnabled(true);
+    intervalSpin->setEnabled(true);
     
     rtCathDataObject *cath = m_cathObjectMap.value(cathPos);
     rt3DPointBufferDataObject *points = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_points));
@@ -178,11 +191,15 @@ void CathHistoryUI::mark()
         if (m_interval == 0)
         {
             for (int ix1=0; ix1<m_numPoints; ix1++)
-                 m_historyRecorder->savePoint();
+                 m_historyRecorder->saveSetPoint(m_set);
+            savedLabel->setText("Saved " + QString::number(m_numPoints) + " points in set # " + QString::number(m_set));
+            m_set++;
+
         }
         else
         {
-            m_historyRecorder->savePoint();
+            savedLabel->setText("Saving...");
+            m_historyRecorder->saveSetPoint(m_set);
             m_counter++;
             connect(m_timer, SIGNAL(timeout()), this, SLOT(markNow()));
             m_timer->start(m_interval);
@@ -197,12 +214,15 @@ void CathHistoryUI::markNow()
     {
         m_timer->stop();
         m_counter = 0;
+        savedLabel->setText("Saved " + QString::number(m_numPoints) + " points in set # " + QString::number(m_set));
+        m_set++;
         disconnect(m_timer, SIGNAL(timeout()), this, SLOT(markNow()));
 
     }
     else
     {
-        m_historyRecorder->savePoint();
+        savedLabel->setText("Saving...");
+        m_historyRecorder->saveSetPoint(m_set);
         m_counter++;
     }
 }

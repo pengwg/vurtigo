@@ -47,6 +47,7 @@ class HistoryData : public QObject
 
  public slots:
     void savePoint();
+    void saveSetPoint(int set);
     void doAutoTrack();
 
  protected:

@@ -81,6 +81,7 @@ public:
 
   void addPoint(rtBasic3DPointData sp);
   void addTimePoint(rt3DTimePointData pt);
+  void addTimeSetPoint(rt3DTimePointData pt,int set);
   void addCartoPoint(rtCartoPointData pt);
 
   inline void removeAllPoints() {

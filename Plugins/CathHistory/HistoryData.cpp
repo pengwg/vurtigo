@@ -82,6 +82,40 @@ void HistoryData::savePoint()
     m_points->unlock();
   }
 
+void HistoryData::saveSetPoint(int set)
+  {
+   // fail if either object doesn't exist
+    if (!m_cath || !m_points)
+      return;
+
+   // get (first) catheter position
+    int        numLocs;
+    QList<int> locs;
+
+    numLocs = m_cath->getNumLocations();
+    locs    = m_cath->getLocationList();
+
+   // get position (Location starts at 1...)
+    double pos[3];
+    if (!m_cath->getPositionAtLocation(locs[0], pos))   /// xxxxxx should we use locs[1]?
+      return;
+
+   // create a point at this position
+    rt3DTimePointData p;
+
+    p.setPoint(pos);
+
+    p.setPointSize(m_pointSize);
+
+    p.setColor(1, 0, 0); // red
+    p.getProperty()->SetOpacity(0.5);
+
+    m_points->lock();
+    m_points->addTimeSetPoint(p,set);
+    m_points->Modified();
+    m_points->unlock();
+  }
+
 
 void HistoryData::setAutoTrack(bool fEnabled)
   {

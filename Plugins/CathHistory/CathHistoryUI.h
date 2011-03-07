@@ -76,6 +76,9 @@ protected:
   //! A counter used to keep track of points in a set
   int m_counter;
 
+  //! The current set
+  int m_set;
+
   //! The cath history data object
   HistoryData *m_historyRecorder;
 
