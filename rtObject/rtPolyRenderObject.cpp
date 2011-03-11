@@ -56,7 +56,7 @@ void rtPolyRenderObject::update() {
 }
 
 //! Add this object to the given renderer.
-bool rtPolyRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rtPolyRenderObject::addToRenderer(vtkRenderer* ren,int window) {
   if (!ren) {
     rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("addToRenderer failed! Renderer object is NULL."));
     return false;
@@ -71,7 +71,7 @@ bool rtPolyRenderObject::addToRenderer(vtkRenderer* ren) {
 }
 
 //! Remove this object from the given renderer.
-bool rtPolyRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rtPolyRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
   setVisible3D(false);
   if (ren->HasViewProp(m_actor)) {

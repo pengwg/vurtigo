@@ -159,10 +159,10 @@ bool rtBaseHandle::watchClick(int pluginID, bool watch) {
   return res;
 }
 
-vtkImageData* rtBaseHandle::grabScreenshot() {
+vtkImageData* rtBaseHandle::grabScreenshot(int window) {
   vtkRenderWindow* temp;
 
-  temp = rtApplication::instance().getMainWinHandle()->getRenderWindow();
+  temp = rtApplication::instance().getMainWinHandle()->getRenderWindow(window);
 
   vtkWindowToImageFilter* filter = vtkWindowToImageFilter::New();
   filter->SetInput(temp);
@@ -176,10 +176,10 @@ vtkImageData* rtBaseHandle::grabScreenshot() {
   return m_screen;
 }
 
-vtkRenderWindow* rtBaseHandle::getRenderWindow() {
+vtkRenderWindow* rtBaseHandle::getRenderWindow(int window) {
   vtkRenderWindow* temp;
 
-  temp = rtApplication::instance().getMainWinHandle()->getRenderWindow();
+  temp = rtApplication::instance().getMainWinHandle()->getRenderWindow(window);
   return temp;
 }
 

@@ -40,10 +40,10 @@ class rt3DPointBufferRenderObject : public rtRenderObject {
   ~rt3DPointBufferRenderObject();
 
   //! Add this object to the given renderer.
-  virtual bool addToRenderer(vtkRenderer* ren);
+  virtual bool addToRenderer(vtkRenderer* ren, int window);
 
   //! Remove this object from the given renderer.
-  virtual bool removeFromRenderer(vtkRenderer* ren);
+  virtual bool removeFromRenderer(vtkRenderer* ren, int window);
 
   //! The position of the center of the cluster of points
   virtual bool getObjectLocation(double loc[6]);
@@ -55,13 +55,13 @@ class rt3DPointBufferRenderObject : public rtRenderObject {
   virtual void setRenderQuality(double quality);
 
 public slots:
-  virtual void mousePressEvent(QMouseEvent* event);
-  virtual void mouseMoveEvent(QMouseEvent* event);
-  virtual void mouseReleaseEvent(QMouseEvent* event);
-  virtual void mouseDoubleClickEvent(QMouseEvent* event);
-  virtual void keyPressEvent(QKeyEvent* event);
-  virtual void keyReleaseEvent(QKeyEvent* event);
-  virtual void wheelEvent(QWheelEvent* event);
+  virtual void mousePressEvent(QMouseEvent* event,int window);
+  virtual void mouseMoveEvent(QMouseEvent* event, int window);
+  virtual void mouseReleaseEvent(QMouseEvent* event, int window);
+  virtual void mouseDoubleClickEvent(QMouseEvent* event, int window);
+  virtual void keyPressEvent(QKeyEvent* event, int window);
+  virtual void keyReleaseEvent(QKeyEvent* event, int window);
+  virtual void wheelEvent(QWheelEvent* event, int window);
 
  protected:
   //! Create the correct data object.

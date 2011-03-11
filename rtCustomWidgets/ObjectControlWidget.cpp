@@ -179,34 +179,34 @@ void ObjectControlWidget::widgetOpacityChanged() {
 /////////////////
 // Public Slots
 /////////////////
-void ObjectControlWidget::mousePressEvent(QMouseEvent* event) {
+void ObjectControlWidget::mousePressEvent(QMouseEvent* event, int window) {
   if(!m_showing || !event) return;
 }
 
-void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event) {
+void ObjectControlWidget::mouseMoveEvent(QMouseEvent* event, int window) {
   if(!m_showing || !event) return;
 }
 
-void ObjectControlWidget::mouseReleaseEvent(QMouseEvent* event) {
+void ObjectControlWidget::mouseReleaseEvent(QMouseEvent* event, int window) {
   if(!m_showing || !event) return;
 }
 
-void ObjectControlWidget::mouseDoubleClickEvent(QMouseEvent* event) {
-  if(!m_showing || !event) return;
-
-}
-
-void ObjectControlWidget::keyPressEvent(QKeyEvent* event) {
+void ObjectControlWidget::mouseDoubleClickEvent(QMouseEvent* event, int window) {
   if(!m_showing || !event) return;
 
 }
 
-void ObjectControlWidget::keyReleaseEvent(QKeyEvent* event) {
+void ObjectControlWidget::keyPressEvent(QKeyEvent* event, int window) {
   if(!m_showing || !event) return;
 
 }
 
-void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
+void ObjectControlWidget::keyReleaseEvent(QKeyEvent* event, int window) {
+  if(!m_showing || !event) return;
+
+}
+
+void ObjectControlWidget::wheelEvent(QWheelEvent* event, int window) {
   if(!m_showing || !event) return;
 }
 
@@ -227,20 +227,24 @@ void ObjectControlWidget::updateConvertedLocations() {
 bool ObjectControlWidget::pickedObjectOfInterest(int x, int y) {
   if (!m_objOfInterest) return false;
 
-  vtkActor* result;
-  vtkPropCollection* col = vtkPropCollection::New();
-  vtkPropPicker* pick = vtkPropPicker::New();
-  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
-
-  col->AddItem(m_objOfInterest);
+  vtkActor* result;  
 
   result = NULL;
-  if (pick->PickProp(x, y, ren, col) ) {
-      result = static_cast<vtkActor*>(pick->GetViewProp());
-  }
+  for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins();ix1++)
+  {
+      vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer(ix1);
+      vtkPropCollection* col = vtkPropCollection::New();
+      vtkPropPicker* pick = vtkPropPicker::New();
+      col->AddItem(m_objOfInterest);
 
-  if(col) col->Delete();
-  if(pick) pick->Delete();
+
+      if (pick->PickProp(x, y, ren, col) ) {
+          result = static_cast<vtkActor*>(pick->GetViewProp());
+      }
+
+      if(col) col->Delete();
+      if(pick) pick->Delete();
+  }
 
   return result == m_objOfInterest;
 }

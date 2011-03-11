@@ -37,12 +37,12 @@ void rt2DPointRenderObject::update() {
 }
 
 //! Add this object to the given renderer.
-bool rt2DPointRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rt2DPointRenderObject::addToRenderer(vtkRenderer* ren, int window) {
   return true;
 }
 
 //! Remove this object from the given renderer.
-bool rt2DPointRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rt2DPointRenderObject::removeFromRenderer(vtkRenderer* ren, int window) {
   return true;
 }
 

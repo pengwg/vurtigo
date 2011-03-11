@@ -94,7 +94,10 @@ void rt3DPointBufferRenderObject::update() {
     sprintf(text,"%s",qPrintable((*pointList)[hashKeys[ix1]].getLabel()));
     tempPipe->setLabelText(text);
     tempPipe->setLabelScale(psize);
-    tempPipe->setLabelCamera(rtApplication::instance().getMainWinHandle()->getRenderer()->GetActiveCamera());
+    ///////////////////////////////
+    // WHICH CAMERA DO WE FOLLOW???
+    ///////////////////////////////
+    tempPipe->setLabelCamera(rtApplication::instance().getMainWinHandle()->getRenderer(0)->GetActiveCamera());
     tempPipe->getLabelProperty()->SetColor(tempPipe->getPropertyHandle()->GetColor());
 
     // If this point is selected then add the selection sphere.
@@ -110,7 +113,7 @@ void rt3DPointBufferRenderObject::update() {
   }
 }
 
-bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren, int window) {
   if (!ren) return false;
   setVisible3D(true);
   for (int ix1=0; ix1<m_pipeList.count(); ix1++) {
@@ -124,21 +127,21 @@ bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren) {
 
   // Connect signals and slots for interaction.
   customQVTKWidget* renWid;
-  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
   // Connect mouse actions
-  connect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
-  connect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
-  connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
-  connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*)));
-  connect(renWid, SIGNAL(interKeyPress(QKeyEvent*)), this, SLOT(keyPressEvent(QKeyEvent*)));
-  connect(renWid, SIGNAL(interKeyRelease(QKeyEvent*)), this, SLOT(keyReleaseEvent(QKeyEvent*)));
-  connect(renWid, SIGNAL(interWheel(QWheelEvent*)), this, SLOT(wheelEvent(QWheelEvent*)));
+  connect(renWid, SIGNAL(interMousePress(QMouseEvent*,int)), this, SLOT(mousePressEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMoveEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(mouseReleaseEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interKeyPress(QKeyEvent*,int)), this, SLOT(keyPressEvent(QKeyEvent*,int)));
+  connect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), this, SLOT(keyReleaseEvent(QKeyEvent*,int)));
+  connect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), this, SLOT(wheelEvent(QWheelEvent*,int)));
 
 
   return true;
 }
 
-bool rt3DPointBufferRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rt3DPointBufferRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
   setVisible3D(false);
   for (int ix1=0; ix1<m_pipeList.count(); ix1++) {
@@ -147,16 +150,16 @@ bool rt3DPointBufferRenderObject::removeFromRenderer(vtkRenderer* ren) {
   }
 
   customQVTKWidget* renWid;
-  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
 
   // Disconnect mouse actions
-  disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
-  disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
-  disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
-  disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*)));
-  disconnect(renWid, SIGNAL(interKeyPress(QKeyEvent*)), this, SLOT(keyPressEvent(QKeyEvent*)));
-  disconnect(renWid, SIGNAL(interKeyRelease(QKeyEvent*)), this, SLOT(keyReleaseEvent(QKeyEvent*)));
-  disconnect(renWid, SIGNAL(interWheel(QWheelEvent*)), this, SLOT(wheelEvent(QWheelEvent*)));
+  disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*,int)), this, SLOT(mousePressEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMoveEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(mouseReleaseEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interKeyPress(QKeyEvent*,int)), this, SLOT(keyPressEvent(QKeyEvent*,int)));
+  disconnect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), this, SLOT(keyReleaseEvent(QKeyEvent*,int)));
+  disconnect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), this, SLOT(wheelEvent(QWheelEvent*,int)));
 
   if( m_controlWidget.isShowing() ) m_controlWidget.hide();
 
@@ -178,64 +181,64 @@ void rt3DPointBufferRenderObject::setRenderQuality(double quality) {
 // Public Slots
 ////////////////
 
-void rt3DPointBufferRenderObject::mousePressEvent(QMouseEvent* event) {
+void rt3DPointBufferRenderObject::mousePressEvent(QMouseEvent* event, int window) {
   if (!m_selectedProp)
     {
       //if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
-          rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMousePress(event);
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
+          rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
       return;
   }
 
   if ( m_controlWidget.isShowing() ) {
-    m_controlWidget.mousePressEvent(event);
+    m_controlWidget.mousePressEvent(event,window);
     if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
 }
 
-void rt3DPointBufferRenderObject::mouseMoveEvent(QMouseEvent* event) {
+void rt3DPointBufferRenderObject::mouseMoveEvent(QMouseEvent* event,int window) {
   if (!m_selectedProp)
     {
       //if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
-          rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseMove(event);
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
+          rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
       return;
   }
 
   if (m_controlWidget.isShowing()) {
     vtkTransform *t = vtkTransform::New();
-    m_controlWidget.mouseMoveEvent(event);
+    m_controlWidget.mouseMoveEvent(event,window);
     m_controlWidget.getTransform(t);
     setControlTransform(t);
     t->Delete();
   }
 }
 
-void rt3DPointBufferRenderObject::mouseReleaseEvent(QMouseEvent* event) {
+void rt3DPointBufferRenderObject::mouseReleaseEvent(QMouseEvent* event,int window) {
   if (!m_selectedProp)
     {
       //if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
-          rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseRelease(event);
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
+          rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
       return;
   }
 
   if (m_controlWidget.isShowing()) {
     vtkTransform *t = vtkTransform::New();
-    m_controlWidget.mouseReleaseEvent(event);
+    m_controlWidget.mouseReleaseEvent(event,window);
     m_controlWidget.getTransform(t);
     setControlTransform(t);
     t->Delete();
   }
 }
 
-void rt3DPointBufferRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
+void rt3DPointBufferRenderObject::mouseDoubleClickEvent(QMouseEvent* event,int window) {
   vtkProp* temp;
   double midPoint[3];
   double pointExt[6];
   double widgetSize[3];
 
-  temp = rtApplication::instance().getMainWinHandle()->getSelectedProp();
+  temp = rtApplication::instance().getMainWinHandle()->getSelectedProp(window);
   rt3DPointBufferDataObject* dObj = static_cast<rt3DPointBufferDataObject*>(m_dataObj);
   m_selectedProp = NULL;
 
@@ -269,26 +272,26 @@ void rt3DPointBufferRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
   if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
-void rt3DPointBufferRenderObject::keyPressEvent(QKeyEvent* event) {
+void rt3DPointBufferRenderObject::keyPressEvent(QKeyEvent* event,int window) {
   if (!m_selectedProp) return;
 }
 
-void rt3DPointBufferRenderObject::keyReleaseEvent(QKeyEvent* event) {
+void rt3DPointBufferRenderObject::keyReleaseEvent(QKeyEvent* event, int window) {
   if (!m_selectedProp) return;
 }
 
-void rt3DPointBufferRenderObject::wheelEvent(QWheelEvent* event) {
+void rt3DPointBufferRenderObject::wheelEvent(QWheelEvent* event, int window) {
   if (!m_selectedProp)
     {
       //if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
-          rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseWheel(event);
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
+          rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window);
       return;
   }
 
   if (m_controlWidget.isShowing()) {
     vtkTransform *t = vtkTransform::New();
-    m_controlWidget.wheelEvent(event);
+    m_controlWidget.wheelEvent(event,window);
     m_controlWidget.getTransform(t);
     setControlTransform(t);
     t->Delete();
@@ -330,8 +333,11 @@ void rt3DPointBufferRenderObject::cleanupPipeList() {
     // Remove the item if it is currently being rendered.
     if (getVisible3D())
     {
-        rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getActor());
-        rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getLabelActor());
+        for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+        {
+            rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getActor(),ix1);
+            rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getLabelActor(),ix1);
+        }
     }
     delete tempPipe;
   }
@@ -347,8 +353,11 @@ void rt3DPointBufferRenderObject::resizePipeList(int size) {
     // Remove the item if it is currently being rendered.
     if (getVisible3D())
     {
-        rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getActor());
-        rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getLabelActor());
+        for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+        {
+            rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getActor(),ix1);
+            rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getLabelActor(),ix1);
+        }
     }
     delete tempPipe;
   }
@@ -359,8 +368,11 @@ void rt3DPointBufferRenderObject::resizePipeList(int size) {
     m_pipeList.append(tempPipe);
     if (getVisible3D())
     {
-        rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getActor());
-        rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getLabelActor());
+        for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+        {
+            rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getActor(),ix1);
+            rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getLabelActor(),ix1);
+        }
     }
   }
 

@@ -108,20 +108,20 @@ void rt2DSliceDataObject::setupGUI() {
 
   connect(m_wlDialog, SIGNAL(valuesChanged(int,int)), this, SLOT(wlChanged(int,int)));
 
- connect(m_optionsWidget.spinLeftButton, SIGNAL(clicked()), this, SLOT(spinLeft()));
- connect(m_optionsWidget.spinRightButton, SIGNAL(clicked()), this, SLOT(spinRight()));
+ //connect(m_optionsWidget.spinLeftButton, SIGNAL(clicked()), this, SLOT(spinLeft()));
+ //connect(m_optionsWidget.spinRightButton, SIGNAL(clicked()), this, SLOT(spinRight()));
 
- connect(m_optionsWidget.rotateUpButton, SIGNAL(clicked()), this, SLOT(rotateUp()));
- connect(m_optionsWidget.rotateDownButton, SIGNAL(clicked()), this, SLOT(rotateDown()));
- connect(m_optionsWidget.rotateLeftButton, SIGNAL(clicked()), this, SLOT(rotateLeft()));
- connect(m_optionsWidget.rotateRightButton, SIGNAL(clicked()), this, SLOT(rotateRight()));
+ //connect(m_optionsWidget.rotateUpButton, SIGNAL(clicked()), this, SLOT(rotateUp()));
+ //connect(m_optionsWidget.rotateDownButton, SIGNAL(clicked()), this, SLOT(rotateDown()));
+ //connect(m_optionsWidget.rotateLeftButton, SIGNAL(clicked()), this, SLOT(rotateLeft()));
+ //connect(m_optionsWidget.rotateRightButton, SIGNAL(clicked()), this, SLOT(rotateRight()));
 
- connect(m_optionsWidget.pushForwardButton, SIGNAL(clicked()), this, SLOT(pushPlane()));
- connect(m_optionsWidget.pullBackButton, SIGNAL(clicked()), this, SLOT(pullPlane()));
+ //connect(m_optionsWidget.pushForwardButton, SIGNAL(clicked()), this, SLOT(pushPlane()));
+ //connect(m_optionsWidget.pullBackButton, SIGNAL(clicked()), this, SLOT(pullPlane()));
 
- connect(m_optionsWidget.xDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(xTranslate(double)));
- connect(m_optionsWidget.yDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(yTranslate(double)));
- connect(m_optionsWidget.zDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(zTranslate(double)));
+ //connect(m_optionsWidget.xDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(xTranslate(double)));
+ //connect(m_optionsWidget.yDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(yTranslate(double)));
+ //connect(m_optionsWidget.zDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(zTranslate(double)));
 
  connect( this, SIGNAL(copyImageData2DSignal()), this, SLOT(copyImageData2DSlot()), Qt::QueuedConnection );
 
@@ -412,7 +412,7 @@ void rt2DSliceDataObject::getPlaneUp(double up[3])
 
 void rt2DSliceDataObject::pushPlaneBy(double amt, bool asUser) {
   if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return;
-
+/*
   vtkMatrix4x4 *mat = vtkMatrix4x4::New();
 
   m_trans->GetMatrix(mat);
@@ -441,10 +441,13 @@ void rt2DSliceDataObject::pushPlaneBy(double amt, bool asUser) {
   m_trans->SetMatrix(mat);
 
   mat->Delete();
+
+  */
+  m_trans->Translate(0,0,amt);
   Modified();
 }
 
-
+/*
 void rt2DSliceDataObject::spinLeftBy(double amt, bool asUser) {
   if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return;
 
@@ -557,7 +560,7 @@ void rt2DSliceDataObject::rotateLeftBy(double amt, bool asUser) {
 
   Modified();
 }
-
+*/
 void rt2DSliceDataObject::translateTo(double x, double y, double z, bool asUser) {
   if (m_optionsWidget.prescribeGroupBox->isChecked() && !asUser) return;
 
@@ -573,7 +576,7 @@ void rt2DSliceDataObject::translateTo(double x, double y, double z, bool asUser)
   Modified();
 }
 
-
+/*
 void rt2DSliceDataObject::spinRight() {
   spinLeftBy(-1.0f, true);
 }
@@ -605,7 +608,7 @@ void rt2DSliceDataObject::pushPlane() {
 void rt2DSliceDataObject::pullPlane() {
   pushPlaneBy(-1.0, true);
 }
-
+*/
 void rt2DSliceDataObject::xTranslate(double v) {
   translateTo(v, m_optionsWidget.yDoubleSpinBox->value(), m_optionsWidget.zDoubleSpinBox->value(), true);
 }

@@ -188,20 +188,26 @@ void rtTimeManager::checkWatchList() {
 
     renderNew = m_watchList.at(ix1)->tryUpdate() || renderNew;
 
+    for (int ix2=0; ix2<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix2++)
+    {
     // Adjust the rendering quality.
-    if (rtApplication::instance().getMainWinHandle()) {
-      if (rtApplication::instance().getMainWinHandle()->cameraMoving()) {
-        // Camera is moving implies lower quality.
-        m_watchList.at(ix1)->setRenderQuality(rtApplication::instance().getMainWinHandle()->getMovingQuality());
-      } else {
-        m_watchList.at(ix1)->setRenderQuality(rtApplication::instance().getMainWinHandle()->getStillQuality());
-      }
+        if (rtApplication::instance().getMainWinHandle()) {
+            if (rtApplication::instance().getMainWinHandle()->cameraMoving(ix2)) {
+                // Camera is moving implies lower quality.
+                m_watchList.at(ix1)->setRenderQuality(rtApplication::instance().getMainWinHandle()->getMovingQuality());
+            } else {
+                m_watchList.at(ix1)->setRenderQuality(rtApplication::instance().getMainWinHandle()->getStillQuality());
+            }
+        }
     }
   }
 
-  if (renderNew && rtApplication::instance().getMainWinHandle()) {
-    rtApplication::instance().getMainWinHandle()->getRenderer()->ResetCameraClippingRange();
-    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+  for (int ix2=0; ix2<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix2++)
+  {
+      if (renderNew && rtApplication::instance().getMainWinHandle()) {
+          rtApplication::instance().getMainWinHandle()->getRenderer(ix2)->ResetCameraClippingRange();
+          rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+      }
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtTimeManager::checkWatchList() end") );

@@ -59,6 +59,9 @@ class customQVTKWidget : public QVTKWidget {
     */
   vtkProp* getChosenProp() { return m_propChosen; }
 
+  //! Set the chosen prop
+  void setChosenProp(vtkProp* prop) {m_propChosen = prop;}
+
   //! Calculate the position of Qt X,Y into vtk X,Y,Z
   void calculateQtToVtk(int qtCoords[2], double vtkCoords[3]);
 
@@ -73,41 +76,33 @@ class customQVTKWidget : public QVTKWidget {
   // from requesting the camera to handle all their non-interactive mouse events)
 
   //! Want Camera to take over processing this mouse press event
-  void camTakeOverMousePress(QMouseEvent *ev) { if (ev->isAccepted()) { emit cameraMousePress(ev); ev->ignore();} }
+  void camTakeOverMousePress(QMouseEvent *ev,int window) { if (ev->isAccepted()) { emit cameraMousePress(ev,window); ev->ignore();} }
 
   //! Want Camera to take over processing this mouse move event
-  void camTakeOverMouseMove(QMouseEvent *ev) { if (ev->isAccepted()) { emit cameraMouseMove(ev); ev->ignore();} }
+  void camTakeOverMouseMove(QMouseEvent *ev,int window) { if (ev->isAccepted()) { emit cameraMouseMove(ev,window); ev->ignore();} }
 
   //! Want Camera to take over processing this mouse release event
-  void camTakeOverMouseRelease(QMouseEvent *ev) {if (ev->isAccepted()) { emit cameraMouseRelease(ev); ev->ignore();} }
+  void camTakeOverMouseRelease(QMouseEvent *ev,int window) {if (ev->isAccepted()) { emit cameraMouseRelease(ev,window); ev->ignore();} }
 
   //! Want Camera to take over processing this mouse wheel event
-  void camTakeOverMouseWheel(QWheelEvent *ev) { if (ev->isAccepted()) { emit cameraWheel(ev); ev->ignore();} }
+  void camTakeOverMouseWheel(QWheelEvent *ev,int window) { if (ev->isAccepted()) { emit cameraWheel(ev,window); ev->ignore();} }
 
 signals:
-  void cameraMousePress(QMouseEvent*);
-  void cameraMouseMove(QMouseEvent*);
-  void cameraMouseRelease(QMouseEvent*);
-  void cameraMouseDoubleClick(QMouseEvent*);
-  void cameraKeyPress(QKeyEvent*);
-  void cameraKeyRelease(QKeyEvent*);
-  void cameraWheel(QWheelEvent*);
+  void cameraMousePress(QMouseEvent*,int);
+  void cameraMouseMove(QMouseEvent*,int);
+  void cameraMouseRelease(QMouseEvent*,int);
+  void cameraMouseDoubleClick(QMouseEvent*,int);
+  void cameraKeyPress(QKeyEvent*,int);
+  void cameraKeyRelease(QKeyEvent*,int);
+  void cameraWheel(QWheelEvent*,int);
 
-  void interMousePress(QMouseEvent*);
-  void interMouseMove(QMouseEvent*);
-  void interMouseRelease(QMouseEvent*);
-  void interMouseDoubleClick(QMouseEvent*);
-  void interKeyPress(QKeyEvent*);
-  void interKeyRelease(QKeyEvent*);
-  void interWheel(QWheelEvent*);
-
-  void placeMousePress(QMouseEvent*);
-  void placeMouseMove(QMouseEvent*);
-  void placeMouseRelease(QMouseEvent*);
-  void placeMouseDoubleClick(QMouseEvent*);
-  void placeKeyPress(QKeyEvent*);
-  void placeKeyRelease(QKeyEvent*);
-  void placeWheel(QWheelEvent*);
+  void interMousePress(QMouseEvent*,int);
+  void interMouseMove(QMouseEvent*,int);
+  void interMouseRelease(QMouseEvent*,int);
+  void interMouseDoubleClick(QMouseEvent*,int);
+  void interKeyPress(QKeyEvent*,int);
+  void interKeyRelease(QKeyEvent*,int);
+  void interWheel(QWheelEvent*,int);
 
  protected:
 
@@ -152,7 +147,7 @@ signals:
   virtual void wheelEvent(QWheelEvent* event);
 
   //! Use prop picking to select a new prop based on a mouse double-click.
-  void selectNewProp(QMouseEvent* event);
+  void selectNewProp(QMouseEvent* event, int window);
 
   //! The prop that is currently chosen. NULL if no prop is chosen.
   vtkProp* m_propChosen;

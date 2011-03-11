@@ -123,19 +123,19 @@ public:
 
 public slots:
   //! Slot called when the mouse is pressed in the QVTK widget.
-  void mousePress(QMouseEvent*);
+  void mousePress(QMouseEvent*,int);
   //! Slot is called when the mouse is moved. These events only occur when at least one of the mouse buttons is pressed down. (See QMouseEvent).
-  void mouseMove(QMouseEvent*);
+  void mouseMove(QMouseEvent*,int);
   //! Slot called when a mouse button is released.
-  void mouseRelease(QMouseEvent*);
+  void mouseRelease(QMouseEvent*,int);
   //! Slot called when the mouse button is double clicked.
-  void mouseDoubleClick(QMouseEvent*);
+  void mouseDoubleClick(QMouseEvent*,int);
   //! Slot called when a key is pressed.
-  void keyPress(QKeyEvent*);
+  void keyPress(QKeyEvent*,int);
   //! Slot called when a key is released.
-  void keyRelease(QKeyEvent*);
+  void keyRelease(QKeyEvent*,int);
   //! Slot called when the mouse wheel is moved.
-  void wheel(QWheelEvent*);
+  void wheel(QWheelEvent*,int);
   //! Slot is called when the wheel timer expires.
   void wheelFinished();
 

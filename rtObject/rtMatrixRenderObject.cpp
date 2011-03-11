@@ -58,7 +58,7 @@ void rtMatrixRenderObject::update() {
 }
 
 //! Add this object to the given renderer.
-bool rtMatrixRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rtMatrixRenderObject::addToRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
   setVisible3D(true);
 
@@ -69,7 +69,7 @@ bool rtMatrixRenderObject::addToRenderer(vtkRenderer* ren) {
 }
 
 //! Remove this object from the given renderer.
-bool rtMatrixRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rtMatrixRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
   setVisible3D(false);
 

@@ -29,10 +29,10 @@ class rtLabelRenderObject : public rtRenderObject {
   ~rtLabelRenderObject();
 
   //! Add this object to the given renderer.
-  virtual bool addToRenderer(vtkRenderer* ren);
+  virtual bool addToRenderer(vtkRenderer* ren,int window);
 
   //! Remove this object from the given renderer.
-  virtual bool removeFromRenderer(vtkRenderer* ren);
+  virtual bool removeFromRenderer(vtkRenderer* ren,int window);
   virtual bool getObjectLocation(double loc[6]);
 
  protected:

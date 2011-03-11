@@ -409,7 +409,7 @@ bool rt3DVolumeRenderObject::hasProp(vtkProp *prop)
 }
 
 //! Add this object to the given renderer.
-bool rt3DVolumeRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rt3DVolumeRenderObject::addToRenderer(vtkRenderer* ren, int window) {
   rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
   if (!ren || !dObj || !dObj->isDataValid()) return false;
   setVisible3D(true);
@@ -431,21 +431,23 @@ bool rt3DVolumeRenderObject::addToRenderer(vtkRenderer* ren) {
   update3PlaneStatus();
 
   customQVTKWidget* renWid;
-  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
+
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
   // Connect mouse actions
-  connect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
-  connect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
-  connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
-  connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*)));
-  connect(renWid, SIGNAL(interKeyPress(QKeyEvent*)), this, SLOT(keyPressEvent(QKeyEvent*)));
-  connect(renWid, SIGNAL(interKeyRelease(QKeyEvent*)), this, SLOT(keyReleaseEvent(QKeyEvent*)));
-  connect(renWid, SIGNAL(interWheel(QWheelEvent*)), this, SLOT(wheelEvent(QWheelEvent*)));
+  connect(renWid, SIGNAL(interMousePress(QMouseEvent*,int)), this, SLOT(mousePressEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMoveEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(mouseReleaseEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interKeyPress(QKeyEvent*,int)), this, SLOT(keyPressEvent(QKeyEvent*,int)));
+  connect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), this, SLOT(keyReleaseEvent(QKeyEvent*,int)));
+  connect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), this, SLOT(wheelEvent(QWheelEvent*,int)));
+
 
   return true;
 }
 
 //! Remove this object from the given renderer.
-bool rt3DVolumeRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rt3DVolumeRenderObject::removeFromRenderer(vtkRenderer* ren, int window) {
   if (!ren) return false;
   setVisible3D(false);
 
@@ -466,16 +468,18 @@ bool rt3DVolumeRenderObject::removeFromRenderer(vtkRenderer* ren) {
   update3PlaneStatus();
 
   customQVTKWidget* renWid;
-  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
+
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
 
   // Disconnect mouse actions
-  disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
-  disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
-  disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
-  disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*)));
-  disconnect(renWid, SIGNAL(interKeyPress(QKeyEvent*)), this, SLOT(keyPressEvent(QKeyEvent*)));
-  disconnect(renWid, SIGNAL(interKeyRelease(QKeyEvent*)), this, SLOT(keyReleaseEvent(QKeyEvent*)));
-  disconnect(renWid, SIGNAL(interWheel(QWheelEvent*)), this, SLOT(wheelEvent(QWheelEvent*)));
+  disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*,int)), this, SLOT(mousePressEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMoveEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(mouseReleaseEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interKeyPress(QKeyEvent*,int)), this, SLOT(keyPressEvent(QKeyEvent*,int)));
+  disconnect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), this, SLOT(keyReleaseEvent(QKeyEvent*,int)));
+  disconnect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), this, SLOT(wheelEvent(QWheelEvent*,int)));
+
 
   // Remove the interactors too...
   if ( m_planeControl[0].isShowing() ) m_planeControl[0].hide();
@@ -649,41 +653,41 @@ bool rt3DVolumeRenderObject::getObjectLocation(double loc[6]) {
   return true;
 }
 
-void rt3DVolumeRenderObject::mousePressEvent(QMouseEvent* event) {
+void rt3DVolumeRenderObject::mousePressEvent(QMouseEvent* event, int window) {
   if (!m_selectedProp || m_currentPlane == -1)
     {
      // if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
-           rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMousePress(event);
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
+           rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
       return;
   }
 
   if (m_planeControl[m_currentPlane].isShowing()) {
-    m_planeControl[m_currentPlane].mousePressEvent(event);
+    m_planeControl[m_currentPlane].mousePressEvent(event,window);
     if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }     
 }
 
-void rt3DVolumeRenderObject::mouseMoveEvent(QMouseEvent* event) {
+void rt3DVolumeRenderObject::mouseMoveEvent(QMouseEvent* event, int window) {
   if (!m_selectedProp || m_currentPlane == -1)
     {
      // if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
-          rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseMove(event);
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
+          rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
       return;
   }
   if (m_planeControl[m_currentPlane].isShowing()) {
-    m_planeControl[m_currentPlane].mouseMoveEvent(event);
+    m_planeControl[m_currentPlane].mouseMoveEvent(event,window);
     if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   } 
 }
 
-void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
+void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event,int window) {
   if (!m_selectedProp || m_currentPlane == -1)
     {
       // if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
-           rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseRelease(event);
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
+           rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
        return;
    }
 
@@ -693,7 +697,7 @@ void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
 
   if (m_planeControl[m_currentPlane].isShowing()) {
     vtkTransform *t = vtkTransform::New();
-    m_planeControl[m_currentPlane].mouseReleaseEvent(event);
+    m_planeControl[m_currentPlane].mouseReleaseEvent(event,window);
     m_planeControl[m_currentPlane].getTransform(t);
 
     m_boxOutline[m_currentPlane].setTransform(t);
@@ -702,6 +706,7 @@ void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
     // do we want to apply rotation interactions?
     // need to do same as wheel event, by tricking the objects into thinking they had
     // their own mouse events, but we need to use THEIR actor positions
+    // maybe try using copyTransforms?
     /*
     for (int ix1=0; ix1<m_syncList.size(); ix1++)
     {
@@ -719,10 +724,10 @@ void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
   }
 }
 
-void rt3DVolumeRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
+void rt3DVolumeRenderObject::mouseDoubleClickEvent(QMouseEvent* event, int window) {
   vtkProp* temp;
 
-  temp = rtApplication::instance().getMainWinHandle()->getSelectedProp();
+  temp = rtApplication::instance().getMainWinHandle()->getSelectedProp(window);
   m_selectedProp = NULL;
   m_currentPlane = -1;
   for (int ix1=0; ix1<3; ix1++) {
@@ -745,25 +750,25 @@ void rt3DVolumeRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
   if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
-void rt3DVolumeRenderObject::keyPressEvent(QKeyEvent* event) {
+void rt3DVolumeRenderObject::keyPressEvent(QKeyEvent* event, int window) {
   if (!m_selectedProp || m_currentPlane == -1) return;
 }
 
-void rt3DVolumeRenderObject::keyReleaseEvent(QKeyEvent* event) {
+void rt3DVolumeRenderObject::keyReleaseEvent(QKeyEvent* event, int window) {
   if (!m_selectedProp || m_currentPlane == -1) return;
 }
 
-void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event) {
+void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event, int window) {
   if (!m_selectedProp || m_currentPlane == -1)
     {
       //if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
-          rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseWheel(event);
+      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
+          rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window);
       return;
   }
   if (m_planeControl[m_currentPlane].isShowing()) {
     vtkTransform *t = vtkTransform::New();
-    m_planeControl[m_currentPlane].wheelEvent(event);
+    m_planeControl[m_currentPlane].wheelEvent(event,window);
     m_planeControl[m_currentPlane].getTransform(t);
 
     m_boxOutline[m_currentPlane].setTransform(t);
@@ -776,7 +781,7 @@ void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event) {
         {
             rt3DVolumeRenderObject *rObj = static_cast<rt3DVolumeRenderObject *>(m_syncList.at(ix1));
             // call a "fake" event
-            rObj->syncWheel(m_currentPlane, event);
+            rObj->syncWheel(m_currentPlane, event, window);
         }
     }
 
@@ -901,12 +906,12 @@ void rt3DVolumeRenderObject::moveCoronalCoronal(double dist)
 {
 }
 
-void rt3DVolumeRenderObject::syncWheel(int plane,QWheelEvent* event )
+void rt3DVolumeRenderObject::syncWheel(int plane,QWheelEvent* event , int window)
 {
     vtkTransform *t = vtkTransform::New();
     // a little hack to make the wheelevent work
     showWidget(plane);
-    m_planeControl[plane].wheelEvent(event);
+    m_planeControl[plane].wheelEvent(event,window);
     hideWidget(plane);
     m_planeControl[plane].getTransform(t);
 
@@ -919,6 +924,7 @@ void rt3DVolumeRenderObject::syncWheel(int plane,QWheelEvent* event )
 void rt3DVolumeRenderObject::copyObject(rtRenderObject *from)
 {
     if (!from) return;
+    if (from->getObjectType() != rtConstants::OT_3DObject) return;
     rt3DVolumeRenderObject *fromRender = static_cast<rt3DVolumeRenderObject*>(from);
     if (!fromRender) return;
     rt3DVolumeDataObject *fromData = static_cast<rt3DVolumeDataObject*>(from->getDataObject());
@@ -930,17 +936,8 @@ void rt3DVolumeRenderObject::copyObject(rtRenderObject *from)
 
 
     // copy the plane transforms
-    vtkTransform *temp = vtkTransform::New();
-    for (int ix1=0; ix1<3; ix1++)
-    {      
-        m_boxOutline[ix1].setTransform(fromRender->getBoxOutlineTransform(ix1));
-        m_texturePlane[ix1].setTransform(fromRender->getTexturePlaneTransform(ix1));
-
-        fromRender->getPlaneControlTransform(ix1,temp);
-        m_planeControl[ix1].setTransform(temp);
-
-    }
-    temp->Delete();
+    copyPlaneTransforms(fromRender);
+    
 
     // copy plane visibility
     thisData->setAxial3D(fromData->getAxial3D());
@@ -957,6 +954,22 @@ void rt3DVolumeRenderObject::copyObject(rtRenderObject *from)
     thisData->wlChanged(fromData->getWindow(),fromData->getLevel());
 
 
+}
+
+void rt3DVolumeRenderObject::copyPlaneTransforms(rt3DVolumeRenderObject *fromRender)
+{
+    if (!fromRender) return;
+    vtkTransform *temp = vtkTransform::New();
+    for (int ix1=0; ix1<3; ix1++)
+    {      
+        m_boxOutline[ix1].setTransform(fromRender->getBoxOutlineTransform(ix1));
+        m_texturePlane[ix1].setTransform(fromRender->getTexturePlaneTransform(ix1));
+
+        fromRender->getPlaneControlTransform(ix1,temp);
+        m_planeControl[ix1].setTransform(temp);
+
+    }
+    temp->Delete();
 }
 
 ////////////

@@ -94,8 +94,15 @@ void customQVTKWidget::paintEvent(QPaintEvent* event) {
 void customQVTKWidget::mousePressEvent(QMouseEvent* event) {
 
 
-    emit interMousePress(event);
-  QVTKWidget::mousePressEvent(event);
+    for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+    {
+        if (this == rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1))
+        {
+            emit interMousePress(event,ix1);
+            event->ignore();
+        }
+    }
+
 }
 
 void customQVTKWidget::mouseMoveEvent(QMouseEvent* event) {
@@ -123,72 +130,65 @@ void customQVTKWidget::mouseMoveEvent(QMouseEvent* event) {
     this->setCursor(Qt::ArrowCursor);
   }
 
-  emit interMouseMove(event);
-  QVTKWidget::mouseMoveEvent(event);
+  for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+  {
+      if (this == rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1))
+      {
+          emit interMouseMove(event,ix1);
+          event->ignore();
+      }
+  }
 }
 
 void customQVTKWidget::mouseReleaseEvent(QMouseEvent* event) {
 
-    emit interMouseRelease(event);
-  QVTKWidget::mouseReleaseEvent(event);
+    for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+    {
+        if (this == rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1))
+        {
+            emit interMouseRelease(event,ix1);
+            event->ignore();
+        }
+    } 
 }
 
 void customQVTKWidget::mouseDoubleClickEvent(QMouseEvent* event) {
 
-    selectNewProp(event);
-    emit interMouseDoubleClick(event);
-  QVTKWidget::mouseDoubleClickEvent(event);
-  event->ignore();
+    for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+    {
+        if (this == rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1))
+        {
+            selectNewProp(event,ix1);
+            emit interMouseDoubleClick(event,ix1);
+            event->ignore();
+        }
+    }
 }
 
 
 void customQVTKWidget::keyPressEvent(QKeyEvent* event) {
 
-  switch(m_interactionMode) {
-    case(CAMERA_MODE):
-    emit cameraKeyPress(event);
-    break;
-    case(INTERACTION_MODE):
-    emit interKeyPress(event);
-    break;
-    case(PLACE_MODE):
-    emit placeKeyPress(event);
-    break;
-    default:
-    break;
-  }
-
-  QVTKWidget::keyPressEvent(event);
 }
 
 
 void customQVTKWidget::keyReleaseEvent(QKeyEvent* event) {
 
-  switch(m_interactionMode) {
-    case(CAMERA_MODE):
-    emit cameraKeyRelease(event);
-    break;
-    case(INTERACTION_MODE):
-    emit interKeyRelease(event);
-    break;
-    case(PLACE_MODE):
-    emit placeKeyRelease(event);
-    break;
-    default:
-    break;
-  }
-
-  QVTKWidget::keyReleaseEvent(event);
 }
 
 
 void customQVTKWidget::wheelEvent(QWheelEvent* event) {
 
-    emit interWheel(event);
-  QVTKWidget::wheelEvent(event);
+    for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+    {
+        if (this == rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1))
+        {
+            emit interWheel(event,ix1);
+            event->ignore();
+        }
+    }
 }
 
-void customQVTKWidget::selectNewProp(QMouseEvent* event) {
+void customQVTKWidget::selectNewProp(QMouseEvent* event, int window) {
   m_propChosen = NULL;
 
   if (!event) return;
@@ -197,8 +197,14 @@ void customQVTKWidget::selectNewProp(QMouseEvent* event) {
   int X = event->x();
   int Y = this->height()-event->y();
 
-  if(picker->PickProp(X, Y, rtApplication::instance().getMainWinHandle()->getRenderer())) {
-    m_propChosen = picker->GetViewProp();
+  if(picker->PickProp(X, Y, rtApplication::instance().getMainWinHandle()->getRenderer(window))) {
+        for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+            rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1)->setChosenProp(picker->GetViewProp());
+  }
+  else
+  {
+      for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+          rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1)->setChosenProp(NULL);
   }
 
   picker->Delete();

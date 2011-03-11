@@ -44,30 +44,33 @@ void Plane2DControlWidget::sizeChanged() {
 }
 
 void Plane2DControlWidget::visibilityChanged() {
-  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
+  for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins();ix1++)
+  {
+      vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer(ix1);
 
-  if (m_showing) {
-    // Widget is showing
+      if (m_showing) {
+          // Widget is showing
 
-    updateWidgetPosition();
+          updateWidgetPosition();
 
-    ren->AddViewProp(m_centralSphere.getActor());
-    ren->AddViewProp(m_boxOutline.getActor());
-    ren->AddViewProp(m_crosshair.getActor());
+          ren->AddViewProp(m_centralSphere.getActor());
+          ren->AddViewProp(m_boxOutline.getActor());
+          ren->AddViewProp(m_crosshair.getActor());
 
-    for (int ix1=0; ix1<3; ix1++) {
-      ren->AddViewProp(m_compassWidget.getActor(ix1));
-    }
-  } else {
-    // Widget is not showing
+          for (int ix1=0; ix1<3; ix1++) {
+              ren->AddViewProp(m_compassWidget.getActor(ix1));
+          }
+      } else {
+          // Widget is not showing
 
-    ren->RemoveViewProp(m_centralSphere.getActor());
-    ren->RemoveViewProp(m_boxOutline.getActor());
-    ren->RemoveViewProp(m_crosshair.getActor());
+          ren->RemoveViewProp(m_centralSphere.getActor());
+          ren->RemoveViewProp(m_boxOutline.getActor());
+          ren->RemoveViewProp(m_crosshair.getActor());
 
-    for (int ix1=0; ix1<3; ix1++) {
-      ren->RemoveViewProp(m_compassWidget.getActor(ix1));
-    }
+          for (int ix1=0; ix1<3; ix1++) {
+              ren->RemoveViewProp(m_compassWidget.getActor(ix1));
+          }
+      }
   }
 
   // Make the window 'dirty' so that it is rerendered
@@ -91,11 +94,11 @@ void Plane2DControlWidget::widgetOpacityChanged() {
 ///////////////////
 // Public Slots
 ///////////////////
-void Plane2DControlWidget::mousePressEvent(QMouseEvent* event) {
+void Plane2DControlWidget::mousePressEvent(QMouseEvent* event, int window) {
   if(!m_showing) return;
 
   if (event->button() == Qt::LeftButton && !m_currProp) {
-    QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
+    QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->size();
     int X = event->x();
     int Y = winSize.height()-event->y();
 
@@ -103,7 +106,7 @@ void Plane2DControlWidget::mousePressEvent(QMouseEvent* event) {
     m_oldY = Y;
 
     // Find the current prop and the position in 3D of the click.
-    m_currProp = getLocalPropAt(X, Y, m_clickPosition);
+    m_currProp = getLocalPropAt(X, Y, m_clickPosition,window);
 
     if ( m_currProp ) {
       // If the point is selected...
@@ -130,7 +133,7 @@ void Plane2DControlWidget::mousePressEvent(QMouseEvent* event) {
     // we clicked on thin air
     else
     {
-        rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMousePress(event);
+        rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
     }
 
     // Make the window 'dirty' so that it is rerendered
@@ -138,18 +141,18 @@ void Plane2DControlWidget::mousePressEvent(QMouseEvent* event) {
   }
 }
 
-void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event) {
+void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event, int window) {
   if(!m_showing || !event) return;
 
   if(event->buttons() == Qt::NoButton && !m_currProp) {
-    QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
+    QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->size();
     int X = event->x();
     int Y = winSize.height()-event->y();
     double pos3D[3];
     vtkActor* tempActor;
 
     // Find the current prop and the position in 3D of the click.
-    tempActor = getLocalPropAt(X, Y, pos3D);
+    tempActor = getLocalPropAt(X, Y, pos3D,window);
 
     if (tempActor) {
       setWidgetOpacity(1.0);
@@ -164,11 +167,11 @@ void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event) {
 
     return;
   } else if (!m_currProp) {
-      rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseMove(event);
+      rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
     return;
   }
 
-  QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
+  QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->size();
   int X = event->x();
   int Y = winSize.height()-event->y();
 
@@ -177,9 +180,9 @@ void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event) {
   double cameraForward[3];
   double normalDirectionT[3];
 
-  rtApplication::instance().getMainWinHandle()->getCameraRight(cameraRight);
-  rtApplication::instance().getMainWinHandle()->getCameraUp(cameraUp);
-  rtApplication::instance().getMainWinHandle()->getCameraForward(cameraForward);
+  rtApplication::instance().getMainWinHandle()->getCameraRight(cameraRight,window);
+  rtApplication::instance().getMainWinHandle()->getCameraUp(cameraUp,window);
+  rtApplication::instance().getMainWinHandle()->getCameraForward(cameraForward,window);
 
   normalDirectionT[0] = m_positiveDirection[0]-m_clickPosition[0];
   normalDirectionT[1] = m_positiveDirection[1]-m_clickPosition[1];
@@ -196,14 +199,14 @@ void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event) {
   double viewZ[3];
   for (int ix1=0; ix1<3; ix1++) viewZ[ix1] = m_convertedLocations[4][ix1];
   m_userTransform->TransformPoint(viewZ, viewZ);
-  rtApplication::instance().getMainWinHandle()->getRenderer()->WorldToView(viewZ[0], viewZ[1], viewZ[2]);
+  rtApplication::instance().getMainWinHandle()->getRenderer(window)->WorldToView(viewZ[0], viewZ[1], viewZ[2]);
   desiredPoint[2] = viewZ[2];
 
-  rtApplication::instance().getMainWinHandle()->getRenderer()->DisplayToNormalizedDisplay(desiredPoint[0], desiredPoint[1]);
-  rtApplication::instance().getMainWinHandle()->getRenderer()->NormalizedDisplayToViewport(desiredPoint[0], desiredPoint[1]);
-  rtApplication::instance().getMainWinHandle()->getRenderer()->ViewportToNormalizedViewport(desiredPoint[0], desiredPoint[1]);
-  rtApplication::instance().getMainWinHandle()->getRenderer()->NormalizedViewportToView(desiredPoint[0], desiredPoint[1], desiredPoint[2]);
-  rtApplication::instance().getMainWinHandle()->getRenderer()->ViewToWorld(desiredPoint[0], desiredPoint[1], desiredPoint[2]);
+  rtApplication::instance().getMainWinHandle()->getRenderer(window)->DisplayToNormalizedDisplay(desiredPoint[0], desiredPoint[1]);
+  rtApplication::instance().getMainWinHandle()->getRenderer(window)->NormalizedDisplayToViewport(desiredPoint[0], desiredPoint[1]);
+  rtApplication::instance().getMainWinHandle()->getRenderer(window)->ViewportToNormalizedViewport(desiredPoint[0], desiredPoint[1]);
+  rtApplication::instance().getMainWinHandle()->getRenderer(window)->NormalizedViewportToView(desiredPoint[0], desiredPoint[1], desiredPoint[2]);
+  rtApplication::instance().getMainWinHandle()->getRenderer(window)->ViewToWorld(desiredPoint[0], desiredPoint[1], desiredPoint[2]);
 
   m_userTransform->Inverse();
   m_userTransform->TransformPoint(desiredPoint, desiredPoint);
@@ -237,7 +240,7 @@ void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event) {
     mouseDirec[1] = (Y-m_oldY);
     mouseDirec[2] = 0.0f;
 
-    tempMatrix->DeepCopy(rtApplication::instance().getMainWinHandle()->getCameraControl()->getViewMatrix());
+    tempMatrix->DeepCopy(rtApplication::instance().getMainWinHandle()->getCameraControl(window)->getViewMatrix());
     tempMatrix->SetElement(0, 3, 0.0f);
     tempMatrix->SetElement(1, 3, 0.0f);
     tempMatrix->SetElement(2, 3, 0.0f);
@@ -309,11 +312,11 @@ void Plane2DControlWidget::mouseMoveEvent(QMouseEvent* event) {
   m_oldY = Y;
 }
 
-void Plane2DControlWidget::mouseReleaseEvent(QMouseEvent* event) {
+void Plane2DControlWidget::mouseReleaseEvent(QMouseEvent* event, int window) {
   if(!m_showing || !m_currProp)
     {
       // we released over nothing
-      if (m_showing) rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseRelease(event);
+      if (m_showing) rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
       return;
   }
 
@@ -336,22 +339,22 @@ void Plane2DControlWidget::mouseReleaseEvent(QMouseEvent* event) {
   }
 }
 
-void Plane2DControlWidget::mouseDoubleClickEvent(QMouseEvent* event) {
+void Plane2DControlWidget::mouseDoubleClickEvent(QMouseEvent* event, int window) {
   if(!m_showing) return;
 
 }
 
-void Plane2DControlWidget::keyPressEvent(QKeyEvent* event) {
+void Plane2DControlWidget::keyPressEvent(QKeyEvent* event,int window) {
   if(!m_showing) return;
 
 }
 
-void Plane2DControlWidget::keyReleaseEvent(QKeyEvent* event) {
+void Plane2DControlWidget::keyReleaseEvent(QKeyEvent* event, int window) {
   if(!m_showing) return;
 
 }
 
-void Plane2DControlWidget::wheelEvent(QWheelEvent* event) {
+void Plane2DControlWidget::wheelEvent(QWheelEvent* event,int window) {
   if(!m_showing) return;
   double numSteps = event->delta() / 120; // Changed by Ethan 2011-01-04 (maybe we want 12 for 1 cm?)
   double increment = 1.0;
@@ -375,7 +378,7 @@ void Plane2DControlWidget::wheelEvent(QWheelEvent* event) {
   sumSq = sqrt(sumSq);
 
   double cameraDirec[3];
-  rtApplication::instance().getMainWinHandle()->getCameraForward(cameraDirec);
+  rtApplication::instance().getMainWinHandle()->getCameraForward(cameraDirec,window);
 
   m_userTransform->MultiplyPoint(cameraDirec, cameraDirec);
 
@@ -432,11 +435,11 @@ void Plane2DControlWidget::updateWidgetPosition() {
   m_compassWidget.applyPositionTransform();
 }
 
-vtkActor* Plane2DControlWidget::getLocalPropAt(int x, int y, double clickPos[3]) {
+vtkActor* Plane2DControlWidget::getLocalPropAt(int x, int y, double clickPos[3], int window) {
   vtkActor* result;
   vtkPropCollection* col = vtkPropCollection::New();
   vtkPropPicker* pick = vtkPropPicker::New();
-  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer();
+  vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer(window);
 
   col->AddItem(m_centralSphere.getActor());
   col->AddItem(m_compassWidget.getActor(0));

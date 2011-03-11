@@ -37,12 +37,12 @@ void rtColorFuncRenderObject::update() {
 }
 
 //! Add this object to the given renderer.
-bool rtColorFuncRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rtColorFuncRenderObject::addToRenderer(vtkRenderer* ren, int window) {
 
 }
 
 //! Remove this object from the given renderer.
-bool rtColorFuncRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rtColorFuncRenderObject::removeFromRenderer(vtkRenderer* ren, int window) {
 
 }
 

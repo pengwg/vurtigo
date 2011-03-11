@@ -122,15 +122,15 @@ Only one thread may request the creation (or removal) of an object at a time.
 /*!
   This function needs to access the graphics directly so it has to be executed in the same thread as the rendering pipeline. NOT THREAD SAFE!
   */
-  vtkImageData* grabScreenshot();
+  vtkImageData* grabScreenshot(int window = 0);
 
-  //! Get a pointer to the Vurtigo Render Window. NOT THREAD SAFE!
+  //! Get a pointer to one of the Vurtigo Render Windows. NOT THREAD SAFE!
 /*!
   This function returns a pointer to a modifyable render window. NOT THREAD SAFE!
 The user should be careful when using this pointer as changes to the render window object may have unexpected results.
 The use of the vtkRenderWindow object in a thread other than the main Vurtigo rendering thread is not cosidered safe.
   */
-  vtkRenderWindow* getRenderWindow();
+  vtkRenderWindow* getRenderWindow(int window = 0);
 
 //! Force the GUI to do a render update.
 /*!

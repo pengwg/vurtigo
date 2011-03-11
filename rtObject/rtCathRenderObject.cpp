@@ -176,7 +176,7 @@ void rtCathRenderObject::update() {
 }
 
 //! Add this object to the given renderer.
-bool rtCathRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rtCathRenderObject::addToRenderer(vtkRenderer* ren, int window) {
   if (!ren) return false;
   setVisible3D(true);
   if (!ren->HasViewProp(m_sphereActor)) {
@@ -192,7 +192,7 @@ bool rtCathRenderObject::addToRenderer(vtkRenderer* ren) {
 }
 
 //! Remove this object from the given renderer.
-bool rtCathRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rtCathRenderObject::removeFromRenderer(vtkRenderer* ren, int window) {
   if (!ren) return false;
   setVisible3D(false);
   if (ren->HasViewProp(m_sphereActor)) {

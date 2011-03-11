@@ -38,13 +38,13 @@ rtOrientationMarkerWidget::~rtOrientationMarkerWidget() {
 
 void rtOrientationMarkerWidget::connectEvents() {
   if (!m_eventWidget) return;
-  QObject::connect(m_eventWidget, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePress(QMouseEvent*)));
-  QObject::connect(m_eventWidget, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMove(QMouseEvent*)));
-  QObject::connect(m_eventWidget, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(mouseRelease(QMouseEvent*)));
-  QObject::connect(m_eventWidget, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClick(QMouseEvent*)));
-  QObject::connect(m_eventWidget, SIGNAL(interKeyPress(QKeyEvent*)), this, SLOT(keyPress(QKeyEvent*)));
-  QObject::connect(m_eventWidget, SIGNAL(interKeyRelease(QKeyEvent*)), this, SLOT(keyRelease(QKeyEvent*)));
-  QObject::connect(m_eventWidget, SIGNAL(interWheel(QWheelEvent*)), this, SLOT(wheel(QWheelEvent*)));
+  QObject::connect(m_eventWidget, SIGNAL(interMousePress(QMouseEvent*,int)), this, SLOT(mousePress(QMouseEvent*)));
+  QObject::connect(m_eventWidget, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMove(QMouseEvent*)));
+  QObject::connect(m_eventWidget, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(mouseRelease(QMouseEvent*)));
+  QObject::connect(m_eventWidget, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), this, SLOT(mouseDoubleClick(QMouseEvent*)));
+  QObject::connect(m_eventWidget, SIGNAL(interKeyPress(QKeyEvent*,int)), this, SLOT(keyPress(QKeyEvent*)));
+  QObject::connect(m_eventWidget, SIGNAL(interKeyRelease(QKeyEvent*,int)), this, SLOT(keyRelease(QKeyEvent*)));
+  QObject::connect(m_eventWidget, SIGNAL(interWheel(QWheelEvent*,int)), this, SLOT(wheel(QWheelEvent*)));
 }
 
 

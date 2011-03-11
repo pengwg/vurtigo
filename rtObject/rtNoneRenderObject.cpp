@@ -37,12 +37,12 @@ void rtNoneRenderObject::update() {
 }
 
 //! Add this object to the given renderer.
-bool rtNoneRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rtNoneRenderObject::addToRenderer(vtkRenderer* ren,int window) {
   return false;
 }
 
 //! Remove this object from the given renderer.
-bool rtNoneRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rtNoneRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   return false;
 }
 

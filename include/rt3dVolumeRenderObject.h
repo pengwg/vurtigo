@@ -57,17 +57,21 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   ~rt3DVolumeRenderObject();
 
   //! Add this object to the given renderer.
-  virtual bool addToRenderer(vtkRenderer* ren);
+  virtual bool addToRenderer(vtkRenderer* ren, int window);
 
   //! Remove this object from the given renderer.
-  virtual bool removeFromRenderer(vtkRenderer* ren);
+  virtual bool removeFromRenderer(vtkRenderer* ren, int window);
   virtual bool getObjectLocation(double loc[6]);
 
   virtual void setRenderQuality(double quality);
 
   virtual bool hasProp(vtkProp *prop);
 
+  //! Copy the information from another object
   virtual void copyObject(rtRenderObject *from);
+
+  //! Copy the plane transformations from another Volume object
+  void copyPlaneTransforms(rt3DVolumeRenderObject *from);
 
   // used for copying
   void getPlaneControlTransform(int plane, vtkTransform *trans) { m_planeControl[plane].getTransform(trans);}
@@ -77,13 +81,13 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   bool getTexturePlaneVisible(int plane) {return m_texturePlane[plane].getVisible();}
 
 public slots:
-  virtual void mousePressEvent(QMouseEvent* event);
-  virtual void mouseMoveEvent(QMouseEvent* event);
-  virtual void mouseReleaseEvent(QMouseEvent* event);
-  virtual void mouseDoubleClickEvent(QMouseEvent* event);
-  virtual void keyPressEvent(QKeyEvent* event);
-  virtual void keyReleaseEvent(QKeyEvent* event);
-  virtual void wheelEvent(QWheelEvent* event);
+  virtual void mousePressEvent(QMouseEvent* event,int window);
+  virtual void mouseMoveEvent(QMouseEvent* event, int window);
+  virtual void mouseReleaseEvent(QMouseEvent* event, int window);
+  virtual void mouseDoubleClickEvent(QMouseEvent* event, int window);
+  virtual void keyPressEvent(QKeyEvent* event, int window);
+  virtual void keyReleaseEvent(QKeyEvent* event, int window);
+  virtual void wheelEvent(QWheelEvent* event, int window);
 
   virtual void newDataAvailable();
 
@@ -110,8 +114,8 @@ public slots:
   //! move the coronal plane along the coronal direction
   virtual void moveCoronalCoronal(double);
 
-  // used for synching
-  void syncWheel(int plane,QWheelEvent* event);
+  //used for synching
+  void syncWheel(int plane,QWheelEvent* event , int window);
   void hideWidget(int plane) {m_planeControl[plane].hide();}
   void showWidget(int plane) {m_planeControl[plane].show();}
   int getCurrentPlane() {return m_currentPlane;}

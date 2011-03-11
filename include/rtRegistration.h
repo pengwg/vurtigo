@@ -56,15 +56,15 @@ Q_OBJECT
   void sourceRadioChosen();
   void targetRadioChosen();
   //! add a new point to the active set
-  void addActivePoint(QMouseEvent*);
+  void addActivePoint(QMouseEvent*,int);
   //! create a new 3D point object
   void addNewPoints();
 
   void placementOff();
   void placementOn();
 
-  void mouseMoved(QMouseEvent*);
-  void doubleClicked(QMouseEvent*);
+  void mouseMoved(QMouseEvent*,int);
+  void doubleClicked(QMouseEvent*,int);
 
   void syncToggled(bool flag);
 

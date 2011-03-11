@@ -128,14 +128,14 @@ double rtCameraControl::getViewAngle() {
 //////////////
 // PUBLIC SLOTS
 ///////////////
-void rtCameraControl::mousePress(QMouseEvent* ev) {
+void rtCameraControl::mousePress(QMouseEvent* ev,int window) {
   double vp[4];
   m_renderer->GetViewport(vp);
 
   m_lastPoint = ev->pos();
 
   // Convert the Qt x, y to VTK viewport.
-  QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
+  QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->size();
   double X = ((double)ev->x()/(double)winSize.width());
   double Y = ((double)(winSize.height()-ev->y())/(double)winSize.height());
 
@@ -152,7 +152,7 @@ void rtCameraControl::mousePress(QMouseEvent* ev) {
   }
 }
 
-void rtCameraControl::mouseMove(QMouseEvent* ev) {
+void rtCameraControl::mouseMove(QMouseEvent* ev,int window) {
   QPoint newPt;
   newPt = ev->pos();
   if (m_leftMouseDown) {
@@ -194,7 +194,7 @@ void rtCameraControl::mouseMove(QMouseEvent* ev) {
   }
 }
 
-void rtCameraControl::mouseRelease(QMouseEvent* ev) {
+void rtCameraControl::mouseRelease(QMouseEvent* ev,int window) {
   if (ev->button() == Qt::LeftButton) {
     m_leftMouseDown = false;
   } else if (ev->button() == Qt::RightButton) {
@@ -207,10 +207,10 @@ void rtCameraControl::mouseRelease(QMouseEvent* ev) {
   rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
-void rtCameraControl::mouseDoubleClick(QMouseEvent* ev) {
+void rtCameraControl::mouseDoubleClick(QMouseEvent* ev,int window) {
 }
 
-void rtCameraControl::keyPress(QKeyEvent* ev) {
+void rtCameraControl::keyPress(QKeyEvent* ev,int window) {
   bool refresh = true;
 
   m_camera->OrthogonalizeViewUp();
@@ -242,10 +242,10 @@ void rtCameraControl::keyPress(QKeyEvent* ev) {
   }
 }
 
-void rtCameraControl::keyRelease(QKeyEvent* ev) {
+void rtCameraControl::keyRelease(QKeyEvent* ev,int window) {
 }
 
-void rtCameraControl::wheel(QWheelEvent* ev) {
+void rtCameraControl::wheel(QWheelEvent* ev,int window) {
   if (!ev) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Wheel event pointer is NULL."));
     return;
@@ -255,7 +255,7 @@ void rtCameraControl::wheel(QWheelEvent* ev) {
   m_renderer->GetViewport(vp);
 
   // Convert the Qt x, y to VTK viewport.
-  QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
+  QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->size();
   double X = ((double)ev->x()/(double)winSize.width());
   double Y = ((double)(winSize.height()-ev->y())/(double)winSize.height());
 
@@ -288,11 +288,11 @@ void rtCameraControl::connectEvents() {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not connect events. QVTK widget pointer is NULL."));
     return;
   }
-  connect(m_eventWidget, SIGNAL(cameraMousePress(QMouseEvent*)), this, SLOT(mousePress(QMouseEvent*)));
-  connect(m_eventWidget, SIGNAL(cameraMouseMove(QMouseEvent*)), this, SLOT(mouseMove(QMouseEvent*)));
-  connect(m_eventWidget, SIGNAL(cameraMouseRelease(QMouseEvent*)), this, SLOT(mouseRelease(QMouseEvent*)));
-  connect(m_eventWidget, SIGNAL(cameraMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClick(QMouseEvent*)));
-  connect(m_eventWidget, SIGNAL(cameraKeyPress(QKeyEvent*)), this, SLOT(keyPress(QKeyEvent*)));
-  connect(m_eventWidget, SIGNAL(cameraKeyRelease(QKeyEvent*)), this, SLOT(keyRelease(QKeyEvent*)));
-  connect(m_eventWidget, SIGNAL(cameraWheel(QWheelEvent*)), this, SLOT(wheel(QWheelEvent*)));
+  connect(m_eventWidget, SIGNAL(cameraMousePress(QMouseEvent*,int)), this, SLOT(mousePress(QMouseEvent*,int)));
+  connect(m_eventWidget, SIGNAL(cameraMouseMove(QMouseEvent*,int)), this, SLOT(mouseMove(QMouseEvent*,int)));
+  connect(m_eventWidget, SIGNAL(cameraMouseRelease(QMouseEvent*,int)), this, SLOT(mouseRelease(QMouseEvent*,int)));
+  connect(m_eventWidget, SIGNAL(cameraMouseDoubleClick(QMouseEvent*,int)), this, SLOT(mouseDoubleClick(QMouseEvent*,int)));
+  connect(m_eventWidget, SIGNAL(cameraKeyPress(QKeyEvent*,int)), this, SLOT(keyPress(QKeyEvent*,int)));
+  connect(m_eventWidget, SIGNAL(cameraKeyRelease(QKeyEvent*,int)), this, SLOT(keyRelease(QKeyEvent*,int)));
+  connect(m_eventWidget, SIGNAL(cameraWheel(QWheelEvent*,int)), this, SLOT(wheel(QWheelEvent*,int)));
 }

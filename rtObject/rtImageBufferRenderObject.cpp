@@ -37,12 +37,12 @@ void rtImageBufferRenderObject::update() {
 }
 
 //! Add this object to the given renderer.
-bool rtImageBufferRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rtImageBufferRenderObject::addToRenderer(vtkRenderer* ren,int window) {
 
 }
 
 //! Remove this object from the given renderer.
-bool rtImageBufferRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rtImageBufferRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
 
 }
 

@@ -66,7 +66,7 @@ rt2DSliceRenderObject::~rt2DSliceRenderObject() {
   m_actor2D->Delete();
 }
 
-bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
   setVisible3D(true);
 
@@ -86,19 +86,19 @@ bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren) {
   }
 
   customQVTKWidget* renWid;
-  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
   // Connect mouse actions
-  connect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
-  connect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
-  connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
-  connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*)));
-  connect(renWid, SIGNAL(interKeyPress(QKeyEvent*)), this, SLOT(keyPressEvent(QKeyEvent*)));
-  connect(renWid, SIGNAL(interKeyRelease(QKeyEvent*)), this, SLOT(keyReleaseEvent(QKeyEvent*)));
-  connect(renWid, SIGNAL(interWheel(QWheelEvent*)), this, SLOT(wheelEvent(QWheelEvent*)));
+  connect(renWid, SIGNAL(interMousePress(QMouseEvent*,int)), this, SLOT(mousePressEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMoveEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(mouseReleaseEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interKeyPress(QKeyEvent*,int)), this, SLOT(keyPressEvent(QKeyEvent*,int)));
+  connect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), this, SLOT(keyReleaseEvent(QKeyEvent*,int)));
+  connect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), this, SLOT(wheelEvent(QWheelEvent*,int)));
   return true;
 }
 
-bool rt2DSliceRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rt2DSliceRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
   setVisible3D(false);
 
@@ -111,16 +111,16 @@ bool rt2DSliceRenderObject::removeFromRenderer(vtkRenderer* ren) {
   }
 
   customQVTKWidget* renWid;
-  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
 
   // Disconnect mouse actions
-  disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*)), this, SLOT(mousePressEvent(QMouseEvent*)));
-  disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoveEvent(QMouseEvent*)));
-  disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(mouseReleaseEvent(QMouseEvent*)));
-  disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*)));
-  disconnect(renWid, SIGNAL(interKeyPress(QKeyEvent*)), this, SLOT(keyPressEvent(QKeyEvent*)));
-  disconnect(renWid, SIGNAL(interKeyRelease(QKeyEvent*)), this, SLOT(keyReleaseEvent(QKeyEvent*)));
-  disconnect(renWid, SIGNAL(interWheel(QWheelEvent*)), this, SLOT(wheelEvent(QWheelEvent*)));
+  disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*,int)), this, SLOT(mousePressEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMoveEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(mouseReleaseEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interKeyPress(QKeyEvent*,int)), this, SLOT(keyPressEvent(QKeyEvent*,int)));
+  disconnect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), this, SLOT(keyReleaseEvent(QKeyEvent*,int)));
+  disconnect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), this, SLOT(wheelEvent(QWheelEvent*,int)));
 
   return true;
 }
@@ -137,44 +137,44 @@ bool rt2DSliceRenderObject::getObjectLocation(double loc[6]) {
 // Public Slots
 //////////////////
 
-void rt2DSliceRenderObject::mousePressEvent(QMouseEvent* event) {
+void rt2DSliceRenderObject::mousePressEvent(QMouseEvent* event,int window) {
   if (!m_selectedProp)
     {
       // if nothing is selected
-       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
-            rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMousePress(event);
+       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
+            rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
       return;
   }
   if (m_control.isShowing()) {
-    m_control.mousePressEvent(event);
+    m_control.mousePressEvent(event,window);
   }
 }
 
-void rt2DSliceRenderObject::mouseMoveEvent(QMouseEvent* event) {
+void rt2DSliceRenderObject::mouseMoveEvent(QMouseEvent* event,int window) {
   if (!m_selectedProp)
     {
       // if nothing is selected
-       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
-            rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseMove(event);
+       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
+            rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
       return;
   }
   if (m_control.isShowing()) {
-    m_control.mouseMoveEvent(event);
+    m_control.mouseMoveEvent(event,window);
   }
 }
 
-void rt2DSliceRenderObject::mouseReleaseEvent(QMouseEvent* event) {
+void rt2DSliceRenderObject::mouseReleaseEvent(QMouseEvent* event,int window) {
   if (!m_selectedProp)
     {
       // if nothing is selected
-       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
-            rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseRelease(event);
+       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
+            rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
       return;
   }
   if (m_control.isShowing()) {
     vtkTransform *t = vtkTransform::New();
     rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
-    m_control.mouseReleaseEvent(event);
+    m_control.mouseReleaseEvent(event,window);
     m_control.getTransform(t);
     dObj->setVtkMatrix(t->GetMatrix(), true);
     dObj->Modified();
@@ -182,10 +182,10 @@ void rt2DSliceRenderObject::mouseReleaseEvent(QMouseEvent* event) {
   }
 }
 
-void rt2DSliceRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
+void rt2DSliceRenderObject::mouseDoubleClickEvent(QMouseEvent* event,int window) {
   vtkProp* temp;
 
-  temp = rtApplication::instance().getMainWinHandle()->getSelectedProp();
+  temp = rtApplication::instance().getMainWinHandle()->getSelectedProp(window);
   m_selectedProp = NULL;
 
   if (m_control.isShowing())
@@ -207,26 +207,26 @@ void rt2DSliceRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
   }
 }
 
-void rt2DSliceRenderObject::keyPressEvent(QKeyEvent* event) {
+void rt2DSliceRenderObject::keyPressEvent(QKeyEvent* event,int window) {
   if (!m_selectedProp) return;
 }
 
-void rt2DSliceRenderObject::keyReleaseEvent(QKeyEvent* event) {
+void rt2DSliceRenderObject::keyReleaseEvent(QKeyEvent* event,int window) {
   if (!m_selectedProp) return;
 }
 
-void rt2DSliceRenderObject::wheelEvent(QWheelEvent* event) {
+void rt2DSliceRenderObject::wheelEvent(QWheelEvent* event,int window) {
   if (!m_selectedProp)
     {
       // if nothing is selected
-       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp())
-            rtApplication::instance().getMainWinHandle()->getRenderWidget()->camTakeOverMouseWheel(event);
+       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
+            rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window);
       return;
   }
   if (m_control.isShowing()) {
     vtkTransform *t = vtkTransform::New();
     rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
-    m_control.wheelEvent(event);
+    m_control.wheelEvent(event,window);
     m_control.getTransform(t);
     dObj->setVtkMatrix(t->GetMatrix(), true);
     dObj->Modified();

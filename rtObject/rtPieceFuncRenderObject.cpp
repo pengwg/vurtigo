@@ -37,14 +37,14 @@ void rtPieceFuncRenderObject::update() {
 }
 
 //! Add this object to the given renderer.
-bool rtPieceFuncRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rtPieceFuncRenderObject::addToRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
 
   return true;
 }
 
 //! Remove this object from the given renderer.
-bool rtPieceFuncRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rtPieceFuncRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
 
   return true;

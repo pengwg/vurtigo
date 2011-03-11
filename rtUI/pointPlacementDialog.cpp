@@ -70,27 +70,33 @@ void pointPlacementDialog::placementOn()
 {
     // Connect mouse actions
     customQVTKWidget* renWid;
-    renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
-    connect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoved(QMouseEvent *)));
-    connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(addPoint(QMouseEvent*)));
+    for (int ix1=0;ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+    {
+        renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1);
+        connect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMoved(QMouseEvent *,int)));
+        connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(addPoint(QMouseEvent*,int)));
+    }
 }
 
 void pointPlacementDialog::placementOff()
 {
     // Disconnect mouse actions
     customQVTKWidget* renWid;
-    renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
-    disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoved(QMouseEvent *)));
-    disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(addPoint(QMouseEvent*)));
+    for (int ix1=0;ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+    {
+        renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1);
+        disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMoved(QMouseEvent *,int)));
+        disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(addPoint(QMouseEvent*,int)));
+    }
 }
 
-void pointPlacementDialog::mouseMoved(QMouseEvent *event)
+void pointPlacementDialog::mouseMoved(QMouseEvent *event,int window)
 {
     if (event->buttons() == Qt::RightButton)
         m_moved = true;
 }
 
-void pointPlacementDialog::addPoint(QMouseEvent *event)
+void pointPlacementDialog::addPoint(QMouseEvent *event,int window)
 {
     // if we moved the mouse, don't put a point
     if (m_moved)
@@ -104,11 +110,11 @@ void pointPlacementDialog::addPoint(QMouseEvent *event)
     {
         double pos[3];
         int res;
-        QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
+        QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->size();
         int X = event->x();
         int Y = winSize.height()-event->y();
         vtkCellPicker *pick = vtkCellPicker::New();
-        res = pick->Pick(X,Y,0,rtApplication::instance().getMainWinHandle()->getRenderer());
+        res = pick->Pick(X,Y,0,rtApplication::instance().getMainWinHandle()->getRenderer(window));
         pick->GetPickPosition(pos);
         rt3DPointBufferDataObject *dObj;
         if (res)

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>361</width>
+    <width>365</width>
     <height>388</height>
    </rect>
   </property>
@@ -39,6 +39,9 @@
        </item>
        <item>
         <widget class="QGroupBox" name="prescribeGroupBox">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="title">
           <string>Prescribe Plane Manually</string>
          </property>

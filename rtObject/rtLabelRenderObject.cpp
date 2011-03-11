@@ -48,7 +48,7 @@ void rtLabelRenderObject::update() {
 }
 
 //! Add this object to the given renderer.
-bool rtLabelRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rtLabelRenderObject::addToRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
   setVisible3D(true);
   if (ren->HasViewProp(m_textActor2D)) return false;
@@ -57,7 +57,7 @@ bool rtLabelRenderObject::addToRenderer(vtkRenderer* ren) {
 }
 
 //! Remove this object from the given renderer.
-bool rtLabelRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rtLabelRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
   setVisible3D(false);
   if (!ren->HasViewProp(m_textActor2D)) return false;

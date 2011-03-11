@@ -108,7 +108,7 @@ void rtEPRenderObject::update() {
 }
 
 //! Add this object to the given renderer.
-bool rtEPRenderObject::addToRenderer(vtkRenderer* ren) {
+bool rtEPRenderObject::addToRenderer(vtkRenderer* ren,int window) {
   if (!ren) {
     rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("addToRenderer failed! Renderer object is NULL."));
     return false;
@@ -131,7 +131,7 @@ bool rtEPRenderObject::addToRenderer(vtkRenderer* ren) {
 }
 
 //! Remove this object from the given renderer.
-bool rtEPRenderObject::removeFromRenderer(vtkRenderer* ren) {
+bool rtEPRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
   setVisible3D(false);
 

@@ -40,13 +40,13 @@ public:
   virtual void widgetOpacityChanged();
 
 public slots:
-  virtual void mousePressEvent(QMouseEvent* event);
-  virtual void mouseMoveEvent(QMouseEvent* event);
-  virtual void mouseReleaseEvent(QMouseEvent* event);
-  virtual void mouseDoubleClickEvent(QMouseEvent* event);
-  virtual void keyPressEvent(QKeyEvent* event);
-  virtual void keyReleaseEvent(QKeyEvent* event);
-  virtual void wheelEvent(QWheelEvent* event);
+  virtual void mousePressEvent(QMouseEvent* event, int window);
+  virtual void mouseMoveEvent(QMouseEvent* event, int window);
+  virtual void mouseReleaseEvent(QMouseEvent* event, int window);
+  virtual void mouseDoubleClickEvent(QMouseEvent* event, int window);
+  virtual void keyPressEvent(QKeyEvent* event, int window);
+  virtual void keyReleaseEvent(QKeyEvent* event, int window);
+  virtual void wheelEvent(QWheelEvent* event, int window);
 
 protected:
 
@@ -57,7 +57,7 @@ protected:
     If no actor is found the function returns NULL.
     The click position parameter is loaded with the coordinates in 3-space of the pick location.
     */
-  vtkActor* getLocalPropAt(int x, int y, double clickPos[3]);
+  vtkActor* getLocalPropAt(int x, int y, double clickPos[3], int window);
 
 
   // Central sphere.

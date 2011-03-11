@@ -336,7 +336,8 @@
    <addaction name="action2D_Only"/>
    <addaction name="separator"/>
    <addaction name="separator"/>
-   <addaction name="action3D_Dual_View"/>
+   <addaction name="actionAddRenWin"/>
+   <addaction name="actionRemoveRenWin"/>
   </widget>
   <action name="actionQuit">
    <property name="text">
@@ -484,12 +485,15 @@
     <string>Timer Options</string>
    </property>
   </action>
-  <action name="action3D_Dual_View">
+  <action name="actionAddRenWin">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
-    <string>3D Dual View</string>
+    <string>Add Render Window</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a new rendering window</string>
    </property>
   </action>
   <action name="actionWhatsThis">
@@ -505,6 +509,14 @@
   <action name="actionPoint_Placement">
    <property name="text">
     <string>Point Placement</string>
+   </property>
+  </action>
+  <action name="actionRemoveRenWin">
+   <property name="text">
+    <string>Remove Render Window</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove a rendering window</string>
    </property>
   </action>
  </widget>

@@ -22,13 +22,13 @@ public slots:
     // setup the table values with points
     void setupTable();
 
-    void addPoint(QMouseEvent*);
+    void addPoint(QMouseEvent*,int);
     void addNewPoints();
 
     void placementOn();
     void placementOff();
 
-    void mouseMoved(QMouseEvent*);
+    void mouseMoved(QMouseEvent*,int);
 
     void tableChanged(int,int);
 

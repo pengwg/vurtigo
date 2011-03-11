@@ -87,10 +87,10 @@ Q_OBJECT
   bool getVisible3D(){ return m_visible3D; }
 
   //! Add this object to the given renderer.
-  virtual bool addToRenderer(vtkRenderer* ren) = 0;
+  virtual bool addToRenderer(vtkRenderer* ren, int window) = 0;
 
   //! Remove this object from the given renderer.
-  virtual bool removeFromRenderer(vtkRenderer* ren) = 0;
+  virtual bool removeFromRenderer(vtkRenderer* ren, int window) = 0;
 
   //! Make this object a copy of another object
   virtual void copyObject(rtRenderObject *from) {}
@@ -118,19 +118,19 @@ Q_OBJECT
 
  public slots:
   //! Called when one of the mouse buttons is pressed.
-  virtual void mousePressEvent(QMouseEvent* event) {  }
+  virtual void mousePressEvent(QMouseEvent* event,int window) {  }
   //! Called when the mouse position changes and at least one button is pressed. (See QMouseEvent)
-  virtual void mouseMoveEvent(QMouseEvent* event) {  }
+  virtual void mouseMoveEvent(QMouseEvent* event,int window) {  }
   //! Called when a mouse button is released
-  virtual void mouseReleaseEvent(QMouseEvent* event) {  }
+  virtual void mouseReleaseEvent(QMouseEvent* event,int window) {  }
   //! Called when the mouse button is double clicked.
-  virtual void mouseDoubleClickEvent(QMouseEvent* event) {  }
+  virtual void mouseDoubleClickEvent(QMouseEvent* event,int window) {  }
   //! Called when a key is pressed.
-  virtual void keyPressEvent(QKeyEvent* event) {}
+  virtual void keyPressEvent(QKeyEvent* event,int window) {}
   //! Called when a key is released.
-  virtual void keyReleaseEvent(QKeyEvent* event) {}
+  virtual void keyReleaseEvent(QKeyEvent* event,int window) {}
   //! The mouse wheel was moved.
-  virtual void wheelEvent(QWheelEvent* event) {}
+  virtual void wheelEvent(QWheelEvent* event,int window) {}
 
  protected:
   //! The rtRenderObject constructor.

@@ -95,17 +95,17 @@ public:
 
 
   //! Spin the plane to the left.
-  void spinLeftBy(double amt, bool asUser=false);
+  //void spinLeftBy(double amt, bool asUser=false);
 
   //! Rotate the plane up
   /*!
     \param amt The amount to rotate by. If negative this function will rotate down.
     \param asUser If true rotate in user mode.
     */
-  void rotateUpBy(double amt, bool asUser=false);
+ // void rotateUpBy(double amt, bool asUser=false);
 
   //! Rotate the plane left
-  void rotateLeftBy(double amt, bool asUser=false);
+  //void rotateLeftBy(double amt, bool asUser=false);
 
   //! Translate the object to a specific position
   void translateTo(double x, double y, double z, bool asUser=false);
@@ -125,14 +125,14 @@ public:
   inline rt2DSliceInputColorWidget* getColorWidgetAt(int pos) { if ( pos <0 || pos>=maxNumberOfInputs() ) return 0; return m_colorInput[pos]; }
 
  protected slots:
-  void spinRight();
-  void spinLeft();
-  void rotateUp();
-  void rotateDown();
-  void rotateLeft();
-  void rotateRight();
-  void pushPlane();
-  void pullPlane();
+  //void spinRight();
+  //void spinLeft();
+  //void rotateUp();
+  //void rotateDown();
+  //void rotateLeft();
+  //void rotateRight();
+  //void pushPlane();
+  //void pullPlane();
   void xTranslate(double);
   void yTranslate(double);
   void zTranslate(double);

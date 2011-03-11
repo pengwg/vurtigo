@@ -68,58 +68,14 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_renderFlag3D = false;
   m_renderLock.release(); // Must start with one resource.
 
-  m_render3DVTKWidget = new customQVTKWidget(this->frame3DRender);
-  m_render3DVTKWidget->setMinimumSize(300,300);
   m_render3DLayout = new QHBoxLayout();
   m_render3DLayout->setContentsMargins(0,0,0,0);
-  m_renWin3D = m_render3DVTKWidget->GetRenderWindow();
 
-  // Stereo rendering causes bugs in OSX.
-#ifdef Q_WS_MAC
-
-#else
-  m_renWin3D->StereoCapableWindowOn();
-#endif
-
-  // Create the local renderer
-  m_localRenderer3D = vtkRenderer::New();
-  // But give it a zero viewport
-  m_localRenderer3D->SetViewport(0.0, 0.0, 0.0, 0.0);
-
-  // Create the main renderer
-  m_renderer3D = vtkRenderer::New();
-  m_renWin3D->AddRenderer(m_renderer3D);
-  m_renderer3D->SetViewport(0.0, 0.0, 1.0, 1.0);
-
-  m_cameraControl = new rtCameraControl( m_renderer3D->GetActiveCamera(), m_renderer3D, m_render3DVTKWidget );
-  m_cameraControl->setToDefaultPosition();
-
-  m_localCameraControl = new rtCameraControl( m_localRenderer3D->GetActiveCamera(), m_localRenderer3D, m_render3DVTKWidget );
-  m_localCameraControl->setToDefaultPosition();
+  addNewRenderWindow();
+  m_numRenWin = 1;
 
   m_movingQuality = 0.5f;
   m_stillQuality = 1.0f;
-
-  m_axesActor = vtkAxesActor::New();
-  m_propAssembly = vtkPropAssembly::New();
-  m_orientationWidget = new rtOrientationMarkerWidget(m_render3DVTKWidget);
-
-  m_propAssembly->AddPart( m_axesActor );
-  m_orientationWidget->SetOrientationMarker(m_propAssembly);
-
-  // This is a bit of a hack.
-  // Vurtigo does not use the vtk style interactor to get mouse events.
-  // However, the vtk Widget that is used for orientation does need it otherwise a seg-fault occurs.
-  // Note that the interactor is disabled!
-  vtkRenderWindowInteractor* inter3D = m_render3DVTKWidget->GetInteractor();
-  inter3D->Disable();
-  m_orientationWidget->SetInteractor( inter3D );
-  // End hack
-
-  m_orientationWidget->SetViewport( 0.75, 0.0, 1.0, 0.25 );
-
-  // Start with a single view.
-  action3D_Dual_View->setChecked(false);
 
   //initialize dialogs
   m_registrationDialog = NULL;
@@ -132,7 +88,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
     setCoordType( m_axesProperties->getCoordType() );
   }
 
-  m_render3DLayout->addWidget(m_render3DVTKWidget);
+
   this->frame3DRender->setLayout(m_render3DLayout);
 
   // The GUI must be stretched more than the tabs. 
@@ -166,10 +122,6 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   pluginBrowseFrame->setLayout(&m_pluginWidgetLayout);
 
-  // the default is camera mode.
-  //actionCamera_Mode->setChecked(true);
-  //actionInteraction_Mode->setChecked(false);
-  //actionPlacement_Mode->setChecked(false);
 
 #ifdef DEBUG_VERBOSE_MODE_ON
   actionDebugText->setChecked(true);
@@ -188,11 +140,22 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 rtMainWindow::~rtMainWindow() {
   m_renderFlag3D = false;
 
-  // Add the second renderer back before cleanup.
-  if (m_renWin3D) m_renWin3D->AddRenderer(m_localRenderer3D);
+  int ix1;
+  for (ix1=0; ix1<m_cameraControl.size(); ix1++)
+  {
+      if (m_cameraControl[ix1]) delete m_cameraControl[ix1];
+      //if (m_localCameraControl) delete m_localCameraControl;
+      if (m_render3DVTKWidget[ix1]) delete m_render3DVTKWidget[ix1];
+      if (m_renderer3D[ix1]) m_renderer3D[ix1]->Delete();
+      if (m_axesActor[ix1]) m_axesActor[ix1]->Delete();
+      if (m_propAssembly[ix1]) m_propAssembly[ix1]->Delete();
+      if (m_orientationWidget[ix1]) {
+        m_orientationWidget[ix1]->SetInteractor(NULL);
+        m_orientationWidget[ix1]->Delete();
+        m_orientationWidget[ix1] = NULL;
+      }
 
-  if (m_cameraControl) delete m_cameraControl;
-  if (m_localCameraControl) delete m_localCameraControl;
+  }
 
   clearPluginList();
   clearObjectList();
@@ -207,19 +170,13 @@ rtMainWindow::~rtMainWindow() {
   // Cleanup the 2D widget hash
   view2DHashCleanup();
 
-  if (m_render3DVTKWidget) delete m_render3DVTKWidget;
+
   if (m_render3DLayout) delete m_render3DLayout;
   if (m_objectBrowseLayout) delete m_objectBrowseLayout;
 
-  if (m_renderer3D) m_renderer3D->Delete();
-  if (m_localRenderer3D) m_localRenderer3D->Delete();
-  if (m_axesActor) m_axesActor->Delete();
-  if (m_propAssembly) m_propAssembly->Delete();
-  if (m_orientationWidget) {
-    m_orientationWidget->SetInteractor(NULL);
-    m_orientationWidget->Delete();
-    m_orientationWidget = NULL;
-  }
+
+  //if (m_localRenderer3D) m_localRenderer3D->Delete();
+
   if (m_axesProperties) delete m_axesProperties;
   if (m_helpManager) delete m_helpManager;
   if (m_registrationDialog) delete m_registrationDialog;
@@ -245,19 +202,19 @@ void rtMainWindow::setupHelpFiles() {
 #endif
 }
 
-vtkRenderWindow* rtMainWindow::getRenderWindow() {
+vtkRenderWindow* rtMainWindow::getRenderWindow(int window) {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::getRenderWindow(): ").append( QString::number((long)m_renWin3D, 16) ) );
 #endif
-  return m_renWin3D;
+  return m_renWin3D[window];
 }
 
 //! Get the vtkRenderer object for the 3D view. 
-vtkRenderer* rtMainWindow::getRenderer() {
+vtkRenderer* rtMainWindow::getRenderer(int window) {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::getRenderer(): ").append( QString::number((long)m_renderer3D, 16) ) );
 #endif
-  return m_renderer3D;
+  return m_renderer3D[window];
 }
 
 //! Get the object tree
@@ -468,13 +425,21 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
 
   // If the box is checked then add it to the renderer.
   if (current->checkState(column) == Qt::Checked) {
-    if ( temp->addToRenderer(m_renderer3D) && temp->addToRenderer(m_localRenderer3D) ) {
-      m_renderFlag3D = true;
+    for (int ix1=0; ix1<m_renderer3D.size(); ix1++)
+      {
+        //if ( temp->addToRenderer(m_renderer3D) && temp->addToRenderer(m_localRenderer3D) ) {
+        if ( temp->addToRenderer(m_renderer3D[ix1],ix1) ) {
+            m_renderFlag3D = true;
+        }
     }
   } else {
-    if ( temp->removeFromRenderer(m_renderer3D) && temp->removeFromRenderer(m_localRenderer3D) ) {
-      m_renderFlag3D = true;
-    }
+      for (int ix1=0; ix1<m_renderer3D.size(); ix1++)
+      {
+          //if ( temp->removeFromRenderer(m_renderer3D) && temp->removeFromRenderer(m_localRenderer3D) ) {
+          if ( temp->removeFromRenderer(m_renderer3D[ix1],ix1) ) {
+              m_renderFlag3D = true;
+          }
+      }
   }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
@@ -514,8 +479,11 @@ void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
   double loc[6];
   if (temp->getObjectLocation(loc)) {
     // Location is valid
-    m_renderer3D->ResetCamera(loc);
-    m_localRenderer3D->ResetCamera(loc);
+    for (int ix1=0; ix1<m_renderer3D.size(); ix1++)
+    {
+        m_renderer3D[ix1]->ResetCamera(loc);
+    }
+    //m_localRenderer3D->ResetCamera(loc);
     m_renderFlag3D = true;
   }
 
@@ -528,7 +496,7 @@ void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
 /*!
   Note that this function does not keep track of the objects it adds.
  */
-void rtMainWindow::addRenderItem(vtkProp* prop) {
+void rtMainWindow::addRenderItem(vtkProp* prop, int window) {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::addRenderItem() start") );
 #endif
@@ -537,9 +505,10 @@ void rtMainWindow::addRenderItem(vtkProp* prop) {
     return;
   }
 
-  if ( !m_renderer3D->HasViewProp(prop) || !m_localRenderer3D->HasViewProp(prop) ) {
-    m_renderer3D->AddViewProp(prop);
-    m_localRenderer3D->AddViewProp(prop);
+  //if ( !m_renderer3D->HasViewProp(prop) || !m_localRenderer3D->HasViewProp(prop) ) {
+  if ( !m_renderer3D[window]->HasViewProp(prop) ) {
+    m_renderer3D[window]->AddViewProp(prop);
+    //m_localRenderer3D->AddViewProp(prop);
     m_renderFlag3D = true;
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
@@ -551,7 +520,7 @@ void rtMainWindow::addRenderItem(vtkProp* prop) {
 /*!
   Note that this function does not keep track of the objects it removes.
  */
-void rtMainWindow::removeRenderItem(vtkProp* prop) {
+void rtMainWindow::removeRenderItem(vtkProp* prop, int window) {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::removeRenderItem() start") );
 #endif
@@ -561,9 +530,10 @@ void rtMainWindow::removeRenderItem(vtkProp* prop) {
     return;
   }
 
-  if (m_renderer3D->HasViewProp(prop) || m_localRenderer3D->HasViewProp(prop)) {
-    m_renderer3D->RemoveViewProp(prop);
-    m_localRenderer3D->RemoveViewProp(prop);
+  //if (m_renderer3D->HasViewProp(prop) || m_localRenderer3D->HasViewProp(prop)) {
+  if (m_renderer3D[window]->HasViewProp(prop) ) {
+    m_renderer3D[window]->RemoveViewProp(prop);
+   // m_localRenderer3D->RemoveViewProp(prop);
     m_renderFlag3D = true;
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
@@ -636,7 +606,8 @@ void rtMainWindow::tryRender3D() {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::tryRender3D() about to render") );
 #endif
-    m_renWin3D->Render();
+    for (int ix1=0; ix1<m_renWin3D.size(); ix1++)
+        m_renWin3D[ix1]->Render();
     m_renderFlag3D = false;
     m_renderLock.release();
 #ifdef DEBUG_VERBOSE_MODE_ON
@@ -679,48 +650,52 @@ void rtMainWindow::update2DViews() {
 #endif
 }
 
-bool rtMainWindow::cameraMoving() {
-  if (!m_cameraControl) {
+bool rtMainWindow::cameraMoving(int window) {
+  if (m_cameraControl.empty()) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::cameraMoving() cameraControl is NULL: "));
     return false;
   }
-  return m_cameraControl->cameraMoving();
+  return m_cameraControl[window]->cameraMoving();
 }
 
-double rtMainWindow::getCameraDistance() {
-  return m_renderer3D->GetActiveCamera()->GetDistance();
+double rtMainWindow::getCameraDistance(int window) {
+  return m_renderer3D[window]->GetActiveCamera()->GetDistance();
 }
 
-void rtMainWindow::getCameraUp(double val[3]) {
-  if (!m_cameraControl) {
+void rtMainWindow::getCameraUp(double val[3],int window) {
+  if (m_cameraControl.empty()) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::getCameraUp() cameraControl is NULL: "));
     return;
   }
-  m_cameraControl->getUpDirection(val);
+  m_cameraControl[window]->getUpDirection(val);
 }
 
-void rtMainWindow::getCameraRight(double val[3]) {
-  if (!m_cameraControl) {
+void rtMainWindow::getCameraRight(double val[3], int window) {
+  if (m_cameraControl.empty()) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::getCameraRight() cameraControl is NULL: "));
     return;
   }
-  m_cameraControl->getRightDirection(val);
+  m_cameraControl[window]->getRightDirection(val);
 }
 
-void rtMainWindow::getCameraForward(double val[3]) {
-  if (!m_cameraControl) {
+void rtMainWindow::getCameraForward(double val[3], int window) {
+  if (m_cameraControl.empty()) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::getCameraForward() cameraControl is NULL: "));
     return;
   }
-  m_cameraControl->getForwardDirection(val);
+  m_cameraControl[window]->getForwardDirection(val);
 }
 
-vtkProp* rtMainWindow::getSelectedProp() {
-  if (!m_render3DVTKWidget) {
+vtkProp* rtMainWindow::getSelectedProp(int window) {
+  if (m_render3DVTKWidget.isEmpty()) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::getSelectedProp() 3D render widget pointer is NULL: "));
     return NULL;
   }
-  return m_render3DVTKWidget->getChosenProp();
+
+  if (m_render3DVTKWidget[window]->getChosenProp())
+      return m_render3DVTKWidget[window]->getChosenProp();
+
+
 }
 
 //! Connect the menu actions to the functions that handle them.
@@ -770,7 +745,8 @@ void rtMainWindow::connectSignals() {
   connect(pluginTree, SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)), this, SLOT(pluginItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)));
 
   // Menu Bar Only
-  connect(action3D_Dual_View, SIGNAL(toggled(bool)), this, SLOT(toggle3DDualView(bool)));
+  connect(actionAddRenWin, SIGNAL(triggered()), this, SLOT(addRenWinPressed()));
+  connect(actionRemoveRenWin, SIGNAL(triggered()),this,SLOT(remRenWinPressed()));
 
   //whatsThis
   connect(actionWhatsThis,SIGNAL(triggered()),this,SLOT(activateWhatsThis()));
@@ -886,21 +862,31 @@ void rtMainWindow::viewChanged2DOnly() {
 #endif
 }
 
-void rtMainWindow::toggle3DDualView(bool dual) {
-  if (dual) {
-    m_renderer3D->SetViewport(0.0, 0.0, 0.5, 1.0);
-    m_localRenderer3D->SetViewport(0.5, 0.0, 1.0, 1.0);
-    m_localRenderer3D->DrawOn();
-    m_renWin3D->AddRenderer(m_localRenderer3D);
-    m_orientationWidget->SetViewport( 0.25, 0.0, 0.5, 0.25 );
-  } else {
-    m_renderer3D->SetViewport(0.0, 0.0, 1.0, 1.0);
-    m_localRenderer3D->SetViewport(0.0, 0.0, 0.0, 0.0);
-    m_localRenderer3D->DrawOff();
-    m_renWin3D->RemoveRenderer(m_localRenderer3D);
-    m_orientationWidget->SetViewport( 0.75, 0.0, 1.0, 0.25 );
-  }
-  m_renderFlag3D = true;
+void rtMainWindow::addRenWinPressed()
+{
+
+    if (m_numRenWin < m_render3DVTKWidget.size())
+        m_render3DVTKWidget[m_numRenWin]->show();
+    else
+        addNewRenderWindow();
+
+    refreshRenderItems();
+    m_numRenWin++;
+    if (m_axesProperties) {
+        setViewType( m_axesProperties->getViewType() );
+        setCoordType( m_axesProperties->getCoordType() );
+    }
+
+    m_renderFlag3D = true;
+}
+
+void rtMainWindow::remRenWinPressed()
+{
+    if (m_numRenWin > 1)
+    {
+        m_render3DVTKWidget[m_numRenWin-1]->hide();
+        m_numRenWin--;
+    }
 }
 
 //! Update  the lists for all the 2D windows.
@@ -1008,15 +994,21 @@ void rtMainWindow::showRenderOptions() {
 #ifdef Q_WS_MAC
   renOpt.removeStereoFeature();
 #else
-  if (m_renWin3D->GetStereoRender()) {
-    renOpt.setStereoType(m_renWin3D->GetStereoType());
-  } else {
-    renOpt.setStereoType(0);
+  for (int ix1=0; ix1<m_renWin3D.size(); ix1++)
+  {
+      if (m_renWin3D[ix1]->GetStereoRender()) {
+          renOpt.setStereoType(m_renWin3D[ix1]->GetStereoType());
+      } else {
+          renOpt.setStereoType(0);
+      }
   }
 #endif
 
-  renOpt.setDirectRender(m_renWin3D->IsDirect());
-  renOpt.setGLRender(m_renWin3D->SupportsOpenGL());
+  for (int ix1=0; ix1<m_renWin3D.size(); ix1++)
+  {
+      renOpt.setDirectRender(m_renWin3D[ix1]->IsDirect());
+      renOpt.setGLRender(m_renWin3D[ix1]->SupportsOpenGL());
+  }
 
   if(renOpt.exec() == QDialog::Accepted) {  
     double renUpQual = renOpt.getRenUpdateQuality();
@@ -1029,11 +1021,14 @@ void rtMainWindow::showRenderOptions() {
 
 #else
     int type = renOpt.getStereoType();
-    if (type == 0) {
-      m_renWin3D->StereoRenderOff();
-    } else {
-      m_renWin3D->StereoRenderOn();
-      m_renWin3D->SetStereoType(type);
+    for (int ix1=0; ix1<m_renWin3D.size(); ix1++)
+    {
+        if (type == 0) {
+            m_renWin3D[ix1]->StereoRenderOff();
+        } else {
+            m_renWin3D[ix1]->StereoRenderOn();
+            m_renWin3D[ix1]->SetStereoType(type);
+        }
     }
 #endif
 
@@ -1046,13 +1041,19 @@ void rtMainWindow::showRenderOptions() {
 }
 
 void rtMainWindow::cameraDefaultView() {
-  m_cameraControl->setToDefaultPosition();
+    for (int ix1=0; ix1<m_cameraControl.size(); ix1++)
+    {
+        m_cameraControl[ix1]->setToDefaultPosition();
+    }
   m_renderFlag3D = true;
 }
 
 
 void rtMainWindow::cameraRobotArmView() {
-  m_cameraControl->setToRobotArmPosition();
+    for (int ix1=0; ix1<m_cameraControl.size(); ix1++)
+    {
+        m_cameraControl[ix1]->setToRobotArmPosition();
+    }
   m_renderFlag3D = true;
 }
 
@@ -1224,8 +1225,11 @@ void rtMainWindow::removeSelectedObject() {
 
   // Get the object
   temp = rtApplication::instance().getObjectManager()->getObjectWithID(current->text(1).toInt());
-  temp->removeFromRenderer(m_renderer3D);
-  temp->removeFromRenderer(m_localRenderer3D);
+  for (int ix1=0; ix1<m_renderer3D.size(); ix1++)
+  {
+      temp->removeFromRenderer(m_renderer3D[ix1],ix1);
+     // temp->removeFromRenderer(m_localRenderer3D);
+  }
   m_renderFlag3D = true;
   rtApplication::instance().getObjectManager()->removeObject(current->text(1).toInt());
   if (temp->getObjectType() == rtConstants::OT_3DPointBuffer)
@@ -1248,84 +1252,93 @@ void rtMainWindow::removeSelectedObject() {
 void rtMainWindow::setViewType(rtAxesProperties::ViewType vt) {
   switch (vt) {
     case(rtAxesProperties::VT_NONE):
-    m_orientationWidget->SetEnabled(0);
+    for (int ix1=0; ix1<m_orientationWidget.size(); ix1++)
+      m_orientationWidget[ix1]->SetEnabled(0);
     break;
     case(rtAxesProperties::VT_VISIBLE):
-    m_orientationWidget->SetEnabled(1);
-    m_orientationWidget->InteractiveOff();
+    for (int ix1=0; ix1<m_orientationWidget.size(); ix1++)
+    {
+        m_orientationWidget[ix1]->SetEnabled(1);
+        m_orientationWidget[ix1]->InteractiveOff();
+    }
     break;
     case(rtAxesProperties::VT_INTERACT):
-    m_orientationWidget->SetEnabled(1);
-    m_orientationWidget->InteractiveOn();
+    for (int ix1=0; ix1<m_orientationWidget.size(); ix1++)
+    {
+        m_orientationWidget[ix1]->SetEnabled(1);
+        m_orientationWidget[ix1]->InteractiveOn();
+    }
     break;
   }
   m_renderFlag3D = true;
 }
 
 void rtMainWindow::setCoordType(rtAxesProperties::CoordType ct) {
+  for (int ix1=0; ix1<m_axesActor.size(); ix1++)
+  {
   switch (ct) {
     case (rtAxesProperties::CT_HFS):
-    m_axesActor->SetXAxisLabelText("Left");
-    m_axesActor->SetYAxisLabelText("Posterior");
-    m_axesActor->SetZAxisLabelText("Superior");
+    m_axesActor[ix1]->SetXAxisLabelText("Left");
+    m_axesActor[ix1]->SetYAxisLabelText("Posterior");
+    m_axesActor[ix1]->SetZAxisLabelText("Superior");
     break;
     case (rtAxesProperties::CT_FFS):
-    m_axesActor->SetXAxisLabelText("Right");
-    m_axesActor->SetYAxisLabelText("Posterior");
-    m_axesActor->SetZAxisLabelText("Inferior");
+    m_axesActor[ix1]->SetXAxisLabelText("Right");
+    m_axesActor[ix1]->SetYAxisLabelText("Posterior");
+    m_axesActor[ix1]->SetZAxisLabelText("Inferior");
     break;
     case (rtAxesProperties::CT_HFP):
-    m_axesActor->SetXAxisLabelText("Right");
-    m_axesActor->SetYAxisLabelText("Anterior");
-    m_axesActor->SetZAxisLabelText("Superior");
+    m_axesActor[ix1]->SetXAxisLabelText("Right");
+    m_axesActor[ix1]->SetYAxisLabelText("Anterior");
+    m_axesActor[ix1]->SetZAxisLabelText("Superior");
     break;
     case (rtAxesProperties::CT_FFP):
-    m_axesActor->SetXAxisLabelText("Left");
-    m_axesActor->SetYAxisLabelText("Anterior");
-    m_axesActor->SetZAxisLabelText("Inferior");
+    m_axesActor[ix1]->SetXAxisLabelText("Left");
+    m_axesActor[ix1]->SetYAxisLabelText("Anterior");
+    m_axesActor[ix1]->SetZAxisLabelText("Inferior");
     break;
     case (rtAxesProperties::CT_HFDR):
-    m_axesActor->SetXAxisLabelText("Posterior");
-    m_axesActor->SetYAxisLabelText("Right");
-    m_axesActor->SetZAxisLabelText("Superior");
+    m_axesActor[ix1]->SetXAxisLabelText("Posterior");
+    m_axesActor[ix1]->SetYAxisLabelText("Right");
+    m_axesActor[ix1]->SetZAxisLabelText("Superior");
     break;
     case (rtAxesProperties::CT_FFDR):
-    m_axesActor->SetXAxisLabelText("Anterior");
-    m_axesActor->SetYAxisLabelText("Right");
-    m_axesActor->SetZAxisLabelText("Inferior");
+    m_axesActor[ix1]->SetXAxisLabelText("Anterior");
+    m_axesActor[ix1]->SetYAxisLabelText("Right");
+    m_axesActor[ix1]->SetZAxisLabelText("Inferior");
     break;
     case (rtAxesProperties::CT_HFDL):
-    m_axesActor->SetXAxisLabelText("Anterior");
-    m_axesActor->SetYAxisLabelText("Left");
-    m_axesActor->SetZAxisLabelText("Superior");
+    m_axesActor[ix1]->SetXAxisLabelText("Anterior");
+    m_axesActor[ix1]->SetYAxisLabelText("Left");
+    m_axesActor[ix1]->SetZAxisLabelText("Superior");
     break;
     case (rtAxesProperties::CT_FFDL):
-    m_axesActor->SetXAxisLabelText("Posterior");
-    m_axesActor->SetYAxisLabelText("Left");
-    m_axesActor->SetZAxisLabelText("Inferior");
+    m_axesActor[ix1]->SetXAxisLabelText("Posterior");
+    m_axesActor[ix1]->SetYAxisLabelText("Left");
+    m_axesActor[ix1]->SetZAxisLabelText("Inferior");
     break;
     case (rtAxesProperties::CT_VTK):
-    m_axesActor->SetXAxisLabelText("X");
-    m_axesActor->SetYAxisLabelText("Y");
-    m_axesActor->SetZAxisLabelText("Z");
+    m_axesActor[ix1]->SetXAxisLabelText("X");
+    m_axesActor[ix1]->SetYAxisLabelText("Y");
+    m_axesActor[ix1]->SetZAxisLabelText("Z");
     break;
   }
   
  // enlarge axis label text to make it readable
-  m_axesActor->GetXAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
-  m_axesActor->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
-  m_axesActor->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
+  m_axesActor[ix1]->GetXAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
+  m_axesActor[ix1]->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+  m_axesActor[ix1]->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
 
-  m_axesActor->GetYAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
-  m_axesActor->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
-  m_axesActor->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
+  m_axesActor[ix1]->GetYAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
+  m_axesActor[ix1]->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+  m_axesActor[ix1]->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
 
-  m_axesActor->GetZAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
-  m_axesActor->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
-  m_axesActor->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
+  m_axesActor[ix1]->GetZAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
+  m_axesActor[ix1]->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+  m_axesActor[ix1]->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
   
  // EthanB: It's a shame they only allow arrows/labels on +X/+Y/+Z, as I'd really rather have a visual depiction of "Right", "Anterior", and "Superior"
-
+}
   
   m_renderFlag3D = true;
 }
@@ -1465,4 +1478,70 @@ void rtMainWindow::removeAll2DFrame() {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::removeAll2DFrame() end") );
 #endif
+}
+
+void rtMainWindow::addNewRenderWindow()
+{
+    customQVTKWidget *newWidget =  new customQVTKWidget(this->frame3DRender);
+
+    newWidget->setMinimumSize(300,300);
+
+    m_render3DVTKWidget.append(newWidget);
+
+    vtkRenderWindow *newWindow = newWidget->GetRenderWindow();
+
+    // Stereo rendering causes bugs in OSX.
+  #ifdef Q_WS_MAC
+
+  #else
+    newWindow->StereoCapableWindowOn();
+  #endif
+
+    m_renWin3D.append( newWindow );
+
+
+    // Create the renderer
+    vtkRenderer *newRenderer = vtkRenderer::New();
+    m_renderer3D.append( newRenderer );
+    newWindow->AddRenderer(newRenderer);
+    newRenderer->SetViewport(0.0, 0.0, 1.0, 1.0);
+
+    rtCameraControl *newCameraControl = new rtCameraControl( newRenderer->GetActiveCamera(), newRenderer, newWidget );
+    m_cameraControl.append(newCameraControl);
+    newCameraControl->setToDefaultPosition();
+
+
+    vtkAxesActor *newAxes = vtkAxesActor::New();
+    m_axesActor.append(newAxes);
+    vtkPropAssembly *newProps = vtkPropAssembly::New();
+    m_propAssembly.append(newProps );
+    rtOrientationMarkerWidget *newOriWidget = new rtOrientationMarkerWidget(newWidget);
+    m_orientationWidget.append(newOriWidget);
+
+    newProps->AddPart( m_axesActor.last() );
+    newOriWidget->SetOrientationMarker(newProps);
+
+    // This is a bit of a hack.
+    // Vurtigo does not use the vtk style interactor to get mouse events.
+    // However, the vtk Widget that is used for orientation does need it otherwise a seg-fault occurs.
+    // Note that the interactor is disabled!
+    vtkRenderWindowInteractor* inter3D = newWidget->GetInteractor();
+    inter3D->Disable();
+    newOriWidget->SetInteractor( inter3D );
+    // End hack
+
+    newOriWidget->SetViewport( 0.75, 0.0, 1.0, 0.25 );
+
+    m_render3DLayout->addWidget(newWidget);
+}
+
+void rtMainWindow::refreshRenderItems()
+{
+    for (int ix1=0; ix1<objectTree->topLevelItemCount(); ix1++)
+    {
+        for (int ix2=0; ix2<objectTree->topLevelItem(ix1)->childCount(); ix2++)
+        {
+            itemChanged(objectTree->topLevelItem(ix1)->child(ix2),2);
+        }
+      }
 }

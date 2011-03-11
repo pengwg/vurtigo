@@ -79,12 +79,12 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   ~rtMainWindow();
 
   //! Get the pointer to the render window
-  vtkRenderWindow* getRenderWindow();
+  vtkRenderWindow* getRenderWindow(int window);
 
   //! Get the pointer to the renderer
-  vtkRenderer* getRenderer();
+  vtkRenderer* getRenderer(int window = 0);
   QTreeWidget* getObjectTree();
-  customQVTKWidget* getRenderWidget() { return m_render3DVTKWidget; }
+  customQVTKWidget* getRenderWidget(int window) { return m_render3DVTKWidget[window]; }
 
   void updateObjectList(QHash<int, rtRenderObject*>*);
   void updatePluginList(QHash<int, QTreeWidgetItem*>*);
@@ -100,37 +100,40 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void tryRender3D();
   void update2DViews();
 
-  void addRenderItem(vtkProp* prop);
-  void removeRenderItem(vtkProp* prop);
+  void addRenderItem(vtkProp* prop, int window);
+  void removeRenderItem(vtkProp* prop, int window);
 
   int createNew2DWidget();
   bool remove2DWidget(int id);
   rtOptions2DView* get2DWidget(int id);
 
   //! Get the type of interaction the the user has currently selected
-  customQVTKWidget::InteractionMode getInteractionMode() { return m_render3DVTKWidget->getInteraction(); }
+  customQVTKWidget::InteractionMode getInteractionMode() { return m_render3DVTKWidget[0]->getInteraction(); }
+
+  //! Get the number of render windows
+  int getNumRenWins() {return m_numRenWin;}
 
   //! Check if the camera for the 3D view is moving
   /*!
     Some object types will render in lower quality when the camera is moving.
     \return True if the camera is moving and false otherwise. Also returns false if the camera control object has not yet been created.
     */
-  bool cameraMoving();
+  bool cameraMoving(int window);
 
   //! Get the distance from the focal point to the camera.
-  double getCameraDistance();
+  double getCameraDistance(int window);
 
-  //! Get the currently selected prop.
-  vtkProp* getSelectedProp();
+  //! Get the currently selected prop in the given rendering window.
+  vtkProp* getSelectedProp(int window);
 
   //! Get the up direction for the camera.
-  void getCameraUp(double val[3]);
+  void getCameraUp(double val[3], int window);
 
   //! Get the direction that points to the right of the camera.
-  void getCameraRight(double val[3]);
+  void getCameraRight(double val[3], int window);
 
   //! Get the direction that points from the camera to the focal point.
-  void getCameraForward(double val[3]);
+  void getCameraForward(double val[3], int window);
 
   //! Get the point placement options
   pointPlacementDialog *getPointPlacement() { return m_pointPlacementDialog; }
@@ -139,7 +142,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void setupHelpFiles();
 
   //! Get the class that controls the camera position and movement.
-  rtCameraControl* getCameraControl() { return m_cameraControl; }
+  rtCameraControl* getCameraControl(int window = 0) { return m_cameraControl[window]; }
 
   void setCoordManual(int ct);
 
@@ -150,7 +153,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void viewChangedMixed();
   void viewChanged3DOnly();
   void viewChanged2DOnly();
-  void toggle3DDualView(bool dual);
+  void addRenWinPressed();
+  void remRenWinPressed();
   void loadPluginFile();
 
   void addNewObject();
@@ -178,6 +182,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void remove2DFrame();
   void removeAll2DFrame();
 
+  void refreshRenderItems();
+
   void pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
 
   void update2DWindowLists(QMultiHash<int, QString>* hash);
@@ -197,7 +203,7 @@ signals:
 
  protected:
   //! The widget that handles the 3D rendering window from VTK.
-  customQVTKWidget *m_render3DVTKWidget;
+  QList<customQVTKWidget *>m_render3DVTKWidget;
   QHBoxLayout *m_render3DLayout;
   QHBoxLayout *m_objectBrowseLayout;
   QWidget* m_currentObjectWidget;
@@ -205,18 +211,19 @@ signals:
 
   QHBoxLayout m_only3DLayout;
   QHBoxLayout m_only2DLayout;
+  QHBoxLayout m_dual3DLayout;
 
-  vtkRenderWindow *m_renWin3D;
-  vtkRenderer *m_renderer3D;
-  rtCameraControl *m_cameraControl;
+  QList<vtkRenderWindow *>m_renWin3D;
+  QList<vtkRenderer *>m_renderer3D;
+  QList<rtCameraControl *>m_cameraControl;
 
-  vtkRenderer * m_localRenderer3D;
-  rtCameraControl *m_localCameraControl;
+  //vtkRenderer * m_localRenderer3D;
+  //rtCameraControl *m_localCameraControl;
 
   // The Axes in the corner
-  vtkAxesActor *m_axesActor;
-  vtkPropAssembly *m_propAssembly;
-  rtOrientationMarkerWidget *m_orientationWidget;
+  QList<vtkAxesActor *>m_axesActor;
+  QList<vtkPropAssembly *>m_propAssembly;
+  QList<rtOrientationMarkerWidget *>m_orientationWidget;
   rtAxesProperties* m_axesProperties;
 
   // the point placement dialog
@@ -252,8 +259,13 @@ signals:
   //! The class that displays all of the help menu windows.
   rtHelpManager *m_helpManager;
 
+
   //! The last directory a loaded plugin was chosen from
   QDir m_lastPluginDir;
+
+  //! The number of rendering windows we have
+  int m_numRenWin;
+
 
   //////////////////////
   // Protected functions
@@ -273,6 +285,8 @@ signals:
   void setCoordType(rtAxesProperties::CoordType);
 
   void view2DHashCleanup();
+
+  void addNewRenderWindow();
 
 };
 
