@@ -28,6 +28,9 @@
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkAxesActor.h>
+#include <vtkProp.h>
 
 #include <iostream>
 #include <cmath>
@@ -46,6 +49,9 @@
 #include "rtHelpManager.h"
 #include "rtApplication.h"
 #include "rtTimeManager.h"
+#include "rtRegistration.h"
+#include "pointPlacementDialog.h"
+#include "rtOrientationMarkerWidget.h"
 
 
 rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
@@ -114,6 +120,10 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   // Start with a single view.
   action3D_Dual_View->setChecked(false);
+
+  //initialize dialogs
+  m_registrationDialog = NULL;
+  m_pointPlacementDialog = NULL;
 
   m_axesProperties = new rtAxesProperties();
 
@@ -212,6 +222,8 @@ rtMainWindow::~rtMainWindow() {
   }
   if (m_axesProperties) delete m_axesProperties;
   if (m_helpManager) delete m_helpManager;
+  if (m_registrationDialog) delete m_registrationDialog;
+  if (m_pointPlacementDialog) delete m_pointPlacementDialog;
 }
 
 
@@ -726,6 +738,8 @@ void rtMainWindow::connectSignals() {
   connect( actionLoad_Object, SIGNAL(triggered()), this, SLOT(loadObject()) );
   connect( actionSave_Object, SIGNAL(triggered()), this, SLOT(saveObject()) );
   connect( actionDeleteSelected, SIGNAL(triggered()), this, SLOT(removeSelectedObject()) );
+  connect( actionRegistration, SIGNAL(triggered()), this, SLOT(registerDialog()));
+  connect (actionPoint_Placement, SIGNAL(triggered()), this,SLOT(showPointPlacement()));
 
   // View Menu
   connect(actionMixed, SIGNAL(triggered()), this, SLOT(viewChangedMixed()));
@@ -929,6 +943,34 @@ void rtMainWindow::showAxesOptions() {
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::showAxesOptions() end") );
+#endif
+}
+
+void rtMainWindow::registerDialog() {
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::registerDialog() start") );
+#endif
+  if (!m_registrationDialog) m_registrationDialog = new rtRegistration(this);
+  m_registrationDialog->placementOn();
+  m_registrationDialog->show();
+
+
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::registerDialog() end") );
+#endif
+}
+
+void rtMainWindow::showPointPlacement() {
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::showPointPlacement() start") );
+#endif
+  // create point placement dialog
+  if (!m_pointPlacementDialog) m_pointPlacementDialog = new pointPlacementDialog(this);
+   m_pointPlacementDialog->placementOn();
+   m_pointPlacementDialog->show();
+
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::showPointPlacement() end") );
 #endif
 }
 
@@ -1187,6 +1229,16 @@ void rtMainWindow::removeSelectedObject() {
   temp->removeFromRenderer(m_localRenderer3D);
   m_renderFlag3D = true;
   rtApplication::instance().getObjectManager()->removeObject(current->text(1).toInt());
+  if (temp->getObjectType() == rtConstants::OT_3DPointBuffer)
+  {
+      if (m_registrationDialog) m_registrationDialog->setupAllCombos();
+      if (m_pointPlacementDialog) m_pointPlacementDialog->setupCombo();
+  }
+  if (temp->getObjectType() == rtConstants::OT_3DObject)
+  {
+      if (m_registrationDialog) m_registrationDialog->setupAllCombos();
+  }
+
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::removeSelectedObject() end") );
 #endif

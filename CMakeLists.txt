@@ -122,8 +122,10 @@ include_directories(
 set (UI_FILES 
   rtUI/rtMainWindow.ui
   rtUI/propertyChooserDialog.ui
+  rtUI/pointPlacement.ui
   rtUI/textPropertyDialog.ui
   rtUI/axesProperties.ui
+  rtUI/landmarkRegistration.ui
   rtUI/volume3DOptions.ui
   rtUI/options2DView.ui
   rtUI/rtAboutDialog.ui

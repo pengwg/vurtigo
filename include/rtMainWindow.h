@@ -20,14 +20,12 @@
 #ifndef RT_MAIN_WINDOW_H
 #define RT_MAIN_WINDOW_H
 
-#include <vtkRenderer.h>
-#include <vtkAxesActor.h>
-#include <vtkPropAssembly.h>
-#include <vtkProp.h>
-#include <vtkCellPicker.h>
 #include <QWhatsThis>
 
 class vtkRenderWindow;
+class vtkAxesActor;
+class vtkPropAssemply;
+class vtkProp;
 
 // Remove the conflict with AssertMacros.h
 // Conflict occurs in OSX
@@ -46,13 +44,15 @@ class vtkRenderWindow;
 class rtRenderObject;
 class rtCameraControl;
 class rtHelpManager;
+class pointPlacementDialog;
+class rtRegistration;
+class rtOrientationMarkerWidget;
 
 #include "ui_rtMainWindow.h"
 #include "customQVTKWidget.h"
 #include "rtAxesProperties.h"
 #include "rtOptions2DView.h"
 #include "objTypes.h"
-#include "rtOrientationMarkerWidget.h"
 
 //! Object that controls the visible Qt widgets. 
 /*!
@@ -131,6 +131,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   //! Get the direction that points from the camera to the focal point.
   void getCameraForward(double val[3]);
 
+  //! Get the point placement options
+  pointPlacementDialog *getPointPlacement() { return m_pointPlacementDialog; }
+
   //! Read the help index and create the help files.
   void setupHelpFiles();
 
@@ -155,6 +158,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void removeSelectedObject();
 
   void showAxesOptions();
+  void registerDialog();
+  void showPointPlacement();
 
   void textError(bool);
   void textWarning(bool);
@@ -219,6 +224,11 @@ signals:
   vtkPropAssembly *m_propAssembly;
   rtOrientationMarkerWidget *m_orientationWidget;
   rtAxesProperties* m_axesProperties;
+
+  // the point placement dialog
+  pointPlacementDialog* m_pointPlacementDialog;
+  // the registration menu
+  rtRegistration *m_registrationDialog;
 
   bool m_renderFlag3D;
   QSemaphore m_renderLock;

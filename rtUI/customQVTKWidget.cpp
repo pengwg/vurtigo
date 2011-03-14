@@ -102,6 +102,7 @@ void customQVTKWidget::mousePressEvent(QMouseEvent* event) {
     break;
     case(PLACE_MODE):
     emit placeMousePress(event);
+    emit cameraMousePress(event);
     break;
     default:
     break;
@@ -143,7 +144,7 @@ void customQVTKWidget::mouseMoveEvent(QMouseEvent* event) {
     emit interMouseMove(event);
     break;
     case(PLACE_MODE):
-    emit placeMouseMove(event);
+    emit cameraMouseMove(event);
     break;
     default:
     break;
@@ -162,7 +163,7 @@ void customQVTKWidget::mouseReleaseEvent(QMouseEvent* event) {
     emit interMouseRelease(event);
     break;
     case(PLACE_MODE):
-    emit placeMouseRelease(event);
+    emit cameraMouseRelease(event);
     break;
     default:
     break;
@@ -243,7 +244,7 @@ void customQVTKWidget::wheelEvent(QWheelEvent* event) {
     emit interWheel(event);
     break;
     case(PLACE_MODE):
-    emit placeWheel(event);
+    emit cameraWheel(event);
     break;
     default:
     break;

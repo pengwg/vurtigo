@@ -130,6 +130,12 @@ public:
   //! Set the DICOM file information.
   inline void copyDicomCommonData(DICOMCommonData* commonData) { if(!commonData) return; m_commonData.deepCopy(commonData); }
 
+  //! Get the trigger delay list
+  QList<double> *getTriggerDelayList() { return &m_triggerList; }
+
+  //! Get the Dicom common data
+  DICOMCommonData *getDicomCommonData() { return &m_commonData; }
+
   //! Check if the volume should be rendered.
   bool getRenderRayTraceVolume() { return m_optionsWidget.groupRayCastVolume->isChecked(); }
 

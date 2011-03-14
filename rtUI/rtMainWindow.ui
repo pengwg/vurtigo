@@ -303,11 +303,20 @@
     <addaction name="actionSave_Object"/>
     <addaction name="separator"/>
     <addaction name="actionDeleteSelected"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionRegistration"/>
+    <addaction name="actionPoint_Placement"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuObjects"/>
    <addaction name="menuView"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuTools"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -516,6 +525,16 @@
   <action name="actionWhatsThis">
    <property name="text">
     <string>whatsThis?</string>
+   </property>
+  </action>
+  <action name="actionRegistration">
+   <property name="text">
+    <string>Registration</string>
+   </property>
+  </action>
+  <action name="actionPoint_Placement">
+   <property name="text">
+    <string>Point Placement</string>
    </property>
   </action>
  </widget>
