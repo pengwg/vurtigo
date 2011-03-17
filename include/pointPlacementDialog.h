@@ -28,6 +28,8 @@ public slots:
     void placementOn();
     void placementOff();
 
+    void mouseMoved(QMouseEvent*);
+
 
 protected:
 
@@ -38,6 +40,9 @@ protected:
     //! The current color
     QColor m_color;
     QStringList m_colorList;
+
+    //! A flag to check whether the mouse moved
+    bool m_moved;
 
 };
 

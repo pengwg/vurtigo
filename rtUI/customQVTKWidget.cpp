@@ -93,21 +93,8 @@ void customQVTKWidget::paintEvent(QPaintEvent* event) {
 
 void customQVTKWidget::mousePressEvent(QMouseEvent* event) {
 
-  switch(m_interactionMode) {
-    case(CAMERA_MODE):
-    emit cameraMousePress(event);
-    break;
-    case(INTERACTION_MODE):
-    emit interMousePress(event);
-    break;
-    case(PLACE_MODE):
-    emit placeMousePress(event);
-    emit cameraMousePress(event);
-    break;
-    default:
-    break;
-  }
 
+    emit interMousePress(event);
   QVTKWidget::mousePressEvent(event);
 }
 
@@ -136,59 +123,20 @@ void customQVTKWidget::mouseMoveEvent(QMouseEvent* event) {
     this->setCursor(Qt::ArrowCursor);
   }
 
-  switch(m_interactionMode) {
-    case(CAMERA_MODE):
-    emit cameraMouseMove(event);
-    break;
-    case(INTERACTION_MODE):
-    emit interMouseMove(event);
-    break;
-    case(PLACE_MODE):
-    emit cameraMouseMove(event);
-    break;
-    default:
-    break;
-  }
-
+  emit interMouseMove(event);
   QVTKWidget::mouseMoveEvent(event);
 }
 
 void customQVTKWidget::mouseReleaseEvent(QMouseEvent* event) {
 
-  switch(m_interactionMode) {
-    case(CAMERA_MODE):
-    emit cameraMouseRelease(event);
-    break;
-    case(INTERACTION_MODE):
     emit interMouseRelease(event);
-    break;
-    case(PLACE_MODE):
-    emit cameraMouseRelease(event);
-    break;
-    default:
-    break;
-  }
-
   QVTKWidget::mouseReleaseEvent(event);
 }
 
 void customQVTKWidget::mouseDoubleClickEvent(QMouseEvent* event) {
 
-  switch(m_interactionMode) {
-    case(CAMERA_MODE):
-    emit cameraMouseDoubleClick(event);
-    break;
-    case(INTERACTION_MODE):
     selectNewProp(event);
     emit interMouseDoubleClick(event);
-    break;
-    case(PLACE_MODE):
-    emit placeMouseDoubleClick(event);
-    break;
-    default:
-    break;
-  }
-
   QVTKWidget::mouseDoubleClickEvent(event);
   event->ignore();
 }
@@ -236,20 +184,7 @@ void customQVTKWidget::keyReleaseEvent(QKeyEvent* event) {
 
 void customQVTKWidget::wheelEvent(QWheelEvent* event) {
 
-  switch(m_interactionMode) {
-    case(CAMERA_MODE):
-    emit cameraWheel(event);
-    break;
-    case(INTERACTION_MODE):
     emit interWheel(event);
-    break;
-    case(PLACE_MODE):
-    emit cameraWheel(event);
-    break;
-    default:
-    break;
-  }
-
   QVTKWidget::wheelEvent(event);
 }
 

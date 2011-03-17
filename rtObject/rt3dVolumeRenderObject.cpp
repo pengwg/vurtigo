@@ -394,6 +394,20 @@ void rt3DVolumeRenderObject::setRenderQuality(double quality) {
   m_rayMapper->SetImageSampleDistance(11.0f - 10.0f*qual);
 }
 
+bool rt3DVolumeRenderObject::hasProp(vtkProp *prop)
+{
+    if (prop)
+    {
+        for (int ix1=0; ix1<3; ix1++)
+        {
+            if (prop == m_texturePlane[ix1].getActor() || prop == m_boxOutline[ix1].getActor()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 //! Add this object to the given renderer.
 bool rt3DVolumeRenderObject::addToRenderer(vtkRenderer* ren) {
   rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);

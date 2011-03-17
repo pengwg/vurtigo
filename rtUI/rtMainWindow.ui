@@ -335,9 +335,6 @@
    <addaction name="action3D_Only"/>
    <addaction name="action2D_Only"/>
    <addaction name="separator"/>
-   <addaction name="actionCamera_Mode"/>
-   <addaction name="actionInteraction_Mode"/>
-   <addaction name="actionPlacement_Mode"/>
    <addaction name="separator"/>
    <addaction name="action3D_Dual_View"/>
   </widget>
@@ -455,33 +452,6 @@
   <action name="action3D_Render_Options">
    <property name="text">
     <string>3D Render Options</string>
-   </property>
-  </action>
-  <action name="actionCamera_Mode">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Camera Mode</string>
-   </property>
-  </action>
-  <action name="actionInteraction_Mode">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Interaction Mode</string>
-   </property>
-  </action>
-  <action name="actionPlacement_Mode">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Placement Mode</string>
    </property>
   </action>
   <action name="actionLoad_Object">

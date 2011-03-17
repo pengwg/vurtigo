@@ -181,13 +181,6 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   void update2DWindowLists(QMultiHash<int, QString>* hash);
 
-  //! The camera mode button was pressed.
-  void cameraModeToggled(bool);
-  //! The interaction mode button was pressed.
-  void interactionModeToggled(bool);
-  //! The placement mode button was pressed.
-  void placeModeToggled(bool);
-
   double getMovingQuality() { return m_movingQuality; }
   double getStillQuality() { return m_stillQuality; }
 

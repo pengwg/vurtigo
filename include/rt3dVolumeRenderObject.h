@@ -65,6 +65,8 @@ class rt3DVolumeRenderObject : public rtRenderObject {
 
   virtual void setRenderQuality(double quality);
 
+  virtual bool hasProp(vtkProp *prop);
+
 public slots:
   virtual void mousePressEvent(QMouseEvent* event);
   virtual void mouseMoveEvent(QMouseEvent* event);

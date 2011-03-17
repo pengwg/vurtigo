@@ -25,6 +25,7 @@
 
 #include <QMouseEvent>
 #include <QColor>
+#include <QPalette>
 
 class rt3DPointBufferDataObject;
 
@@ -49,14 +50,17 @@ Q_OBJECT
   void setupTargetTable();
 
 
-  void sourceRadioChosen() {m_activeSet = 0;}
-  void targetRadioChosen() {m_activeSet = 1;}
+  void sourceRadioChosen();
+  void targetRadioChosen();
 
   void addActivePoint(QMouseEvent*);
   void addNewPoints();
 
   void placementOff();
   void placementOn();
+
+  void mouseMoved(QMouseEvent*);
+  void doubleClicked(QMouseEvent*);
 
 protected:
 
@@ -72,6 +76,9 @@ protected:
  //! The current color
  QColor m_color;
  QStringList m_colorList;
+
+ //! A flag to check whether the mouse moved
+ bool m_moved;
 
 
 };

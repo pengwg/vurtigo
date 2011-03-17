@@ -67,8 +67,14 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
 
 
 
-  m_activeSet = 0;
+
   m_colorList = QColor::colorNames();
+  m_moved = false;
+  // set the source active
+  m_activeSet = 0;
+  sourceFrame->setLineWidth(5);
+  targetFrame->setLineWidth(5);
+  sourceFrame->setFrameStyle(QFrame::Panel | QFrame::Raised);
 
   registerBox->addItem("Rigid");
   registerBox->addItem("Similarity");
@@ -85,12 +91,29 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
 rtRegistration::~rtRegistration() {
 }
 
+void rtRegistration::sourceRadioChosen()
+{
+    m_activeSet = 0;
+    sourceFrame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    targetFrame->setFrameStyle(QFrame::NoFrame);
+}
+
+void rtRegistration::targetRadioChosen()
+{
+    m_activeSet = 1;
+    targetFrame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    sourceFrame->setFrameStyle(QFrame::NoFrame);
+}
+
 void rtRegistration::placementOn()
 {
     // Connect mouse actions
     customQVTKWidget* renWid;
     renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
-    connect(renWid, SIGNAL(placeMousePress(QMouseEvent*)), this, SLOT(addActivePoint(QMouseEvent*)));
+    connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(addActivePoint(QMouseEvent*)));
+    connect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoved(QMouseEvent *)));
+    connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(doubleClicked(QMouseEvent*)));
+
 }
 
 void rtRegistration::placementOff()
@@ -98,7 +121,36 @@ void rtRegistration::placementOff()
     // Disconnect mouse actions
     customQVTKWidget* renWid;
     renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
-    disconnect(renWid, SIGNAL(placeMousePress(QMouseEvent*)), this, SLOT(addActivePoint(QMouseEvent*)));
+    disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(addActivePoint(QMouseEvent*)));
+    disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoved(QMouseEvent*)));
+    disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(doubleClicked(QMouseEvent*)));
+
+}
+
+void rtRegistration::mouseMoved(QMouseEvent *event)
+{
+    if (event->buttons() == Qt::RightButton)
+        m_moved = true;
+}
+
+
+void rtRegistration::doubleClicked(QMouseEvent *event)
+{
+    vtkProp *chosen = rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp();
+
+    rt3DVolumeRenderObject *volObj;
+    for (int ix1=0; ix1<m_volumes.count(); ix1++)
+    {
+        volObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(ix1)));
+        if (volObj->hasProp(chosen))
+        {
+            if (m_activeSet == 0)
+                volSource->setCurrentIndex(ix1);
+            else if (m_activeSet == 1)
+                volTarget->setCurrentIndex(ix1);
+        }
+    }
+
 }
 
 //! The user has clicked on register so the changes will be made.
@@ -173,66 +225,78 @@ void rtRegistration::registerButtonPressed() {
 
 void rtRegistration::addActivePoint(QMouseEvent *event)
 {
-    double pos[3];
-    int res;
-    QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
-    int X = event->x();
-    int Y = winSize.height()-event->y();
-    vtkCellPicker *pick = vtkCellPicker::New();
-    res = pick->Pick(X,Y,0,rtApplication::instance().getMainWinHandle()->getRenderer());
-    pick->GetPickPosition(pos);
-    rt3DPointBufferDataObject *dObj;
-    rtBasic3DPointData newPoint;
-    if (res)
+    // if we moved the mouse, don't put a point
+    if (m_moved)
     {
-
-        if (m_activeSet == 0)
-        {
-            dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
-            newPoint.setPoint(pos);
-            // if the other table has more points, match the colors
-
-            if (setOneTable->rowCount() < setTwoTable->rowCount())
-                m_color = (setTwoTable->item(setOneTable->rowCount(),3))->backgroundColor();
-            else
-                // get a random color
-                m_color = QColor(m_colorList.at(qrand() % m_colorList.size()));
-
-            //m_color = QColor(m_colorList.at(setOneTable->rowCount()+1));
-            newPoint.getProperty()->SetColor(m_color.red() / 255.0,m_color.green() / 255.0,m_color.blue() / 255.0);
-            dObj->lock();
-            dObj->addPoint(newPoint);
-            dObj->Modified();
-            dObj->unlock();
-            setupSourceTable();
-
-        }
-        else if (m_activeSet == 1)
-        {
-            dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()))->getDataObject());
-            // set position and color of new point
-            newPoint.setPoint(pos);
-            // if the other table has more points, match the colors
-
-            if (setOneTable->rowCount() > setTwoTable->rowCount())
-                m_color = (setOneTable->item(setTwoTable->rowCount(),3))->backgroundColor();
-            else
-                // get a random color
-                m_color = QColor(m_colorList.at(qrand() % m_colorList.size()));
-
-            //m_color = QColor(m_colorList.at(setTwoTable->rowCount()+1));
-            newPoint.getProperty()->SetColor(m_color.red() / 255.0,m_color.green() / 255.0,m_color.blue() / 255.0);
-            dObj->lock();
-            dObj->addPoint(newPoint);
-            dObj->Modified();
-            dObj->unlock();
-            setupTargetTable();
-
-        }
-
-
-
+        // reset the mouse moved flag
+        m_moved = false;
+        return;
     }
+
+    if (event->button() == Qt::RightButton)
+    {
+        double pos[3];
+        int res;
+        QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
+        int X = event->x();
+        int Y = winSize.height()-event->y();
+        vtkCellPicker *pick = vtkCellPicker::New();
+        res = pick->Pick(X,Y,0,rtApplication::instance().getMainWinHandle()->getRenderer());
+        pick->GetPickPosition(pos);
+        rt3DPointBufferDataObject *dObj;
+        rtBasic3DPointData newPoint;
+        if (res)
+        {
+
+            if (m_activeSet == 0)
+            {
+                dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
+                newPoint.setPoint(pos);
+                // if the other table has more points, match the colors
+
+                if (setOneTable->rowCount() < setTwoTable->rowCount())
+                    m_color = (setTwoTable->item(setOneTable->rowCount(),3))->backgroundColor();
+                else
+                    // get a random color
+                    m_color = QColor(m_colorList.at(qrand() % m_colorList.size()));
+
+                //m_color = QColor(m_colorList.at(setOneTable->rowCount()+1));
+                newPoint.getProperty()->SetColor(m_color.red() / 255.0,m_color.green() / 255.0,m_color.blue() / 255.0);
+                dObj->lock();
+                dObj->addPoint(newPoint);
+                dObj->Modified();
+                dObj->unlock();
+                setupSourceTable();
+
+            }
+            else if (m_activeSet == 1)
+            {
+                rt3DVolumeRenderObject *rObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volTarget->currentIndex())));
+                if (!rObj->hasProp(pick->GetViewProp())) return;
+                dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()))->getDataObject());
+                // set position and color of new point
+                newPoint.setPoint(pos);
+                // if the other table has more points, match the colors
+
+                if (setOneTable->rowCount() > setTwoTable->rowCount())
+                    m_color = (setOneTable->item(setTwoTable->rowCount(),3))->backgroundColor();
+                else
+                    // get a random color
+                    m_color = QColor(m_colorList.at(qrand() % m_colorList.size()));
+
+                //m_color = QColor(m_colorList.at(setTwoTable->rowCount()+1));
+                newPoint.getProperty()->SetColor(m_color.red() / 255.0,m_color.green() / 255.0,m_color.blue() / 255.0);
+                dObj->lock();
+                dObj->addPoint(newPoint);
+                dObj->Modified();
+                dObj->unlock();
+                setupTargetTable();
+
+            }
+
+        }
+    }
+
 
 }
 
@@ -298,7 +362,6 @@ void rtRegistration::setupSourceTable()
     // remove old data
     setOneTable->clearContents();
     int ix1;
-    int t = setSource->currentIndex();
     rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
     if (!dObj) return;
 

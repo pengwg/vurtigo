@@ -54,6 +54,7 @@ pointPlacementDialog::pointPlacementDialog(QWidget *parent, Qt::WindowFlags flag
   connect(this, SIGNAL(rejected()), this, SLOT(placementOff()));
 
   m_colorList = QColor::colorNames();
+  m_moved = false;
   setupCombo();
 
 
@@ -68,8 +69,8 @@ void pointPlacementDialog::placementOn()
     // Connect mouse actions
     customQVTKWidget* renWid;
     renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
-    connect(renWid, SIGNAL(placeMousePress(QMouseEvent*)), this, SLOT(addPoint(QMouseEvent*)));
-
+    connect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoved(QMouseEvent *)));
+    connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(addPoint(QMouseEvent*)));
 }
 
 void pointPlacementDialog::placementOff()
@@ -77,39 +78,56 @@ void pointPlacementDialog::placementOff()
     // Disconnect mouse actions
     customQVTKWidget* renWid;
     renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
-    disconnect(renWid, SIGNAL(placeMousePress(QMouseEvent*)), this, SLOT(addPoint(QMouseEvent*)));
+    disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoved(QMouseEvent *)));
+    disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(addPoint(QMouseEvent*)));
+}
+
+void pointPlacementDialog::mouseMoved(QMouseEvent *event)
+{
+    if (event->buttons() == Qt::RightButton)
+        m_moved = true;
 }
 
 void pointPlacementDialog::addPoint(QMouseEvent *event)
 {
-    double pos[3];
-    int res;
-    QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
-    int X = event->x();
-    int Y = winSize.height()-event->y();
-    vtkCellPicker *pick = vtkCellPicker::New();
-    res = pick->Pick(X,Y,0,rtApplication::instance().getMainWinHandle()->getRenderer());
-    pick->GetPickPosition(pos);
-    rt3DPointBufferDataObject *dObj;
-    if (res)
-    {        
+    // if we moved the mouse, don't put a point
+    if (m_moved)
+    {
+        // reset the mouse moved flag
+        m_moved = false;
+        return;
+    }
 
-        dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setCombo->currentIndex()))->getDataObject());
-        rtBasic3DPointData newPoint;
-        newPoint.setPoint(pos);
+    if (event->button() == Qt::RightButton)
+    {
+        double pos[3];
+        int res;
+        QSize winSize = rtApplication::instance().getMainWinHandle()->getRenderWidget()->size();
+        int X = event->x();
+        int Y = winSize.height()-event->y();
+        vtkCellPicker *pick = vtkCellPicker::New();
+        res = pick->Pick(X,Y,0,rtApplication::instance().getMainWinHandle()->getRenderer());
+        pick->GetPickPosition(pos);
+        rt3DPointBufferDataObject *dObj;
+        if (res)
+        {
 
-        m_color = QColor(m_colorList.at(qrand() % m_colorList.size()));
+            dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setCombo->currentIndex()))->getDataObject());
+            rtBasic3DPointData newPoint;
+            newPoint.setPoint(pos);
 
-        newPoint.getProperty()->SetColor(m_color.red() / 255.0,m_color.green() / 255.0,m_color.blue() / 255.0);
-        dObj->lock();
-        dObj->addPoint(newPoint);
-        dObj->Modified();
-        dObj->unlock();
-        setupTable();
+            m_color = QColor(m_colorList.at(qrand() % m_colorList.size()));
 
-      }
+            newPoint.getProperty()->SetColor(m_color.red() / 255.0,m_color.green() / 255.0,m_color.blue() / 255.0);
+            dObj->lock();
+            dObj->addPoint(newPoint);
+            dObj->Modified();
+            dObj->unlock();
+            setupTable();
 
-    pick->Delete();
+          }
+        pick->Delete();
+    }
 
 }
 

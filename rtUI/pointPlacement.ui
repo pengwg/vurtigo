@@ -21,7 +21,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Points</string>
+          <string>Point Sets</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -67,8 +67,11 @@
    </item>
    <item row="1" column="0">
     <widget class="QPushButton" name="newPointsButton">
+     <property name="toolTip">
+      <string>Press to create a new 3D Point Buffer Object</string>
+     </property>
      <property name="text">
-      <string>New Points</string>
+      <string>New Point Set</string>
      </property>
     </widget>
    </item>
@@ -77,6 +80,9 @@
    </item>
    <item row="2" column="0">
     <widget class="QPushButton" name="refreshButton">
+     <property name="toolTip">
+      <string>Press to refresh the list of Point Sets</string>
+     </property>
      <property name="text">
       <string>Refresh</string>
      </property>

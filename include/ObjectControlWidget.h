@@ -79,9 +79,6 @@ public slots:
   virtual void keyReleaseEvent(QKeyEvent* event);
   virtual void wheelEvent(QWheelEvent* event);
 
-  void cameraMode(bool);
-  void interactionMode(bool);
-  void placeMode(bool);
 protected:
   //! Determine if this widget is being shown
   bool m_showing;

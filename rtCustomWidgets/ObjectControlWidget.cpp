@@ -78,9 +78,6 @@ ObjectControlWidget::ObjectControlWidget() {
   // No object of interest just yet.
   m_objOfInterest = NULL;
 
-  connect( rtApplication::instance().getMainWinHandle(), SIGNAL(cameraModeSignal(bool)), this, SLOT(cameraMode(bool)) );
-  connect( rtApplication::instance().getMainWinHandle(), SIGNAL(interactionModeSignal(bool)), this, SLOT(interactionMode(bool)) );
-  connect( rtApplication::instance().getMainWinHandle(), SIGNAL(placeModeSignal(bool)), this, SLOT(placeMode(bool)) );
 }
 
 ObjectControlWidget::~ObjectControlWidget() {
@@ -212,19 +209,6 @@ void ObjectControlWidget::keyReleaseEvent(QKeyEvent* event) {
 void ObjectControlWidget::wheelEvent(QWheelEvent* event) {
   if(!m_showing || !event) return;
 }
-
-void ObjectControlWidget::cameraMode(bool toggle) {
-  if (toggle) hide();
-}
-
-void ObjectControlWidget::interactionMode(bool toggle) {
-  if(!toggle) hide();
-}
-
-void ObjectControlWidget::placeMode(bool toggle) {
-  if(toggle) hide();
-}
-
 
 //////////////
 // Protected
