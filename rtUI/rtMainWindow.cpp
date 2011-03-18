@@ -769,6 +769,10 @@ void rtMainWindow::connectSignals() {
   //Context Menu
   connect(objectTree, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(objectTreeContextMenu(QPoint)));
 
+  //controls
+  connect(actionControls,SIGNAL(triggered()),this,SLOT(showControls()));
+
+
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::connectSignals() end") );
 #endif
@@ -1699,6 +1703,29 @@ void rtMainWindow::visTableChanged(int row,int col)
                 m_renderFlag3D = true;
         }
     }
+}
+
+void rtMainWindow::showControls()
+{
+    QString text;
+    text = " 3D View Controls: \n";
+    text +=" --------------------- \n\n\n";
+    text +=" Shift - Show Cursor Coordinates \n\n";
+    text +=" Left-Click + Drag - Rotate Camera \n\n";
+    text +=" Right-Click + Drag - Translate Camera \n\n";
+    text +=" PageUp / PageDown - Roll Camera \n\n";
+    text +=" Scroll Wheel - Move Camera Forwards/Backwards \n\n";
+    text +=" Double-Click On Object- Select Object \n\n";
+    text +=" Double-Click Not On Object - Deselect Object \n\n";
+    text +=" D-Key - Deselect All Objects \n\n\n";
+    text +=" Object Interaction: \n";
+    text +=" ----------------------- \n\n\n";
+    text +=" Left-Click+Drag on Ring - Rotate Object (along ring direction) \n\n";
+    text +=" Left-Click+Drag on Centre Sphere - Translate Object \n\n";
+    text +=" Scroll Wheel - Translate Object Towards/Away from Camera";
+
+    QMessageBox::information(0,"3D View Controls",text);
+
 }
 
 void rtMainWindow::setGlobalOn(QTreeWidgetItem *item)

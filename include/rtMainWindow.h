@@ -200,6 +200,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   double getStillQuality() { return m_stillQuality; }
 
   void activateWhatsThis() { QWhatsThis::enterWhatsThisMode(); }
+  void showControls();
 
 signals:
   //! Emitted when a new render window is added

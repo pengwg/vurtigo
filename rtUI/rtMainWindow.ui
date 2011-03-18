@@ -257,6 +257,7 @@
     <addaction name="actionAbout"/>
     <addaction name="separator"/>
     <addaction name="actionWhatsThis"/>
+    <addaction name="actionControls"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -529,6 +530,11 @@
   <action name="actionObject_Visibilities">
    <property name="text">
     <string>3D Object Visibilities</string>
+   </property>
+  </action>
+  <action name="actionControls">
+   <property name="text">
+    <string>Controls</string>
    </property>
   </action>
  </widget>
