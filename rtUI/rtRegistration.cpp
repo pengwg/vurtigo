@@ -55,8 +55,6 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
 
   connect (refreshButton, SIGNAL(pressed()), this, SLOT(setupAllCombos()));
 
-  //connect when index changes on boxes - call setupTables
-
   connect (setSource, SIGNAL(currentIndexChanged(int)), this, SLOT(setupSourceTable()));
   connect (setTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(setupTargetTable()));
 
@@ -66,6 +64,8 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
   connect (newPointsButton, SIGNAL(pressed()), this, SLOT(addNewPoints()));
 
   connect (syncSTBox, SIGNAL(toggled(bool)), this ,SLOT(syncToggled(bool)));
+
+  connect (colorMatchButton, SIGNAL(pressed()), this, SLOT(colorMatchPressed()));
 
   connect(this, SIGNAL(rejected()), this, SLOT(placementOff()));
 
@@ -440,6 +440,30 @@ void rtRegistration::setupAllCombos()
 {
     setupVolumeCombos();
     setupPointCombos();
+}
+
+void rtRegistration::colorMatchPressed()
+{
+    int min;
+    rt3DPointBufferDataObject *sObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
+    rt3DPointBufferDataObject *tObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()))->getDataObject());
+    if (setOneTable->rowCount() < setTwoTable->rowCount())
+        min = setOneTable->rowCount();
+    else
+        min = setTwoTable->rowCount();
+
+    for (int ix1=0; ix1<min; ix1++)
+    {
+        m_color = QColor(m_colorList.at(qrand() % m_colorList.size()));
+        sObj->getPointAtIndex(ix1)->getProperty()->SetColor(m_color.red() / 255.0,m_color.green() / 255.0,m_color.blue() / 255.0);
+        tObj->getPointAtIndex(ix1)->getProperty()->SetColor(m_color.red() / 255.0,m_color.green() / 255.0,m_color.blue() / 255.0);
+    }
+
+    sObj->Modified();
+    tObj->Modified();
+
+    setupSourceTable();
+    setupTargetTable();
 }
 
 

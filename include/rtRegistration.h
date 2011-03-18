@@ -41,20 +41,24 @@ Q_OBJECT
 
  public slots:
   void registerButtonPressed();
-  // set the names of the 3D point objects in the combo boxes
+
+  //! set the names of the 3D point objects in the combo boxes
   void setupPointCombos();
+  //! set the names of the 3D volume objects in the combo boxes
   void setupVolumeCombos();
   void setupAllCombos();
-  // setup the table values with points
+  //! setup the source table values with points
   void setupSourceTable();
+  //! setup the target table values with points
   void setupTargetTable();
 
   void volumeChanged();
 
   void sourceRadioChosen();
   void targetRadioChosen();
-
+  //! add a new point to the active set
   void addActivePoint(QMouseEvent*);
+  //! create a new 3D point object
   void addNewPoints();
 
   void placementOff();
@@ -64,6 +68,8 @@ Q_OBJECT
   void doubleClicked(QMouseEvent*);
 
   void syncToggled(bool flag);
+
+  void colorMatchPressed();
 
 protected:
 
