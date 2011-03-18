@@ -184,10 +184,9 @@ bool rt3DPointBufferDataObject::loadFile(QFile *file) {
   if (!file->open(QIODevice::ReadOnly | QIODevice::Text))
     return false;
 
-  bool nameChanged=false;
   QXmlStreamReader reader(file);
   rtConstants::rtObjectType objType;
-  QString objName="";
+  QString objName = "";
 
   // Remove previous points before adding the new ones.
   removeAllPoints();
@@ -200,9 +199,6 @@ bool rt3DPointBufferDataObject::loadFile(QFile *file) {
         if ( objType != this->getObjectType() ) {
           rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Object Type for data file is wrong."));
           break;
-        } else if ( objName != "" && objName != this->getObjName() ) {
-          setObjName(objName);
-          nameChanged = true;
         }
       } else if (reader.name() == "BufferData") {
         loadBufferData(&reader);
@@ -219,7 +215,6 @@ bool rt3DPointBufferDataObject::loadFile(QFile *file) {
 
   file->close();
   emit pointListModifiedSignal();
-  if (nameChanged) rtApplication::instance().getObjectManager()->updateGuiObjectList();
   return true;
 }
 
