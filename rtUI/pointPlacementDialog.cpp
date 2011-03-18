@@ -53,6 +53,8 @@ pointPlacementDialog::pointPlacementDialog(QWidget *parent, Qt::WindowFlags flag
 
   connect(this, SIGNAL(rejected()), this, SLOT(placementOff()));
 
+  setTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
   m_colorList = QColor::colorNames();
   m_moved = false;
   setupCombo();

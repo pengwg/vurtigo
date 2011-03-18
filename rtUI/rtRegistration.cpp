@@ -60,13 +60,17 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
   connect (setSource, SIGNAL(currentIndexChanged(int)), this, SLOT(setupSourceTable()));
   connect (setTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(setupTargetTable()));
 
+  connect (volSource, SIGNAL(currentIndexChanged(int)), this, SLOT(volumeChanged()));
+  connect (volTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(volumeChanged()));
+
   connect (newPointsButton, SIGNAL(pressed()), this, SLOT(addNewPoints()));
+
+  connect (syncSTBox, SIGNAL(toggled(bool)), this ,SLOT(syncToggled(bool)));
 
   connect(this, SIGNAL(rejected()), this, SLOT(placementOff()));
 
-
-
-
+  setOneTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  setTwoTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
   m_colorList = QColor::colorNames();
   m_moved = false;
@@ -75,6 +79,7 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
   sourceFrame->setLineWidth(5);
   targetFrame->setLineWidth(5);
   sourceFrame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+  targetFrame->setFrameStyle(QFrame::NoFrame);
 
   registerBox->addItem("Rigid");
   registerBox->addItem("Similarity");
@@ -96,6 +101,9 @@ void rtRegistration::sourceRadioChosen()
     m_activeSet = 0;
     sourceFrame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     targetFrame->setFrameStyle(QFrame::NoFrame);
+    // update synchs
+    syncToggled(syncSTBox->isChecked());
+
 }
 
 void rtRegistration::targetRadioChosen()
@@ -103,6 +111,7 @@ void rtRegistration::targetRadioChosen()
     m_activeSet = 1;
     targetFrame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     sourceFrame->setFrameStyle(QFrame::NoFrame);
+    syncToggled(syncSTBox->isChecked());
 }
 
 void rtRegistration::placementOn()
@@ -112,7 +121,7 @@ void rtRegistration::placementOn()
     renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
     connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(addActivePoint(QMouseEvent*)));
     connect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoved(QMouseEvent *)));
-    connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(doubleClicked(QMouseEvent*)));
+    //connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(doubleClicked(QMouseEvent*)));
 
 }
 
@@ -123,8 +132,13 @@ void rtRegistration::placementOff()
     renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget();
     disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*)), this, SLOT(addActivePoint(QMouseEvent*)));
     disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*)), this, SLOT(mouseMoved(QMouseEvent*)));
-    disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(doubleClicked(QMouseEvent*)));
+    //disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*)), this, SLOT(doubleClicked(QMouseEvent*)));
 
+}
+
+void rtRegistration::volumeChanged()
+{
+    syncToggled(syncSTBox->isChecked());
 }
 
 void rtRegistration::mouseMoved(QMouseEvent *event)
@@ -136,19 +150,31 @@ void rtRegistration::mouseMoved(QMouseEvent *event)
 
 void rtRegistration::doubleClicked(QMouseEvent *event)
 {
-    vtkProp *chosen = rtApplication::instance().getMainWinHandle()->getRenderWidget()->getChosenProp();
 
-    rt3DVolumeRenderObject *volObj;
+}
+
+void rtRegistration::syncToggled(bool flag)
+{
+    // no volume loaded
+    if (volSource->currentIndex() < 0) return;
+    if (volTarget->currentIndex() < 0) return;
+
+    rt3DVolumeRenderObject *sObj;
+    rt3DVolumeRenderObject *tObj;
     for (int ix1=0; ix1<m_volumes.count(); ix1++)
     {
-        volObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(ix1)));
-        if (volObj->hasProp(chosen))
-        {
-            if (m_activeSet == 0)
-                volSource->setCurrentIndex(ix1);
-            else if (m_activeSet == 1)
-                volTarget->setCurrentIndex(ix1);
-        }
+        sObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(ix1)));
+        // may need to be a little more precise here!
+        if (sObj) sObj->removeAllSync();
+    }
+
+    if (flag && (sObj != tObj))
+    {
+        sObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volSource->currentIndex())));
+        tObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volTarget->currentIndex())));
+        sObj->addSyncObject(tObj);
+        tObj->addSyncObject(sObj);
+
     }
 
 }

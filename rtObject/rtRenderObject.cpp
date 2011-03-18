@@ -30,6 +30,7 @@ rtRenderObject::rtRenderObject()
 
   // Clear the list first.
   m_pipe2D.clear();
+  m_syncList.clear();
 }
 
 rtRenderObject::~rtRenderObject() {
@@ -143,4 +144,13 @@ bool rtRenderObject::saveFile(QFile* file) {
 bool rtRenderObject::loadFile(QFile* file) {
   if (m_dataObj) return m_dataObj->loadFile(file);
   else return false;
+}
+
+void rtRenderObject::removeSyncObject(rtRenderObject *rObj)
+{
+    for (int ix1=0; ix1<m_syncList.size(); ix1++)
+    {
+        if (m_syncList.at(ix1) == rObj)
+            m_syncList.removeAt(ix1);
+    }
 }

@@ -101,6 +101,13 @@ public slots:
   //! move the coronal plane along the coronal direction
   virtual void moveCoronalCoronal(double);
 
+  // used for synching
+  void syncWheel(int plane,QWheelEvent* event);
+  void hideWidget(int plane) {m_planeControl[plane].hide();}
+  void showWidget(int plane) {m_planeControl[plane].show();}
+  int getCurrentPlane() {return m_currentPlane;}
+
+
  protected:
   void setupDataObject();
   void setupPipeline();

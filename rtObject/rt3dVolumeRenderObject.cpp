@@ -699,7 +699,19 @@ void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event) {
     m_boxOutline[m_currentPlane].setTransform(t);
     m_texturePlane[m_currentPlane].setTransform(t);
     adjustReslice(m_currentPlane);
-
+    // do we want to apply rotation interactions?
+    // need to do same as wheel event, by tricking the objects into thinking they had
+    // their own mouse events, but we need to use THEIR actor positions
+    /*
+    for (int ix1=0; ix1<m_syncList.size(); ix1++)
+    {
+        if (m_syncList.at(ix1)->getObjectType() == rtConstants::OT_3DObject)
+        {
+            rt3DVolumeRenderObject *rObj = static_cast<rt3DVolumeRenderObject *>(m_syncList.at(ix1));
+            rObj->transformPlane(m_currentPlane, t);
+        }
+    }
+*/
     t->Delete();
 
     // Modify the data object so that the update function will be called.
@@ -715,16 +727,21 @@ void rt3DVolumeRenderObject::mouseDoubleClickEvent(QMouseEvent* event) {
   m_currentPlane = -1;
   for (int ix1=0; ix1<3; ix1++) {
     if (m_planeControl[ix1].isShowing())
-      m_planeControl[ix1].hide();
+    {
+        hideWidget(ix1);
+
+    }
 
     if (temp) {
       if (temp == m_texturePlane[ix1].getActor() || temp == m_boxOutline[ix1].getActor()) {
         m_selectedProp = temp;
-        m_planeControl[ix1].show();
+        showWidget(ix1);
+
         m_currentPlane = ix1;
       }
     }
   }
+
   if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
@@ -752,6 +769,16 @@ void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event) {
     m_boxOutline[m_currentPlane].setTransform(t);
     m_texturePlane[m_currentPlane].setTransform(t);
     adjustReslice(m_currentPlane);
+    // apply the interaction to all synched objects
+    for (int ix1=0; ix1<m_syncList.size(); ix1++)
+    {
+        if (m_syncList.at(ix1)->getObjectType() == rtConstants::OT_3DObject)
+        {
+            rt3DVolumeRenderObject *rObj = static_cast<rt3DVolumeRenderObject *>(m_syncList.at(ix1));
+            // call a "fake" event
+            rObj->syncWheel(m_currentPlane, event);
+        }
+    }
 
     t->Delete();
 
@@ -872,7 +899,21 @@ void rt3DVolumeRenderObject::moveCoronalNormal(double dist)
 
 void rt3DVolumeRenderObject::moveCoronalCoronal(double dist)
 {
+}
 
+void rt3DVolumeRenderObject::syncWheel(int plane,QWheelEvent* event )
+{
+    vtkTransform *t = vtkTransform::New();
+    // a little hack to make the wheelevent work
+    showWidget(plane);
+    m_planeControl[plane].wheelEvent(event);
+    hideWidget(plane);
+    m_planeControl[plane].getTransform(t);
+
+    m_boxOutline[plane].setTransform(t);
+    m_texturePlane[plane].setTransform(t);
+    adjustReslice(plane);
+    t->Delete();
 }
 
 ////////////

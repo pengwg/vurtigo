@@ -72,6 +72,10 @@ Q_OBJECT
 
   void setDataObject(rtDataObject* dataObj);
 
+  void addSyncObject(rtRenderObject *rObj) {m_syncList.append(rObj);}
+  void removeSyncObject(rtRenderObject *rObj);
+  void removeAllSync() {m_syncList.clear();}
+
   //! Set the name for this data object
   void setName(QString renName);
 
@@ -166,6 +170,9 @@ Q_OBJECT
   vtkProp* m_selectedProp;
 
   QDateTime m_lastUpdate;
+
+  //! A list of objects that interactions should be synchronized to
+  QList<rtRenderObject*> m_syncList;
 
  private:
   //! The name of the render object

@@ -49,6 +49,7 @@ Q_OBJECT
   void setupSourceTable();
   void setupTargetTable();
 
+  void volumeChanged();
 
   void sourceRadioChosen();
   void targetRadioChosen();
@@ -61,6 +62,8 @@ Q_OBJECT
 
   void mouseMoved(QMouseEvent*);
   void doubleClicked(QMouseEvent*);
+
+  void syncToggled(bool flag);
 
 protected:
 
