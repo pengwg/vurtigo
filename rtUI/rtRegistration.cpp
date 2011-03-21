@@ -69,8 +69,10 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
 
   connect(this, SIGNAL(rejected()), this, SLOT(placementOff()));
 
-  setOneTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  setTwoTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  connect(setOneTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableOneChanged(int,int)));
+  connect(setTwoTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableTwoChanged(int,int)));
+
+  connect(numLabels, SIGNAL(pressed()), this, SLOT(numberLabels()));
 
   m_colorList = QColor::colorNames();
   m_moved = false;
@@ -293,6 +295,7 @@ void rtRegistration::addActivePoint(QMouseEvent *event)
                 dObj->Modified();
                 dObj->unlock();
                 setupSourceTable();
+                setupTargetTable();
 
             }
             else if (m_activeSet == 1)
@@ -316,7 +319,9 @@ void rtRegistration::addActivePoint(QMouseEvent *event)
                 dObj->addPoint(newPoint);
                 dObj->Modified();
                 dObj->unlock();
+                setupSourceTable();
                 setupTargetTable();
+
 
             }
 
@@ -385,6 +390,9 @@ void rtRegistration::setupVolumeCombos()
 
 void rtRegistration::setupSourceTable()
 {
+    // turn off signals so they don't get called while we update
+    disconnect(setOneTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableOneChanged(int,int)));
+
     // remove old data
     setOneTable->clearContents();
     int ix1;
@@ -395,22 +403,31 @@ void rtRegistration::setupSourceTable()
 
     for (ix1=0; ix1<dObj->getPointListSize(); ix1++)
     {
-        //setOneTable->insertRow(ix1);
         QTableWidgetItem *newItem = new QTableWidgetItem(QString::number(dObj->getPointAtIndex(ix1)->getX()));
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setOneTable->setItem(ix1,0,newItem);
         newItem = new QTableWidgetItem(QString::number(dObj->getPointAtIndex(ix1)->getY()));
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setOneTable->setItem(ix1,1,newItem);
         newItem = new QTableWidgetItem(QString::number(dObj->getPointAtIndex(ix1)->getZ()));
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setOneTable->setItem(ix1,2,newItem);
         newItem = new QTableWidgetItem();
         newItem->setBackgroundColor(dObj->getPointAtIndex(ix1)->getColor());
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setOneTable->setItem(ix1,3,newItem);
+        newItem = new QTableWidgetItem(dObj->getPointAtIndex(ix1)->getLabel());
+        setOneTable->setItem(ix1,4,newItem);
     }
+
+    connect(setOneTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableOneChanged(int,int)));
 
 }
 
 void rtRegistration::setupTargetTable()
 {
+    // turn off signals so they don't get called while we update
+    disconnect(setTwoTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableTwoChanged(int,int)));
     // remove old data
     setTwoTable->clearContents();
     int ix1;
@@ -422,17 +439,24 @@ void rtRegistration::setupTargetTable()
 
     for (ix1=0; ix1<dObj->getPointListSize(); ix1++)
     {
-        //setTwoTable->insertRow(ix1);
         QTableWidgetItem *newItem = new QTableWidgetItem(QString::number(dObj->getPointAtIndex(ix1)->getX()));
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setTwoTable->setItem(ix1,0,newItem);
         newItem = new QTableWidgetItem(QString::number(dObj->getPointAtIndex(ix1)->getY()));
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setTwoTable->setItem(ix1,1,newItem);
         newItem = new QTableWidgetItem(QString::number(dObj->getPointAtIndex(ix1)->getZ()));
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setTwoTable->setItem(ix1,2,newItem);
         newItem = new QTableWidgetItem();
         newItem->setBackgroundColor(dObj->getPointAtIndex(ix1)->getColor());
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setTwoTable->setItem(ix1,3,newItem);
+        newItem = new QTableWidgetItem(dObj->getPointAtIndex(ix1)->getLabel());
+        setTwoTable->setItem(ix1,4,newItem);
     }
+
+    connect(setTwoTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableTwoChanged(int,int)));
 
 }
 
@@ -458,9 +482,95 @@ void rtRegistration::colorMatchPressed()
         sObj->getPointAtIndex(ix1)->getProperty()->SetColor(m_color.red() / 255.0,m_color.green() / 255.0,m_color.blue() / 255.0);
         tObj->getPointAtIndex(ix1)->getProperty()->SetColor(m_color.red() / 255.0,m_color.green() / 255.0,m_color.blue() / 255.0);
     }
-
     sObj->Modified();
     tObj->Modified();
+
+    setupSourceTable();
+    setupTargetTable();
+}
+
+void rtRegistration::tableOneChanged(int row,int col)
+{
+    if (col == 4)
+    {
+        QTableWidgetItem *item = setOneTable->item(row,col);
+        rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
+        if (!dObj) return;
+        if (row < dObj->getPointListSize())
+        {
+            dObj->getPointAtIndex(row)->setLabel(item->text());
+            dObj->pointListModifiedSlot();
+            dObj->tableCellChanged(row,5);
+        }
+        else
+        {
+            setupSourceTable();
+            setupTargetTable();
+        }
+
+        //matching label on other side?
+        dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()))->getDataObject());
+        if (!dObj) return;
+        if (row < dObj->getPointListSize())
+        {
+            dObj->getPointAtIndex(row)->setLabel(item->text());
+            dObj->pointListModifiedSlot();
+            dObj->tableCellChanged(row,5);
+        }
+        if (setTwoTable->item(row,col)) setTwoTable->item(row,col)->setText(item->text());
+    }
+}
+
+void rtRegistration::tableTwoChanged(int row,int col)
+{
+    if (col == 4)
+    {
+        QTableWidgetItem *item = setTwoTable->item(row,col);
+        rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()))->getDataObject());
+        if (!dObj) return;
+        if (row < dObj->getPointListSize())
+        {
+            dObj->getPointAtIndex(row)->setLabel(item->text());
+            dObj->pointListModifiedSlot();
+            dObj->tableCellChanged(row,5);
+        }
+        else
+        {
+            setupSourceTable();
+            setupTargetTable();
+        }
+
+        //matching label on other side?
+        dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
+        if (!dObj) return;
+        if (row < dObj->getPointListSize())
+        {
+            dObj->getPointAtIndex(row)->setLabel(item->text());
+            dObj->pointListModifiedSlot();
+            dObj->tableCellChanged(row,5);
+        }
+        if (setOneTable->item(row,col)) setOneTable->item(row,col)->setText(item->text());
+    }
+}
+
+void rtRegistration::numberLabels()
+{
+    if (setSource->currentIndex() < 0) return;
+    rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
+    int ix1;
+    for (ix1=0; ix1<dObj->getPointListSize(); ix1++)
+    {
+        dObj->getPointAtIndex(ix1)->setLabel(QString::number(ix1));
+    }
+    dObj->Modified();
+    dObj->pointListModifiedSlot();
+    dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()))->getDataObject());
+    for (ix1=0; ix1<dObj->getPointListSize(); ix1++)
+    {
+        dObj->getPointAtIndex(ix1)->setLabel(QString::number(ix1));
+    }
+    dObj->Modified();
+    dObj->pointListModifiedSlot();
 
     setupSourceTable();
     setupTargetTable();

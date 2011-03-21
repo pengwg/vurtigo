@@ -25,14 +25,23 @@ rtSingle3DPointPipeline::rtSingle3DPointPipeline() {
   m_mapper = vtkPolyDataMapper::New();
   m_actor = vtkActor::New();
 
+  m_labelActor = vtkFollower::New();
+  m_labelMapper = vtkPolyDataMapper::New();
+  m_labelText = vtkVectorText::New();
+
   m_mapper->SetInput(m_sphere->GetOutput());
   m_actor->SetMapper(m_mapper);
+  m_labelMapper->SetInputConnection(m_labelText->GetOutputPort());
+  m_labelActor->SetMapper(m_labelMapper);
 }
 
 rtSingle3DPointPipeline::~rtSingle3DPointPipeline() {
   m_sphere->Delete();
   m_mapper->Delete();
   m_actor->Delete();
+  m_labelMapper->Delete();
+  m_labelText->Delete();
+  m_labelActor->Delete();
 }
 
 void rtSingle3DPointPipeline::setPosition(double x, double y, double z) {
@@ -43,9 +52,32 @@ void rtSingle3DPointPipeline::setPosition(double coords[3]) {
   m_sphere->SetCenter(coords);
 }
 
+void rtSingle3DPointPipeline::setLabelPosition(double x, double y, double z) {
+    m_labelActor->SetPosition(x,y,z);
+}
+
+void rtSingle3DPointPipeline::setLabelPosition(double coords[3]) {
+    m_labelActor->SetPosition(coords);
+}
+
 void rtSingle3DPointPipeline::setRadius(double r) {
   if (r<=0.0) return;
   m_sphere->SetRadius(r);
+}
+
+void rtSingle3DPointPipeline::setLabelScale(double s)
+{
+    m_labelActor->SetScale(s);
+}
+
+void rtSingle3DPointPipeline::setLabelCamera(vtkCamera *cam)
+{
+    m_labelActor->SetCamera(cam);
+}
+
+void rtSingle3DPointPipeline::setLabelText(char *text)
+{
+    m_labelText->SetText(text);
 }
 
 void rtSingle3DPointPipeline::setResolution(int resolution) {

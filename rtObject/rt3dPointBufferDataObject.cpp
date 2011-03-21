@@ -559,17 +559,18 @@ void rt3DPointBufferDataObject::updateGuiPointList() {
 
   m_optionsWidget.pointsTable->clear();
 
-  m_optionsWidget.pointsTable->setColumnCount(5+m_columnHeaderList.size());
+  m_optionsWidget.pointsTable->setColumnCount(6+m_columnHeaderList.size());
 
   m_optionsWidget.pointsTable->setHorizontalHeaderItem(0, new QTableWidgetItem("Point ID") );
   m_optionsWidget.pointsTable->setHorizontalHeaderItem(1, new QTableWidgetItem("X") );
   m_optionsWidget.pointsTable->setHorizontalHeaderItem(2, new QTableWidgetItem("Y") );
   m_optionsWidget.pointsTable->setHorizontalHeaderItem(3, new QTableWidgetItem("Z") );
   m_optionsWidget.pointsTable->setHorizontalHeaderItem(4, new QTableWidgetItem("Timestamp (ms)") );
+  m_optionsWidget.pointsTable->setHorizontalHeaderItem(5, new QTableWidgetItem("Point Label") );
 
   // Add the custom headers (if any)
   for (int ix1=0; ix1<m_columnHeaderList.size(); ix1++) {
-    m_optionsWidget.pointsTable->setHorizontalHeaderItem(5+ix1, new QTableWidgetItem(m_columnHeaderList[ix1]) );
+    m_optionsWidget.pointsTable->setHorizontalHeaderItem(6+ix1, new QTableWidgetItem(m_columnHeaderList[ix1]) );
   }
   m_optionsWidget.pointsTable->setRowCount(m_namedInfoData.size());
   index = 0;
@@ -581,11 +582,12 @@ void rt3DPointBufferDataObject::updateGuiPointList() {
     m_optionsWidget.pointsTable->setItem( index, 3, new QTableWidgetItem(QString::number(i.value().getZ())) );
     m_optionsWidget.pointsTable->setItem( index, 4, new QTableWidgetItem(QString::number(i.value().getCreationTime())) );
     m_optionsWidget.pointsTable->item( index, 4 )->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    m_optionsWidget.pointsTable->setItem( index, 5, new QTableWidgetItem(i.value().getLabel()));
 
     // Do the custom headings as well.
     for (int ix1=0; ix1<m_columnHeaderList.size(); ix1++) {
       if (i.value().tagExists(m_columnHeaderList[ix1])) {
-        m_optionsWidget.pointsTable->setItem( index, 5+ix1, new QTableWidgetItem(QString::number( i.value().getValue(m_columnHeaderList[ix1]) )) );
+        m_optionsWidget.pointsTable->setItem( index, 6+ix1, new QTableWidgetItem(QString::number( i.value().getValue(m_columnHeaderList[ix1]) )) );
       }
     }
 
@@ -629,48 +631,62 @@ void rt3DPointBufferDataObject::tableCellChanged(int row, int col) {
   id = itemId->text().toInt(&ok);
 
   if (ok && m_namedInfoData.contains(id)) {
-    newValue = item->text().toDouble(&ok);
-    pointHandle = getPointWithId(id);
-
-    if (ok) {
-      // Value is a valid double. Must update data structures.
-      if (col == 1) {
-        m_namedInfoData[id].setX(newValue);
-        pointHandle->setX(newValue);
-      } else if (col == 2) {
-        m_namedInfoData[id].setY(newValue);
-        pointHandle->setY(newValue);
-      } else if (col == 3) {
-        m_namedInfoData[id].setZ(newValue);
-        pointHandle->setZ(newValue);
-      } else {
-        // A custom tag.
-        m_namedInfoData[id].setNamedValue(m_columnHeaderList[col-5], newValue);
+      // if the label changed
+      if (col == 5)
+      {
+          char text[100] = "";
+          sprintf(text,"%s",qPrintable(item->text()));
+          m_namedInfoData[id].setLabel(text);
+          Modified();
       }
+      else
+      {
+          newValue = item->text().toDouble(&ok);
+          pointHandle = getPointWithId(id);
 
-      // Both numbers are OK so we can call modified.
-      Modified();
+          if (ok) {
+            // Value is a valid double. Must update data structures.
+            if (col == 1) {
+              m_namedInfoData[id].setX(newValue);
+              pointHandle->setX(newValue);
+            } else if (col == 2) {
+              m_namedInfoData[id].setY(newValue);
+              pointHandle->setY(newValue);
+            } else if (col == 3) {
+              m_namedInfoData[id].setZ(newValue);
+              pointHandle->setZ(newValue);
+            } else {
+              // A custom tag.
+              m_namedInfoData[id].setNamedValue(m_columnHeaderList[col-6], newValue);
+            }
 
-    } else {
-      // Value is not a valid double.
-      // Must replace string with the old value.
-      if (col == 1) {
-        item->setText(QString::number(m_namedInfoData[id].getX()));
-      } else if (col == 2) {
-        item->setText(QString::number(m_namedInfoData[id].getY()));
-      } else if (col == 3) {
-        item->setText(QString::number(m_namedInfoData[id].getZ()));
-      } else {
-        // A custom tag.
-        if (m_namedInfoData[id].tagExists(m_columnHeaderList[col-5])) {
-          item->setText(QString::number(m_namedInfoData[id].getValue(m_columnHeaderList[col-5])));
-        } else {
-          item->setText("");
+            // Both numbers are OK so we can call modified.
+            Modified();
+
+          } else {
+            // Value is not a valid double.
+            // Must replace string with the old value.
+            if (col == 1) {
+              item->setText(QString::number(m_namedInfoData[id].getX()));
+            } else if (col == 2) {
+              item->setText(QString::number(m_namedInfoData[id].getY()));
+            } else if (col == 3) {
+              item->setText(QString::number(m_namedInfoData[id].getZ()));
+            } else {
+              // A custom tag.
+              if (m_namedInfoData[id].tagExists(m_columnHeaderList[col-6])) {
+                item->setText(QString::number(m_namedInfoData[id].getValue(m_columnHeaderList[col-6])));
+              } else {
+                item->setText("");
+              }
+            }
+
+          }
         }
       }
 
-    }
-  }
+
+
 }
 
 

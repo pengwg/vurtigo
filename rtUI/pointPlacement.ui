@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>284</width>
+    <width>410</width>
     <height>458</height>
    </rect>
   </property>
@@ -36,6 +36,12 @@
          <attribute name="horizontalHeaderDefaultSectionSize">
           <number>61</number>
          </attribute>
+         <attribute name="horizontalHeaderStretchLastSection">
+          <bool>true</bool>
+         </attribute>
+         <attribute name="horizontalHeaderStretchLastSection">
+          <bool>true</bool>
+         </attribute>
          <attribute name="horizontalHeaderDefaultSectionSize">
           <number>61</number>
          </attribute>
@@ -57,6 +63,11 @@
          <column>
           <property name="text">
            <string>Color</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Label</string>
           </property>
          </column>
         </widget>

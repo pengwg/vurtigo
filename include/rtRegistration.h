@@ -71,6 +71,11 @@ Q_OBJECT
 
   void colorMatchPressed();
 
+  void tableOneChanged(int,int);
+  void tableTwoChanged(int,int);
+
+  void numberLabels();
+
 protected:
 
  //! The list of all 3D point objects

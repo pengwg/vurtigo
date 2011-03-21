@@ -72,8 +72,13 @@ public:
     }
   }
 
+  inline QString getLabel() { return m_label;}
+  inline void setLabel(QString label) {m_label = label;}
+
 protected:
   QMap<QString, double> m_infoMap;
+  // The point's text label
+  QString m_label;
 
 };
 

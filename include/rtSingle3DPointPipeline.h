@@ -24,6 +24,8 @@
 #include <vtkSphereSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkActor.h>
+#include <vtkFollower.h>
+#include <vtkVectorText.h>
 
 //! Complete rendering pipeline for a single point in 3D space.
 class rtSingle3DPointPipeline
@@ -34,12 +36,26 @@ public:
 
   inline vtkActor* getActor() { return m_actor; }
 
+  inline vtkActor* getLabelActor() { return m_labelActor; }
+
   void setPosition(double x, double y, double z);
 
   void setPosition(double coords[3]);
 
+  void setLabelPosition(double x,double y,double z);
+
+  void setLabelPosition(double coords[3]);
+
   //! Set the radius of the displayed point.
   void setRadius(double r);
+
+  void setLabelScale(double s);
+
+  void setLabelText(char *text);
+
+  void setLabelCamera(vtkCamera *cam);
+
+  inline vtkProperty* getLabelProperty() {return m_labelActor->GetProperty(); }
 
   void setResolution(int resolution);
 
@@ -52,6 +68,9 @@ protected:
   vtkSphereSource* m_sphere;
   vtkPolyDataMapper* m_mapper;
   vtkActor* m_actor;
+  vtkFollower *m_labelActor;
+  vtkPolyDataMapper *m_labelMapper;
+  vtkVectorText *m_labelText;
 };
 
 #endif // RTSINGLE3DPOINTPIPELINE_H

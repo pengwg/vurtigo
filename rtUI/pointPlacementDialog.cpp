@@ -53,7 +53,7 @@ pointPlacementDialog::pointPlacementDialog(QWidget *parent, Qt::WindowFlags flag
 
   connect(this, SIGNAL(rejected()), this, SLOT(placementOff()));
 
-  setTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  connect(setTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableChanged(int,int)));
 
   m_colorList = QColor::colorNames();
   m_moved = false;
@@ -125,6 +125,8 @@ void pointPlacementDialog::addPoint(QMouseEvent *event)
             dObj->addPoint(newPoint);
             dObj->Modified();
             dObj->unlock();
+
+
             setupTable();
 
           }
@@ -167,6 +169,8 @@ void pointPlacementDialog::setupCombo()
 }
 void pointPlacementDialog::setupTable()
 {
+    // Disconnect the table so that we don't get all the changed events.
+    disconnect(setTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableChanged(int,int)));
     // remove old data
     setTable->clearContents();
     int ix1;
@@ -179,14 +183,35 @@ void pointPlacementDialog::setupTable()
     {
 
         QTableWidgetItem *newItem = new QTableWidgetItem(QString::number(dObj->getPointAtIndex(ix1)->getX()));
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setTable->setItem(ix1,0,newItem);
         newItem = new QTableWidgetItem(QString::number(dObj->getPointAtIndex(ix1)->getY()));
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setTable->setItem(ix1,1,newItem);
         newItem = new QTableWidgetItem(QString::number(dObj->getPointAtIndex(ix1)->getZ()));
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setTable->setItem(ix1,2,newItem);
         newItem = new QTableWidgetItem();
         newItem->setBackgroundColor(dObj->getPointAtIndex(ix1)->getColor());
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         setTable->setItem(ix1,3,newItem);
+        newItem = new QTableWidgetItem(dObj->getPointAtIndex(ix1)->getLabel());
+        setTable->setItem(ix1,4,newItem);
     }
 
+    connect(setTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableChanged(int,int)));
+
+}
+
+void pointPlacementDialog::tableChanged(int row,int col)
+{
+    if (col == 4)
+    {
+        QTableWidgetItem *item = setTable->item(row,col);
+        rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setCombo->currentIndex()))->getDataObject());
+        if (!dObj) return;
+        dObj->getPointAtIndex(row)->setLabel(item->text());
+        dObj->pointListModifiedSlot();
+        dObj->tableCellChanged(row,5);
+    }
 }

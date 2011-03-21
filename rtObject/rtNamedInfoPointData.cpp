@@ -25,6 +25,7 @@
 rtNamedInfoPointData::rtNamedInfoPointData()
 {
   m_infoMap.clear();
+  m_label = "";
 }
 
 rtNamedInfoPointData::rtNamedInfoPointData(const rtNamedInfoPointData& sp)
