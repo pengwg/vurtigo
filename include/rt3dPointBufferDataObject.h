@@ -55,6 +55,9 @@ public:
     */
   inline QList<int>* getSelectedItemsList() { return &m_selectedItems; }
 
+  //! Get the filename this object is currently saved in
+  inline QString getFilename() { return m_saveFileName;}
+
   //! Get a handle to the point at a particular location in 3D.
   /*!
     \param x The X coord of the point to find.

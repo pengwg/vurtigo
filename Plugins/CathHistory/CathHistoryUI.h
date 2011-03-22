@@ -24,6 +24,7 @@
 #include <QString>
 #include <QMap>
 #include <QTimer>
+#include <QFileInfo>
 #include <ui_CathHistory.h>
 
 #include "HistoryData.h"
@@ -57,6 +58,8 @@ protected:
   void updateCheckableStatus();
 
   void trackingPairChanged();
+
+  void savePointObject();
 
   //! Map the combo box indices to the plane objects.
   QMap<int, rtCathDataObject*> m_cathObjectMap;

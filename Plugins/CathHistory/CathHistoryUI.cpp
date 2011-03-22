@@ -40,6 +40,7 @@ CathHistoryUI::CathHistoryUI() {
   markButton->setEnabled(false);
   pointsSpin->setEnabled(false);
   intervalSpin->setEnabled(false);
+  autoSaveBox->setEnabled(false);
   
   updateCheckableStatus();
 
@@ -85,6 +86,7 @@ void CathHistoryUI::updateCheckableStatus() {
       markButton->setEnabled(true);
       pointsSpin->setEnabled(true);
       intervalSpin->setEnabled(true);
+      autoSaveBox->setEnabled(true);
   }
   
   cathAutoTrackCheckBox->setEnabled((cathPos < 0) ? false : true);
@@ -192,14 +194,16 @@ void CathHistoryUI::mark()
         {
             for (int ix1=0; ix1<m_numPoints; ix1++)
                  m_historyRecorder->saveSetPoint(m_set);
-            savedLabel->setText("Saved " + QString::number(m_numPoints) + " points in set # " + QString::number(m_set));
+            savePointObject();
+            savedLabel->setText("Marked " + QString::number(m_numPoints) + " points in set # " + QString::number(m_set));
             m_set++;
 
         }
         else
         {
-            savedLabel->setText("Saving...");
+            savedLabel->setText("Marking...");
             m_historyRecorder->saveSetPoint(m_set);
+            savePointObject();
             m_counter++;
             connect(m_timer, SIGNAL(timeout()), this, SLOT(markNow()));
             m_timer->start(m_interval);
@@ -214,19 +218,38 @@ void CathHistoryUI::markNow()
     {
         m_timer->stop();
         m_counter = 0;
-        savedLabel->setText("Saved " + QString::number(m_numPoints) + " points in set # " + QString::number(m_set));
+        savedLabel->setText("Marked " + QString::number(m_numPoints) + " points in set # " + QString::number(m_set));
         m_set++;
         disconnect(m_timer, SIGNAL(timeout()), this, SLOT(markNow()));
 
     }
     else
     {
-        savedLabel->setText("Saving...");
+        savedLabel->setText("Marking...");
         m_historyRecorder->saveSetPoint(m_set);
+        savePointObject();
         m_counter++;
     }
 }
 
 void CathHistoryUI::cathAutoTrackChanged(bool value) {
   m_historyRecorder->setAutoTrack(value);
+}
+
+void CathHistoryUI::savePointObject()
+{
+    if (autoSaveBox->isChecked())
+    {
+        if (m_historyRecorder->getPointBufferObject()->getFilename().isEmpty())
+        {
+            filenameLabel->setStyleSheet("QLabel { color : red; }");
+            filenameLabel->setText("NO FILE SPECIFIED, NOT SAVING");
+        }
+        else
+        {
+            filenameLabel->setStyleSheet("");
+            filenameLabel->setText("Saved Points to: " + QFileInfo(m_historyRecorder->getPointBufferObject()->getFilename()).fileName());
+            m_historyRecorder->getPointBufferObject()->saveThisObject();
+        }
+    }
 }
