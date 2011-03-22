@@ -394,7 +394,7 @@
      <item>
       <widget class="QPushButton" name="registerButton">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="toolTip">
         <string>Press to begin landmark Registration of Source to Target</string>

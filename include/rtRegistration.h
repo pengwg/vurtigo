@@ -22,7 +22,6 @@
 
 #include "ui_landmarkRegistration.h"
 
-
 #include <QMouseEvent>
 #include <QColor>
 #include <QPalette>

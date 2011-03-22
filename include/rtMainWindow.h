@@ -40,6 +40,7 @@ class vtkProp;
 #include <QHash>
 #include <QSemaphore>
 #include <QtHelp>
+#include <QTreeWidget>
 
 class rtRenderObject;
 class rtCameraControl;
@@ -220,6 +221,7 @@ signals:
 
   // the point placement dialog
   pointPlacementDialog* m_pointPlacementDialog;
+
   // the registration menu
   rtRegistration *m_registrationDialog;
 

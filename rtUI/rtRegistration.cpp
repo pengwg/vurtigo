@@ -187,6 +187,8 @@ void rtRegistration::registerButtonPressed() {
     rt3DPointBufferDataObject *source = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
     rt3DPointBufferDataObject *target = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()))->getDataObject());
     rt3DVolumeDataObject *volume = static_cast<rt3DVolumeDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volSource->currentIndex()))->getDataObject());
+    rt3DVolumeDataObject *tVolume = static_cast<rt3DVolumeDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volTarget->currentIndex()))->getDataObject());
+    if (!source || !target || !volume || !tVolume) return;
 
     if (source->getPointListSize() != target->getPointListSize())
         return;
@@ -196,8 +198,17 @@ void rtRegistration::registerButtonPressed() {
     vtkThinPlateSplineTransform *TPStransform = vtkThinPlateSplineTransform::New();
     vtkPoints *sources = vtkPoints::New();
     vtkPoints *targets = vtkPoints::New();
+    vtkPoints *sourcesFinal = vtkPoints::New();
+    vtkPoints *targetsFinal = vtkPoints::New();
+    QString strRegType;
 
-    for (int ix1; ix1<source->getPointListSize(); ix1++)
+    int min = 0;
+    if (source->getPointListSize() < target->getPointListSize())
+        min = source->getPointListSize();
+    else
+        min = target->getPointListSize();
+
+    for (int ix1=0; ix1<min; ix1++)
     {
         double p[3];
         source->getPointAtIndex(ix1)->getPoint(p);
@@ -205,49 +216,153 @@ void rtRegistration::registerButtonPressed() {
         target->getPointAtIndex(ix1)->getPoint(p);
         targets->InsertNextPoint(p);
     }
+    // transform points into coord system of volume
+    volume->getTransform()->TransformPoints(sources,sourcesFinal);
+    volume->getTransform()->TransformPoints(targets,targetsFinal);
 
     switch(registerBox->currentIndex())
     {
     case 0:
         Ltransform->SetModeToRigidBody();
-        Ltransform->SetSourceLandmarks(sources);
-        Ltransform->SetTargetLandmarks(targets);
+        Ltransform->SetSourceLandmarks(sourcesFinal);
+        Ltransform->SetTargetLandmarks(targetsFinal);
+        strRegType = "Rigid";
         break;
     case 1:
         Ltransform->SetModeToSimilarity();
-        Ltransform->SetSourceLandmarks(sources);
-        Ltransform->SetTargetLandmarks(targets);
+        Ltransform->SetSourceLandmarks(sourcesFinal);
+        Ltransform->SetTargetLandmarks(targetsFinal);
+        strRegType = "Similarity";
         break;
     case 2:
         Ltransform->SetModeToAffine();
-        Ltransform->SetSourceLandmarks(sources);
-        Ltransform->SetTargetLandmarks(targets);
+        Ltransform->SetSourceLandmarks(sourcesFinal);
+        Ltransform->SetTargetLandmarks(targetsFinal);
+        strRegType = "Affine";
         break;
     case 3:
-        TPStransform->SetSourceLandmarks(sources);
-        TPStransform->SetTargetLandmarks(targets);
+        Ltransform->SetModeToAffine();
+        Ltransform->SetSourceLandmarks(sourcesFinal);
+        Ltransform->SetTargetLandmarks(targetsFinal);
         TPStransform->SetBasisToR();
+        strRegType = "TPSpline";
     }
 
-
-
+    vtkImageChangeInformation* undoChangeImgCenterInfo = vtkImageChangeInformation::New();
+    vtkImageChangeInformation* changeImgCenterInfo = vtkImageChangeInformation::New();
     vtkImageReslice *reslice = vtkImageReslice::New();
-    reslice->SetInput(volume->getImageData());
-    reslice->SetOutputExtentToDefault();
-    reslice->SetOutputSpacingToDefault();
-    reslice->SetOutputOriginToDefault();
-    if (registerBox->currentIndex() < 3)
-        reslice->SetResliceTransform(Ltransform);
-    else
+    vtkTransform *TPSAffine = vtkTransform::New();
+
+    if (registerBox->currentIndex() > 2)
+    {
+        // perform an affine transform to line up volumes
+        Ltransform->Inverse();
+        TPSAffine->SetMatrix(Ltransform->GetMatrix());
+        TPSAffine->Concatenate(volume->getTransform());
+
+        // transform target points by the affine, so that source and target fit together within IMAGES!!! coord system
+        // MAKE SURE WHEN VOLUME MOVE IS DONE that source and target points are transformed into ORIGINAL volume/image coords!!!!
+        vtkPoints *affineTarget = vtkPoints::New();
+        Ltransform->TransformPoints(targetsFinal,affineTarget);
+
+        //set the TPS transform
+        TPStransform->SetSourceLandmarks(sourcesFinal);
+        TPStransform->SetTargetLandmarks(affineTarget);
+
+
+        //Pass new volume through vtkImageChangeInformation Filter to center image for rotations and translations
+        changeImgCenterInfo->SetInput(volume->getImageData());
+        changeImgCenterInfo->CenterImageOn();   //Set the origin of the output so that the image coordinate (0,0,0) lies at center of the data set
+        changeImgCenterInfo->Update();
+
+
+        //perform the appropriate image transformation/resampling through vtkImageReslice       
+        reslice->SetInput(changeImgCenterInfo->GetOutput());
+        reslice->SetOutputExtentToDefault();
+        reslice->SetOutputSpacingToDefault();
+        reslice->SetOutputOriginToDefault();
         reslice->SetResliceTransform(TPStransform);
 
+        reslice->SetInterpolationModeToLinear();
+        reslice->Update();
+
+        //remove the previous origin translation        
+        undoChangeImgCenterInfo->SetInput(reslice->GetOutput());
+        undoChangeImgCenterInfo->SetOriginTranslation(volume->getImageData()->GetCenter()); //reset the origin
+        undoChangeImgCenterInfo->Update();
+
+        //affineSource->Delete();
+        //affineTarget->Delete();
+    }
+
     rtRenderObject* temp;
-    temp = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DObject,QString(volume->getObjName() + "_R_" + QString::number(source->getId()) + "_to_" + QString::number(target->getId())));
+    temp = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DObject,QString(volume->getObjName() + ":" + strRegType + "_R_" + QString::number(source->getId()) + "_to_" + QString::number(target->getId())));
+
+    if (temp)
+    {
+        rt3DVolumeDataObject* regObj = static_cast<rt3DVolumeDataObject*>(temp->getDataObject());
+        regObj->lock();
+        vtkTransform *temp = vtkTransform::New();
+
+        if (registerBox->currentIndex() < 3)
+        {
+
+            Ltransform->Inverse();
+            // add the transform and image data to the new volume
+            temp->SetMatrix(Ltransform->GetMatrix());
+            temp->Concatenate(volume->getTransform());
+            regObj->copyNewTransform(temp);
+            regObj->copyNewImageData(volume->getImageData());
+/*
+            // add a new point object with the transformed points
+            vtkPoints *sourceTransformed = vtkPoints::New();
+            temp->TransformPoints(sourcesFinal,sourceTransformed);
+
+
+            rt3DPointBufferDataObject *sourceTransPoints = static_cast<rt3DPointBufferDataObject *>(rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,QString(strRegType + "_R_" + QString::number(source->getId()) + "_to_" + QString::number(target->getId())))->getDataObject());
+            if (sourceTransPoints)
+            {
+                rtBasic3DPointData *newPoint = new rtBasic3DPointData();
+                for (int ix1=0; ix1<sourceTransformed->GetNumberOfPoints();ix1++)
+                {
+                    newPoint->setPoint(sourceTransformed->GetPoint(ix1));
+                    QColor c = source->getPointAtIndex(ix1)->getColor();
+                    newPoint->getProperty()->SetColor(c.red() / 255.0,c.green() / 255.0,c.blue() / 255.0);
+                    sourceTransPoints->addPoint(*newPoint);
+                    sourceTransPoints->Modified();
+                }
+                delete newPoint;
+            }
+
+*/
+
+
+        }
+        else
+        {
+            regObj->copyNewTransform(TPSAffine);
+            regObj->copyNewImageData(undoChangeImgCenterInfo->GetOutput());            
+        }
+
+        regObj->copyTriggerDelayList(volume->getTriggerDelayList());
+        regObj->copyDicomCommonData(volume->getDicomCommonData());
+        regObj->Modified();
+        regObj->unlock();
+    }
+
+    //Cleanup
+    sources->Delete();
+    targets->Delete();
+    sourcesFinal->Delete();
+    targetsFinal->Delete();
 
     Ltransform->Delete();
     TPStransform->Delete();
-    sources->Delete();
-    targets->Delete();
+
+    changeImgCenterInfo->Delete();
+    reslice->Delete();
+    undoChangeImgCenterInfo->Delete();
+    TPSAffine->Delete();
 
 }
 
