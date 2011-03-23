@@ -48,25 +48,8 @@ bool HistoryData::equivalentTo(rtCathDataObject* cath, rt3DPointBufferDataObject
   return (m_cath == cath && m_points == points);
 }
 
-void HistoryData::savePoint()
-  {
-   // fail if either object doesn't exist
-    if (!m_cath || !m_points)
-      return;
-      
-   // get (first) catheter position
-    int        numLocs;
-    QList<int> locs;
-
-    numLocs = m_cath->getNumLocations();
-    locs    = m_cath->getLocationList();
-
-   // get position (Location starts at 1...)
-    double pos[3];
-    if (!m_cath->getPositionAtLocation(locs[0], pos))   /// xxxxxx should we use locs[1]?
-      return;
-      
-   // create a point at this position
+rt3DTimePointData HistoryData::createPoint(double pos[3])
+{
     rt3DTimePointData p;
 
     p.setPoint(pos);
@@ -75,9 +58,34 @@ void HistoryData::savePoint()
 
     p.setColor(1, 0, 0); // red
     p.getProperty()->SetOpacity(0.5);
-    
+    return p;
+}
+
+bool HistoryData::getCathPosition(double cathPos[3])
+{
+    //get (first) catheter position
+       QList<int> locs;
+       locs    = m_cath->getLocationList();
+
+       // get position (Location starts at 1...)
+        if (!m_cath->getPositionAtLocation(locs[0], cathPos))   /// xxxxxx should we use locs[1]?
+          return false;
+        else return true;
+}
+
+void HistoryData::savePoint()
+  {
+   // fail if either object doesn't exist
+    if (!m_cath || !m_points)
+      return;
+
+   double pos[3];
+   if (!getCathPosition(pos))
+       return;
+      
+   // create a point at this position
     m_points->lock();
-    m_points->addTimePoint(p);
+    m_points->addTimePoint(createPoint(pos));
     m_points->Modified();
     m_points->unlock();
   }
@@ -89,29 +97,17 @@ void HistoryData::saveSetPoint(int set)
       return;
 
    // get (first) catheter position
-    int        numLocs;
-    QList<int> locs;
-
-    numLocs = m_cath->getNumLocations();
-    locs    = m_cath->getLocationList();
-
-   // get position (Location starts at 1...)
     double pos[3];
-    if (!m_cath->getPositionAtLocation(locs[0], pos))   /// xxxxxx should we use locs[1]?
-      return;
+    if (!getCathPosition(pos))
+        return;
 
    // create a point at this position
-    rt3DTimePointData p;
-
-    p.setPoint(pos);
-
-    p.setPointSize(m_pointSize);
-
-    p.setColor(1, 0, 0); // red
-    p.getProperty()->SetOpacity(0.5);
-
+    QList<QString> tags;
+    QList<double> vals;
+    tags.append("Set");
+    vals.append(set);
     m_points->lock();
-    m_points->addTimeSetPoint(p,set);
+    m_points->addCustomTimePoint(createPoint(pos),tags,vals);
     m_points->Modified();
     m_points->unlock();
   }
@@ -134,29 +130,16 @@ void HistoryData::doAutoTrack()
       return;
       
    // get (first) catheter position
-    int        numLocs;
-    QList<int> locs;
-
-    numLocs = m_cath->getNumLocations();
-    locs    = m_cath->getLocationList();
-
-   // get position (Location starts at 1...)
     double pos[3];
-    if (!m_cath->getPositionAtLocation(locs[0], pos))   /// xxxxxx should we use locs[1]?
-      return;
+    if (!getCathPosition(pos))
+        return;
       
    // create a point at this position
     rt3DTimePointData p;
-    
-    p.setPoint(pos);
+    p = createPoint(pos);
 
     if (rtBasic3DPointData::findDistance(p, m_prevAutoTrackPoint) < m_autoTrackDistanceThreshold)
       return;
-
-    p.setPointSize(m_pointSize);
-
-    p.setColor(1, 0, 0); // red
-    p.getProperty()->SetOpacity(0.5);
 
     m_prevAutoTrackPoint = p;
     

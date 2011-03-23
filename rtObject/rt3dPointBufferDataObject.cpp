@@ -109,18 +109,6 @@ void rt3DPointBufferDataObject::addTimePoint(rt3DTimePointData pt) {
   }
 }
 
-void rt3DPointBufferDataObject::addTimeSetPoint(rt3DTimePointData pt, int set) {
-  rtNamedInfoPointData namedPt;
-  int id = getNextId();
-  if (id != -1) {
-    pt.setPointId(id);
-    // Append to the regular point list.
-    namedPt.fromTimePoint(&pt);
-    namedPt.setNamedValue("Set",set);
-    m_namedInfoData.insert(id, namedPt);
-    emit pointListModifiedSignal();
-  }
-}
 
 void rt3DPointBufferDataObject::addCartoPoint(rtCartoPointData pt) {
   rtNamedInfoPointData namedPt;
@@ -130,6 +118,63 @@ void rt3DPointBufferDataObject::addCartoPoint(rtCartoPointData pt) {
     pt.setPointId(id);
     // Append to the regular point list.
     namedPt.fromCartoPoint(&pt);
+    m_namedInfoData.insert(id, namedPt);
+    emit pointListModifiedSignal();
+  }
+}
+
+void rt3DPointBufferDataObject::addCustomPoint(rtBasic3DPointData pt, QList<QString> tags, QList<double> vals) {
+  rtNamedInfoPointData namedPt;
+  int id = getNextId();
+  if (id != -1) {
+    pt.setPointId(id);
+    // Append to the regular point list.
+    namedPt.fromBasic3DPoint(&pt);
+    int min = 0;
+    if (tags.size() < vals.size())
+        min = tags.size();
+    else
+        min = vals.size();
+    for (int ix1=0; ix1<min; ix1++)
+        namedPt.setNamedValue(tags.at(ix1),vals.at(ix1));
+    m_namedInfoData.insert(id, namedPt);
+    emit pointListModifiedSignal();
+  }
+}
+
+void rt3DPointBufferDataObject::addCustomTimePoint(rt3DTimePointData pt, QList<QString> tags, QList<double> vals) {
+  rtNamedInfoPointData namedPt;
+  int id = getNextId();
+  if (id != -1) {
+    pt.setPointId(id);
+    // Append to the regular point list.
+    namedPt.fromTimePoint(&pt);
+    int min = 0;
+    if (tags.size() < vals.size())
+        min = tags.size();
+    else
+        min = vals.size();
+    for (int ix1=0; ix1<min; ix1++)
+        namedPt.setNamedValue(tags.at(ix1),vals.at(ix1));
+    m_namedInfoData.insert(id, namedPt);
+    emit pointListModifiedSignal();
+  }
+}
+
+void rt3DPointBufferDataObject::addCustomCartoPoint(rtCartoPointData pt, QList<QString> tags, QList<double> vals) {
+  rtNamedInfoPointData namedPt;
+  int id = getNextId();
+  if (id != -1) {
+    pt.setPointId(id);
+    // Append to the regular point list.
+    namedPt.fromCartoPoint(&pt);
+    int min = 0;
+    if (tags.size() < vals.size())
+        min = tags.size();
+    else
+        min = vals.size();
+    for (int ix1=0; ix1<min; ix1++)
+        namedPt.setNamedValue(tags.at(ix1),vals.at(ix1));
     m_namedInfoData.insert(id, namedPt);
     emit pointListModifiedSignal();
   }

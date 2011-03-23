@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>417</width>
-    <height>163</height>
+    <height>191</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,9 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QLabel" name="label">
+     <property name="toolTip">
+      <string/>
+     </property>
      <property name="text">
       <string>Tracked Catheter:</string>
      </property>
@@ -69,6 +72,13 @@
          <width>0</width>
          <height>0</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Mark a set of points</string>
+       </property>
+       <property name="whatsThis">
+        <string>Mark a set of points in the CathHistory 3D Point object.
+The number of points and the interval between marking can be set using the options to the right.</string>
        </property>
        <property name="text">
         <string>Mark Set</string>
@@ -135,27 +145,16 @@
    <item row="3" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QCheckBox" name="cathAutoTrackCheckBox">
-       <property name="text">
-        <string>Auto Track</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
       <widget class="QCheckBox" name="autoSaveBox">
+       <property name="toolTip">
+        <string>Marked points are auto-saved to a file</string>
+       </property>
+       <property name="whatsThis">
+        <string>Enable Auto-Save.
+While Auto-Save is activated, the entire CathHistory 3D point object will be saved to an XML file after each marking set is completed.
+
+WARNING: If a file has not been specified for the CathHistory 3D Point object, Auto-Save will not work.</string>
+       </property>
        <property name="text">
         <string>Auto-Save</string>
        </property>
@@ -164,18 +163,44 @@
     </layout>
    </item>
    <item row="4" column="0" colspan="2">
-    <layout class="QVBoxLayout" name="verticalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="savedLabel">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="savedLabel">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="filenameLabel">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
-      <widget class="QLabel" name="filenameLabel">
+      <widget class="QPushButton" name="cathAutoTrackPushButton">
+       <property name="toolTip">
+        <string>Enable auto-tracking</string>
+       </property>
+       <property name="whatsThis">
+        <string>Toggle Auto-Track.
+While Auto-Track is enabled, every change in the catheter position will be marked in the CathHistory 3D Point object.
+
+NOTE: Auto-Track will disable Set marking and Auto-Save features.</string>
+       </property>
        <property name="text">
-        <string/>
+        <string>Auto Track Off</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
        </property>
       </widget>
      </item>

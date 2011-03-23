@@ -51,6 +51,7 @@ public slots:
   void intervalChanged(int interval) {m_interval = interval;}
   
   void cathAutoTrackChanged(bool);
+  void autoSaveChanged(bool);
 
 protected:
   void connectSignals();

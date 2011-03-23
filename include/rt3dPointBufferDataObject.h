@@ -84,8 +84,10 @@ public:
 
   void addPoint(rtBasic3DPointData sp);
   void addTimePoint(rt3DTimePointData pt);
-  void addTimeSetPoint(rt3DTimePointData pt,int set);
   void addCartoPoint(rtCartoPointData pt);
+  void addCustomPoint(rtBasic3DPointData pt,QList<QString> tags,QList<double> vals);
+  void addCustomTimePoint(rt3DTimePointData pt,QList<QString> tags,QList<double> vals);
+  void addCustomCartoPoint(rtCartoPointData pt,QList<QString> tags,QList<double> vals);
 
   inline void removeAllPoints() {
     m_namedInfoData.clear();

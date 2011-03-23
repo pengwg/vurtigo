@@ -71,7 +71,8 @@ void CathHistoryUI::connectSignals() {
 
   connect( cathComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(cathChanged(int)) );
   
-  connect( cathAutoTrackCheckBox, SIGNAL(toggled(bool)), this, SLOT(cathAutoTrackChanged(bool)));
+  connect( cathAutoTrackPushButton, SIGNAL(toggled(bool)), this, SLOT(cathAutoTrackChanged(bool)));
+  connect( autoSaveBox, SIGNAL(toggled(bool)),this,SLOT(autoSaveChanged(bool)));
 
   connect( markButton, SIGNAL(clicked()), this, SLOT(mark()));
   connect( pointsSpin, SIGNAL(valueChanged(int)), this, SLOT(pointsChanged(int)));
@@ -89,7 +90,7 @@ void CathHistoryUI::updateCheckableStatus() {
       autoSaveBox->setEnabled(true);
   }
   
-  cathAutoTrackCheckBox->setEnabled((cathPos < 0) ? false : true);
+  cathAutoTrackPushButton->setEnabled((cathPos < 0) ? false : true);
 }
 
 void CathHistoryUI::populateLists() {
@@ -203,7 +204,8 @@ void CathHistoryUI::mark()
         {
             savedLabel->setText("Marking...");
             m_historyRecorder->saveSetPoint(m_set);
-            savePointObject();
+            //save to disk after every new point?
+            //savePointObject();
             m_counter++;
             connect(m_timer, SIGNAL(timeout()), this, SLOT(markNow()));
             m_timer->start(m_interval);
@@ -220,6 +222,7 @@ void CathHistoryUI::markNow()
         m_counter = 0;
         savedLabel->setText("Marked " + QString::number(m_numPoints) + " points in set # " + QString::number(m_set));
         m_set++;
+        savePointObject();
         disconnect(m_timer, SIGNAL(timeout()), this, SLOT(markNow()));
 
     }
@@ -227,13 +230,32 @@ void CathHistoryUI::markNow()
     {
         savedLabel->setText("Marking...");
         m_historyRecorder->saveSetPoint(m_set);
-        savePointObject();
+        //save to disk after every new point?
+        //savePointObject();
         m_counter++;
     }
 }
 
 void CathHistoryUI::cathAutoTrackChanged(bool value) {
   m_historyRecorder->setAutoTrack(value);
+  if (value)
+  {
+      cathAutoTrackPushButton->setText("Auto Track On");
+      savedLabel->setText("");
+      filenameLabel->setText("");
+  }
+  else
+      cathAutoTrackPushButton->setText("Auto Track Off");
+  markButton->setEnabled(!value);
+  pointsSpin->setEnabled(!value);
+  intervalSpin->setEnabled(!value);
+  autoSaveBox->setEnabled(!value);
+}
+
+void CathHistoryUI::autoSaveChanged(bool value)
+{
+    if (!value)
+        filenameLabel->setText("");
 }
 
 void CathHistoryUI::savePointObject()

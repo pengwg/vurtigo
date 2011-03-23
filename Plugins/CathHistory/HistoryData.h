@@ -23,6 +23,7 @@
 #include <QObject>
 #include "rtCathDataObject.h"
 #include "rt3dPointBufferDataObject.h"
+#include "rt3DTimePointData.h"
 
 class HistoryData : public QObject
 {
@@ -53,6 +54,9 @@ class HistoryData : public QObject
  protected:
   rtCathDataObject* m_cath;
   rt3DPointBufferDataObject* m_points;
+
+  rt3DTimePointData createPoint(double pos[3]);
+  bool getCathPosition(double cathPos[3]);
   
   bool m_fAutoTrack;
   rtBasic3DPointData m_prevAutoTrackPoint;
