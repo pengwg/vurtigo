@@ -32,6 +32,9 @@ TrackData::TrackData(rtCathDataObject* cath, rt2DSliceDataObject* slice)
   m_cath = cath;
   m_slice = slice;
   m_vol = NULL;
+  m_axial = false;
+  m_sagittal = false;
+  m_coronal = false;
 
   m_sliceOnly = false;
 
@@ -51,6 +54,9 @@ TrackData::TrackData(rtCathDataObject* cath, rt3DVolumeDataObject* vol)
   m_cath = cath;
   m_slice = NULL;
   m_vol = vol;
+  m_axial = false;
+  m_sagittal = false;
+  m_coronal = false;
 
   m_sliceOnly = false;
 
@@ -87,6 +93,13 @@ bool TrackData::isSliceOnly() {
 
 void TrackData::setSliceOnly(bool value) {
   m_sliceOnly = value;
+}
+
+void TrackData::setPlanes(bool axial, bool sagittal, bool coronal)
+{
+    m_axial = axial;
+    m_sagittal = sagittal;
+    m_coronal = coronal;
 }
 
 void TrackData::setTrackingOn() {
@@ -187,7 +200,7 @@ void TrackData::update() {
   {
       //cath position is pos
       // move plane to that point + offset
-      m_vol->movePlanestoPoint(pos,m_offset);
+      m_vol->movePlanestoPoint(pos,m_offset,m_axial,m_sagittal,m_coronal);
   }
 }
 

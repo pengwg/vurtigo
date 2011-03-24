@@ -221,7 +221,7 @@ public:
   }
 
   //! Move the three planes so that all three planes intersect with the point
-  void movePlanestoPoint(double point[3],double offset) {
+  void movePlanestoPoint(double point[3],double offset,bool axial,bool sagittal,bool coronal) {
       if ( (m_movePoint[0] != point[0]) || (m_movePoint[1] != point[1]) || (m_movePoint[2] != point[2]))
       {
           m_movePoint[0] = point[0];
@@ -229,7 +229,7 @@ public:
           m_movePoint[2] = point[2];
           m_moveOffset = offset;
           Modified();
-          emit slicePlaneMoveSignal();
+          emit slicePlaneMoveSignal(axial,sagittal,coronal);
       }
   }
 
@@ -357,7 +357,7 @@ public:
   // Tell the render object to turn on/off bounding box
   void boundBoxSignal(bool);
 
-  void slicePlaneMoveSignal();
+  void slicePlaneMoveSignal(bool,bool,bool);
   void axialNormal(double);
   void axialAxial(double);
   void sagittalNormal(double);

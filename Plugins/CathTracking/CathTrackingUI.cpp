@@ -61,6 +61,9 @@ void CathTrackingUI::connectSignals() {
   connect( trackGroupBox, SIGNAL(toggled(bool)), this, SLOT(trackChanged(bool)));
   
   connect( sliceOnlyCheckBox, SIGNAL(toggled(bool)), this, SLOT(sliceOnlyChanged(bool)));
+  connect( axialCheck, SIGNAL(clicked()),this,SLOT(planesChanged()));
+  connect( sagittalCheck, SIGNAL(clicked()),this,SLOT(planesChanged()));
+  connect( coronalCheck, SIGNAL(clicked()),this,SLOT(planesChanged()));
 }
 
 void CathTrackingUI::updateCheckableStatus() {
@@ -97,12 +100,22 @@ void CathTrackingUI::updateCheckableStatus() {
   if (cathPtr && (planePtr || volPtr))
   {
       trackGroupBox->setEnabled(true);
-      if (planePtr) { sliceOnlyCheckBox->setEnabled(true); }
+      if (planePtr) { sliceOnlyCheckBox->setEnabled(true);}
+      if (volPtr)
+      {
+          axialCheck->setEnabled(true);
+          sagittalCheck->setEnabled(true);
+          coronalCheck->setEnabled(true);
+      }
+
   }
   else
   {
       trackGroupBox->setEnabled(false);
       sliceOnlyCheckBox->setEnabled(false);
+      axialCheck->setEnabled(false);
+      sagittalCheck->setEnabled(false);
+      coronalCheck->setEnabled(false);
   }
 }
 
@@ -182,6 +195,9 @@ void CathTrackingUI::trackingPairChanged() {
           trackGroupBox->setChecked(td->isTracking());
           trackLocSpinBox->setValue(td->getLocation());
           trackOffsetDoubleSpinBox->setValue(td->getOffset());
+          axialCheck->setChecked(td->getAxial());
+          sagittalCheck->setChecked(td->getSagittal());
+          coronalCheck->setChecked(td->getCoronal());
       }
   }
   else
@@ -422,4 +438,32 @@ void CathTrackingUI::sliceOnlyChanged(bool value) {
     }
   }
   updateInfo();
+}
+
+void CathTrackingUI::planesChanged()
+{
+    int cathId, volId;
+    rtCathDataObject* cathPtr = NULL;
+    rt3DVolumeDataObject* volPtr = NULL;
+    TrackData* td;
+
+    cathId = m_cathComboBox.getCurrentObjectId();
+    volId = m_volumeComboBox.getCurrentObjectId();
+
+    if (cathId >= 0) {
+      cathPtr = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathId));
+    }
+
+    if (volId >= 0)
+    {
+        volPtr = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(volId));
+    }
+
+    if (volPtr && cathPtr) {
+      td = getPairCV( volPtr, cathPtr );
+      if (td) {
+            td->setPlanes(axialCheck->isChecked(),sagittalCheck->isChecked(),coronalCheck->isChecked());
+      }
+    }
+
 }

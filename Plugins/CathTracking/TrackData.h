@@ -44,6 +44,10 @@ class TrackData : public QObject
     double getOffset() { return m_offset; }
     void setOffest(double offset) { m_offset = offset; }
 
+    bool getAxial() {return m_axial;}
+    bool getSagittal() {return m_sagittal;}
+    bool getCoronal() {return m_coronal;}
+
     bool isTracking();
     void setTrackingOn();
     void setTrackingOff();
@@ -51,6 +55,8 @@ class TrackData : public QObject
     
     bool isSliceOnly();
     void setSliceOnly(bool value);
+
+    void setPlanes(bool axial,bool sagittal,bool coronal);
 
     rt2DSliceDataObject* getSliceObject() { return m_slice; }
     rtCathDataObject* getCathObject() { return m_cath; }
@@ -65,6 +71,9 @@ class TrackData : public QObject
   double m_offset;
   bool m_tracking;
   bool m_sliceOnly;
+  bool m_axial;
+  bool m_sagittal;
+  bool m_coronal;
   rt2DSliceDataObject* m_slice;
   rtCathDataObject* m_cath;
   rt3DVolumeDataObject *m_vol;

@@ -51,6 +51,8 @@ public slots:
   
   void sliceOnlyChanged(bool);
 
+  void planesChanged();
+
 protected:
   void connectSignals();
   void updateCheckableStatus();

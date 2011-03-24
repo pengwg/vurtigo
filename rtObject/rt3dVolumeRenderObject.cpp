@@ -521,7 +521,7 @@ void rt3DVolumeRenderObject::setupDataObject() {
   connect(temp, SIGNAL(sagittalResetSignal()), this, SLOT(resetSagittalPlane()));
   connect(temp, SIGNAL(coronalResetSignal()), this, SLOT(resetCoronalPlane()));
   connect(temp, SIGNAL(boundBoxSignal(bool)), this, SLOT(setBoundBox(bool)));
-  connect(temp, SIGNAL(slicePlaneMoveSignal()), this, SLOT(movePlanes()));
+  connect(temp, SIGNAL(slicePlaneMoveSignal(bool,bool,bool)), this, SLOT(movePlanes(bool,bool,bool)));
   connect(temp, SIGNAL(axialNormal(double)),this,SLOT(moveAxialNormal(double)));
   connect(temp, SIGNAL(axialAxial(double)),this,SLOT(moveAxialAxial(double)));
   connect(temp, SIGNAL(sagittalNormal(double)),this,SLOT(moveSagittalNormal(double)));
@@ -713,7 +713,7 @@ void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event) {
   }
 }
 
-void rt3DVolumeRenderObject::movePlanes()
+void rt3DVolumeRenderObject::movePlanes(bool axial,bool sagittal,bool coronal)
 {
     //calculate distance from point to each plane
     // move the plane
@@ -737,36 +737,44 @@ void rt3DVolumeRenderObject::movePlanes()
 
     //AXIAL
 
-    m_boxOutline[0].getNormal(normal);
-    m_boxOutline[0].getMidpoint(orig);
-    vtkMath::Normalize(normal);
+    if (axial)
+    {
+        m_boxOutline[0].getNormal(normal);
+        m_boxOutline[0].getMidpoint(orig);
+        vtkMath::Normalize(normal);
 
-    vtkMath::Subtract(newPos,orig,sub);
-    dist = vtkMath::Dot(sub,normal);
+        vtkMath::Subtract(newPos,orig,sub);
+        dist = vtkMath::Dot(sub,normal);
 
-    moveAxialNormal(dist + dObj->getMoveOffset());
-
+        moveAxialNormal(dist + dObj->getMoveOffset());
+    }
     //SAGITTAL
 
-    m_boxOutline[1].getNormal(normal);
-    m_boxOutline[1].getMidpoint(orig);
-    vtkMath::Normalize(normal);
+    if (sagittal)
+    {
+        m_boxOutline[1].getNormal(normal);
+        m_boxOutline[1].getMidpoint(orig);
+        vtkMath::Normalize(normal);
 
-    vtkMath::Subtract(newPos,orig,sub);
-    dist = vtkMath::Dot(sub,normal);
+        vtkMath::Subtract(newPos,orig,sub);
+        dist = vtkMath::Dot(sub,normal);
 
-    moveSagittalNormal(dist + dObj->getMoveOffset());
+        moveSagittalNormal(dist + dObj->getMoveOffset());
+    }
 
     //CORONAL
 
-    m_boxOutline[2].getNormal(normal);
-    m_boxOutline[2].getMidpoint(orig);
-    vtkMath::Normalize(normal);
+    if (coronal)
+    {
+        m_boxOutline[2].getNormal(normal);
+        m_boxOutline[2].getMidpoint(orig);
+        vtkMath::Normalize(normal);
 
-    vtkMath::Subtract(newPos,orig,sub);
-    dist = vtkMath::Dot(sub,normal);
+        vtkMath::Subtract(newPos,orig,sub);
+        dist = vtkMath::Dot(sub,normal);
 
-    moveCoronalNormal(dist + dObj->getMoveOffset());
+        moveCoronalNormal(dist + dObj->getMoveOffset());
+    }
 
 
 }

@@ -7,16 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>209</height>
+    <height>295</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <property name="spacing">
-    <number>4</number>
-   </property>
    <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
@@ -31,7 +28,14 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>Tracking Volume: </string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
     <widget class="QGroupBox" name="trackGroupBox">
      <property name="title">
       <string>Track Catheter with Plane</string>
@@ -82,25 +86,47 @@
     </widget>
    </item>
    <item row="4" column="0">
-    <widget class="QCheckBox" name="sliceOnlyCheckBox">
-     <property name="text">
-      <string>Track Slice Only (do not follow catheter laterally)</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label_5">
-     <property name="text">
-      <string>Tracking Volume: </string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QTextEdit" name="trackedPairs">
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-    </widget>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QCheckBox" name="sliceOnlyCheckBox">
+       <property name="text">
+        <string>Track Slice Only (do not follow catheter laterally)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QCheckBox" name="axialCheck">
+         <property name="text">
+          <string>Axial</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="sagittalCheck">
+         <property name="text">
+          <string>Sagittal</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="coronalCheck">
+         <property name="text">
+          <string>Coronal</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QTextEdit" name="trackedPairs">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

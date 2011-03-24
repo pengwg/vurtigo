@@ -81,7 +81,7 @@ public slots:
 
   virtual void setBoundBox(bool);
 
-  virtual void movePlanes();
+  virtual void movePlanes(bool,bool,bool);
   virtual void moveAxialNormal(double);
   virtual void moveAxialAxial(double);
   virtual void moveSagittalNormal(double);
