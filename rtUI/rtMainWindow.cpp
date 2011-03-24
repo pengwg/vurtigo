@@ -761,6 +761,9 @@ void rtMainWindow::connectSignals() {
   connect(actionPlacement_Mode, SIGNAL(toggled(bool)), this, SLOT(placeModeToggled(bool)));
   connect(action3D_Dual_View, SIGNAL(toggled(bool)), this, SLOT(toggle3DDualView(bool)));
 
+  //whatsThis
+  connect(actionWhatsThis,SIGNAL(triggered()),this,SLOT(activateWhatsThis()));
+
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::connectSignals() end") );
 #endif

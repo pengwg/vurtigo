@@ -204,7 +204,7 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>293</width>
+                  <width>297</width>
                   <height>566</height>
                  </rect>
                 </property>
@@ -236,7 +236,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>25</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -255,6 +255,8 @@
     <addaction name="actionSource_Docs"/>
     <addaction name="separator"/>
     <addaction name="actionAbout"/>
+    <addaction name="separator"/>
+    <addaction name="actionWhatsThis"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -509,6 +511,11 @@
    </property>
    <property name="text">
     <string>3D Dual View</string>
+   </property>
+  </action>
+  <action name="actionWhatsThis">
+   <property name="text">
+    <string>whatsThis?</string>
    </property>
   </action>
  </widget>

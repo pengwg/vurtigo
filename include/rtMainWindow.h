@@ -25,6 +25,8 @@
 #include <vtkPropAssembly.h>
 #include <vtkProp.h>
 #include <vtkCellPicker.h>
+#include <QWhatsThis>
+
 class vtkRenderWindow;
 
 // Remove the conflict with AssertMacros.h
@@ -183,6 +185,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   double getMovingQuality() { return m_movingQuality; }
   double getStillQuality() { return m_stillQuality; }
+
+  void activateWhatsThis() { QWhatsThis::enterWhatsThisMode(); }
 
 signals:
   //! Emited when the interaction mode in Vurtigo is switched to camera mode.
