@@ -272,10 +272,10 @@ void CathTrackingUI::updateInfo()
             ts << "Volume: " << m_trackList[ix1]->getVolObject()->getObjName() << " " << QString::number(m_trackList[ix1]->getVolObject()->getId()) ;
         ts << "  Tracked: ";
         if (m_trackList[ix1]->isTracking())
-            ts << "ON";
+            ts << "ON: ";
         else
-            ts << "OFF";
-        ts << "\n\n";
+            ts << "OFF: ";
+        ts << "A:" << m_trackList[ix1]->getAxial() << " S: " << m_trackList[ix1]->getSagittal() << " C: " << m_trackList[ix1]->getCoronal() << "\n\n";
     }
     ts.flush();
 
@@ -395,7 +395,14 @@ void CathTrackingUI::trackChanged(bool track) {
   if (planePtr && cathPtr) {
     td = getPairCP( planePtr, cathPtr );
     if (td) {
-      td->setTracking(track);
+        bool ok = true;
+        for (int ix1=0; ix1<m_trackList.size(); ix1++)
+          if ((m_trackList[ix1]->getCathObject() != td->getCathObject())  && (m_trackList[ix1]->getSliceObject() == td->getSliceObject())  )
+              ok = false;
+        if (ok)
+           td->setTracking(track);
+        else
+            td->setTrackingOff();
       td->update();
 	  
     }
@@ -405,7 +412,18 @@ void CathTrackingUI::trackChanged(bool track) {
   {
       td = getPairCV( volPtr, cathPtr );
       if (td) {
-        td->setTracking(track);
+        bool ok = true;
+        for (int ix1=0; ix1<m_trackList.size(); ix1++)
+          if ((m_trackList[ix1]->getCathObject() != td->getCathObject())  && (m_trackList[ix1]->getVolObject() == td->getVolObject())  )
+              ok = false;
+        if (ok)
+           td->setTracking(track);
+        else
+        {
+            td->setTrackingOff();
+            trackGroupBox->setChecked(false);
+        }
+
         td->update();
 
       }
@@ -465,5 +483,6 @@ void CathTrackingUI::planesChanged()
             td->setPlanes(axialCheck->isChecked(),sagittalCheck->isChecked(),coronalCheck->isChecked());
       }
     }
+    updateInfo();
 
 }

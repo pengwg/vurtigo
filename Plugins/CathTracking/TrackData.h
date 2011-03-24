@@ -24,6 +24,7 @@
 #include "rt2dSliceDataObject.h"
 #include "rtCathDataObject.h"
 #include "rt3dVolumeDataObject.h"
+#include "rtBaseHandle.h"
 
 
 class TrackData : public QObject

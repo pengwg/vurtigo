@@ -136,6 +136,9 @@ void TrackData::update() {
   QList<int> locs;
 
   numLoc = m_cath->getNumLocations();
+  if (numLoc == 0)
+      return;
+
   locs = m_cath->getLocationList();
 
   // Ensure the location is in the proper bounds.
