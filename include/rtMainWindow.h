@@ -243,6 +243,9 @@ signals:
   //! The class that displays all of the help menu windows.
   rtHelpManager *m_helpManager;
 
+  //! The last directory a loaded plugin was chosen from
+  QDir m_lastPluginDir;
+
   //////////////////////
   // Protected functions
   /////////////////////////

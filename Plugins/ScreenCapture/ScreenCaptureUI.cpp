@@ -158,7 +158,7 @@ void ScreenCaptureUI::newFile() {
 void ScreenCaptureUI::fileChooser() {
   QString dir;
 
-  dir = QFileDialog::getSaveFileName(this, "Save File Prefix");
+  dir = QFileDialog::getSaveFileName(this, "Save File Prefix",m_lastDir);
   if (dir != "") {
     // The user did select a directory.
     fileNameEdit->setText(dir);

@@ -106,8 +106,9 @@ void CardiacMeshReaderUI::newDirectory() {
 //! Popup a dialog box to choose a directory
 void CardiacMeshReaderUI::dirChooser() {
   QString dir;
-
-  dir = QFileDialog::getExistingDirectory(this, "Select DICOM Directory", "", QFileDialog::ShowDirsOnly);
+  QDir lastDirUp = QDir(m_lastDir);
+  lastDirUp.cdUp();
+  dir = QFileDialog::getExistingDirectory(this, "Select DICOM Directory", lastDirUp.path(), QFileDialog::ShowDirsOnly);
 
   if (dir != "") {
     // The user did select a directory.
@@ -178,8 +179,10 @@ void CardiacMeshReaderUI::newDirectoryMesh() {
 
 void CardiacMeshReaderUI::dirChooserMesh() {
   QString dir;
-
-  dir = QFileDialog::getExistingDirectory(this, "Select Mesh Directory", "", QFileDialog::ShowDirsOnly);
+  // use the DICOM set location for the mesh, since they might be close together
+  QDir lastDirUp = QDir(m_lastDir);
+  lastDirUp.cdUp();
+  dir = QFileDialog::getExistingDirectory(this, "Select Mesh Directory", lastDirUp.path(), QFileDialog::ShowDirsOnly);
 
   if (dir != "") {
     // The user did select a directory.

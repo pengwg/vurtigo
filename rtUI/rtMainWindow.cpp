@@ -1023,14 +1023,15 @@ void rtMainWindow::loadPluginFile() {
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::loadPluginFile() start") );
 #endif
   QString fName;
-
-  fName = QFileDialog::getOpenFileName(this, "Select Plugin XML File", ".", "*.XML *.xml");
+  fName = QFileDialog::getOpenFileName(this, "Select Plugin XML File", m_lastPluginDir.path(), "*.XML *.xml");
 
   QFile file(fName);
   if (!file.exists()) {
     rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("rtMainWindow::loadPluginFile() File does not exist: ").append(fName) );
     return;
   }
+  m_lastPluginDir = QFileInfo(fName).dir();
+  m_lastPluginDir.cdUp();
 
   if (!rtApplication::instance().getPluginLoader()->loadPluginsFromConfig(&file)) {
     rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("rtMainWindow::loadPluginFile() Failed to load plugins from: ").append(fName) );
