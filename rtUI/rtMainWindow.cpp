@@ -949,6 +949,7 @@ void rtMainWindow::registerDialog() {
 #endif
   if (!m_registrationDialog) m_registrationDialog = new rtRegistration(this);
   m_registrationDialog->placementOn();
+  m_registrationDialog->setupAllCombos();
   m_registrationDialog->show();
 
 
@@ -964,6 +965,7 @@ void rtMainWindow::showPointPlacement() {
   // create point placement dialog
   if (!m_pointPlacementDialog) m_pointPlacementDialog = new pointPlacementDialog(this);
    m_pointPlacementDialog->placementOn();
+   m_pointPlacementDialog->setupCombo();
    m_pointPlacementDialog->show();
 
 #ifdef DEBUG_VERBOSE_MODE_ON

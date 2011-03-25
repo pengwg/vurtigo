@@ -92,6 +92,9 @@ Q_OBJECT
   //! Remove this object from the given renderer.
   virtual bool removeFromRenderer(vtkRenderer* ren) = 0;
 
+  //! Make this object a copy of another object
+  virtual void copyObject(rtRenderObject *from) {}
+
   bool tryUpdate();
 
   void resetUpdateTime();

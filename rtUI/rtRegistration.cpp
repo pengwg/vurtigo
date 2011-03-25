@@ -183,12 +183,16 @@ void rtRegistration::syncToggled(bool flag)
 
 //! The user has clicked on register so the changes will be made.
 void rtRegistration::registerButtonPressed() {
+    if (m_points.isEmpty() || m_volumes.isEmpty()) return;
+    rtRenderObject *st = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()));
+    rtRenderObject *tt = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()));
+    rtRenderObject *vol = rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volSource->currentIndex()));
+    if (!st || !tt || !vol) return;
 
-    rt3DPointBufferDataObject *source = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
-    rt3DPointBufferDataObject *target = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()))->getDataObject());
-    rt3DVolumeDataObject *volume = static_cast<rt3DVolumeDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volSource->currentIndex()))->getDataObject());
-    rt3DVolumeDataObject *tVolume = static_cast<rt3DVolumeDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volTarget->currentIndex()))->getDataObject());
-    if (!source || !target || !volume || !tVolume) return;
+    rt3DPointBufferDataObject *source = static_cast<rt3DPointBufferDataObject*>(st->getDataObject());
+    rt3DPointBufferDataObject *target = static_cast<rt3DPointBufferDataObject*>(tt->getDataObject());
+    rt3DVolumeDataObject *volume = static_cast<rt3DVolumeDataObject*>(vol->getDataObject());
+
 
     if (source->getPointListSize() != target->getPointListSize())
         return;
@@ -295,23 +299,24 @@ void rtRegistration::registerButtonPressed() {
         //affineTarget->Delete();
     }
 
-    rtRenderObject* temp;
-    temp = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DObject,QString(volume->getObjName() + ":" + strRegType + "_R_" + QString::number(source->getId()) + "_to_" + QString::number(target->getId())));
+    rtRenderObject* newObject;
+    newObject = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DObject,QString(volume->getObjName() + ":" + strRegType + "_R_" + QString::number(source->getId()) + "_to_" + QString::number(target->getId())));
 
-    if (temp)
+    if (newObject)
     {
-        rt3DVolumeDataObject* regObj = static_cast<rt3DVolumeDataObject*>(temp->getDataObject());
+        rt3DVolumeRenderObject *regRender = static_cast<rt3DVolumeRenderObject*>(newObject);
+        rt3DVolumeDataObject* regObj = static_cast<rt3DVolumeDataObject*>(newObject->getDataObject());
         regObj->lock();
-        vtkTransform *temp = vtkTransform::New();
+        vtkTransform *newTrans = vtkTransform::New();
 
         if (registerBox->currentIndex() < 3)
         {
 
             Ltransform->Inverse();
             // add the transform and image data to the new volume
-            temp->SetMatrix(Ltransform->GetMatrix());
-            temp->Concatenate(volume->getTransform());
-            regObj->copyNewTransform(temp);
+            newTrans->SetMatrix(Ltransform->GetMatrix());
+            newTrans->Concatenate(volume->getTransform());
+            regObj->copyNewTransform(newTrans);
             regObj->copyNewImageData(volume->getImageData());
 /*
             // add a new point object with the transformed points
@@ -347,7 +352,9 @@ void rtRegistration::registerButtonPressed() {
         regObj->copyTriggerDelayList(volume->getTriggerDelayList());
         regObj->copyDicomCommonData(volume->getDicomCommonData());
         regObj->Modified();
+        regRender->copyObject(vol);
         regObj->unlock();
+        newTrans->Delete();
     }
 
     //Cleanup

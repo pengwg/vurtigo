@@ -67,6 +67,15 @@ class rt3DVolumeRenderObject : public rtRenderObject {
 
   virtual bool hasProp(vtkProp *prop);
 
+  virtual void copyObject(rtRenderObject *from);
+
+  // used for copying
+  void getPlaneControlTransform(int plane, vtkTransform *trans) { m_planeControl[plane].getTransform(trans);}
+  vtkTransform *getBoxOutlineTransform(int plane) { return m_boxOutline[plane].getTransform();}
+  vtkTransform *getTexturePlaneTransform(int plane) { return m_texturePlane[plane].getTransform();}
+  bool getBoxOutlineVisible(int plane) {return m_boxOutline[plane].getVisible();}
+  bool getTexturePlaneVisible(int plane) {return m_texturePlane[plane].getVisible();}
+
 public slots:
   virtual void mousePressEvent(QMouseEvent* event);
   virtual void mouseMoveEvent(QMouseEvent* event);

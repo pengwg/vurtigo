@@ -146,6 +146,14 @@ public:
   //! Check if the 3D coronal slice is being shown
   bool getCoronal3D() { return m_optionsWidget.checkCoronal3D->isChecked(); }
 
+  //! Set if the 3D axial slice is being shown
+  void setAxial3D(bool set) {m_optionsWidget.checkAxial3D->setChecked(set); }
+  //! Set if the 3D sagittal slice is being shown
+  void setSagittal3D(bool set) {m_optionsWidget.checkSagittal3D->setChecked(set);}
+  //! Set if the 3D coronal slice is being shown
+  void setCoronal3D(bool set) {m_optionsWidget.checkCoronal3D->setChecked(set);}
+
+
   //! Get the opacity of the axial slice.
   inline double getAxialOpacity() { return ((double)m_optionsWidget.axialOpacitySlider->value())/100.0; }
   inline double getSagittalOpacity() { return ((double)m_optionsWidget.sagittalOpacitySlider->value())/100.0; }

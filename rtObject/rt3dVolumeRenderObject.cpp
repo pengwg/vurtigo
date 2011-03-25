@@ -916,6 +916,48 @@ void rt3DVolumeRenderObject::syncWheel(int plane,QWheelEvent* event )
     t->Delete();
 }
 
+void rt3DVolumeRenderObject::copyObject(rtRenderObject *from)
+{
+    if (!from) return;
+    rt3DVolumeRenderObject *fromRender = static_cast<rt3DVolumeRenderObject*>(from);
+    if (!fromRender) return;
+    rt3DVolumeDataObject *fromData = static_cast<rt3DVolumeDataObject*>(from->getDataObject());
+    rt3DVolumeDataObject *thisData = static_cast<rt3DVolumeDataObject*>(this->getDataObject());
+
+    // copy the object visibility?
+    //this->setVisible3D(from->getVisible3D());
+
+
+    // copy the plane transforms
+    vtkTransform *temp = vtkTransform::New();
+    for (int ix1=0; ix1<3; ix1++)
+    {      
+        m_boxOutline[ix1].setTransform(fromRender->getBoxOutlineTransform(ix1));
+        m_texturePlane[ix1].setTransform(fromRender->getTexturePlaneTransform(ix1));
+
+        fromRender->getPlaneControlTransform(ix1,temp);
+        m_planeControl[ix1].setTransform(temp);
+
+    }
+    temp->Delete();
+
+    // copy plane visibility
+    thisData->setAxial3D(fromData->getAxial3D());
+    thisData->setSagittal3D(fromData->getSagittal3D());
+    thisData->setCoronal3D(fromData->getCoronal3D());
+    // copy opacity of planes
+    thisData->setAxialOpacity(fromData->getAxialOpacity());
+    thisData->setSagittalOpacity(fromData->getSagittalOpacity());
+    thisData->setCoronalOpacity(fromData->getCoronalOpacity());
+
+    // copy data over
+    thisData->setVisibleComponent(fromData->getVisibleComponent());
+
+    thisData->wlChanged(fromData->getWindow(),fromData->getLevel());
+
+
+}
+
 ////////////
 // Protected Functions
 /////////////
