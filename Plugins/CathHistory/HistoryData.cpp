@@ -66,11 +66,11 @@ bool HistoryData::getCathPosition(double cathPos[3])
     //get (first) catheter position
        QList<int> locs;
        locs    = m_cath->getLocationList();
+       if (locs.isEmpty())
+           return false;
 
        // get position (Location starts at 1...)
-        if (!m_cath->getPositionAtLocation(locs[0], cathPos))   /// xxxxxx should we use locs[1]?
-          return false;
-        else return true;
+        return m_cath->getPositionAtLocation(locs[0], cathPos);   /// xxxxxx should we use locs[1]?
 }
 
 void HistoryData::savePoint()

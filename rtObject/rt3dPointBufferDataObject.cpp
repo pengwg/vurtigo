@@ -451,6 +451,7 @@ void rt3DPointBufferDataObject::clearPointDataPressed() {
 
   if (button == QMessageBox::Yes) {
     removeAllPoints();
+    setFilename("");
   }
 }
 
@@ -475,20 +476,34 @@ void rt3DPointBufferDataObject::saveThisObject() {
     // Find the file name
     m_saveFileName = QFileDialog::getSaveFileName(getBaseWidget(), "Save As...");
   }
-  file.setFileName(m_saveFileName);
-  m_optionsWidget.filename->setText(QString("Saved to: " + QFileInfo(m_saveFileName).fileName()));
+  if (m_saveFileName.isEmpty())
+  {
+      m_optionsWidget.filename->setText("File not saved");
+  }
+  else
+  {
+      file.setFileName(m_saveFileName);
+      m_optionsWidget.filename->setText(QString("Saved to: " + QFileInfo(m_saveFileName).fileName()));
+      this->saveFile(&file);
+  }
   QTimer::singleShot(2000, this, SLOT(savedObject()));
-  this->saveFile(&file);
 }
 
 void rt3DPointBufferDataObject::saveAsThisObject() {
   QFile file;
-  m_saveFileName = QFileDialog::getSaveFileName(getBaseWidget(), "Save As...");
+  m_saveFileName = QFileDialog::getSaveFileName(getBaseWidget(), "Save As...",QFileInfo(m_saveFileName).dir().path());
 
-  file.setFileName(m_saveFileName);
-  m_optionsWidget.filename->setText(QString("Saved to: " + QFileInfo(m_saveFileName).fileName()));
+  if (m_saveFileName.isEmpty())
+  {
+      m_optionsWidget.filename->setText("File not saved");
+  }
+  else
+  {
+      file.setFileName(m_saveFileName);
+      m_optionsWidget.filename->setText(QString("Saved to: " + QFileInfo(m_saveFileName).fileName()));
+      this->saveFile(&file);
+  }
   QTimer::singleShot(2000, this, SLOT(savedObject()));
-  this->saveFile(&file);
 }
 
 void rt3DPointBufferDataObject::savedObject()

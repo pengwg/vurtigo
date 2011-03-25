@@ -143,7 +143,7 @@ The number of points and the interval between marking can be set using the optio
     </layout>
    </item>
    <item row="3" column="0" colspan="2">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QCheckBox" name="autoSaveBox">
        <property name="toolTip">
@@ -157,6 +157,21 @@ WARNING: If a file has not been specified for the CathHistory 3D Point object, A
        </property>
        <property name="text">
         <string>Auto-Save</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="resetButton">
+       <property name="toolTip">
+        <string>Reset the marked points</string>
+       </property>
+       <property name="whatsThis">
+        <string>Reset the marked points.
+This will save the current points to an XML file (if one has not been specified, a dialog will appear to allow the user to choose a file).
+The points will then be cleared and the set number reset to 0.</string>
+       </property>
+       <property name="text">
+        <string>Reset</string>
        </property>
       </widget>
      </item>

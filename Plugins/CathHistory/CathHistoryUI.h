@@ -25,6 +25,7 @@
 #include <QMap>
 #include <QTimer>
 #include <QFileInfo>
+#include <QMessageBox>
 #include <ui_CathHistory.h>
 
 #include "HistoryData.h"
@@ -52,6 +53,10 @@ public slots:
   
   void cathAutoTrackChanged(bool);
   void autoSaveChanged(bool);
+
+  void resetPoints();
+
+  void savedObject();
 
 protected:
   void connectSignals();

@@ -57,6 +57,7 @@ public:
 
   //! Get the filename this object is currently saved in
   inline QString getFilename() { return m_saveFileName;}
+  inline void setFilename(QString file) {m_saveFileName = file;}
 
   //! Get a handle to the point at a particular location in 3D.
   /*!

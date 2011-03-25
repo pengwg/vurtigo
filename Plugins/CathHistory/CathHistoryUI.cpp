@@ -41,6 +41,7 @@ CathHistoryUI::CathHistoryUI() {
   pointsSpin->setEnabled(false);
   intervalSpin->setEnabled(false);
   autoSaveBox->setEnabled(false);
+  resetButton->setEnabled(false);
   
   updateCheckableStatus();
 
@@ -77,6 +78,8 @@ void CathHistoryUI::connectSignals() {
   connect( markButton, SIGNAL(clicked()), this, SLOT(mark()));
   connect( pointsSpin, SIGNAL(valueChanged(int)), this, SLOT(pointsChanged(int)));
   connect ( intervalSpin, SIGNAL(valueChanged(int)), this, SLOT(intervalChanged(int)));
+
+  connect (resetButton, SIGNAL(clicked()), this, SLOT(resetPoints()));
 }
 
 void CathHistoryUI::updateCheckableStatus() {
@@ -88,6 +91,7 @@ void CathHistoryUI::updateCheckableStatus() {
       pointsSpin->setEnabled(true);
       intervalSpin->setEnabled(true);
       autoSaveBox->setEnabled(true);
+      resetButton->setEnabled(true);
   }
   
   cathAutoTrackPushButton->setEnabled((cathPos < 0) ? false : true);
@@ -274,4 +278,47 @@ void CathHistoryUI::savePointObject()
             m_historyRecorder->getPointBufferObject()->saveThisObject();
         }
     }
+    QTimer::singleShot(2000, this, SLOT(savedObject()));
+}
+
+void CathHistoryUI::resetPoints()
+{
+    rt3DPointBufferDataObject *dObj = m_historyRecorder->getPointBufferObject();
+    if (!dObj) return;
+    QMessageBox::StandardButton button;
+
+    button = QMessageBox::question(this, QString("Reset Points"),
+                          QString("This operation will reset the Set and delete all points and point data. The operation cannot be undone. Proceed?"),
+                          QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+    if (button == QMessageBox::Yes)
+    {
+        if (dObj->getPointListSize() > 0)
+        {
+            dObj->saveThisObject();
+            if (dObj->getFilename().isEmpty())
+            {
+                filenameLabel->setStyleSheet("QLabel { color : red; }");
+                filenameLabel->setText("File not saved");
+            }
+            else
+            {
+                filenameLabel->setStyleSheet("");
+                filenameLabel->setText("Saved Points to: " + QFileInfo(m_historyRecorder->getPointBufferObject()->getFilename()).fileName());
+            }
+            savedLabel->setText("");
+            QTimer::singleShot(2000, this, SLOT(savedObject()));
+
+
+        }
+        dObj->removeAllPoints();
+        dObj->setFilename("");
+        m_set = 0;
+    }
+}
+
+void CathHistoryUI::savedObject()
+{
+    filenameLabel->setText("");
+    savedLabel->setText("");
 }
