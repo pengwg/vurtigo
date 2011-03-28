@@ -78,6 +78,7 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
   m_moved = false;
   // set the source active
   m_activeSet = 0;
+  m_error = 0;
   sourceFrame->setLineWidth(5);
   targetFrame->setLineWidth(5);
   sourceFrame->setFrameStyle(QFrame::Panel | QFrame::Raised);
@@ -87,6 +88,8 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
   registerBox->addItem("Similarity");
   registerBox->addItem("Affine");
   registerBox->addItem("Thin Plate Spline");
+
+  regInfo->clear();
 
   setupAllCombos();
 
@@ -181,7 +184,7 @@ void rtRegistration::syncToggled(bool flag)
 
 }
 
-//! The user has clicked on register so the changes will be made.
+// The user has clicked on register so the changes will be made.
 void rtRegistration::registerButtonPressed() {
     if (m_points.isEmpty() || m_volumes.isEmpty()) return;
     rtRenderObject *st = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()));
@@ -351,7 +354,12 @@ void rtRegistration::registerButtonPressed() {
             sourceTransformed->Delete();
             volInv->Delete();
 
-
+            m_error = calculateError(target, sourceTransPoints);
+            if (m_error >= 0)
+            {
+                QString infoText = QString(volume->getObjName() + ":" + strRegType + "_R_" + QString::number(source->getId()) + "_to_" + QString::number(target->getId()) + " Avg Distance = " + QString::number(m_error) + " mm \n\n");
+                regInfo->append(infoText);
+            }
 
 
         }
@@ -714,5 +722,38 @@ void rtRegistration::numberLabels()
     setupTargetTable();
 }
 
+double rtRegistration::calculateError(rt3DPointBufferDataObject *one, rt3DPointBufferDataObject *two)
+{
+    if (!one || !two) return -1;
+    // A list of all squared errors
+    //QList<double> Errors;
+    double error = 0;
+    int min = 0;
+    int oneS = one->getPointListSize();
+    int twoS = two->getPointListSize();
+    min = (oneS < twoS) ? oneS : twoS;
+    for (int ix1=0; ix1<min; ix1++)
+    {
+        /*
+         // a different error measure
+        double tmp = 0;
+        int ax,bx,ay,by,az,bz;
+        ax = one->getPointAtIndex(ix1)->getX();
+        bx = two->getPointAtIndex(ix1)->getX();
+        ay = one->getPointAtIndex(ix1)->getY();
+        by = two->getPointAtIndex(ix1)->getY();
+        az = one->getPointAtIndex(ix1)->getZ();
+        bz = two->getPointAtIndex(ix1)->getZ();
+        tmp = tmp + ((one->getPointAtIndex(ix1)->getX() - two->getPointAtIndex(ix1)->getX()) * (one->getPointAtIndex(ix1)->getX() - two->getPointAtIndex(ix1)->getX()));
+        tmp = tmp + ((one->getPointAtIndex(ix1)->getY() - two->getPointAtIndex(ix1)->getY()) * (one->getPointAtIndex(ix1)->getY() - two->getPointAtIndex(ix1)->getY()));
+        tmp = tmp + ((one->getPointAtIndex(ix1)->getZ() - two->getPointAtIndex(ix1)->getZ()) * (one->getPointAtIndex(ix1)->getZ() - two->getPointAtIndex(ix1)->getZ()));
+        //Errors.append(tmp);
+        error  = error + tmp;
+        */
+        error = error + rtBasic3DPointData::findDistance(*(one->getPointAtIndex(ix1)),*(two->getPointAtIndex(ix1)));
+    }
 
+    return error / min;
+
+}
 

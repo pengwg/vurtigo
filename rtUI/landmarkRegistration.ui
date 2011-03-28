@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>774</width>
-    <height>506</height>
+    <height>625</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Landmark Registration</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_5">
+  <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox_2">
      <property name="enabled">
@@ -29,7 +29,11 @@
       <item>
        <widget class="QCheckBox" name="syncSTBox">
         <property name="toolTip">
-         <string/>
+         <string>Synchronize wheel scroll to both Source and Target</string>
+        </property>
+        <property name="whatsThis">
+         <string>When this box is checked, any wheel scrolling interactions performed on one of either the Source or Target object will be mirrored on the other object.
+This can be used to help place landmarks in similar locations on both objects.</string>
         </property>
         <property name="text">
          <string>Sync Wheel Events</string>
@@ -59,6 +63,11 @@
        <property name="toolTip">
         <string>Press to create a new 3D Point Buffer Object</string>
        </property>
+       <property name="whatsThis">
+        <string>Pressing this button will create a new 3D Point object in the main object tree, which can now be selected in the combo boxes below for placing points.
+
+The object name will be in the form &quot;Placement &lt;text&gt;&quot;, where &lt;text&gt; is the text given by the user in the box to the right.</string>
+       </property>
        <property name="text">
         <string>New Point Set</string>
        </property>
@@ -72,6 +81,13 @@
        <property name="enabled">
         <bool>true</bool>
        </property>
+       <property name="toolTip">
+        <string>Match the colors of Source and Target points</string>
+       </property>
+       <property name="whatsThis">
+        <string>Pressing this button will take all the points that match indices between Source and Target and set them to a series of matching random colors.
+This can be used to quickly color match two prior sets of points that.</string>
+       </property>
        <property name="text">
         <string>Color Match</string>
        </property>
@@ -82,6 +98,9 @@
        <property name="toolTip">
         <string>Refresh the Volume and 3D Point lists</string>
        </property>
+       <property name="whatsThis">
+        <string>This button will refresh the lists of volumes and 3D points in the event that new objects have been created but are not in the lists.</string>
+       </property>
        <property name="text">
         <string>Refresh</string>
        </property>
@@ -89,6 +108,12 @@
      </item>
      <item row="1" column="0">
       <widget class="QPushButton" name="numLabels">
+       <property name="toolTip">
+        <string>Set the labels of all points to their index</string>
+       </property>
+       <property name="whatsThis">
+        <string>Pressing this button will automatially set the labels of all points in both the Source and Target to their index (beginning from 0).</string>
+       </property>
        <property name="text">
         <string>Number Labels</string>
        </property>
@@ -399,8 +424,29 @@
        <property name="toolTip">
         <string>Press to begin landmark Registration of Source to Target</string>
        </property>
+       <property name="whatsThis">
+        <string>Pressing this button will perform a landmark registration between the Source and Target volumes using their corresponding points and the method chosen to the left.
+
+The output of the registration is 2 new objects. 
+
+1. A transformed copy of the Source object with the name:
+    &lt;RegistrationMethod&gt;-R-&lt;SourcePoints&gt;-&lt;TargetPoints&gt;
+
+2. A transformed copy of the Source Points with similar name to above object and labeled with &lt;RegistrationMethod&gt;</string>
+       </property>
        <property name="text">
         <string>Register</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="4" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="textInfo">
+     <item>
+      <widget class="QTextEdit" name="regInfo">
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

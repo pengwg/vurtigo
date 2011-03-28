@@ -93,6 +93,11 @@ protected:
  //! A flag to check whether the mouse moved
  bool m_moved;
 
+ //! The error measure
+ double m_error;
+
+ double calculateError(rt3DPointBufferDataObject *one, rt3DPointBufferDataObject *two);
+
 
 };
 
