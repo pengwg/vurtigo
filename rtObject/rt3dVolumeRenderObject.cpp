@@ -925,7 +925,8 @@ void rt3DVolumeRenderObject::copyObject(rtRenderObject *from)
     rt3DVolumeDataObject *thisData = static_cast<rt3DVolumeDataObject*>(this->getDataObject());
 
     // copy the object visibility?
-    //this->setVisible3D(from->getVisible3D());
+    this->setVisible3D(from->getVisible3D());
+    this->updateTreeItem();
 
 
     // copy the plane transforms

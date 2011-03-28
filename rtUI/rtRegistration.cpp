@@ -296,7 +296,7 @@ void rtRegistration::registerButtonPressed() {
         undoChangeImgCenterInfo->Update();
 
         //affineSource->Delete();
-        //affineTarget->Delete();
+        affineTarget->Delete();
     }
 
     rtRenderObject* newObject;
@@ -318,10 +318,15 @@ void rtRegistration::registerButtonPressed() {
             newTrans->Concatenate(volume->getTransform());
             regObj->copyNewTransform(newTrans);
             regObj->copyNewImageData(volume->getImageData());
-/*
+
             // add a new point object with the transformed points
             vtkPoints *sourceTransformed = vtkPoints::New();
-            temp->TransformPoints(sourcesFinal,sourceTransformed);
+            vtkTransform *volInv = vtkTransform::New();
+            volInv->SetMatrix(newTrans->GetMatrix());
+            volInv->Inverse();
+
+            volInv->TransformPoints(sourcesFinal,sourceTransformed);
+
 
 
             rt3DPointBufferDataObject *sourceTransPoints = static_cast<rt3DPointBufferDataObject *>(rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,QString(strRegType + "_R_" + QString::number(source->getId()) + "_to_" + QString::number(target->getId())))->getDataObject());
@@ -333,13 +338,20 @@ void rtRegistration::registerButtonPressed() {
                     newPoint->setPoint(sourceTransformed->GetPoint(ix1));
                     QColor c = source->getPointAtIndex(ix1)->getColor();
                     newPoint->getProperty()->SetColor(c.red() / 255.0,c.green() / 255.0,c.blue() / 255.0);
+                    sourceTransPoints->lock();
                     sourceTransPoints->addPoint(*newPoint);
                     sourceTransPoints->Modified();
+                    // again, would be better to use addCustomPoint from markSet changes when they are done
+                    sourceTransPoints->getPointAtIndex(ix1)->setLabel(QString(strRegType + " " + source->getPointAtIndex(ix1)->getLabel()));
+                    sourceTransPoints->unlock();
                 }
                 delete newPoint;
             }
 
-*/
+            sourceTransformed->Delete();
+            volInv->Delete();
+
+
 
 
         }
@@ -401,7 +413,9 @@ void rtRegistration::addActivePoint(QMouseEvent *event)
             if (m_activeSet == 0)
             {
                 dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
+
                 newPoint.setPoint(pos);
+
                 // if the other table has more points, match the colors
 
                 if (setOneTable->rowCount() < setTwoTable->rowCount())
@@ -416,6 +430,8 @@ void rtRegistration::addActivePoint(QMouseEvent *event)
                 dObj->addPoint(newPoint);
                 dObj->Modified();
                 dObj->unlock();
+                // give the new point a label (this line should be removed after markset is done so that we use addcustompoint above rather than this, to add the label)
+                dObj->getPointAtIndex(dObj->getPointListSize() - 1)->setLabel("S" + QString::number(dObj->getPointListSize()-1));
                 setupSourceTable();
                 setupTargetTable();
 
@@ -441,10 +457,10 @@ void rtRegistration::addActivePoint(QMouseEvent *event)
                 dObj->addPoint(newPoint);
                 dObj->Modified();
                 dObj->unlock();
+                // give the new point a label (this line should be removed after markset is done so that we use addcustompoint above rather than this, to add the label)
+                dObj->getPointAtIndex(dObj->getPointListSize() - 1)->setLabel("T" + QString::number(dObj->getPointListSize()-1));
                 setupSourceTable();
                 setupTargetTable();
-
-
             }
 
         }
