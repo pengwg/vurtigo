@@ -89,14 +89,6 @@ void CathTrackingUI::updateCheckableStatus() {
       volPtr = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(volId));
   }
 
-  /*if ( !cathPtr || !planePtr ) {
-    trackGroupBox->setEnabled(false);
-    sliceOnlyCheckBox->setEnabled(false);
-  }
-  else {
-    trackGroupBox->setEnabled(true);
-    sliceOnlyCheckBox->setEnabled(true);
-  }*/
   if (cathPtr && (planePtr || volPtr))
   {
       trackGroupBox->setEnabled(true);
@@ -165,20 +157,6 @@ void CathTrackingUI::trackingPairChanged() {
   }
 
   // Not relevant if at least one does not exist.
-  /*if ( !planePtr || !cathPtr ) {
-    updateCheckableStatus();
-    trackGroupBox->setChecked(false);
-    trackLocSpinBox->setValue(0);
-    trackOffsetDoubleSpinBox->setValue(1.0); // offset by 1 mm in the camera direction (to aid visibility)
-    sliceOnlyCheckBox->setChecked(false);
-  } else {
-    td = getPair( planePtr, cathPtr );
-    trackGroupBox->setChecked(td->isTracking());
-    trackLocSpinBox->setValue(td->getLocation());
-    trackOffsetDoubleSpinBox->setValue(td->getOffset());
-    sliceOnlyCheckBox->setChecked(td->isSliceOnly());
-  }
-  */
   if (cathPtr && (planePtr || volPtr))
   {
       if (planePtr)
@@ -397,7 +375,7 @@ void CathTrackingUI::trackChanged(bool track) {
     if (td) {
         bool ok = true;
         for (int ix1=0; ix1<m_trackList.size(); ix1++)
-          if ((m_trackList[ix1]->getCathObject() != td->getCathObject())  && (m_trackList[ix1]->getSliceObject() == td->getSliceObject())  )
+          if ((m_trackList[ix1]->getCathObject() != td->getCathObject())  && (m_trackList[ix1]->getSliceObject() == td->getSliceObject())  && (m_trackList[ix1]->isTracking()))
               ok = false;
         if (ok)
            td->setTracking(track);
@@ -414,7 +392,7 @@ void CathTrackingUI::trackChanged(bool track) {
       if (td) {
         bool ok = true;
         for (int ix1=0; ix1<m_trackList.size(); ix1++)
-          if ((m_trackList[ix1]->getCathObject() != td->getCathObject())  && (m_trackList[ix1]->getVolObject() == td->getVolObject())  )
+          if ((m_trackList[ix1]->getCathObject() != td->getCathObject())  && (m_trackList[ix1]->getVolObject() == td->getVolObject())  && (m_trackList[ix1]->isTracking()))
               ok = false;
         if (ok)
            td->setTracking(track);

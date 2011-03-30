@@ -24,7 +24,6 @@
 #include "rt2dSliceDataObject.h"
 #include "rtCathDataObject.h"
 #include "rt3dVolumeDataObject.h"
-#include "rtBaseHandle.h"
 
 
 class TrackData : public QObject
@@ -36,7 +35,9 @@ class TrackData : public QObject
     TrackData(rtCathDataObject* cath, rt3DVolumeDataObject* vol);
     ~TrackData();
 
+    //! Check if this trackdata's objects are the same as the ones given
     bool equivalentCPTo(rtCathDataObject* cath, rt2DSliceDataObject* slice);
+    //! Check if this trackdata's objects are the same as the ones given
     bool equivalentCVTo(rtCathDataObject* cath, rt3DVolumeDataObject* vol);
 
     int getLocation() { return m_location; }

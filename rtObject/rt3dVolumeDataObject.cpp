@@ -81,6 +81,8 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   m_movePoint[1] = 0;
   m_movePoint[2] = 0;
 
+  m_moveOffset = 0;
+
   m_cineFrame = new QTimer(this);
   connect( m_cineFrame,SIGNAL(timeout()), this, SLOT(nextVisibleComponent()) );
 

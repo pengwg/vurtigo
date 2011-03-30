@@ -726,6 +726,7 @@ void rt3DVolumeRenderObject::movePlanes(bool axial,bool sagittal,bool coronal)
     double sub[3];
     double dist;
     double bounds[6];
+    double delta[6];
 
     dObj->getMovePoint(newPos);
 
@@ -733,7 +734,8 @@ void rt3DVolumeRenderObject::movePlanes(bool axial,bool sagittal,bool coronal)
 
     // if we are out of bounds, don't move
     dObj->getImageData()->GetBounds(bounds);
-    if ((newPos[0] < bounds[0]) || (newPos[0] > bounds[1]) || (newPos[1] < bounds[2]) || (newPos[1] > bounds[3]) || (newPos[2] < bounds[4]) || (newPos[2] > bounds[5])) return;
+
+    if (!vtkMath::PointIsWithinBounds(newPos,bounds,delta)) return;
 
     //AXIAL
 

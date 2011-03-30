@@ -27,7 +27,7 @@
 TrackData::TrackData(rtCathDataObject* cath, rt2DSliceDataObject* slice)
 {
   m_location = 0;
-  m_offset = 0;
+  m_offset = 1.0f;
   m_tracking = false;
   m_cath = cath;
   m_slice = slice;
@@ -49,7 +49,7 @@ TrackData::TrackData(rtCathDataObject* cath, rt2DSliceDataObject* slice)
 TrackData::TrackData(rtCathDataObject* cath, rt3DVolumeDataObject* vol)
 {
   m_location = 0;
-  m_offset = 0;
+  m_offset = 1.0f;
   m_tracking = false;
   m_cath = cath;
   m_slice = NULL;

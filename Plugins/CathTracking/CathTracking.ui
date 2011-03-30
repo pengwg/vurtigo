@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>295</height>
+    <height>337</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -72,11 +72,20 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="trackOffsetDoubleSpinBox">
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="decimals">
            <number>1</number>
           </property>
           <property name="minimum">
-           <double>-100.000000000000000</double>
+           <double>0.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>500.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>1.000000000000000</double>
           </property>
          </widget>
         </item>

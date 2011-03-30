@@ -81,12 +81,19 @@ public slots:
 
   virtual void setBoundBox(bool);
 
+  //! move the given planes to the move point
   virtual void movePlanes(bool,bool,bool);
+  //! move the axial plane along its normal
   virtual void moveAxialNormal(double);
+  //! move the axial plane along the axial direction
   virtual void moveAxialAxial(double);
+  //! move the sagittal plane along its normal
   virtual void moveSagittalNormal(double);
+  //! move the sagittal plane along the sagittal direction
   virtual void moveSagittalSagittal(double);
+  //! move the coronal plane along its normal
   virtual void moveCoronalNormal(double);
+  //! move the coronal plane along the coronal direction
   virtual void moveCoronalCoronal(double);
 
  protected:

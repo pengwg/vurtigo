@@ -351,18 +351,28 @@ public:
   //! The volume has received new image data
   void newImageData();
 
+  //! Reset the axial plane
   void axialResetSignal();
+  //! Reset the sagittal plane
   void sagittalResetSignal();
+  //! Reset the coronal plane
   void coronalResetSignal();
-  // Tell the render object to turn on/off bounding box
+  //! Tell the render object to turn on/off bounding box
   void boundBoxSignal(bool);
 
+  //! Move the given slice planes to the move point
   void slicePlaneMoveSignal(bool,bool,bool);
+  //! Move the axial plane along its normal
   void axialNormal(double);
+  //! move the axial plane along the axial direction
   void axialAxial(double);
+  //! Move the sagittal plane along its normal
   void sagittalNormal(double);
+  //! move the sagittal plane along the sagittal direction
   void sagittalSagittal(double);
+  //! Move the coronal plane along its normal
   void coronalNormal(double);
+  //! move the coronal plane along the coronal direction
   void coronalCoronal(double);
 
  protected:

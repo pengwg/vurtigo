@@ -68,14 +68,6 @@ protected:
   ObjectSelectionComboBox m_planeComboBox;
   ObjectSelectionComboBox m_volumeComboBox;
 
-  //! Map the combo box indices to the catheter objects.
-  QMap<int, rt2DSliceDataObject*> m_planeObjectMap;
-
-  //! Map the combo box indices to the plane objects.
-  QMap<int, rtCathDataObject*> m_cathObjectMap;
-
-  //! Map the combo box indices to the volume objects
-  QMap<int, rt3DVolumeDataObject*> m_volumeObjectMap;
 
   QList<TrackData*> m_trackList;
 
