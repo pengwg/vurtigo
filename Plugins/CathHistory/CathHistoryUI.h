@@ -25,7 +25,6 @@
 #include <QMap>
 #include <QTimer>
 #include <QFileInfo>
-#include <QMessageBox>
 #include <ui_CathHistory.h>
 
 #include "HistoryData.h"
@@ -87,6 +86,9 @@ protected:
 
   //! The current set
   int m_set;
+
+  //! A counter used to keep track of point save attempts
+  int m_numTries;
 
   //! The cath history data object
   HistoryData *m_historyRecorder;

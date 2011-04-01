@@ -23,6 +23,7 @@
 #include "rtApplication.h"
 
 #include <QList>
+#include <QMessageBox>
 
 CathHistoryUI::CathHistoryUI() {
   setupUi(this);
@@ -198,19 +199,33 @@ void CathHistoryUI::mark()
         if (m_interval == 0)
         {
             for (int ix1=0; ix1<m_numPoints; ix1++)
-                 m_historyRecorder->saveSetPoint(m_set);
-            savePointObject();
-            savedLabel->setText("Marked " + QString::number(m_numPoints) + " points in set # " + QString::number(m_set));
-            m_set++;
+            {
+                 if (m_historyRecorder->saveSetPoint(m_set))
+                     m_counter++;
+            }
+            if (m_counter > 0)
+            {
+                savePointObject();
+                savedLabel->setText("Marked " + QString::number(m_counter) + " points in set # " + QString::number(m_set));
+                m_set++;
+                m_counter = 0;
+            }
+            else
+                savedLabel->setText("Could not mark any points");
 
         }
         else
         {
             savedLabel->setText("Marking...");
-            m_historyRecorder->saveSetPoint(m_set);
-            //save to disk after every new point?
-            //savePointObject();
-            m_counter++;
+            if (m_historyRecorder->saveSetPoint(m_set))
+            {
+                /*! /todo{
+                //save to disk after every new point?
+                savePointObject(); }
+                */
+                m_counter++;
+            }
+            m_numTries = 1;
             connect(m_timer, SIGNAL(timeout()), this, SLOT(markNow()));
             m_timer->start(m_interval);
         }
@@ -220,23 +235,33 @@ void CathHistoryUI::mark()
 
 void CathHistoryUI::markNow()
 {
-    if (m_counter >= m_numPoints)
+    if (m_numTries >= m_numPoints)
     {
+        if (m_counter > 0)
+        {
+            savedLabel->setText("Marked " + QString::number(m_counter) + " points in set # " + QString::number(m_set));
+            m_counter = 0;
+            m_set++;
+            savePointObject();
+        }
+        else
+            savedLabel->setText("Could not mark any points");
         m_timer->stop();
-        m_counter = 0;
-        savedLabel->setText("Marked " + QString::number(m_numPoints) + " points in set # " + QString::number(m_set));
-        m_set++;
-        savePointObject();
         disconnect(m_timer, SIGNAL(timeout()), this, SLOT(markNow()));
 
     }
     else
     {
         savedLabel->setText("Marking...");
-        m_historyRecorder->saveSetPoint(m_set);
-        //save to disk after every new point?
-        //savePointObject();
-        m_counter++;
+        if (m_historyRecorder->saveSetPoint(m_set))
+        {
+            /*! /todo{
+            //save to disk after every new point?
+            savePointObject(); }
+            */
+            m_counter++;
+        }
+        m_numTries++;
     }
 }
 
@@ -285,31 +310,37 @@ void CathHistoryUI::resetPoints()
 {
     rt3DPointBufferDataObject *dObj = m_historyRecorder->getPointBufferObject();
     if (!dObj) return;
-    QMessageBox::StandardButton button;
+    QMessageBox::StandardButton button1,button2;
 
-    button = QMessageBox::question(this, QString("Reset Points"),
-                          QString("This operation will reset the Set and delete all points and point data. The operation cannot be undone. Proceed?"),
+    button1 = QMessageBox::question(this, QString("Reset Points"),
+                          QString("This operation will delete all points and point data to start a new session at set 0. \n The operation cannot be undone. Proceed?"),
                           QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
-    if (button == QMessageBox::Yes)
+    if (button1 == QMessageBox::Yes)
     {
-        if (dObj->getPointListSize() > 0)
+        button2 = QMessageBox::question(this, QString("Save File"),
+                              QString("Save points before reset? \n If you select No, any changes made to points before last save will be lost."),
+                              QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        if (button2 == QMessageBox::Yes)
         {
-            dObj->saveThisObject();
-            if (dObj->getFilename().isEmpty())
+            if (dObj->getPointListSize() > 0)
             {
-                filenameLabel->setStyleSheet("QLabel { color : red; }");
-                filenameLabel->setText("File not saved");
-            }
-            else
-            {
-                filenameLabel->setStyleSheet("");
-                filenameLabel->setText("Saved Points to: " + QFileInfo(m_historyRecorder->getPointBufferObject()->getFilename()).fileName());
-            }
-            savedLabel->setText("");
-            QTimer::singleShot(2000, this, SLOT(savedObject()));
+                dObj->saveThisObject();
+                if (dObj->getFilename().isEmpty())
+                {
+                    filenameLabel->setStyleSheet("QLabel { color : red; }");
+                    filenameLabel->setText("File not saved");
+                }
+                else
+                {
+                    filenameLabel->setStyleSheet("");
+                    filenameLabel->setText("Saved Points to: " + QFileInfo(m_historyRecorder->getPointBufferObject()->getFilename()).fileName());
+                }
+                savedLabel->setText("");
+                QTimer::singleShot(2000, this, SLOT(savedObject()));
 
 
+            }
         }
         dObj->removeAllPoints();
         dObj->setFilename("");
@@ -320,5 +351,4 @@ void CathHistoryUI::resetPoints()
 void CathHistoryUI::savedObject()
 {
     filenameLabel->setText("");
-    savedLabel->setText("");
 }

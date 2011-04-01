@@ -47,8 +47,8 @@ class HistoryData : public QObject
     inline void setPointSize(int sz) { if (sz > 0) m_pointSize = sz; }
 
  public slots:
-    void savePoint();
-    void saveSetPoint(int set);
+    bool savePoint();
+    bool saveSetPoint(int set);
     void doAutoTrack();
 
  protected:

@@ -123,58 +123,43 @@ void rt3DPointBufferDataObject::addCartoPoint(rtCartoPointData pt) {
   }
 }
 
-void rt3DPointBufferDataObject::addCustomPoint(rtBasic3DPointData pt, QList<QString> tags, QList<double> vals) {
+void rt3DPointBufferDataObject::addCustomPoint(rtBasic3DPointData pt, const QList<QPair<QString,double> > &tags) {
   rtNamedInfoPointData namedPt;
   int id = getNextId();
   if (id != -1) {
     pt.setPointId(id);
     // Append to the regular point list.
     namedPt.fromBasic3DPoint(&pt);
-    int min = 0;
-    if (tags.size() < vals.size())
-        min = tags.size();
-    else
-        min = vals.size();
-    for (int ix1=0; ix1<min; ix1++)
-        namedPt.setNamedValue(tags.at(ix1),vals.at(ix1));
+    for (int ix1=0; ix1<tags.size(); ix1++)
+        namedPt.setNamedValue(tags.at(ix1).first,tags.at(ix1).second);
     m_namedInfoData.insert(id, namedPt);
     emit pointListModifiedSignal();
   }
 }
 
-void rt3DPointBufferDataObject::addCustomTimePoint(rt3DTimePointData pt, QList<QString> tags, QList<double> vals) {
+void rt3DPointBufferDataObject::addCustomTimePoint(rt3DTimePointData pt, const QList<QPair<QString,double> > &tags) {
   rtNamedInfoPointData namedPt;
   int id = getNextId();
   if (id != -1) {
     pt.setPointId(id);
     // Append to the regular point list.
     namedPt.fromTimePoint(&pt);
-    int min = 0;
-    if (tags.size() < vals.size())
-        min = tags.size();
-    else
-        min = vals.size();
-    for (int ix1=0; ix1<min; ix1++)
-        namedPt.setNamedValue(tags.at(ix1),vals.at(ix1));
+    for (int ix1=0; ix1<tags.size(); ix1++)
+        namedPt.setNamedValue(tags.at(ix1).first,tags.at(ix1).second);
     m_namedInfoData.insert(id, namedPt);
     emit pointListModifiedSignal();
   }
 }
 
-void rt3DPointBufferDataObject::addCustomCartoPoint(rtCartoPointData pt, QList<QString> tags, QList<double> vals) {
+void rt3DPointBufferDataObject::addCustomCartoPoint(rtCartoPointData pt, const QList<QPair<QString,double> > &tags) {
   rtNamedInfoPointData namedPt;
   int id = getNextId();
   if (id != -1) {
     pt.setPointId(id);
     // Append to the regular point list.
     namedPt.fromCartoPoint(&pt);
-    int min = 0;
-    if (tags.size() < vals.size())
-        min = tags.size();
-    else
-        min = vals.size();
-    for (int ix1=0; ix1<min; ix1++)
-        namedPt.setNamedValue(tags.at(ix1),vals.at(ix1));
+    for (int ix1=0; ix1<tags.size(); ix1++)
+        namedPt.setNamedValue(tags.at(ix1).first,tags.at(ix1).second);
     m_namedInfoData.insert(id, namedPt);
     emit pointListModifiedSignal();
   }

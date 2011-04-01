@@ -73,43 +73,45 @@ bool HistoryData::getCathPosition(double cathPos[3])
         return m_cath->getPositionAtLocation(locs[0], cathPos);   /// xxxxxx should we use locs[1]?
 }
 
-void HistoryData::savePoint()
+bool HistoryData::savePoint()
   {
    // fail if either object doesn't exist
     if (!m_cath || !m_points)
-      return;
+      return false;
 
    double pos[3];
    if (!getCathPosition(pos))
-       return;
+       return false;
       
    // create a point at this position
     m_points->lock();
     m_points->addTimePoint(createPoint(pos));
     m_points->Modified();
     m_points->unlock();
+
+    return true;
   }
 
-void HistoryData::saveSetPoint(int set)
+bool HistoryData::saveSetPoint(int set)
   {
    // fail if either object doesn't exist
     if (!m_cath || !m_points)
-      return;
+      return false;
 
    // get (first) catheter position
     double pos[3];
     if (!getCathPosition(pos))
-        return;
+        return false;
 
    // create a point at this position
-    QList<QString> tags;
-    QList<double> vals;
-    tags.append("Set");
-    vals.append(set);
+    QList<QPair<QString,double> > tags;
+    tags.append(qMakePair(QString("Set"),(double)set));
     m_points->lock();
-    m_points->addCustomTimePoint(createPoint(pos),tags,vals);
+    m_points->addCustomTimePoint(createPoint(pos),tags);
     m_points->Modified();
     m_points->unlock();
+
+    return true;
   }
 
 
