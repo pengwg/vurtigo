@@ -32,6 +32,7 @@ rtNamedInfoPointData::rtNamedInfoPointData(const rtNamedInfoPointData& sp)
  : rtBasic3DPointData(sp)
 {
   m_infoMap = sp.m_infoMap;
+  m_label = sp.m_label;
 }
 
 bool rtNamedInfoPointData::operator==(const rtNamedInfoPointData &other) const {

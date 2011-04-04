@@ -212,7 +212,8 @@ void rt3DVolumeRenderObject::newDataAvailable() {
   resetSagittalPlane();
   resetCoronalPlane();
 
-  dObj->setCanGPU(m_gpuRayMapper->IsRenderSupported(rtApplication::instance().getMainWinHandle()->getRenderWindow(),dObj->getVolumeProperty()));
+  // if it works for one render window, it shuld work for all
+  dObj->setCanGPU(m_gpuRayMapper->IsRenderSupported(rtApplication::instance().getMainWinHandle()->getRenderWindow(0),dObj->getVolumeProperty()));
   dObj->setupGPUGUI();
 
   vtkTransform *t = vtkTransform::New();

@@ -202,6 +202,7 @@ bool rt3DPointBufferDataObject::saveFile(QFile *file) {
     writer.writeTextElement( "x", QString::number(temp.getX()) );
     writer.writeTextElement( "y", QString::number(temp.getY()) );
     writer.writeTextElement( "z", QString::number(temp.getZ()) );
+    writer.writeTextElement("label",temp.getLabel());
     saveVtkProperty(&writer, temp.getProperty(), "Property");
     saveVtkProperty(&writer, temp.getSelectedProperty(), "SelectedProperty");
 
@@ -819,6 +820,8 @@ void rt3DPointBufferDataObject::loadInfoPoint(QXmlStreamReader* reader) {
         temp.setY( getDoubleFromString(reader->readElementText(), 0.0) );
       } else if (reader->name() == "z") {
         temp.setZ( getDoubleFromString(reader->readElementText(), 0.0) );
+      } else if (reader->name() == "label") {
+        temp.setLabel(reader->readElementText());
       } else if (reader->name() == "VtkProperty") {
         // Read each of the two properties.
         loadVtkProperty(reader, inputProp, propName);
