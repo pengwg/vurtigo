@@ -278,6 +278,18 @@ void rt3DPointBufferRenderObject::mouseDoubleClickEvent(QMouseEvent* event,int w
 
 void rt3DPointBufferRenderObject::keyPressEvent(QKeyEvent* event,int window) {
   if (!m_selectedProp) return;
+  if (event->key() == Qt::Key_D)
+  {
+      for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+      {
+          rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1)->setChosenProp(NULL);
+      }
+      if (m_controlWidget.isShowing())
+      {
+        m_controlWidget.hide();
+        m_selectedProp = NULL;
+      }
+  }
 }
 
 void rt3DPointBufferRenderObject::keyReleaseEvent(QKeyEvent* event, int window) {
