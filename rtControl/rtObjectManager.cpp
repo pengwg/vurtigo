@@ -179,6 +179,14 @@ rtRenderObject* rtObjectManager::addReadOnlyObject(rtConstants::rtObjectType obj
   return newObj;
 }
 
+//! Rename an existing object
+void rtObjectManager::renameObjectWithID(int objID, QString newName)
+{
+    getObjectWithID(objID)->getDataObject()->setObjName(newName);
+    updateGuiObjectList();
+    emit objectRenamed(objID);
+}
+
 //! Remove and delete an object from the list.
 /*!
   Can only remove read/write objects. For read only objects see removeReadOnly().

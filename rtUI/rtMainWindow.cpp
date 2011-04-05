@@ -712,6 +712,7 @@ void rtMainWindow::connectSignals() {
   connect( actionNewObject, SIGNAL(triggered()), this, SLOT(addNewObject()) );
   connect( actionLoad_Object, SIGNAL(triggered()), this, SLOT(loadObject()) );
   connect( actionSave_Object, SIGNAL(triggered()), this, SLOT(saveObject()) );
+  connect (actionRename_Object, SIGNAL(triggered()), this, SLOT(renameObject()));
   connect( actionDeleteSelected, SIGNAL(triggered()), this, SLOT(removeSelectedObject()) );
   connect( actionRegistration, SIGNAL(triggered()), this, SLOT(registerDialog()));
   connect (actionPoint_Placement, SIGNAL(triggered()), this,SLOT(showPointPlacement()));
@@ -1205,6 +1206,38 @@ void rtMainWindow::saveObject() {
 #endif
 }
 
+//! Rename the currrently selected item
+void rtMainWindow::renameObject()
+{
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::renameObject() start") );
+#endif
+
+  QTreeWidgetItem* current=NULL;
+
+  current = objectTree->currentItem();
+
+  if (!current) return;
+
+  // Check for a heading.
+  if (current->columnCount() == 1) {
+    return;
+  }
+
+  bool ok;
+  QString oldName = rtApplication::instance().getObjectManager()->getObjectWithID(current->text(1).toInt())->getDataObject()->getObjName();
+  QString newName = QInputDialog::getText(this,"Rename Object","New name of object: ",QLineEdit::Normal,oldName,&ok);
+  if (ok && !newName.isEmpty())
+  {
+      rtApplication::instance().getObjectManager()->renameObjectWithID(current->text(1).toInt(),newName);
+  }
+
+  m_renderFlag3D = true;
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::renameObject() end") );
+#endif
+}
+
 //! Remove the currently selected item.
 void rtMainWindow::removeSelectedObject() {
 #ifdef DEBUG_VERBOSE_MODE_ON
@@ -1232,15 +1265,6 @@ void rtMainWindow::removeSelectedObject() {
   }
   m_renderFlag3D = true;
   rtApplication::instance().getObjectManager()->removeObject(current->text(1).toInt());
-  if (temp->getObjectType() == rtConstants::OT_3DPointBuffer)
-  {
-      if (m_registrationDialog) m_registrationDialog->setupAllCombos();
-      if (m_pointPlacementDialog) m_pointPlacementDialog->setupCombo();
-  }
-  if (temp->getObjectType() == rtConstants::OT_3DObject)
-  {
-      if (m_registrationDialog) m_registrationDialog->setupAllCombos();
-  }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::removeSelectedObject() end") );

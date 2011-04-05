@@ -56,6 +56,11 @@ pointPlacementDialog::pointPlacementDialog(QWidget *parent, Qt::WindowFlags flag
 
   connect(setTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableChanged(int,int)));
 
+  // if an object is added, removed  or renamed from Vurtigo. reset the combo box just in case it was a 3DPoint object
+  connect(rtApplication::instance().getObjectManager(),SIGNAL(objectCreated(int)),this,SLOT(setupCombo()));
+  connect(rtApplication::instance().getObjectManager(),SIGNAL(objectRemoved(int)),this,SLOT(setupCombo()));
+  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectRenamed(int)),this,SLOT(setupCombo()));
+
   m_colorList = QColor::colorNames();
   m_moved = false;
 
@@ -170,8 +175,9 @@ void pointPlacementDialog::setupCombo()
     for (int ix1=0; ix1<m_points.count(); ix1++)
     {
         rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(ix1));
+        if (!rObj) return;
         if (rObj == m_currPoints)
-            index = ix1;
+            index = ix1;        
         rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rObj->getDataObject());
         if (!dObj) return;
         QString objName = dObj->getObjName();

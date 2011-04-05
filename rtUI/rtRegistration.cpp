@@ -56,6 +56,11 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
 
   connect (refreshButton, SIGNAL(pressed()), this, SLOT(setupAllCombos()));
 
+  // if an object is added,removed or renamed from Vurtigo. reset the combo boxes just in case it was a 3DPoint or 3D Volume object
+  connect(rtApplication::instance().getObjectManager(),SIGNAL(objectCreated(int)),this,SLOT(setupAllCombos()));
+  connect(rtApplication::instance().getObjectManager(),SIGNAL(objectRemoved(int)),this,SLOT(setupAllCombos()));
+  connect(rtApplication::instance().getObjectManager(),SIGNAL(objectRenamed(int)),this,SLOT(setupAllCombos()));
+
   connect (setSource, SIGNAL(currentIndexChanged(int)), this, SLOT(setupSourceTable()));
   connect (setTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(setupTargetTable()));
 
@@ -191,7 +196,8 @@ void rtRegistration::syncToggled(bool flag)
     {
         sObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(ix1)));
         // may need to be a little more precise here!
-        if (sObj) sObj->removeAllSync();
+        if (sObj)
+            sObj->removeAllSync();
     }
 
     if (flag)
@@ -538,6 +544,7 @@ void rtRegistration::setupPointCombos()
     for (int ix1=0; ix1<m_points.count(); ix1++)
     {
         rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(ix1));
+        if (!rObj) return;
         if (rObj == m_currSetSource)
             indexS = ix1;
         if (rObj == m_currSetTarget)
@@ -575,6 +582,7 @@ void rtRegistration::setupVolumeCombos()
     for (int ix1=0; ix1<m_volumes.count(); ix1++)
     {
         rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(ix1));
+        if (!rObj) return;
         if (rObj == m_currVolSource)
             indexS = ix1;
         if (rObj == m_currVolTarget)

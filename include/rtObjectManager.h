@@ -44,6 +44,7 @@ class rtObjectManager : public QObject {
 
   rtRenderObject* addObjectOfType(rtConstants::rtObjectType objType, QString objName="Not Named");
   rtRenderObject* addReadOnlyObject(rtConstants::rtObjectType objType, QString objName="Not Named");
+  void renameObjectWithID(int objID, QString newName);
   bool removeObject(int objID);
   bool removeReadOnly(int objID);
   rtRenderObject* getObjectWithID(int objID);
@@ -81,6 +82,7 @@ class rtObjectManager : public QObject {
 signals:
   void objectCreated(int objID);
   void objectRemoved(int objID);
+  void objectRenamed(int objID);
 
  private:
   //! Maximum number of objects.

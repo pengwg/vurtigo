@@ -161,6 +161,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   QList<int> loadObject(QString file = QString());
   void saveObject();
   void removeSelectedObject();
+  void renameObject();
 
   void showAxesOptions();
   void registerDialog();

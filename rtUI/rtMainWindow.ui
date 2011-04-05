@@ -301,6 +301,7 @@
     <addaction name="actionNewObject"/>
     <addaction name="actionLoad_Object"/>
     <addaction name="actionSave_Object"/>
+    <addaction name="actionRename_Object"/>
     <addaction name="separator"/>
     <addaction name="actionDeleteSelected"/>
     <addaction name="separator"/>
@@ -517,6 +518,11 @@
    </property>
    <property name="toolTip">
     <string>Remove a rendering window</string>
+   </property>
+  </action>
+  <action name="actionRename_Object">
+   <property name="text">
+    <string>Rename Object</string>
    </property>
   </action>
  </widget>
