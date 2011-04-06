@@ -27,6 +27,16 @@
 #include <math.h>
 
 #include <vtkMath.h>
+#include <vtkImageReader2.h>
+#include <vtkJPEGReader.h>
+#include <vtkPNGReader.h>
+#include <vtkBMPReader.h>
+#include <vtkStringArray.h>
+#include <vtkImageActor.h>
+#include <vtkRendererCollection.h>
+
+#include <rtBaseHandle.h>
+#include <rt3dVolumeDataObject.h>
 
 //DCMTK
 #ifdef Q_OS_UNIX
@@ -89,65 +99,126 @@ void DICOMFileReader::cleanupImageData() {
 }
 
 //! Set the name of the directory to get the DICOM files from.
-bool DICOMFileReader::setDirectory(QString dirPath) {
+bool DICOMFileReader::setDirectory(QString dirPath, imageType type) {
 
   QDir fileDir(dirPath);
   QStringList files;
   QStringList filters;
-  filters << "*.dcm" << "*.DCM" << "*.MR.dcm";
+  if (type == DICOMFileReader::I_DICOM)
+  {
+      filters << "*.dcm" << "*.DCM" << "*.MR.dcm";
 
-  if (!fileDir.exists()) {
-    std::cout << "No such directory: " << dirPath.toStdString() << std::endl;
-    return false;
+      if (!fileDir.exists()) {
+          std::cout << "No such directory: " << dirPath.toStdString() << std::endl;
+          return false;
+      }
+
+      fileDir.setFilter(QDir::NoSymLinks | QDir::NoDotAndDotDot | QDir::Readable | QDir::Files);
+      fileDir.setNameFilters(filters);
+      files = fileDir.entryList();
+
+      if (files.count() <= 0) {
+          std::cout << "Directory found, but no DICOM files could be found inside:  " << dirPath.toStdString() << std::endl;
+          return false;
+      }
+
+      cleanupImageData();
+
+      double maxTrig=-1.0;
+
+      // Create the trigger list for the first set of images.
+      for (int ix1=0; ix1<files.count(); ix1++) {
+          double trig = DICOMImageData::getTriggerFromFile(fileDir.filePath(files.at(ix1)));
+          if (!m_triggerList.contains(trig) && trig > maxTrig) {
+              m_triggerList.append(trig);
+              maxTrig = trig;
+          } else {
+              break;
+          }
+      }
+
+      for (int ix1=0; ix1<files.count(); ix1++) {
+          m_comments.append("Image Number: ===== " + QString::number(ix1+1) + " ===== \n");
+          m_ddata = new DICOMImageData();
+          // Some image types need a trigger list.
+          m_ddata->setTrigList(&m_triggerList);
+          if ( !m_ddata->readFile(fileDir.filePath(files.at(ix1))) ) {
+              // Failed to read the file.
+              std::cout << "Failed to Read DICOM File: " << fileDir.filePath(files.at(ix1)).toStdString() << std::endl;
+              return false;
+          } else {
+              // File was read correctly.
+              m_imgData.append(m_ddata);
+          }
+      }
+
+      // Give that volume a default name.
+      m_volName = QString("E") + m_ddata->getStudyID() + QString("S") + m_ddata->getSeriesNumber();
+      return true;
   }
+  else
+  {
+      if (type == DICOMFileReader::I_JPEG)
+          filters << "*.jpg";
+      else if (type == DICOMFileReader::I_PNG)
+          filters << "*.png";
+      else if (type == DICOMFileReader::I_BMP)
+          filters << "*.bmp";
+      else
+          return false;
 
-  fileDir.setFilter(QDir::NoSymLinks | QDir::NoDotAndDotDot | QDir::Readable | QDir::Files);
-  fileDir.setNameFilters(filters);
-  files = fileDir.entryList();
+      if (!fileDir.exists()) {
+          std::cout << "No such directory: " << dirPath.toStdString() << std::endl;
+          return false;
+      }
+      fileDir.setFilter(QDir::NoSymLinks | QDir::NoDotAndDotDot | QDir::Readable | QDir::Files);
+      fileDir.setNameFilters(filters);
+      files = fileDir.entryList();
 
-  if (files.count() <= 0) {
-    std::cout << "Directory found, but no DICOM files could be found inside:  " << dirPath.toStdString() << std::endl;
-    return false;
+      if (files.count() <= 0) {
+          std::cout << "Directory found, but no correct image files could be found inside:  " << dirPath.toStdString() << std::endl;
+          return false;
+      }
+
+      vtkStringArray *nameList = vtkStringArray::New();
+      for (int ix1=0; ix1<files.count(); ix1++) {
+          m_comments.append("Image Number: ===== " + QString::number(ix1+1) + " ===== \n");
+          nameList->InsertValue(ix1,fileDir.filePath(files.at(ix1)).toStdString().c_str());
+      }
+
+      vtkImageReader2 *reader = NULL;
+      if (type == DICOMFileReader::I_JPEG)
+          reader = vtkJPEGReader::New();
+      else if (type == DICOMFileReader::I_PNG)
+          reader = vtkPNGReader::New();
+      else if (type == DICOMFileReader::I_BMP)
+          reader = vtkBMPReader::New();
+      else
+          return false;
+
+      reader->SetFileNames(nameList);
+      reader->SetDataSpacing(1,1,2);
+      reader->Update();
+      int vol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "3D Image Object");
+      if (vol >=0) {
+        rt3DVolumeDataObject* ptObj = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(vol));
+
+        if (ptObj) {
+          ptObj->lock();
+          // can use this to set the transform of the color image object
+          //ptObj->copyNewTransform();
+          ptObj->copyNewImageData(reader->GetOutput(),1);
+          ptObj->Modified();
+          ptObj->unlock();
+        }
+      }
+      return true;
   }
-
-  cleanupImageData();
-
-  double maxTrig=-1.0;
-
-  // Create the trigger list for the first set of images.
-  for (int ix1=0; ix1<files.count(); ix1++) {
-    double trig = DICOMImageData::getTriggerFromFile(fileDir.filePath(files.at(ix1)));
-    if (!m_triggerList.contains(trig) && trig > maxTrig) {
-      m_triggerList.append(trig);
-      maxTrig = trig;
-    } else {
-      break;
-    }
-  }
-
-  for (int ix1=0; ix1<files.count(); ix1++) {
-    m_comments.append("Image Number: ===== " + QString::number(ix1+1) + " ===== \n");
-    m_ddata = new DICOMImageData();
-    // Some image types need a trigger list. 
-    m_ddata->setTrigList(&m_triggerList);
-    if ( !m_ddata->readFile(fileDir.filePath(files.at(ix1))) ) {
-      // Failed to read the file.
-      std::cout << "Failed to Read DICOM File: " << fileDir.filePath(files.at(ix1)).toStdString() << std::endl;
-      return false;
-    } else {
-      // File was read correctly.
-      m_imgData.append(m_ddata);
-    }
-  }
-
-  // Give that volume a default name.
-  m_volName = QString("E") + m_ddata->getStudyID() + QString("S") + m_ddata->getSeriesNumber();
-  return true;
 }
 
 
 
-bool DICOMFileReader::createVolume(QList<DICOMImageData*>* imgData) {
+bool DICOMFileReader::createVolume(QList<DICOMImageData*>* imgData, imageType type) {
   // Check for the image data pointer
   if (!imgData) {
     std::cout << "Error: No Image Pointer!" << std::endl;

@@ -206,7 +206,7 @@ vtkVolumeRayCastFunction* rt3DVolumeDataObject::getRayCastFunction() {
   return temp;
 }
 
-bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
+bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp,int type) {
   if (!temp) return false;
 
   double rangeI[2], rangeP[2];
@@ -247,6 +247,7 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
 
   m_imgData->DeepCopy(temp);
   m_imgData->GetScalarRange(rangeI);
+  m_imgType = type;
 
   m_imgUShortCast->SetShift(-rangeI[0]);
   m_imgUShortCast->Update();

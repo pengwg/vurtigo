@@ -17,7 +17,7 @@
    <item row="0" column="0" colspan="2">
     <widget class="QGroupBox" name="directoryGroupBox">
      <property name="title">
-      <string>DICOM Directory</string>
+      <string>Image Directory</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -35,6 +35,30 @@
         <property name="text">
          <string>...</string>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="imageTypeBox">
+        <item>
+         <property name="text">
+          <string>DICOM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>JPEG</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>PNG</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>BMP</string>
+         </property>
+        </item>
        </widget>
       </item>
      </layout>

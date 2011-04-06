@@ -112,9 +112,10 @@ public:
   /*!
   Setting the new image data will cause a lot of re-setting of parameters and options. Volume properites and transfer functions will be modified. The image data will be copied over to this object. This finction emits a newImageData() signal if successful.
   @param temp The ImageData to be copied.
+  @param type The type of image (0 = DICOM, 1 = Color Images)
   @return true if the data was copied correctly.
   */
-  bool copyNewImageData(vtkImageData* temp);
+  bool copyNewImageData(vtkImageData* temp,int type = 0);
 
   //! Set a new position transform for the image data.
   /*!
@@ -195,6 +196,9 @@ public:
   int getWindow() { return m_window; }
   //! Get the level part of the window level.
   int getLevel() { return m_level; }
+
+  //! Get the Image type
+  int getImageType() {return m_imgType;}
 
   //! Get the annotation status.
   /*!
@@ -422,6 +426,9 @@ public:
 
   //! The annotation for this volume.
   QString m_annotation;
+
+  //! The type of image (0 = DICOM, 1 = Color Image)
+  int m_imgType;
 
   QList<double> m_triggerList;
   vtkSmartPointer<vtkImageExtractComponents> m_subImg;

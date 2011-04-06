@@ -52,13 +52,31 @@ void DICOMReaderUI::newDirectory() {
   if ( m_lastDir != directoryEdit->text() ) {
     m_lastDir = directoryEdit->text();
 
+    DICOMFileReader::imageType type;
+    if (imageTypeBox->currentIndex() == 0)
+        type = DICOMFileReader::I_DICOM;
+    else if (imageTypeBox->currentIndex() == 1)
+        type = DICOMFileReader::I_JPEG;
+    else if (imageTypeBox->currentIndex() == 2)
+        type = DICOMFileReader::I_PNG;
+    else if (imageTypeBox->currentIndex() == 3)
+        type = DICOMFileReader::I_BMP;
+
     // Use the custom reader too.
-    bool okDir = m_customReader.setDirectory(m_lastDir);
-    bool okVol = false;
-    if (okDir) {
-        // Try to create the volume.
-        okVol = m_customReader.createVolume(m_customReader.getDICOMImageData());
+    bool okDir = m_customReader.setDirectory(m_lastDir,type);
+    if (okDir && type != DICOMFileReader::I_DICOM)
+    {
+        infoBrowser->append("Successfully created Image Object");
+        createVolumeButton->setEnabled(false);
+        nameLineEdit->setEnabled(false);
+        return;
     }
+    bool okVol = false;
+    if (okDir && type == DICOMFileReader::I_DICOM) {
+        // Try to create the volume.
+        okVol = m_customReader.createVolume(m_customReader.getDICOMImageData(),type);
+    }
+
     infoBrowser->clear();
     if (okDir && okVol) {
       infoBrowser->append(m_customReader.getComments());
@@ -73,7 +91,7 @@ void DICOMReaderUI::newDirectory() {
       {
           infoBrowser->append("Error with directory!");
       }
-      if (!okVol)
+      if (!okVol && type == DICOMFileReader::I_DICOM)
       {
           infoBrowser->append("Could not create volume!");
       }

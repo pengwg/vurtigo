@@ -193,10 +193,17 @@ void rt3DVolumeRenderObject::newDataAvailable() {
     m_imgReslice[ix1]->SetOutputExtentToDefault();
     m_imgReslice[ix1]->AutoCropOutputOff();
     m_imgReslice[ix1]->SetOutputDimensionality(2);
-    m_imgReslice[ix1]->AddInput( m_transFilter->GetOutput() );
+    if (dObj->getImageType() == 0)
+        m_imgReslice[ix1]->AddInput( m_transFilter->GetOutput() );
+    else if (dObj->getImageType() == 1)
+        m_imgReslice[ix1]->AddInput(dObj->getImageData());
   }
 
   for (int ix1=0; ix1<3; ix1++) {
+    // for some reason imgReslice loses the scalar component number from the original image
+    // so we hack it back in
+    if (dObj->getImageType() == 1)
+        m_imgReslice[ix1]->GetOutput()->SetNumberOfScalarComponents(3);
     m_texturePlane[ix1].setImageData(m_imgReslice[ix1]->GetOutput());
   }
 

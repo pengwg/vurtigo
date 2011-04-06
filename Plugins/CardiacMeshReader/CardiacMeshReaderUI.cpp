@@ -86,11 +86,11 @@ void CardiacMeshReaderUI::newDirectory() {
     m_lastDir = directoryEdit->text();
 
     // Use the custom reader too.
-    bool ok = m_customReader.setDirectory(m_lastDir);
+    bool ok = m_customReader.setDirectory(m_lastDir,DICOMFileReader::I_DICOM);
     infoBrowser->clear();
     if (ok) {
       infoBrowser->append(m_customReader.getComments());
-      m_customReader.createVolume(m_customReader.getDICOMImageData());
+      m_customReader.createVolume(m_customReader.getDICOMImageData(),DICOMFileReader::I_DICOM);
       p1FinishButton->setEnabled(true);
       p1NextButton->setEnabled(true);
       m_meshReader.setNumPhases(m_customReader.getImageData()->GetNumberOfScalarComponents());

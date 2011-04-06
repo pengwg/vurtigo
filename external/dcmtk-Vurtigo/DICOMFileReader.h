@@ -52,8 +52,15 @@ public:
   DICOMFileReader();
   ~DICOMFileReader();
 
-  bool setDirectory(QString dirPath);
-  bool createVolume(QList<DICOMImageData*>* imgData);
+  enum imageType {
+    I_DICOM,
+    I_JPEG,
+    I_PNG,
+    I_BMP
+  };
+
+  bool setDirectory(QString dirPath,imageType type);
+  bool createVolume(QList<DICOMImageData*>* imgData, imageType type);
   DICOMCommonData* getCommonDataHandle() { return m_ddata->getCommonDataHandle(); }
 
   vtkImageData* getImageData() { return m_infoFix->GetOutput(); }
