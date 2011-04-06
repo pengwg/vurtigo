@@ -21,13 +21,13 @@
 
 #include <QDir>
 #include <QStringList>
+#include <QInputDialog>
 
 #include <iostream>
 #include <string>
 #include <math.h>
 
 #include <vtkMath.h>
-#include <vtkImageReader2.h>
 #include <vtkJPEGReader.h>
 #include <vtkPNGReader.h>
 #include <vtkBMPReader.h>
@@ -66,6 +66,12 @@ DICOMFileReader::DICOMFileReader() {
   m_transform->Inverse();
 
   m_ddata = NULL;
+
+  m_reader = NULL;
+  m_spacingX = 1.0;
+  m_spacingY = 1.0;
+  m_spacingZ = 1.0;
+
 
   m_volName = "";
 }
@@ -181,44 +187,34 @@ bool DICOMFileReader::setDirectory(QString dirPath, imageType type) {
       }
 
       vtkStringArray *nameList = vtkStringArray::New();
+      QImage first(fileDir.filePath(files.at(0)));
       for (int ix1=0; ix1<files.count(); ix1++) {
-          m_comments.append("Image Number: ===== " + QString::number(ix1+1) + " ===== \n");
-          nameList->InsertValue(ix1,fileDir.filePath(files.at(ix1)).toStdString().c_str());
+          QImage img(fileDir.filePath(files.at(ix1)));
+          if (img.size() == first.size())
+          {
+              m_comments.append("Image Number: ===== " + QString::number(ix1+1) + " ===== \n");
+              nameList->InsertValue(ix1,fileDir.filePath(files.at(ix1)).toStdString().c_str());
+          }
       }
 
-      vtkImageReader2 *reader = NULL;
       if (type == DICOMFileReader::I_JPEG)
-          reader = vtkJPEGReader::New();
+          m_reader = vtkJPEGReader::New();
       else if (type == DICOMFileReader::I_PNG)
-          reader = vtkPNGReader::New();
+          m_reader = vtkPNGReader::New();
       else if (type == DICOMFileReader::I_BMP)
-          reader = vtkBMPReader::New();
+          m_reader = vtkBMPReader::New();
       else
           return false;
 
-      reader->SetFileNames(nameList);
-      reader->SetDataSpacing(1,1,2);
-      reader->Update();
-      int vol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, "3D Image Object");
-      if (vol >=0) {
-        rt3DVolumeDataObject* ptObj = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(vol));
-
-        if (ptObj) {
-          ptObj->lock();
-          // can use this to set the transform of the color image object
-          //ptObj->copyNewTransform();
-          ptObj->copyNewImageData(reader->GetOutput(),1);
-          ptObj->Modified();
-          ptObj->unlock();
-        }
-      }
+      m_reader->SetFileNames(nameList);
+      m_volName = "Image Object";
       return true;
   }
 }
 
 
 
-bool DICOMFileReader::createVolume(QList<DICOMImageData*>* imgData, imageType type) {
+bool DICOMFileReader::createVolume(QList<DICOMImageData*>* imgData) {
   // Check for the image data pointer
   if (!imgData) {
     std::cout << "Error: No Image Pointer!" << std::endl;
@@ -385,4 +381,17 @@ bool DICOMFileReader::createVolume(QList<DICOMImageData*>* imgData, imageType ty
 
 
   return true;
+}
+
+vtkImageData* DICOMFileReader::getImageData(bool isDICOM)
+{
+    if (isDICOM)
+        return m_infoFix->GetOutput();
+    else
+    {
+        m_reader->SetDataSpacing(m_spacingX,m_spacingY,m_spacingZ);
+        m_reader->Update();
+        return m_reader->GetOutput();
+    }
+
 }

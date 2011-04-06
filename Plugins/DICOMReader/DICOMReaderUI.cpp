@@ -33,6 +33,7 @@ DICOMReaderUI::DICOMReaderUI() {
   setupUi(this);
 
   m_lastDir = "";
+  isDICOM = true;
 
   connectSignals();
 }
@@ -44,6 +45,9 @@ void DICOMReaderUI::connectSignals() {
   connect(directoryEdit, SIGNAL(editingFinished()), this, SLOT(newDirectory()));
   connect(directoryChooser, SIGNAL(clicked()), this, SLOT(dirChooser()));
   connect(createVolumeButton, SIGNAL(clicked()), this, SLOT(saveAsVolume()));
+  connect(spacingX, SIGNAL(valueChanged(double)), this, SLOT(spacingChanged()));
+  connect(spacingY, SIGNAL(valueChanged(double)), this, SLOT(spacingChanged()));
+  connect(spacingZ, SIGNAL(valueChanged(double)), this, SLOT(spacingChanged()));
 }
 
 //! Slot called when the user changes the directory.
@@ -54,44 +58,46 @@ void DICOMReaderUI::newDirectory() {
 
     DICOMFileReader::imageType type;
     if (imageTypeBox->currentIndex() == 0)
+    {
         type = DICOMFileReader::I_DICOM;
-    else if (imageTypeBox->currentIndex() == 1)
-        type = DICOMFileReader::I_JPEG;
-    else if (imageTypeBox->currentIndex() == 2)
-        type = DICOMFileReader::I_PNG;
-    else if (imageTypeBox->currentIndex() == 3)
-        type = DICOMFileReader::I_BMP;
+        isDICOM = true;
+    }
+    else
+    {
+        isDICOM = false;
+        if (imageTypeBox->currentIndex() == 1)
+            type = DICOMFileReader::I_JPEG;
+        else if (imageTypeBox->currentIndex() == 2)
+            type = DICOMFileReader::I_PNG;
+        else if (imageTypeBox->currentIndex() == 3)
+            type = DICOMFileReader::I_BMP;
+    }
 
     // Use the custom reader too.
     bool okDir = m_customReader.setDirectory(m_lastDir,type);
-    if (okDir && type != DICOMFileReader::I_DICOM)
-    {
-        infoBrowser->append("Successfully created Image Object");
-        createVolumeButton->setEnabled(false);
-        nameLineEdit->setEnabled(false);
-        return;
-    }
-    bool okVol = false;
+    bool okVol = true;
     if (okDir && type == DICOMFileReader::I_DICOM) {
         // Try to create the volume.
-        okVol = m_customReader.createVolume(m_customReader.getDICOMImageData(),type);
+        okVol = m_customReader.createVolume(m_customReader.getDICOMImageData());
     }
 
     infoBrowser->clear();
     if (okDir && okVol) {
       infoBrowser->append(m_customReader.getComments());
-
+      if (type != DICOMFileReader::I_DICOM)
+          spacingOptions->setEnabled(true);
       createVolumeButton->setEnabled(true);
       nameLineEdit->setText(m_customReader.getDefaultName());
       nameLineEdit->setEnabled(true);
     } else {
+      spacingOptions->setEnabled(false);
       createVolumeButton->setEnabled(false);
       nameLineEdit->setEnabled(false);
       if (!okDir)
       {
           infoBrowser->append("Error with directory!");
       }
-      if (!okVol && type == DICOMFileReader::I_DICOM)
+      if (!okVol)
       {
           infoBrowser->append("Could not create volume!");
       }
@@ -105,7 +111,7 @@ void DICOMReaderUI::dirChooser() {
   QString dir;
   QDir lastDirUp = QDir(m_lastDir);
   lastDirUp.cdUp();
-  dir = QFileDialog::getExistingDirectory(this, "Select DICOM Directory", lastDirUp.path(), QFileDialog::ShowDirsOnly);
+  dir = QFileDialog::getExistingDirectory(this, "Select Image Directory", lastDirUp.path(), QFileDialog::ShowDirsOnly);
 
   if (dir != "") {
     // The user did select a directory.
@@ -116,18 +122,38 @@ void DICOMReaderUI::dirChooser() {
 
 //! Save the current set of DICOM images as a volume
 void DICOMReaderUI::saveAsVolume() {
-  m_vol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, nameLineEdit->text());
-  if (m_vol >=0) {
-    rt3DVolumeDataObject* ptObj = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(m_vol));
 
-    if (ptObj) {
-      ptObj->lock();
-      ptObj->copyNewTransform(m_customReader.getTransform());
-      ptObj->copyNewImageData(m_customReader.getImageData());
-      ptObj->copyTriggerDelayList(m_customReader.getTriggerList());
-      ptObj->copyDicomCommonData(m_customReader.getCommonDataHandle());
-      ptObj->Modified();
-      ptObj->unlock();
+    if (isDICOM)
+    {
+        m_vol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, nameLineEdit->text());
+        if (m_vol >=0) {
+            rt3DVolumeDataObject* ptObj = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(m_vol));
+
+            if (ptObj) {
+                ptObj->lock();
+                ptObj->copyNewTransform(m_customReader.getTransform());
+                ptObj->copyNewImageData(m_customReader.getImageData(isDICOM));
+                ptObj->copyTriggerDelayList(m_customReader.getTriggerList());
+                ptObj->copyDicomCommonData(m_customReader.getCommonDataHandle());
+                ptObj->Modified();
+                ptObj->unlock();
+            }
+        }
     }
-  }
+    else
+    {
+        m_vol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, nameLineEdit->text());
+        if (m_vol >=0) {
+            rt3DVolumeDataObject* ptObj = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(m_vol));
+
+            if (ptObj) {
+                ptObj->lock();
+                // if we want to apply transform
+                //ptObj->copyNewTransform(m_customReader.getTransform());
+                ptObj->copyNewImageData(m_customReader.getImageData(isDICOM),1);
+                ptObj->Modified();
+                ptObj->unlock();
+            }
+        }
+    }
 }

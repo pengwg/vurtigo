@@ -40,6 +40,7 @@ public slots:
   void newDirectory();
   void dirChooser();
   void saveAsVolume();
+  void spacingChanged() {m_customReader.setSpacing(spacingX->value(),spacingY->value(),spacingZ->value());}
 
 protected:
   void connectSignals();
@@ -50,6 +51,9 @@ protected:
 
   //! The ID of the newest volume
   int m_vol;
+
+  //! The volume is a DICOM
+  bool isDICOM;
 };
 
 #endif // DICOMREADERUI_H

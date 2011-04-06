@@ -90,10 +90,10 @@ void CardiacMeshReaderUI::newDirectory() {
     infoBrowser->clear();
     if (ok) {
       infoBrowser->append(m_customReader.getComments());
-      m_customReader.createVolume(m_customReader.getDICOMImageData(),DICOMFileReader::I_DICOM);
+      m_customReader.createVolume(m_customReader.getDICOMImageData());
       p1FinishButton->setEnabled(true);
       p1NextButton->setEnabled(true);
-      m_meshReader.setNumPhases(m_customReader.getImageData()->GetNumberOfScalarComponents());
+      m_meshReader.setNumPhases(m_customReader.getImageData(true)->GetNumberOfScalarComponents());
     } else {
       infoBrowser->append("Error!");
       p1FinishButton->setEnabled(false);
@@ -131,7 +131,7 @@ void CardiacMeshReaderUI::page1Finish() {
     if (ptObj) {
       ptObj->lock();
       ptObj->copyNewTransform(m_customReader.getTransform());
-      ptObj->copyNewImageData(m_customReader.getImageData());
+      ptObj->copyNewImageData(m_customReader.getImageData(true));
       ptObj->copyTriggerDelayList(m_customReader.getTriggerList());
       ptObj->Modified();
       ptObj->unlock();
@@ -251,7 +251,7 @@ void CardiacMeshReaderUI::page3Finish() {
     if (ptObj) {
       ptObj->lock();
       ptObj->copyNewTransform(m_customReader.getTransform());
-      ptObj->copyNewImageData(m_customReader.getImageData());
+      ptObj->copyNewImageData(m_customReader.getImageData(true));
       ptObj->copyTriggerDelayList(m_customReader.getTriggerList());
       ptObj->copyDicomCommonData(m_customReader.getCommonDataHandle());
       ptObj->Modified();
@@ -313,7 +313,7 @@ bool CardiacMeshReaderUI::loadPolyDataFromPoints(rtPolyDataObject* data,  MeshPo
   pointListLink.clear();
 
   double space[3];
-  m_customReader.getImageData()->GetSpacing(space);
+  m_customReader.getImageData(true)->GetSpacing(space);
 
   vtkTransform* trans = m_customReader.getTransform();
   //vtkTransform* trans = vtkTransform::New();
@@ -388,7 +388,7 @@ bool CardiacMeshReaderUI::loadEPMeshFromPoints(rtEPDataObject* data, MeshPointSe
 
   double space[3];
   double pt[3];
-  m_customReader.getImageData()->GetSpacing(space);
+  m_customReader.getImageData(true)->GetSpacing(space);
 
   vtkTransform* trans = m_customReader.getTransform();
   data->lock();

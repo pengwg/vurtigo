@@ -46,6 +46,8 @@
     {-1,1,-1} /*Feet First Decubitus Left before rotate */
   };
 
+  class vtkImageReader2;
+
 class DICOMFileReader
 {
 public:
@@ -60,10 +62,10 @@ public:
   };
 
   bool setDirectory(QString dirPath,imageType type);
-  bool createVolume(QList<DICOMImageData*>* imgData, imageType type);
+  bool createVolume(QList<DICOMImageData*>* imgData);
   DICOMCommonData* getCommonDataHandle() { return m_ddata->getCommonDataHandle(); }
 
-  vtkImageData* getImageData() { return m_infoFix->GetOutput(); }
+  vtkImageData* getImageData(bool isDICOM);
   vtkTransform* getTransform() { return m_transform; }
 
   QString getComments() { return m_comments; }
@@ -76,6 +78,25 @@ public:
 
   //! Get the list as DICOM image data.
   QList<DICOMImageData*>* getDICOMImageData() { return &m_imgData; }
+
+  //! Set the spacing
+  void setSpacing(double x, double y, double z)
+  {
+      if (x >= 0)
+          m_spacingX = x;
+      if (y >= 0)
+          m_spacingY = y;
+      if (z >= 0)
+          m_spacingZ = z;
+  }
+
+  //! Get the spacing
+ void getSpacing(double x, double y, double z)
+ {
+     x = m_spacingX;
+     y = m_spacingY;
+     z = m_spacingZ;
+ }
 
 protected:
   QList<QString> m_fileList;
@@ -105,6 +126,16 @@ protected:
 
   //! The default name of the volume
   QString m_volName;
+
+  //! The X spacing of the image object
+  double m_spacingX;
+  //! The Y spacing of the image object
+  double m_spacingY;
+  //! The Z spacing of the image object
+  double m_spacingZ;
+
+  //! The image reader
+  vtkImageReader2 *m_reader;
 };
 
 #endif // DICOMFILEREADER_H
