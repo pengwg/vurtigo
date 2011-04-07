@@ -189,6 +189,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   void update2DWindowLists(QMultiHash<int, QString>* hash);
 
+  //! The custom context menu for the object tree
+  void objectTreeContextMenu(QPoint pos);
+
   double getMovingQuality() { return m_movingQuality; }
   double getStillQuality() { return m_stillQuality; }
 

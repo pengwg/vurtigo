@@ -752,6 +752,9 @@ void rtMainWindow::connectSignals() {
   //whatsThis
   connect(actionWhatsThis,SIGNAL(triggered()),this,SLOT(activateWhatsThis()));
 
+  //Context Menu
+  connect(objectTree, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(objectTreeContextMenu(QPoint)));
+
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::connectSignals() end") );
 #endif
@@ -775,9 +778,23 @@ void rtMainWindow::setupObjectTree() {
   objectTree->setColumnWidth(0, 150);
   objectTree->setColumnWidth(1, 60);
 
+  objectTree->setContextMenuPolicy(Qt::CustomContextMenu);
+
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::setupObjectTree() end") );
 #endif
+}
+
+void rtMainWindow::objectTreeContextMenu(QPoint pos)
+{
+    if (objectTree->currentItem()->parent())
+    {
+        QMenu menu;
+        menu.addAction(actionSave_Object);
+        menu.addAction(actionRename_Object);
+        menu.addAction(actionDeleteSelected);
+        menu.exec(QCursor::pos());
+    }
 }
 
 //! Assign string names to the object types.
