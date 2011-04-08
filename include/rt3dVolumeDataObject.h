@@ -210,9 +210,20 @@ public:
   int getWindow() { return m_window; }
   //! Get the level part of the window level.
   int getLevel() { return m_level; }
-
   //! Get the Image type
   int getImageType() {return m_imgType;}
+  //! Get the axial color
+  QColor getAxialColor() {return m_axialColor;}
+  //! Get the sagittal color
+  QColor getSagittalColor() {return m_sagittalColor;}
+  //! Get the coronal color
+  QColor getCoronalColor() {return m_coronalColor;}
+  //! Has the user changed the axial color
+  bool didAxialColorChange() {return m_AColor;}
+  //! Has the user changed the sagittal color
+  bool didSagittalColorChange() {return m_SColor;}
+  //! Has the user changed the coronal color
+  bool didCoronalColorChange() {return m_CColor;}
 
   //! Get the annotation status.
   /*!
@@ -303,6 +314,13 @@ public:
   void colorTransferChangedGUI(QString id);
   //! The color transfer function has changed
   void colorTransferChanged(int);
+
+  //! Choose a new axial color
+  void axialColorChanged();
+  //! Choose a new sagittal color
+  void sagittalColorChanged();
+  //! Choose a new coronal color
+  void coronalColorChanged();
 
   //! A new piecewise function has been chosen from the GUI
   void piecewiseChangedGUI(QString id);
@@ -477,6 +495,20 @@ public:
 
   //! Positions for the three planes
   vtkTransform* m_planeTransform[3];
+
+  //! Axial plane color
+  QColor m_axialColor;
+  //! Sagittal plane color
+  QColor m_sagittalColor;
+  //! Coronal plane color
+  QColor m_coronalColor;
+
+  //! The user changed the axial color
+  bool m_AColor;
+  //! The user changed the sagittal color
+  bool m_SColor;
+  //! The user changed the coronal color
+  bool m_CColor;
 
   //! The point to move the three planes to
   double m_movePoint[3];

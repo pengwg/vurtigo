@@ -56,6 +56,9 @@ rt3DVolumeDataObject::rt3DVolumeDataObject() {
   m_pieceFunc = m_pieceFuncDefault;
   m_colorTransFunc = m_colorTransFuncDefault;
 
+  // The user has yet to change the colors
+  m_AColor = m_SColor = m_CColor = false;
+
   // Set them both to -1 since at the start we are not using external color or piecewise functions.
   m_piecewiseFuncID = -1;
   m_colorFuncID = -1;
@@ -468,6 +471,51 @@ void rt3DVolumeDataObject::coronalResetSlot() {
   Modified();
 }
 
+void rt3DVolumeDataObject::axialColorChanged()
+{
+    QColor clr = QColorDialog::getColor(m_axialColor);
+    if (clr.isValid())
+    {
+        m_axialColor = clr;
+        QPalette palette;
+        palette.setColor(m_optionsWidget.axialColor->backgroundRole(), clr);
+        m_optionsWidget.axialColor->setPalette(palette);
+        m_AColor = true;
+        Modified();
+
+    }
+}
+
+void rt3DVolumeDataObject::sagittalColorChanged()
+{
+    QColor clr = QColorDialog::getColor(m_sagittalColor);
+    if (clr.isValid())
+    {
+        m_sagittalColor = clr;
+        QPalette palette;
+        palette.setColor(m_optionsWidget.sagittalColor->backgroundRole(), clr);
+        m_optionsWidget.sagittalColor->setPalette(palette);
+        m_SColor = true;
+        Modified();
+
+    }
+}
+
+void rt3DVolumeDataObject::coronalColorChanged()
+{
+    QColor clr = QColorDialog::getColor(m_coronalColor);
+    if (clr.isValid())
+    {
+        m_coronalColor = clr;
+        QPalette palette;
+        palette.setColor(m_optionsWidget.coronalColor->backgroundRole(), clr);
+        m_optionsWidget.coronalColor->setPalette(palette);
+        m_CColor = true;
+        Modified();
+
+    }
+}
+
 void rt3DVolumeDataObject::interpolationChanged(int interp) {
   m_interpolationType = interp;
   Modified();
@@ -841,6 +889,11 @@ void rt3DVolumeDataObject::setupGUI() {
   connect(m_optionsWidget.sagittalOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(Modified()));
   connect(m_optionsWidget.coronalOpacitySlider, SIGNAL(valueChanged(int)), this, SLOT(Modified()));
 
+  //2D plane colors
+  connect(m_optionsWidget.axialColor, SIGNAL(clicked()), this, SLOT(axialColorChanged()));
+  connect(m_optionsWidget.sagittalColor, SIGNAL(clicked()), this, SLOT(sagittalColorChanged()));
+  connect(m_optionsWidget.coronalColor, SIGNAL(clicked()), this, SLOT(coronalColorChanged()));
+
   // Watch for new objects to update the lists.
   connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(newObjectCreated(int)));
   connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(oldObjectRemoved(int)));
@@ -874,6 +927,14 @@ void rt3DVolumeDataObject::setupGUI() {
     m_optionsWidget.comboCTFunc->addItem(QString::number(colorFuncs.at(ix1)));
   }
   m_optionsWidget.interpolateComboBox->setCurrentIndex(m_interpolationType);
+
+  m_optionsWidget.axialColor->setAutoFillBackground(true);
+  m_optionsWidget.sagittalColor->setAutoFillBackground(true);
+  m_optionsWidget.coronalColor->setAutoFillBackground(true);
+
+  m_axialColor = QColor("white");
+  m_sagittalColor = QColor("white");
+  m_coronalColor = QColor("white");
 }
 
 void rt3DVolumeDataObject::setupGPUGUI()

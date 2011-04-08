@@ -519,12 +519,33 @@ void rt3DVolumeRenderObject::update3PlaneStatus() {
     m_texturePlane[2].getActor()->SetVisibility(0);
   }
 
+  double r,g,b;
+  r = (double)(dObj->getAxialColor().red())/255.0;
+  g = (double)(dObj->getAxialColor().green())/255.0;
+  b = (double)(dObj->getAxialColor().blue())/255.0;
   m_boxOutline[0].getActor()->GetProperty()->SetOpacity(dObj->getAxialOpacity());
   m_texturePlane[0].getActor()->GetProperty()->SetOpacity(dObj->getAxialOpacity());
+  // setup plane colors
+  m_texturePlane[0].getActor()->GetProperty()->SetColor(r,g,b);
+  if (dObj->didAxialColorChange()) m_boxOutline[0].setOutlineColor(r,g,b);
+
+  r = (double)(dObj->getSagittalColor().red())/255.0;
+  g = (double)(dObj->getSagittalColor().green())/255.0;
+  b = (double)(dObj->getSagittalColor().blue())/255.0;
   m_boxOutline[1].getActor()->GetProperty()->SetOpacity(dObj->getSagittalOpacity());
   m_texturePlane[1].getActor()->GetProperty()->SetOpacity(dObj->getSagittalOpacity());
+  //setup plane colors
+  m_texturePlane[1].getActor()->GetProperty()->SetColor(r,g,b);
+  if (dObj->didSagittalColorChange()) m_boxOutline[1].setOutlineColor(r,g,b);
+
+  r = (double)(dObj->getCoronalColor().red())/255.0;
+  g = (double)(dObj->getCoronalColor().green())/255.0;
+  b = (double)(dObj->getCoronalColor().blue())/255.0;
   m_boxOutline[2].getActor()->GetProperty()->SetOpacity(dObj->getCoronalOpacity());
   m_texturePlane[2].getActor()->GetProperty()->SetOpacity(dObj->getCoronalOpacity());
+  // setup plane colors
+  m_texturePlane[2].getActor()->GetProperty()->SetColor(r,g,b);
+  if (dObj->didCoronalColorChange()) m_boxOutline[2].setOutlineColor(r,g,b);
 
   // Fix the user transforms for the 3 planes
   vtkTransform* tt = vtkTransform::New();
