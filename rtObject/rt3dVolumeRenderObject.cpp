@@ -68,6 +68,7 @@ rt3DVolumeRenderObject::~rt3DVolumeRenderObject() {
 
   if(m_transFilter) m_transFilter->Delete();
   if(m_rayMapper) m_rayMapper->Delete();
+  if(m_gpuRayMapper) m_gpuRayMapper->Delete();
   if(m_volumeActor) m_volumeActor->Delete();
 
   if(m_outline) m_outline->Delete();
@@ -204,6 +205,8 @@ void rt3DVolumeRenderObject::newDataAvailable() {
   resetSagittalPlane();
   resetCoronalPlane();
 
+  dObj->setCanGPU(m_gpuRayMapper->IsRenderSupported(rtApplication::instance().getMainWinHandle()->getRenderWindow(),dObj->getVolumeProperty()));
+  dObj->setupGPUGUI();
 
   vtkTransform *t = vtkTransform::New();
   t->Concatenate(dObj->getTransform());
@@ -528,6 +531,7 @@ void rt3DVolumeRenderObject::setupDataObject() {
   connect(temp, SIGNAL(sagittalSagittal(double)),this,SLOT(moveSagittalSagittal(double)));
   connect(temp, SIGNAL(coronalNormal(double)),this,SLOT(moveCoronalNormal(double)));
   connect(temp, SIGNAL(coronalCoronal(double)),this,SLOT(moveCoronalCoronal(double)));
+  connect(temp, SIGNAL(gpuSignal(bool)),this,SLOT(setGPUOptions(bool)));
 }
 
 
@@ -537,6 +541,7 @@ void rt3DVolumeRenderObject::setupPipeline() {
 
   m_transFilter = vtkImageReslice::New();
   m_rayMapper = vtkVolumeRayCastMapper::New();
+  m_gpuRayMapper = vtkGPUVolumeRayCastMapper::New();
   m_volumeActor = vtkVolume::New();
   m_volumeActor->PickableOff();
   //m_rayMapper->SetNumberOfThreads(16);
@@ -545,14 +550,9 @@ void rt3DVolumeRenderObject::setupPipeline() {
   m_outlineMapper = vtkPolyDataMapper::New();
   m_outlineActor = vtkActor::New();
 
-  // Volume Rendering
-  m_rayMapper->SetInput( m_transFilter->GetOutput() );
-  m_rayMapper->SetVolumeRayCastFunction( dObj->getRayCastFunction() );
+  // default is CPU volume rendering
+  setGPUOptions(false);
 
-  // Manually adjust the sample distances
-  m_rayMapper->AutoAdjustSampleDistancesOff ();
-
-  m_volumeActor->SetMapper(m_rayMapper);
   m_volumeActor->SetProperty( dObj->getVolumeProperty() );
   m_volumeActor->SetVisibility(0);
 
@@ -591,6 +591,31 @@ void rt3DVolumeRenderObject::setupPipeline() {
 
   // Update the volume
   tryUpdate();
+}
+
+void rt3DVolumeRenderObject::setGPUOptions(bool flag)
+{
+    if (!flag)
+    {
+        // Volume Rendering
+        rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
+        m_rayMapper->SetInput( m_transFilter->GetOutput() );
+        m_rayMapper->SetVolumeRayCastFunction( dObj->getRayCastFunction() );
+
+        // Manually adjust the sample distances
+        m_rayMapper->AutoAdjustSampleDistancesOff ();
+
+        m_volumeActor->SetMapper(m_rayMapper);
+    }
+    else
+    {
+        // GPU Volume Rendering
+        m_gpuRayMapper->SetInput(m_transFilter->GetOutput());
+        m_volumeActor->SetMapper(m_gpuRayMapper);
+    }
+
+    update();
+
 }
 
 

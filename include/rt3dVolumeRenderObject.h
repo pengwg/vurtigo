@@ -27,6 +27,7 @@
 
 #include <vtkImageCast.h>
 #include <vtkVolumeRayCastMapper.h>
+#include <vtkGPUVolumeRayCastMapper.h>
 #include <vtkVolume.h>
 #include <vtkOutlineFilter.h>
 #include <vtkPolyDataMapper.h>
@@ -81,6 +82,8 @@ public slots:
 
   virtual void setBoundBox(bool);
 
+  void setGPUOptions(bool);
+
   //! move the given planes to the move point
   virtual void movePlanes(bool,bool,bool);
   //! move the axial plane along its normal
@@ -106,6 +109,7 @@ public slots:
   vtkSmartPointer<vtkImageReslice> m_transFilter;
 
   vtkSmartPointer<vtkVolumeRayCastMapper> m_rayMapper;
+  vtkSmartPointer<vtkGPUVolumeRayCastMapper> m_gpuRayMapper;
   vtkSmartPointer<vtkVolume> m_volumeActor;
 
   vtkSmartPointer<vtkOutlineFilter> m_outline;
