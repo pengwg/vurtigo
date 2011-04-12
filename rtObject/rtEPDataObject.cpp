@@ -23,6 +23,7 @@
 #include <QThread>
 #include <QThreadPool>
 #include <QApplication>
+#include <QMessageBox>
 
 #include <vtkPoints.h>
 #include <vtkIntArray.h>
@@ -36,6 +37,7 @@
 #include "rtTimeManager.h"
 #include "rt3dPointBufferDataObject.h"
 #include "rtRenderObject.h"
+#include "rtMainWindow.h"
 
 //! Constructor
 rtEPDataObject::rtEPDataObject()
@@ -357,10 +359,80 @@ bool rtEPDataObject::saveFile(QFile *file) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to open file for writing. Error Code: ").append(QString::number(file->error())));
     return false;
   }
+  QList<rtCardiacMeshPointData> tempPT;
+  QList<int> slices;
+  QXmlStreamWriter writer(file);
+  writer.setAutoFormatting(true);
+  writer.writeStartDocument();
+  writer.writeStartElement("VurtigoFile");
+  rtDataObject::saveHeader(&writer, getObjectType(), getObjName());
+  writer.writeTextElement("numPhases", QString::number(m_phaseDataList.size()));
 
-  // TODO ***
+  writer.writeStartElement("Properties");
+  if ((m_inPlaneInterval < 1.0) || (m_crossPlaneInterval < 1.0))
+  {
+      QApplication::restoreOverrideCursor();
+      QMessageBox::StandardButton button;
+      button = QMessageBox::warning(0,"Saving High Quality Mesh","Warning: saving a mesh with small spacing will cause longer load times. Save spacing information anyway?",
+                                    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+      if (button == QMessageBox::Yes)
+      {
+          writer.writeAttribute("inPlaneInterval",QString::number(m_inPlaneInterval));
+          writer.writeAttribute("crossPlaneInterval",QString::number(m_crossPlaneInterval));
+      }
+      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  }
+  writer.writeAttribute("pointOpacity",QString::number(m_pointsOpacity));
+  writer.writeAttribute("surfaceOpacity",QString::number(m_surfaceOpacity));
+  writer.writeAttribute("currentPhase",QString::number(m_currentPhase));
+  writer.writeEndElement();
+
+  // save some mapping properties too
+  rtRenderObject *tmp = rtApplication::instance().getObjectManager()->getObjectWithID(m_objectSelectionBox.getCurrentObjectId());
+  if (tmp)
+  {
+      writer.writeStartElement("Mapping");
+      writer.writeAttribute("colorByProperty",QString::number(m_optionsWidget.colorByComboBox->currentIndex()));
+      writer.writeAttribute("effectSlider",QString::number(m_optionsWidget.effectSlider->value()));
+      writer.writeEndElement();
+  }
+
+  for (int ix1=0; ix1<m_phaseDataList.size(); ix1++)
+  {
+      writer.writeStartElement("Phase");
+      writer.writeAttribute("phaseNumber", QString::number(ix1));
+      writer.writeAttribute("Trigger",QString::number(m_phaseDataList.value(ix1).triggerDelay));
+      slices = m_phaseDataList.value(ix1).pointList.uniqueKeys();
+      writer.writeAttribute("numSlices",QString::number(slices.size()));
+
+      for (int ix2 = 0; ix2 < slices.size() ;ix2++)
+      {
+          writer.writeStartElement("Slice");
+          tempPT = m_phaseDataList.value(ix1).pointList.values(slices[ix2]);
+          writer.writeAttribute("sliceNumber",QString::number(ix2));
+          writer.writeAttribute("numPoints",QString::number(tempPT.size()));
+          for (int ix3 = 0; ix3 < tempPT.size(); ix3++)
+          {
+              writer.writeStartElement("Point");
+              writer.writeAttribute("numPoint",QString::number(ix3));
+              writer.writeAttribute("Location",QString::number(tempPT[ix3].getLocation()));
+              writer.writeAttribute("X",QString::number(tempPT[ix3].getX()));
+              writer.writeAttribute("Y",QString::number(tempPT[ix3].getY()));
+              writer.writeAttribute("Z",QString::number(tempPT[ix3].getZ()));
+              writer.writeEndElement(); // point
+          }
+          writer.writeEndElement(); // slice
+      }      
+      writer.writeEndElement(); // phase
+  }
+  writer.writeEndElement(); // vurtigofile
+  writer.writeEndDocument();
 
   file->close();
+  // save the 3D points as well
+  if (tmp)
+      tmp->getDataObject()->saveFile(&QFile(file->fileName() + "_points"));
+
   return true;
 }
 
@@ -370,10 +442,146 @@ bool rtEPDataObject::loadFile(QFile *file) {
     return false;
   }
 
-  // TODO ***
+  QXmlStreamReader reader(file);
+  QXmlStreamAttributes attrib;
+  rtConstants::rtObjectType objType;
+  QString objName="";
+  bool valueOK;
 
+  int phaseNumber;
+  int triggerDelay;
+  int colorIndex,effectSlider;
+  bool hadPoints = false;
+
+  while (!reader.atEnd()) {
+    if (reader.readNext() == QXmlStreamReader::StartElement ) {
+      if (reader.name() == "FileInfo") {
+        rtDataObject::loadHeader(&reader, objType, objName);
+      } else if (reader.name() == "Phase") {
+        attrib = reader.attributes();
+        phaseNumber = attrib.value("phaseNumber").toString().toInt(&valueOK);
+        triggerDelay = attrib.value("Trigger").toString().toInt(&valueOK);
+        setTriggerDelay(phaseNumber,triggerDelay);
+        readNewPhaseFromFile(&reader, phaseNumber, triggerDelay);
+      }
+      else if (reader.name() == "Properties")
+      {
+          attrib = reader.attributes();
+          if (attrib.hasAttribute("inPlaneInterval"))
+          {
+              m_inPlaneInterval = attrib.value("inPlaneInterval").toString().toDouble(&valueOK);
+              m_optionsWidget.inSliceSpace->setValue(m_inPlaneInterval);
+          }
+          if (attrib.hasAttribute("crossPlaneInterval"))
+          {
+              m_crossPlaneInterval = attrib.value("crossPlaneInterval").toString().toDouble(&valueOK);
+              m_optionsWidget.betweenSliceSpace->setValue(m_crossPlaneInterval);
+          }
+          m_pointsOpacity = attrib.value("pointOpacity").toString().toDouble(&valueOK);
+          m_optionsWidget.pointsOpacitySlider->setValue((int)(m_pointsOpacity*100));
+          m_surfaceOpacity = attrib.value("surfaceOpacity").toString().toDouble(&valueOK);
+          m_optionsWidget.surfaceOpacitySlider->setValue((int)(m_surfaceOpacity*100));
+          m_currentPhase = attrib.value("currentPhase").toString().toInt(&valueOK);
+
+      }
+      else if (reader.name() == "Mapping")
+      {
+          attrib = reader.attributes();
+          colorIndex = attrib.value("colorByProperty").toString().toInt(&valueOK);
+          effectSlider = attrib.value("effectSlider").toString().toInt(&valueOK);
+          hadPoints = true;
+      }
+    }
+
+  }
+
+
+  if (reader.hasError()) {
+    return false;
+    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("XML Reader Failed. Error: ").append(reader.errorString()));
+  }
+  QList<int> id;
+  id = rtApplication::instance().getMainWinHandle()->loadObject(QString(file->fileName() + "_points"));
+  if (!id.isEmpty())
+  {
+      for (int ix1=0; ix1<m_objectSelectionBox.count(); ix1++)
+      {
+          if (m_objectSelectionBox.itemData(ix1) == id.last())
+          {
+              m_objectSelectionBox.setCurrentIndex(ix1);
+              break;
+          }
+      }
+      m_optionsWidget.colorByComboBox->setCurrentIndex(colorIndex);
+      m_optionsWidget.effectSlider->setValue(effectSlider);
+  }
+  else if (hadPoints)
+  {
+      QApplication::restoreOverrideCursor();
+      QMessageBox::warning(0,"No Points!","Could not find EP point file! Loading just mesh");
+      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  }
+  updateObjectNow();
+  m_cineWidget.sliderValueChanged(m_currentPhase);
+  setModifyFlagForAll();
   Modified();
   return true;
+}
+
+bool rtEPDataObject::readNewPhaseFromFile(QXmlStreamReader* reader, int phase, int trigger)
+{
+    if (!reader)
+    {
+      rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not read phase info from file. Reader pointer is NULL."));
+      return false;
+    }
+    QXmlStreamAttributes attrib;
+    bool valueOK;
+    int sliceID,pointID;
+    QList<rtCardiacMeshPointData> pts;
+    rtCardiacMeshPointData tempPT;
+    QMultiMap<int, rtCardiacMeshPointData> pointList;
+    while (!reader->atEnd())
+    {
+        if (reader->readNext() == QXmlStreamReader::StartElement )
+        {
+            if (reader->name() == "Slice")
+            {
+                attrib = reader->attributes();
+                sliceID = attrib.value("sliceNumber").toString().toInt(&valueOK);
+                while (!(reader->isEndElement() && reader->name() == "Slice"))
+                {
+                    if (reader->readNext() == QXmlStreamReader::StartElement)
+                    {
+                        if (reader->name() == "Point")
+                        {
+                            attrib = reader->attributes();
+                            pointID = attrib.value("numPoint").toString().toInt(&valueOK);
+                            tempPT.setX(attrib.value("X").toString().toDouble(&valueOK));
+                            tempPT.setY(attrib.value("Y").toString().toDouble(&valueOK));
+                            tempPT.setZ(attrib.value("Z").toString().toDouble(&valueOK));
+                            tempPT.setSlice(sliceID);
+                            tempPT.setPhase(phase);
+                            tempPT.setLocation(attrib.value("Location").toString().toInt(&valueOK));
+                            addPoint(tempPT);
+                        }
+                    }
+                }
+            }
+        } else if (reader->isEndElement() && reader->name() == "Phase")
+        {
+            // End of this phase!
+            break;
+        }
+    }
+
+    m_phaseDataList[phase].triggerDelay = trigger;
+
+    if (reader->hasError()) {
+      rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("XML Reader Failed. Error: ").append(reader->errorString()));
+      return false;
+    }
+
 }
 
 ///////////////

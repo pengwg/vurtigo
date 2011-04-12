@@ -150,7 +150,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void loadPluginFile();
 
   void addNewObject();
-  void loadObject();
+  QList<int> loadObject(QString file = QString());
   void saveObject();
   void removeSelectedObject();
 

@@ -207,6 +207,9 @@ public:
   //! Set the flag for all the data pieces to modified.
   void setModifyFlagForAll();
 
+  //! used for loading from file
+  bool readNewPhaseFromFile(QXmlStreamReader* reader, int phase, int trigger);
+
   //! The current phase
   int m_currentPhase;
 

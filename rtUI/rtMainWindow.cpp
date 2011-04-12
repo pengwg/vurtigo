@@ -1071,15 +1071,18 @@ void rtMainWindow::addNewObject() {
 #endif
 }
 
-void rtMainWindow::loadObject() {
+QList<int> rtMainWindow::loadObject(QString fname) {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::loadObject() start") );
 #endif
 
   QFile file;
   QStringList names;
-
-  names = QFileDialog::getOpenFileNames(this, "Select Files To Open:");
+  QList<int> objIDs;
+  if (fname == "")
+      names = QFileDialog::getOpenFileNames(this, "Select Files To Open:");
+  else
+      names.append(fname);
   for (int ix1=0; ix1<names.size(); ix1++) {
     file.setFileName(names.at(ix1));
     if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -1110,13 +1113,17 @@ void rtMainWindow::loadObject() {
         obj = rtApplication::instance().getObjectManager()->addObjectOfType(objType, objName);
         if (obj) {
           objFile.setFileName(names.at(ix1));
+          QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
           obj->loadFile(&objFile);
+          QApplication::restoreOverrideCursor();
+          objIDs.append(obj->getDataObject()->getId());
         }
       }
 
       file.close();
     }
   }
+  return objIDs;
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::loadObject() end") );
 #endif
@@ -1147,7 +1154,9 @@ void rtMainWindow::saveObject() {
     // Find the file name
     fName = QFileDialog::getSaveFileName(this, "Save As...");
     file.setFileName(fName);
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     temp->saveFile(&file);
+    QApplication::restoreOverrideCursor();
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::saveObject() end") );
