@@ -21,9 +21,10 @@
 #include "rtTimeManager.h"
 #include "rtDataObject.h"
 #include "rtApplication.h"
+#include "rtMainWindow.h"
 
 rtRenderObject::rtRenderObject()
-: m_dataObj(NULL), m_canRender3D(false), m_visible3D(false), m_renderName("None"), m_objType(rtConstants::OT_None)
+: m_dataObj(NULL), m_canRender3D(false),  m_renderName("None"), m_objType(rtConstants::OT_None)
 {
   m_treeItem = new QTreeWidgetItem();
   m_treeItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
@@ -31,6 +32,9 @@ rtRenderObject::rtRenderObject()
   // Clear the list first.
   m_pipe2D.clear();
   m_syncList.clear();
+  m_visible3D.clear();
+  for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+      m_visible3D.append(false);
 }
 
 rtRenderObject::~rtRenderObject() {
@@ -89,11 +93,12 @@ void rtRenderObject::updateTreeItem() {
     // Only show the 3D checkbox if the 3D can be rendered.
     if (m_canRender3D) {
       m_treeItem->setText(2, "3D");
-      if (m_visible3D) {
-        m_treeItem->setCheckState(2,Qt::Checked);
-      } else {
-        m_treeItem->setCheckState(2,Qt::Unchecked);
-      }
+
+      if (m_visible3D.contains(true))
+          m_treeItem->setCheckState(2,Qt::Checked);
+      else
+          m_treeItem->setCheckState(2,Qt::Unchecked);
+
     } else {
       m_treeItem->setText(2, "NA");
     }
@@ -102,23 +107,42 @@ void rtRenderObject::updateTreeItem() {
 
 void rtRenderObject::uncheckTreeItem() {
   if (m_treeItem) {
-    if (m_treeItem->checkState(2) == Qt::Checked || m_visible3D) {
-      m_visible3D = false;
+      for (int ix1=0; ix1<m_visible3D.size(); ix1++)
+          m_visible3D[ix1] = false;
+    if (m_treeItem->checkState(2) == Qt::Checked) {
       m_treeItem->setCheckState(2,Qt::Unchecked);
     }
   }
 }
 
-void rtRenderObject::setVisible3D(bool v) {
+void rtRenderObject::setVisible3D(int window,bool v) {
   if( !rtApplication::instance().getTimeManager() ) return;
 
-  m_visible3D = v;
+  if (window >= m_visible3D.size())
+      std::cout << "rtRenderObject::setVisible3D tried to set visibilty on a window the object didnt know about \n";
+  m_visible3D[window] = v;
   if (v) {
     tryUpdate();
     rtApplication::instance().getTimeManager()->addToWatchList(this);
-  } else {
+  } else if (!m_visible3D.contains(true)){
     rtApplication::instance().getTimeManager()->removeFromWatchList(this);
   }
+}
+
+void rtRenderObject::setVisible3DAll(QList<bool> v)
+{
+    if( !rtApplication::instance().getTimeManager() ) return;
+    m_visible3D = v;
+    if (v.contains(true))
+    {
+        tryUpdate();
+        rtApplication::instance().getTimeManager()->addToWatchList(this);
+    }
+    else
+    {
+        rtApplication::instance().getTimeManager()->removeFromWatchList(this);
+    }
+
 }
 
 //! Set the update time to the current time.

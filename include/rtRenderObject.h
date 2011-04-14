@@ -83,8 +83,11 @@ Q_OBJECT
   virtual void updateTreeItem();
   virtual void uncheckTreeItem();
 
-  void setVisible3D(bool v);
-  bool getVisible3D(){ return m_visible3D; }
+  void setVisible3D(int window,bool v);
+  void setVisible3DAll(QList<bool> v);
+  void setVisible3DAllOn() { for(int ix1=0; ix1<m_visible3D.size(); ix1++) m_visible3D[ix1] = true;}
+  void setVisible3DAllOff(){ for(int ix1=0; ix1<m_visible3D.size(); ix1++) m_visible3D[ix1] = false;}
+  QList<bool> getVisible3D(){ return m_visible3D; }
 
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren, int window) = 0;
@@ -163,8 +166,8 @@ Q_OBJECT
 
   QTreeWidgetItem* m_treeItem;
 
-  //! True if the variable is being rendered in the 3D window.
-  bool m_visible3D;
+  //! True if the variable is being rendered in a 3D window.
+  QList<bool> m_visible3D;
 
   //! The selected prop for this object.
   /*!

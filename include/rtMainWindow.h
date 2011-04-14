@@ -183,7 +183,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void remove2DFrame();
   void removeAll2DFrame();
 
-  void refreshRenderItems();
+  void refreshRenderItems(bool);
 
   void pluginItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
 

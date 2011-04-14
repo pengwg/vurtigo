@@ -64,7 +64,7 @@ bool rtPolyRenderObject::addToRenderer(vtkRenderer* ren,int window) {
     return false;
   }
 
-  setVisible3D(true);
+  setVisible3D(window,true);
   if (!ren->HasViewProp(m_actor)) {
     ren->AddViewProp(m_actor);
   }
@@ -88,7 +88,7 @@ bool rtPolyRenderObject::addToRenderer(vtkRenderer* ren,int window) {
 //! Remove this object from the given renderer.
 bool rtPolyRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
-  setVisible3D(false);
+  setVisible3D(window,false);
   if (ren->HasViewProp(m_actor)) {
     ren->RemoveViewProp(m_actor);
   }

@@ -115,7 +115,7 @@ void rt3DPointBufferRenderObject::update() {
 
 bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren, int window) {
   if (!ren) return false;
-  setVisible3D(true);
+  setVisible3D(window,true);
   for (int ix1=0; ix1<m_pipeList.count(); ix1++) {
     if (!ren->HasViewProp(m_pipeList.at(ix1)->getActor())) {
       ren->AddViewProp( m_pipeList.at(ix1)->getActor() );
@@ -143,7 +143,7 @@ bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren, int window) {
 
 bool rt3DPointBufferRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
-  setVisible3D(false);
+  setVisible3D(window,false);
   for (int ix1=0; ix1<m_pipeList.count(); ix1++) {
     if (ren->HasViewProp( m_pipeList.at(ix1)->getActor() )) ren->RemoveViewProp( m_pipeList.at(ix1)->getActor() );
     if (ren->HasViewProp( m_pipeList.at(ix1)->getLabelActor() )) ren->RemoveViewProp( m_pipeList.at(ix1)->getLabelActor() );
@@ -331,9 +331,9 @@ void rt3DPointBufferRenderObject::cleanupPipeList() {
   while(!m_pipeList.empty()) {
     tempPipe = m_pipeList.takeLast();
     // Remove the item if it is currently being rendered.
-    if (getVisible3D())
+    for (int ix1=0; ix1<getVisible3D().size(); ix1++)
     {
-        for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+        if (getVisible3D().at(ix1))
         {
             rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getActor(),ix1);
             rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getLabelActor(),ix1);
@@ -351,9 +351,9 @@ void rt3DPointBufferRenderObject::resizePipeList(int size) {
   while(m_pipeList.size() > size) {
     tempPipe = m_pipeList.takeLast();
     // Remove the item if it is currently being rendered.
-    if (getVisible3D())
+    for (int ix1=0; ix1<getVisible3D().size(); ix1++)
     {
-        for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+        if (getVisible3D().at(ix1))
         {
             rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getActor(),ix1);
             rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getLabelActor(),ix1);
@@ -366,9 +366,9 @@ void rt3DPointBufferRenderObject::resizePipeList(int size) {
   while (m_pipeList.size() < size) {
     tempPipe = new rtSingle3DPointPipeline();
     m_pipeList.append(tempPipe);
-    if (getVisible3D())
+    for (int ix1=0; ix1<getVisible3D().size(); ix1++)
     {
-        for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+        if (getVisible3D().at(ix1))
         {
             rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getActor(),ix1);
             rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getLabelActor(),ix1);

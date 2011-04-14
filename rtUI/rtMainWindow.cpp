@@ -425,15 +425,17 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
 
   // If the box is checked then add it to the renderer.
   if (current->checkState(column) == Qt::Checked) {
-    for (int ix1=0; ix1<m_renderer3D.size(); ix1++)
+    for (int ix1=0; ix1<temp->getVisible3D().size(); ix1++)
       {
+
         //if ( temp->addToRenderer(m_renderer3D) && temp->addToRenderer(m_localRenderer3D) ) {
         if ( temp->addToRenderer(m_renderer3D[ix1],ix1) ) {
             m_renderFlag3D = true;
         }
+
     }
   } else {
-      for (int ix1=0; ix1<m_renderer3D.size(); ix1++)
+      for (int ix1=0; ix1<temp->getVisible3D().size(); ix1++)
       {
           //if ( temp->removeFromRenderer(m_renderer3D) && temp->removeFromRenderer(m_localRenderer3D) ) {
           if ( temp->removeFromRenderer(m_renderer3D[ix1],ix1) ) {
@@ -472,16 +474,19 @@ void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
 
   // Get the object
   temp = rtApplication::instance().getObjectManager()->getObjectWithID(item->text(1).toInt());
-  if (!temp->getVisible3D()) {
+  if (!temp->getVisible3D().contains(true)) {
     // Not visible so we have nothing to center on...
     return;
   }
   double loc[6];
   if (temp->getObjectLocation(loc)) {
     // Location is valid
+      if (m_renderer3D.size() != temp->getVisible3D().size())
+          std::cout << "rtMainWindow::centerOnObject number of visible3D flags in the current object doesn't match the numRenWin \n";
     for (int ix1=0; ix1<m_renderer3D.size(); ix1++)
     {
-        m_renderer3D[ix1]->ResetCamera(loc);
+        if (temp->getVisible3D().at(ix1))
+            m_renderer3D[ix1]->ResetCamera(loc);
     }
     //m_localRenderer3D->ResetCamera(loc);
     m_renderFlag3D = true;
@@ -888,8 +893,8 @@ void rtMainWindow::addRenWinPressed()
     else
         addNewRenderWindow();
 
-    refreshRenderItems();
     m_numRenWin++;
+    refreshRenderItems(true);
     if (m_axesProperties) {
         setViewType( m_axesProperties->getViewType() );
         setCoordType( m_axesProperties->getCoordType() );
@@ -904,6 +909,7 @@ void rtMainWindow::remRenWinPressed()
     {
         m_render3DVTKWidget[m_numRenWin-1]->hide();
         m_numRenWin--;
+        refreshRenderItems(false);
     }
 }
 
@@ -1576,12 +1582,21 @@ void rtMainWindow::addNewRenderWindow()
     m_render3DLayout->addWidget(newWidget);
 }
 
-void rtMainWindow::refreshRenderItems()
+void rtMainWindow::refreshRenderItems(bool flag)
 {
+    rtRenderObject *temp=NULL;
+    QList<bool> visibles;
     for (int ix1=0; ix1<objectTree->topLevelItemCount(); ix1++)
     {
         for (int ix2=0; ix2<objectTree->topLevelItem(ix1)->childCount(); ix2++)
         {
+            temp = rtApplication::instance().getObjectManager()->getObjectWithID(objectTree->topLevelItem(ix1)->child(ix2)->text(1).toInt());
+            visibles = temp->getVisible3D();
+            if (flag)
+                visibles.append(true);
+            else
+                visibles.takeLast();
+            temp->setVisible3DAll(visibles);
             itemChanged(objectTree->topLevelItem(ix1)->child(ix2),2);
         }
       }

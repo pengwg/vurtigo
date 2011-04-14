@@ -191,7 +191,7 @@ void rtBaseHandle::forceRenderUpdate(int objID) {
   }
 }
 
-void rtBaseHandle::setObjectVisible3D(int idObj, bool fVisible)
+void rtBaseHandle::setObjectVisible3D(int idObj, bool fVisible, int window)
   {
     rtRenderObject *pRenderObj = getRenderObjectWithID(idObj);
     if (!pRenderObj)
@@ -207,8 +207,18 @@ void rtBaseHandle::setObjectVisible3D(int idObj, bool fVisible)
         rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtBaseHandle::setObjectVisible3D - idObj  ").append(QString::number(idObj)).append(" has no data object!"));
         return;
       }
-    
-    pRenderObj->setVisible3D(fVisible);
+    if ((window > -1) && (window < rtApplication::instance().getMainWinHandle()->getNumRenWins())) {
+        pRenderObj->setVisible3D(window,fVisible);
+    }
+    else
+    {
+        if (fVisible)
+            pRenderObj->setVisible3DAllOn();
+        else
+            pRenderObj->setVisible3DAllOff();
+    }
+
+
     pDataObj->Modified();
     pRenderObj->updateTreeItem();
     

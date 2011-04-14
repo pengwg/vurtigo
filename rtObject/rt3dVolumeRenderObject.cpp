@@ -413,7 +413,7 @@ bool rt3DVolumeRenderObject::hasProp(vtkProp *prop)
 bool rt3DVolumeRenderObject::addToRenderer(vtkRenderer* ren, int window) {
   rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
   if (!ren || !dObj || !dObj->isDataValid()) return false;
-  setVisible3D(true);
+  setVisible3D(window,true);
 
   if (!ren->HasViewProp(m_annotateActor)) {
     ren->AddViewProp(m_annotateActor);
@@ -450,7 +450,7 @@ bool rt3DVolumeRenderObject::addToRenderer(vtkRenderer* ren, int window) {
 //! Remove this object from the given renderer.
 bool rt3DVolumeRenderObject::removeFromRenderer(vtkRenderer* ren, int window) {
   if (!ren) return false;
-  setVisible3D(false);
+  setVisible3D(window,false);
 
   if (ren->HasViewProp(m_annotateActor)) {
     ren->RemoveViewProp(m_annotateActor);
@@ -495,7 +495,7 @@ void rt3DVolumeRenderObject::update3PlaneStatus() {
 
   if (!dObj) return;
 
-  if ( dObj->getAxial3D() && getVisible3D() ) {
+  if ( dObj->getAxial3D() && getVisible3D().contains(true) ) {
     m_boxOutline[0].getActor()->SetVisibility(1);
     m_texturePlane[0].getActor()->SetVisibility(1);
   } else {
@@ -503,7 +503,7 @@ void rt3DVolumeRenderObject::update3PlaneStatus() {
     m_texturePlane[0].getActor()->SetVisibility(0);
   }
 
-  if ( dObj->getSagittal3D() && getVisible3D() ) {
+  if ( dObj->getSagittal3D() && getVisible3D().contains(true) ) {
     m_boxOutline[1].getActor()->SetVisibility(1);
     m_texturePlane[1].getActor()->SetVisibility(1);
   } else {
@@ -511,7 +511,7 @@ void rt3DVolumeRenderObject::update3PlaneStatus() {
     m_texturePlane[1].getActor()->SetVisibility(0);
   }
 
-  if ( dObj->getCoronal3D() && getVisible3D() ) {
+  if ( dObj->getCoronal3D() && getVisible3D().contains(true) ) {
     m_boxOutline[2].getActor()->SetVisibility(1);
     m_texturePlane[2].getActor()->SetVisibility(1);
   } else {
@@ -932,7 +932,7 @@ void rt3DVolumeRenderObject::copyObject(rtRenderObject *from)
     rt3DVolumeDataObject *thisData = static_cast<rt3DVolumeDataObject*>(this->getDataObject());
 
     // copy the object visibility?
-    this->setVisible3D(from->getVisible3D());
+    this->setVisible3DAll(from->getVisible3D());
     this->updateTreeItem();
 
 

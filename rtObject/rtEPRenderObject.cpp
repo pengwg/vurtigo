@@ -128,8 +128,6 @@ bool rtEPRenderObject::addToRenderer(vtkRenderer* ren,int window) {
     ren->AddViewProp(m_infoActor);
   }
 
-  setVisible3D(true);
-
   // Connect signals and slots for interaction.
   customQVTKWidget* renWid;
   renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
@@ -142,13 +140,14 @@ bool rtEPRenderObject::addToRenderer(vtkRenderer* ren,int window) {
   connect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), this, SLOT(keyReleaseEvent(QKeyEvent*,int)));
   connect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), this, SLOT(wheelEvent(QWheelEvent*,int)));
 
+  setVisible3D(window,true);
   return true;
 }
 
 //! Remove this object from the given renderer.
 bool rtEPRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
-  setVisible3D(false);
+  setVisible3D(window,false);
 
   if (ren->HasViewProp(m_pointActor)) {
     ren->RemoveViewProp(m_pointActor);

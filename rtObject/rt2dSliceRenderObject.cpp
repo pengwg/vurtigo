@@ -68,7 +68,7 @@ rt2DSliceRenderObject::~rt2DSliceRenderObject() {
 
 bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
-  setVisible3D(true);
+  setVisible3D(window,true);
 
   rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
   if (!dObj->isDataValid()) return false;
@@ -100,7 +100,7 @@ bool rt2DSliceRenderObject::addToRenderer(vtkRenderer* ren,int window) {
 
 bool rt2DSliceRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   if (!ren) return false;
-  setVisible3D(false);
+  setVisible3D(window,false);
 
   if(ren->HasViewProp(m_texturePlane.getActor())) {
     ren->RemoveViewProp(m_texturePlane.getActor());
