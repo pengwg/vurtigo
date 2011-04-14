@@ -160,7 +160,10 @@ public slots:
 
   //! Adjust the reslice position with a given ID.
   void adjustReslice(int slice);
+
  private:
+  //! The position (in 2D) of a mouse click
+  QPoint m_mousePos;
 
 };
 

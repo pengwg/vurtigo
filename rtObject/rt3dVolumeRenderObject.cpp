@@ -51,6 +51,8 @@ rt3DVolumeRenderObject::rt3DVolumeRenderObject() {
   m_currentPlane = -1;
   m_isInit = false;
   m_selectedProp = NULL;
+  m_mousePos.setX(-1);
+  m_mousePos.setY(-1);
 
   setupDataObject();
   setupPipeline();
@@ -684,8 +686,15 @@ void rt3DVolumeRenderObject::mousePressEvent(QMouseEvent* event, int window) {
       return;
   }
 
-  if (m_planeControl[m_currentPlane].isShowing()) {
-    m_planeControl[m_currentPlane].mousePressEvent(event,window);
+  if (m_planeControl[m_currentPlane].isShowing())
+  {
+      if (event->modifiers() == Qt::ShiftModifier)
+      {
+          m_mousePos.setX(event->globalX());
+          m_mousePos.setY(event->globalY());
+      }
+      else
+          m_planeControl[m_currentPlane].mousePressEvent(event,window);
     if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }     
 }
@@ -698,8 +707,48 @@ void rt3DVolumeRenderObject::mouseMoveEvent(QMouseEvent* event, int window) {
           rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
       return;
   }
-  if (m_planeControl[m_currentPlane].isShowing()) {
-    m_planeControl[m_currentPlane].mouseMoveEvent(event,window);
+
+  if (m_planeControl[m_currentPlane].isShowing())
+  {
+      // if we are holding down the button while moving
+      if ((event->modifiers() == Qt::ShiftModifier) && (m_mousePos.x() != -1))
+      {
+           rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
+           int minw,maxw,val,minl,maxl,stepw,stepl;
+           minw = dObj->getWLDialog()->windowSlider->minimum() / 1000;
+           maxw = dObj->getWLDialog()->windowSlider->maximum() / 1000;
+           minl = dObj->getWLDialog()->levelSlider->minimum() / 1000;
+           maxl = dObj->getWLDialog()->levelSlider->maximum() / 1000;
+           // find a step amount based on the range
+           stepw = (maxw - minw) / 200;
+           stepl = (maxl - minl) / 200;
+           stepw = (stepw < 1)? 1 : stepw;
+           stepl = (stepl < 1)? 1 : stepl;
+
+           int w = dObj->getWindow() + (int)( - event->globalY() + m_mousePos.y())*stepw;
+           if (w < 0)
+               w = 0;
+           int l = dObj->getLevel() + (int)(  event->globalX() - m_mousePos.x())*stepl;
+           if (l < 0)
+               l = 0;
+
+
+
+           val = (w>maxw)?maxw:(w - minw);
+           dObj->getWLDialog()->windowSlider->setValue(val*1000);
+           dObj->getWLDialog()->windowSliderChange(val*1000);
+
+           val = (l>maxl)?maxl:(l - minl);
+           dObj->getWLDialog()->levelSlider->setValue(val*1000);
+           dObj->getWLDialog()->levelSliderChange(val*1000);
+
+           m_mousePos.setX(event->globalX());
+           m_mousePos.setY(event->globalY());
+      }
+      else
+      {
+          m_planeControl[m_currentPlane].mouseMoveEvent(event,window);
+      }
     if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   } 
 }
@@ -712,6 +761,8 @@ void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event,int window) {
            rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
        return;
    }
+  // reset the last mouse press to nothing
+  m_mousePos.setX(-1);
 
   rt3DVolumeDataObject* dObj = static_cast<rt3DVolumeDataObject*>(m_dataObj);
 

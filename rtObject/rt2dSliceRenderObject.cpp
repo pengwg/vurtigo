@@ -40,6 +40,8 @@ rt2DSliceRenderObject::rt2DSliceRenderObject() {
   setName("2DSlice Renderer");
   // initialize!!!
   m_selectedProp = NULL;
+  m_mousePos.setX(-1);
+  m_mousePos.setY(-1);
   setupDataObject();
   setupPipeline();
 }
@@ -146,7 +148,13 @@ void rt2DSliceRenderObject::mousePressEvent(QMouseEvent* event,int window) {
       return;
   }
   if (m_control.isShowing()) {
-    m_control.mousePressEvent(event,window);
+      if (event->modifiers() == Qt::ShiftModifier)
+      {
+          m_mousePos.setX(event->globalX());
+          m_mousePos.setY(event->globalY());
+      }
+      else
+          m_control.mousePressEvent(event,window);
   }
 }
 
@@ -159,7 +167,44 @@ void rt2DSliceRenderObject::mouseMoveEvent(QMouseEvent* event,int window) {
       return;
   }
   if (m_control.isShowing()) {
-    m_control.mouseMoveEvent(event,window);
+      // if we are holding down the button while moving
+      if ((event->modifiers() == Qt::ShiftModifier) && (m_mousePos.x() != -1))
+      {
+          rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
+          int minw,maxw,val,minl,maxl,stepw,stepl;
+          minw = dObj->getWLDialog()->windowSlider->minimum() / 1000;
+          maxw = dObj->getWLDialog()->windowSlider->maximum() / 1000;
+          minl = dObj->getWLDialog()->levelSlider->minimum() / 1000;
+          maxl = dObj->getWLDialog()->levelSlider->maximum() / 1000;
+          // find a step amount based on the range
+          stepw = (maxw - minw) / 200;
+          stepl = (maxl - minl) / 200;
+          stepw = (stepw < 1)? 1 : stepw;
+          stepl = (stepl < 1)? 1 : stepl;
+
+          int w = dObj->getWindow() + (int)( - event->globalY() + m_mousePos.y())*stepw;
+          if (w < 0)
+              w = 0;
+          int l = dObj->getLevel() + (int)(  event->globalX() - m_mousePos.x())*stepl;
+          if (l < 0)
+              l = 0;
+
+
+
+          val = (w>maxw)?maxw:(w - minw);
+          dObj->getWLDialog()->windowSlider->setValue(val*1000);
+          dObj->getWLDialog()->windowSliderChange(val*1000);
+
+          val = (l>maxl)?maxl:(l - minl);
+          dObj->getWLDialog()->levelSlider->setValue(val*1000);
+          dObj->getWLDialog()->levelSliderChange(val*1000);
+
+          m_mousePos.setX(event->globalX());
+          m_mousePos.setY(event->globalY());
+      }
+      else
+
+          m_control.mouseMoveEvent(event,window);
   }
 }
 
@@ -171,6 +216,9 @@ void rt2DSliceRenderObject::mouseReleaseEvent(QMouseEvent* event,int window) {
             rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
       return;
   }
+  // reset the last mouse press to nothing
+   m_mousePos.setX(-1);
+
   if (m_control.isShowing()) {
     vtkTransform *t = vtkTransform::New();
     rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);

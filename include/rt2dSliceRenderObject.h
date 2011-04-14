@@ -86,6 +86,8 @@ public slots:
   QList<vtkWindowLevelLookupTable*> m_colorFunction;
   vtkImageBlend* m_imageBlend;
  private:
+  //! The position (in 2D) of a mouse click
+  QPoint m_mousePos;
 
 };
 

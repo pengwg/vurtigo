@@ -210,6 +210,8 @@ public:
   int getWindow() { return m_window; }
   //! Get the level part of the window level.
   int getLevel() { return m_level; }
+  //! Get the window level dialog
+  rtWindowLevelDialog *getWLDialog() {return m_wlDialog;}
   //! Get the Image type
   int getImageType() {return m_imgType;}
   //! Get the axial color

@@ -115,6 +115,8 @@ public:
   inline double getWindow() { return m_window; }
   //! Get the level part of the window level
   inline double getLevel() { return m_level; }
+  //! Get the window level dialog
+  rtWindowLevelDialog *getWLDialog() {return m_wlDialog;}
 
   inline void setManualOn() { m_optionsWidget.prescribeGroupBox->setChecked(true); }
   inline void setManualOff() { m_optionsWidget.prescribeGroupBox->setChecked(false); }
