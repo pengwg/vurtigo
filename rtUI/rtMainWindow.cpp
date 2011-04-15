@@ -74,6 +74,8 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   addNewRenderWindow();
   m_numRenWin = 1;
 
+  m_visTable = new QTableWidget;
+
   m_movingQuality = 0.5f;
   m_stillQuality = 1.0f;
 
@@ -736,6 +738,7 @@ void rtMainWindow::connectSignals() {
   connect(actionDefault_View, SIGNAL(triggered()), this , SLOT(cameraDefaultView()));
   connect(actionRobot_Arm, SIGNAL(triggered()), this, SLOT(cameraRobotArmView()));
   connect(actionTimer_Options, SIGNAL(triggered()), this, SLOT(showTimeOptionsDialog()));
+  connect(actionObject_Visibilities, SIGNAL(triggered()),this,SLOT(showObjectVisibilities()));
 
   // 2D View controls
   connect(add2DFrameBtn, SIGNAL(clicked()), this, SLOT(add2DFrame()));
@@ -798,6 +801,8 @@ void rtMainWindow::objectTreeContextMenu(QPoint pos)
         menu.addAction(actionSave_Object);
         menu.addAction(actionRename_Object);
         menu.addAction(actionDeleteSelected);
+        menu.addSeparator();
+        menu.addAction(actionObject_Visibilities);
         menu.exec(QCursor::pos());
     }
 }
@@ -1600,4 +1605,36 @@ void rtMainWindow::refreshRenderItems(bool flag)
             itemChanged(objectTree->topLevelItem(ix1)->child(ix2),2);
         }
       }
+}
+
+void rtMainWindow::showObjectVisibilities()
+{
+    QTreeWidgetItem* current=NULL;
+    rtRenderObject* temp=NULL;
+
+    current = objectTree->currentItem();
+
+    if (!current) return;
+
+    // Check for a heading.
+    if (current->columnCount() == 1) {
+      return;
+    }
+
+    // Find the object
+    temp = rtApplication::instance().getObjectManager()->getObjectWithID(current->text(1).toInt());
+    //rows,cols
+    m_visTable->clear();
+    m_visTable->clearContents();
+    QList<bool> objVis = temp->getVisible3D();
+    m_visTable->setRowCount(1);
+    m_visTable->setColumnCount(objVis.size());
+    for (int ix1=0; ix1<objVis.size(); ix1++)
+    {
+        if (objVis[ix1])
+            m_visTable->setItem(0,ix1,new QTableWidgetItem("ON"));
+        else
+            m_visTable->setItem(0,ix1,new QTableWidgetItem("OFF"));
+    }
+    m_visTable->show();
 }

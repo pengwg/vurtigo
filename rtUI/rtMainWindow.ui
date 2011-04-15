@@ -293,6 +293,7 @@
     <addaction name="actionCoordinate_Axes"/>
     <addaction name="action3D_Render_Options"/>
     <addaction name="actionTimer_Options"/>
+    <addaction name="actionObject_Visibilities"/>
    </widget>
    <widget class="QMenu" name="menuObjects">
     <property name="title">
@@ -523,6 +524,11 @@
   <action name="actionRename_Object">
    <property name="text">
     <string>Rename Object</string>
+   </property>
+  </action>
+  <action name="actionObject_Visibilities">
+   <property name="text">
+    <string>3D Object Visibilities</string>
    </property>
   </action>
  </widget>

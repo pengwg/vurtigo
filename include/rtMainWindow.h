@@ -41,6 +41,7 @@ class vtkProp;
 #include <QSemaphore>
 #include <QtHelp>
 #include <QTreeWidget>
+#include <QTableWidget>
 
 class rtRenderObject;
 class rtCameraControl;
@@ -179,6 +180,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   void showTimeOptionsDialog();
 
+  void showObjectVisibilities();
+
   void add2DFrame();
   void remove2DFrame();
   void removeAll2DFrame();
@@ -269,6 +272,9 @@ signals:
 
   //! The number of rendering windows we have
   int m_numRenWin;
+
+  //! The 3D object visibility widget
+  QTableWidget *m_visTable;
 
 
   //////////////////////
