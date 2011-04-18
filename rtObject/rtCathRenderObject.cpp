@@ -19,6 +19,8 @@
 *******************************************************************************/
 #include "rtCathRenderObject.h"
 #include "rtCathDataObject.h"
+#include "rtApplication.h"
+#include "rtMainWindow.h"
 #include <iostream>
 #include "rtApplication.h"
 #include "rtMainWindow.h"
@@ -40,12 +42,11 @@ rtCathRenderObject::~rtCathRenderObject() {
   }
 
   // Spheres Pipeline
-  for (int ix1=0 ; ix1<m_sphereList.size(); ix1++) {
-    if (m_sphereList[ix1]) m_sphereList[ix1]->Delete();
+  for (int ix1=0 ; ix1<m_sphereActor.size(); ix1++) {
+      if (m_sphereActor[ix1]) m_sphereActor[ix1]->Delete();
   }
-  if (m_sphereAppend) m_sphereAppend->Delete();
+  if (m_sphere) m_sphere->Delete();
   if (m_sphereMapper) m_sphereMapper->Delete();
-  if (m_sphereActor) m_sphereActor->Delete();
 }
 
 
@@ -57,9 +58,6 @@ void rtCathRenderObject::update() {
   rtCathDataObject* dObj = static_cast<rtCathDataObject*>(m_dataObj);
   if (!dObj) return;
 
-  // The catheter is rendered differently depending on the number of locations.
-  vtkSphereSource* temp;
-
   int numLoc = dObj->getNumLocations();
 
   // Check if there are no locations.
@@ -69,19 +67,32 @@ void rtCathRenderObject::update() {
     return;
   }
 
-  if (m_sphereList.size()!=numLoc) {
+    vtkActor *tempA;
+  if (m_sphereActor.size()!=numLoc) {
     // Number of locations has changed. So delete the old list and add a new one.
-    while (!m_sphereList.empty()) {
-      temp = m_sphereList.takeFirst();
-      m_sphereAppend->RemoveInput(temp->GetOutput());
-      temp->Delete();
+    while (!m_sphereActor.empty()) {
+      tempA = m_sphereActor.takeFirst();
+      for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+          rtApplication::instance().getMainWinHandle()->removeRenderItem(tempA,ix1);
+      tempA->Delete();
     }
+    m_sphereActor.clear();
+
     for (int ix1=0; ix1<numLoc; ix1++) {
-      temp = vtkSphereSource::New();
-      m_sphereList.append(temp);
-      m_sphereAppend->AddInput(temp->GetOutput());
+
+      vtkActor *actor = vtkActor::New();
+      actor->SetMapper(m_sphereMapper);
+      for (int ix2=0; ix2<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix2++)
+      {
+          if (getVisible3D().at(ix2))
+              rtApplication::instance().getMainWinHandle()->addRenderItem(actor,ix2);
+      }
+      m_sphereActor.append(actor);
+
     }
   }
+
+  m_sphere->SetRadius( ((double)dObj->getPointSize())/10.0f );
 
   double SNR;
   int loc;
@@ -94,30 +105,31 @@ void rtCathRenderObject::update() {
     dObj->getSNRAtLocation(loc, SNR);
   }
 
+
   if (numLoc == 1) {
     // Just one location. Render just a ball and no spline or anything else.
     // The the first and only sphere.
-    temp = m_sphereList.value(0);
-    temp->SetCenter(coords);
-    temp->SetThetaResolution(50);
-    temp->SetPhiResolution(50);
-    temp->SetRadius( ((double)dObj->getPointSize())/10.0f );
+    m_sphereActor[0]->SetPosition(coords);
+
     if (dObj->useSNRSize()) {
+        m_sphereActor[0]->SetProperty(vtkProperty::New());
         if ( SNR <= dObj->getBadSNR())
-        { m_sphereActor->GetProperty()->SetColor(1.0,0.0,0.0); }
+        { m_sphereActor[0]->GetProperty()->SetColor(1.0,0.0,0.0); }
         else if ( SNR <= dObj->getGoodSNR() )
-        { m_sphereActor->GetProperty()->SetColor(1.0,1.0,0.5); }
+        { m_sphereActor[0]->GetProperty()->SetColor(1.0,1.0,0.0); }
         else
-        { m_sphereActor->GetProperty()->SetColor(0.0,1.0,0.0); }
+        { m_sphereActor[0]->GetProperty()->SetColor(0.0,1.0,0.0); }
     } else {
         //refresh back to user given properties
+        m_sphereActor[0]->SetProperty( dObj->getPointProperty() );
         dObj->refreshProperties();
     }
 
 
     // Just the spheres need to be rendered so turn everythign off and then turn the spheres back on.
     visibilityOff();
-    m_sphereActor->VisibilityOn();
+    for (int ix1=0; ix1<m_sphereActor.size(); ix1++)
+        m_sphereActor[ix1]->VisibilityOn();
 
   } else if (numLoc > 1) {
     // Multiple locations. Render everyting.
@@ -153,20 +165,26 @@ void rtCathRenderObject::update() {
       dObj->getPositionAtLocation(loc, coords);
       dObj->getSNRAtLocation(loc, SNR);
 
-      temp = m_sphereList.value(ix1);
-      temp->SetCenter(coords);
-      temp->SetThetaResolution(50);
-      temp->SetPhiResolution(50);
-      temp->SetRadius( ((double)dObj->getPointSize())/10.0f );
+
+      m_sphereActor[ix1]->SetPosition(coords);
+
       if (dObj->useSNRSize()) {
+          m_sphereActor[ix1]->SetProperty(vtkProperty::New());
           if ( SNR <= dObj->getBadSNR() )
-          { m_sphereActor->GetProperty()->SetColor(1.0,0.0,0.0); }
+          {
+              m_sphereActor[ix1]->GetProperty()->SetColor(1.0,0.0,0.0);
+          }
           else if ( SNR <= dObj->getGoodSNR())
-          { m_sphereActor->GetProperty()->SetColor(1.0,1.0,0.5); }
+          {
+              m_sphereActor[ix1]->GetProperty()->SetColor(1.0,1.0,0.0);
+          }
           else
-          { m_sphereActor->GetProperty()->SetColor(0.0,1.0,0.0); }
+          {
+              m_sphereActor[ix1]->GetProperty()->SetColor(0.0,1.0,0.0);
+          }
       } else {
           //refresh back to user given properties
+          m_sphereActor[ix1]->SetProperty( dObj->getPointProperty() );
           dObj->refreshProperties();
       }
 
@@ -198,8 +216,12 @@ void rtCathRenderObject::update() {
 bool rtCathRenderObject::addToRenderer(vtkRenderer* ren, int window) {
   if (!ren) return false;
   setVisible3D(window,true);
-  if (!ren->HasViewProp(m_sphereActor)) {
-    ren->AddViewProp(m_sphereActor);
+
+  for (int ix1=0; ix1<m_sphereActor.size(); ix1++)
+  {
+      if (!ren->HasViewProp(m_sphereActor[ix1])) {
+          ren->AddViewProp(m_sphereActor[ix1]);
+      }
   }
   if (!ren->HasViewProp(m_cathArrow.getTubeActor())) {
     ren->AddViewProp(m_cathArrow.getTubeActor());
@@ -227,8 +249,12 @@ bool rtCathRenderObject::addToRenderer(vtkRenderer* ren, int window) {
 bool rtCathRenderObject::removeFromRenderer(vtkRenderer* ren, int window) {
   if (!ren) return false;
   setVisible3D(window,false);
-  if (ren->HasViewProp(m_sphereActor)) {
-    ren->RemoveViewProp(m_sphereActor);
+
+  for (int ix1=0; ix1<m_sphereActor.size(); ix1++)
+  {
+      if (ren->HasViewProp(m_sphereActor[ix1])) {
+          ren->RemoveViewProp(m_sphereActor[ix1]);
+      }
   }
   if (ren->HasViewProp(m_cathArrow.getTubeActor())) {
     ren->RemoveViewProp(m_cathArrow.getTubeActor());
@@ -274,16 +300,13 @@ void rtCathRenderObject::setupPipeline() {
     m_spline[ix1]->SetRightConstraint(1);
   }
 
-  // Spheres Pipeline
-  m_sphereAppend = vtkAppendPolyData::New();
-  m_sphereMapper = vtkPolyDataMapper::New();
-  m_sphereActor = vtkActor::New();
-
-  m_sphereMapper->SetInput(m_sphereAppend->GetOutput());
-  m_sphereActor->SetMapper(m_sphereMapper);
-  m_sphereActor->SetProperty( dObj->getPointProperty() );
-
   m_canRender3D = true;
+
+  m_sphere = vtkSphereSource::New();
+  m_sphere->SetThetaResolution(50);
+  m_sphere->SetPhiResolution(50);
+  m_sphereMapper = vtkPolyDataMapper::New();
+  m_sphereMapper->SetInputConnection(m_sphere->GetOutputPort());
 
   // But set their visibility to off
   visibilityOff();
@@ -291,21 +314,23 @@ void rtCathRenderObject::setupPipeline() {
 
 //! The position of the catheter tip is returned.
 bool rtCathRenderObject::getObjectLocation(double loc[6]) {
-  if (!m_sphereActor) return false;
+  if (!m_sphereActor[0]) return false;
 
-  m_sphereActor->GetBounds(loc);
+  m_sphereActor[0]->GetBounds(loc);
 
   return true;
 }
 
 void rtCathRenderObject::visibilityOn() {
-  m_sphereActor->VisibilityOn();
+  for (int ix1=0; ix1<m_sphereActor.size(); ix1++)
+      m_sphereActor[ix1]->VisibilityOn();
   m_cathArrow.tubeVisibilityOn();
   m_cathArrow.coneVisibilityOn();
 }
 
 void rtCathRenderObject::visibilityOff() {
-  m_sphereActor->VisibilityOff();
+  for (int ix1=0; ix1<m_sphereActor.size(); ix1++)
+      m_sphereActor[ix1]->VisibilityOff();
   m_cathArrow.tubeVisibilityOff();
   m_cathArrow.coneVisibilityOff();
 }

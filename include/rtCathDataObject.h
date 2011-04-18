@@ -108,10 +108,10 @@ public:
   inline void setSplineThickness(double thickness) { m_cathGuiSetup.thicknessSpinBox->setValue(thickness); }
 
   inline int getBadSNR() { return m_badSNR; }
-  inline void setBadSNR(int value) { m_cathGuiSetup.badSpin->setValue(value); }
+  inline void setBadSNR(int value) { badSNRChanged(value); }
 
   inline int getGoodSNR() { return m_goodSNR; }
-  inline void setGoodSNR(int value) { m_cathGuiSetup.goodSpin->setValue(value); }
+  inline void setGoodSNR(int value) { goodSNRChanged(value); }
 
  public slots:
   void splinePropertyDialog();

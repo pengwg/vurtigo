@@ -72,10 +72,9 @@ class rtCathRenderObject : public rtRenderObject {
   vtkSmartPointer<vtkKochanekSpline> m_spline[3];
 
   // Spheres Pipeline
-  QList<vtkSphereSource*> m_sphereList;
-  vtkSmartPointer<vtkAppendPolyData> m_sphereAppend;
-  vtkSmartPointer<vtkPolyDataMapper> m_sphereMapper;
-  vtkSmartPointer<vtkActor> m_sphereActor;
+  vtkSphereSource* m_sphere;
+  vtkPolyDataMapper* m_sphereMapper;
+  QList<vtkActor*> m_sphereActor;
 
  private:
 

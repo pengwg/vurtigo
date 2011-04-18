@@ -180,11 +180,11 @@ void TestSuiteBasic::run() {
       ptObj->setCoilCoords(c2, 1.6, 1.4, 1.3);
       ptObj->setCoilSNR(c2, 25);
       ptObj->setCoilCoords(c3, 13.2, 7.5, 2.5);
-      ptObj->setCoilSNR(c3, 40);
+      ptObj->setCoilSNR(c3, 80);
       ptObj->setCoilCoords(c4, 22.5, 9.0, 7.0);
-      ptObj->setCoilSNR(c4, 40);
+      ptObj->setCoilSNR(c4, 30);
       ptObj->setCoilCoords(c5, 27.3, 11.2, 9.1);
-      ptObj->setCoilSNR(c5, 40);
+      ptObj->setCoilSNR(c5, 10);
       ptObj->Modified();
       ptObj->unlock();
     }
