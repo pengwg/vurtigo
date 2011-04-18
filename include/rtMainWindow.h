@@ -181,6 +181,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void showTimeOptionsDialog();
 
   void showObjectVisibilities();
+  void visTableChanged(int row,int col);
 
   void add2DFrame();
   void remove2DFrame();

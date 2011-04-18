@@ -388,6 +388,8 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
   m_objectBrowseLayout->addWidget(baseWid);
   m_currentObjectWidget = baseWid;
 
+  if (m_visTable->isVisible()) showObjectVisibilities();
+
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::currItemChanged() end") );
 #endif
@@ -429,22 +431,28 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   if (current->checkState(column) == Qt::Checked) {
     for (int ix1=0; ix1<temp->getVisible3D().size(); ix1++)
       {
-
-        //if ( temp->addToRenderer(m_renderer3D) && temp->addToRenderer(m_localRenderer3D) ) {
-        if ( temp->addToRenderer(m_renderer3D[ix1],ix1) ) {
-            m_renderFlag3D = true;
+        if (!m_visTable->isVisible() || (m_visTable->isVisible() && temp->getVisible3D().at(ix1)))
+        {
+            //if ( temp->addToRenderer(m_renderer3D) && temp->addToRenderer(m_localRenderer3D) ) {
+            if ( temp->addToRenderer(m_renderer3D[ix1],ix1) ) {
+                m_renderFlag3D = true;
+            }
         }
 
     }
   } else {
       for (int ix1=0; ix1<temp->getVisible3D().size(); ix1++)
       {
+
           //if ( temp->removeFromRenderer(m_renderer3D) && temp->removeFromRenderer(m_localRenderer3D) ) {
           if ( temp->removeFromRenderer(m_renderer3D[ix1],ix1) ) {
               m_renderFlag3D = true;
           }
+
       }
   }
+
+   if (m_visTable->isVisible()) showObjectVisibilities();
 
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::itemChanged() end") );
@@ -739,6 +747,7 @@ void rtMainWindow::connectSignals() {
   connect(actionRobot_Arm, SIGNAL(triggered()), this, SLOT(cameraRobotArmView()));
   connect(actionTimer_Options, SIGNAL(triggered()), this, SLOT(showTimeOptionsDialog()));
   connect(actionObject_Visibilities, SIGNAL(triggered()),this,SLOT(showObjectVisibilities()));
+  connect(m_visTable, SIGNAL(cellChanged(int,int)),this,SLOT(visTableChanged(int,int)));
 
   // 2D View controls
   connect(add2DFrameBtn, SIGNAL(clicked()), this, SLOT(add2DFrame()));
@@ -900,6 +909,7 @@ void rtMainWindow::addRenWinPressed()
 
     m_numRenWin++;
     refreshRenderItems(true);
+    if (m_visTable->isVisible()) showObjectVisibilities();
     if (m_axesProperties) {
         setViewType( m_axesProperties->getViewType() );
         setCoordType( m_axesProperties->getCoordType() );
@@ -915,6 +925,7 @@ void rtMainWindow::remRenWinPressed()
         m_render3DVTKWidget[m_numRenWin-1]->hide();
         m_numRenWin--;
         refreshRenderItems(false);
+        if (m_visTable->isVisible()) showObjectVisibilities();
     }
 }
 
@@ -1605,6 +1616,7 @@ void rtMainWindow::refreshRenderItems(bool flag)
             itemChanged(objectTree->topLevelItem(ix1)->child(ix2),2);
         }
       }
+      m_renderFlag3D = true;
 }
 
 void rtMainWindow::showObjectVisibilities()
@@ -1626,15 +1638,64 @@ void rtMainWindow::showObjectVisibilities()
     //rows,cols
     m_visTable->clear();
     m_visTable->clearContents();
+    // get the visibilities
     QList<bool> objVis = temp->getVisible3D();
+
+    // setup the table
     m_visTable->setRowCount(1);
     m_visTable->setColumnCount(objVis.size());
+    QTableWidgetItem *tempItem;
     for (int ix1=0; ix1<objVis.size(); ix1++)
     {
+        tempItem = new QTableWidgetItem();
+        tempItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
         if (objVis[ix1])
-            m_visTable->setItem(0,ix1,new QTableWidgetItem("ON"));
-        else
-            m_visTable->setItem(0,ix1,new QTableWidgetItem("OFF"));
+        {
+            tempItem->setCheckState(Qt::Checked);
+            tempItem->setText("ON");
+
+        }
+        else if (!objVis[ix1])
+        {
+            tempItem->setCheckState(Qt::Unchecked);
+            tempItem->setText("OFF");
+        }
+
+        m_visTable->setItem(0,ix1,tempItem);
     }
+    m_visTable->setMaximumHeight(80);
+    m_visTable->setWindowTitle(temp->getDataObject()->getObjName() + " - Visibilities");
+    QStringList vhead;
+    vhead.append("Visible?");
+    m_visTable->setVerticalHeaderLabels(vhead);
     m_visTable->show();
+}
+
+void rtMainWindow::visTableChanged(int row,int col)
+{
+    if (row == 0)
+    {
+        rtRenderObject* temp = rtApplication::instance().getObjectManager()->getObjectWithID(objectTree->currentItem()->text(1).toInt());
+        QTableWidgetItem *item = m_visTable->item(row,col);
+        if (item->checkState()==Qt::Checked)
+        {
+            item->setText("ON");
+            temp->setVisible3D(col,true);
+            // if we turn one on, set global check on as well
+            objectTree->currentItem()->setCheckState(2,Qt::Checked);
+            if (temp->addToRenderer(m_renderer3D[col],col))
+                m_renderFlag3D = true;
+
+        }
+        else if (item->checkState()==Qt::Unchecked)
+        {
+            item->setText("OFF");
+            temp->setVisible3D(col,false);
+            // if we just unchecked them all
+            if (!temp->getVisible3D().contains(true))
+                objectTree->currentItem()->setCheckState(2,Qt::Unchecked);
+            if (temp->removeFromRenderer(m_renderer3D[col],col))
+                m_renderFlag3D = true;
+        }
+    }
 }

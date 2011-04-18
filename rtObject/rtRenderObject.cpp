@@ -132,7 +132,9 @@ void rtRenderObject::setVisible3D(int window,bool v) {
 void rtRenderObject::setVisible3DAll(QList<bool> v)
 {
     if( !rtApplication::instance().getTimeManager() ) return;
-    m_visible3D = v;
+    m_visible3D.clear();
+    for (int ix1=0; ix1<v.size(); ix1++)
+        m_visible3D.append(v[ix1]);
     if (v.contains(true))
     {
         tryUpdate();
