@@ -30,6 +30,7 @@
 
 #include <vtkProperty.h>
 #include <vtkTransform.h>
+#include <vtkXYPlotActor.h>
 
 //! A buffer of 3D points
 class rt3DPointBufferDataObject : public rtDataObject
@@ -139,6 +140,9 @@ public:
   void rotMinusZ();
   void scaleChanged(double val);
 
+  //! Plot the currently chosen properties in a 2D plot
+  void plotProperties();
+
   //! Slot called when the user chooses to clear the point data.
   void clearPointDataPressed();
 
@@ -214,6 +218,9 @@ public:
   //! The filename to save to if one has been chosen
   QString m_saveFileName;
 
+  //! The XY plot actor
+  vtkXYPlotActor *m_plot;
+
   // Functions
   //! Set the GUI widgets.
   /*!
@@ -233,6 +240,9 @@ public:
 
   //! Update the list of column headers based on the current points.
   void updateColumnHeaders();
+
+  //! Update the lists of plot properties
+  void updatePlotProperties();
 
   //! The buffer data tag has been reached.
   /*!

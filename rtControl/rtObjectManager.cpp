@@ -39,6 +39,7 @@
 #include "rtImageBufferRenderObject.h"
 #include "rt2dPointRenderObject.h"
 #include "rtEPRenderObject.h"
+#include "rt2DPlotRenderObject.h"
 #include "rtApplication.h"
 
 #include <QMutexLocker>
@@ -126,7 +127,10 @@ rtRenderObject* rtObjectManager::addObjectOfType(QString objType, QString objNam
   } else if (objType == "OT_3DPointBuffer")
   {
       temp=new rt3DPointBufferRenderObject();
-  } else if (objType == "OT_TextLabel")
+  } else if (objType == "OT_2DPlot")
+  {
+      temp=new rt2DPlotRenderObject();
+  }else if (objType == "OT_TextLabel")
   {
       temp=new rtLabelRenderObject();
   } else

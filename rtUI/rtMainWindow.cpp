@@ -33,6 +33,9 @@
 #include <vtkProp3D.h>
 #include <vtk3DSImporter.h>
 #include <vtkSmartPointer.h>
+#include <vtkAxesActor.h>
+#include <vtkProp.h>
+#include <vtkContextView.h>
 
 #include <iostream>
 #include <cmath>
@@ -80,6 +83,8 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   addNewRenderWindow();
   m_numRenWin = 1;
+
+  setupContextView();
 
   m_visTable = new QTableWidget;
 
@@ -161,6 +166,21 @@ rtMainWindow::~rtMainWindow() {
 
   }
 
+  //remove the 2D Plots
+  for (ix1=0; ix1<m_2DContextView.size(); ix1++)
+  {
+      if (m_2DContextView[ix1]) m_2DContextView[ix1]->Delete();
+      if (m_2DPlotWidget[ix1]) delete m_2DPlotWidget[ix1];
+  }
+
+  // remove the 2D context view
+  /*
+  if (m_2DContextViewInteractor)
+  {
+      m_2DContextViewInteractor->Disable();
+      m_2DContextViewInteractor->Delete();
+  }
+*/
   clearPluginList();
   clearObjectList();
 
@@ -177,6 +197,7 @@ rtMainWindow::~rtMainWindow() {
 
   if (m_render3DLayout) delete m_render3DLayout;
   if (m_objectBrowseLayout) delete m_objectBrowseLayout;
+  if (m_2DPlotLayout) delete m_2DPlotLayout;
 
 
   //if (m_localRenderer3D) m_localRenderer3D->Delete();
@@ -835,8 +856,10 @@ void rtMainWindow::populateObjectTypeNames() {
   m_rtObjectTypeNames.insert("OT_vtkColorTransferFunction", "Color Function");
   m_rtObjectTypeNames.insert("OT_ImageBuffer", "Image Buffer");
   m_rtObjectTypeNames.insert("OT_2DPointBuffer", "2D Point Buffer");
+  m_rtObjectTypeNames.insert("OT_2DPlot", "2D Plot");
   m_rtObjectTypeNames.insert("OT_3DPointBuffer", "3D Point Buffer");
   m_rtObjectTypeNames.insert("OT_TextLabel", "Text Label");
+
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::populateObjectTypeNames() end") );
 #endif
@@ -1788,6 +1811,7 @@ void rtMainWindow::setGlobalOn(QTreeWidgetItem *item)
 
 }
 
+
 void rtMainWindow::addNewObjectType(QString type)
 {
     m_rtObjectTypeNames.insert(type,type);
@@ -1801,4 +1825,70 @@ void rtMainWindow::deselectAll()
   QListIterator<rtRenderObject*> itr(rtApplication::instance().getObjectManager()->getAllObjects());
   while (itr.hasNext())
     itr.next()->deselect();
+}
+
+void rtMainWindow::setupContextView()
+{
+    m_2DPlotLayout = new QVBoxLayout();
+    m_2DPlotLayout->setContentsMargins(0,0,0,0);
+    plotFrame->setLayout(m_2DPlotLayout);
+
+}
+
+int rtMainWindow::addNewPlot()
+{
+
+    if (m_2DContextView.size() == 0)
+    {
+        QList<int> sizes = plotSplitter->sizes();
+        // make the plot widget visible
+        sizes[1] = 300;
+        plotSplitter->setSizes(sizes);
+    }
+
+
+    vtkContextView *newContext = vtkContextView::New();
+    QVTKWidget *newWidget = new QVTKWidget();
+
+    newContext->SetInteractor(newWidget->GetInteractor());
+    newWidget->SetRenderWindow(newContext->GetRenderWindow());
+    m_2DPlotWidget.append(newWidget);
+    m_2DContextView.append(newContext);
+
+    m_2DPlotLayout->addWidget(newWidget);
+    return m_2DContextView.size() - 1;
+
+    //m_2DContextViewInteractor = vtkSmartPointer<vtkRenderWindowInteractor>::New();
+    //m_2DContextViewInteractor->SetRenderWindow(m_2DContextView->GetRenderWindow());
+
+    // initialize the interactor
+    //m_2DContextViewInteractor->Initialize();
+    //m_2DContextViewInteractor->Start();
+}
+
+void rtMainWindow::removePlot(int index)
+{
+    if (index >= m_2DPlotWidget.size()) return;
+
+    m_2DPlotLayout->removeWidget(m_2DPlotWidget[index]);
+    delete m_2DPlotWidget[index];
+    m_2DContextView[index]->Delete();
+    m_2DPlotWidget.removeAt(index);
+    m_2DContextView.removeAt(index);
+
+    if (m_2DContextView.size() == 0)
+    {
+        QList<int> sizes = plotSplitter->sizes();
+        // make the plot widget invisible
+        sizes[1] = 0;
+        plotSplitter->setSizes(sizes);
+    }
+}
+
+void rtMainWindow::removeContextView(vtkContextView *view)
+{
+    if (m_2DContextView.contains(view))
+    {
+        removePlot(m_2DContextView.indexOf(view));
+    }
 }

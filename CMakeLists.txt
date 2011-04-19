@@ -171,6 +171,7 @@ target_link_libraries(VurtigoBase
   vtkCommon
   vtkRendering
   vtkVolumeRendering
+  vtkCharts
   QVTK
   rtMessage
   DCMTKVurtigo

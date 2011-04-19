@@ -27,6 +27,8 @@ set ( RTOBJECT_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/rtImageBufferRenderObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rt2dPointDataObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rt2dPointRenderObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt2DPlotDataObject.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rt2DPlotRenderObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtEPDataObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtEPRenderObject.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rtEPInfoObject.cpp
@@ -60,6 +62,7 @@ set (RTOBJECT_MOC_FILES
   ${CMAKE_HOME_DIRECTORY}/include/rtColorFuncDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rtImageBufferDataObject.h
   ${CMAKE_HOME_DIRECTORY}/include/rt2dPointDataObject.h
+  ${CMAKE_HOME_DIRECTORY}/include/rt2DPlotDataObject.h
   CACHE INTERNAL "rtObject Files to be processed by Qt first"
 )
 

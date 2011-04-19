@@ -31,11 +31,24 @@
 #include "rt3dPointBufferDataObject.h"
 #include "rtObjectManager.h"
 #include "FilterDialog.h"
+#include "rt2DPlotDataObject.h"
+#include "rt2DPlotRenderObject.h"
+#include <vtkPlot.h>
+#include <vtkAxis.h>
+
+#include <vtkChartXY.h>
+#include <vtkContextScene.h>
+
+#include <vtkDataArray.h>
+#include <vtkFieldData.h>
+#include <vtkDataObject.h>
+#include <vtkSphereSource.h>
 
 //! Constructor
 rt3DPointBufferDataObject::rt3DPointBufferDataObject()
 : m_currentScale(1.0), m_pointZoom(1.0), m_saveFileName("")
 {
+  m_plot = vtkXYPlotActor::New();
   removeAllPoints();
   setObjectType("OT_3DPointBuffer");
   setupGUI();
@@ -45,6 +58,7 @@ rt3DPointBufferDataObject::rt3DPointBufferDataObject()
 
 //! Destructor
 rt3DPointBufferDataObject::~rt3DPointBufferDataObject() {
+  m_plot->Delete();
   removeAllPoints();
   cleanupGUI();
 }
@@ -544,6 +558,99 @@ void rt3DPointBufferDataObject::addNewTagButton() {
   }
 }
 
+void rt3DPointBufferDataObject::plotProperties()
+{
+    if (m_optionsWidget.xAxisProperty->currentIndex() == -1) return;
+    if (m_optionsWidget.yAxisProperty->currentIndex() == -1) return;
+
+    vtkDataArray *xdata = vtkDataArray::CreateDataArray(VTK_DOUBLE);
+    vtkDataArray *ydata = vtkDataArray::CreateDataArray(VTK_DOUBLE);
+
+
+    double x,y;
+
+
+    if (m_optionsWidget.selectedRadio->isChecked())
+    {
+        if (m_selectedItems.size() == 0)
+            return;
+
+        xdata->SetNumberOfTuples(m_selectedItems.size());
+        ydata->SetNumberOfTuples(m_selectedItems.size());
+
+        for (int ix1=0; ix1<m_selectedItems.size(); ix1++)
+        {
+            x = getPointWithId(m_selectedItems[ix1])->getValue(m_optionsWidget.xAxisProperty->currentText());
+            xdata->SetTuple(ix1,&x);
+            y = getPointWithId(m_selectedItems[ix1])->getValue(m_optionsWidget.yAxisProperty->currentText());
+            ydata->SetTuple(ix1,&y);
+        }
+    }
+    else if (m_optionsWidget.allRadio->isChecked())
+    {
+        xdata->SetNumberOfTuples(getPointListSize());
+        ydata->SetNumberOfTuples(getPointListSize());
+
+        for (int ix1=0; ix1<getPointListSize(); ix1++)
+        {
+            x = getPointAtIndex(ix1)->getValue(m_optionsWidget.xAxisProperty->currentText());
+            xdata->SetTuple(ix1,&x);
+            y = getPointAtIndex(ix1)->getValue(m_optionsWidget.yAxisProperty->currentText());
+            ydata->SetTuple(ix1,&y);
+        }
+    }
+/*  VTK Legacy Method of plotting
+    /////////////////////////////
+
+    vtkFieldData *fData = vtkFieldData::New();
+    fData->AllocateArrays(2);
+    fData->AddArray(xdata);
+    fData->AddArray(ydata);
+
+    vtkDataObject *dObj = vtkDataObject::New();
+    dObj->SetFieldData(fData);
+
+    m_plot->Delete();
+    m_plot = vtkXYPlotActor::New();
+
+    m_plot->AddDataObjectInput(dObj);
+
+    m_plot->SetXValuesToValue();
+    m_plot->SetDataObjectXComponent(0,0);
+    m_plot->SetDataObjectYComponent(0,1);
+
+    m_plot->SetPosition(0.1,0.7);
+    m_plot->SetWidth(0.7);
+    m_plot->SetHeight(0.3);
+
+    m_plot->SetTitle(QString(m_optionsWidget.yAxisProperty->currentText() + " vs. " + m_optionsWidget.xAxisProperty->currentText()).toStdString().c_str());
+    m_plot->SetXTitle(m_optionsWidget.xAxisProperty->currentText().toStdString().c_str());
+    m_plot->SetYTitle(m_optionsWidget.yAxisProperty->currentText().toStdString().c_str());
+
+    //vtkSphereSource *symb = vtkSphereSource::New();
+    //m_plot->SetPlotSymbol(0,symb->GetOutput());
+    //symb->Delete();
+    m_plot->GetProperty()->SetPointSize(5);
+    m_plot->PlotPointsOn();
+
+    // which render window do we put it in? for now just put in window 0
+    rtApplication::instance().getMainWinHandle()->getRenderer(0)->AddActor(m_plot);
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+*/
+    rt2DPlotRenderObject *rObj;
+    rObj = static_cast<rt2DPlotRenderObject *>(rtApplication::instance().getObjectManager()->addObjectOfType("OT_2DPlot",QString(this->getObjName() + ": " + m_optionsWidget.yAxisProperty->currentText() + " vs. " + m_optionsWidget.xAxisProperty->currentText())));
+    rt2DPlotDataObject *plot = static_cast<rt2DPlotDataObject *>(rObj->getDataObject());
+    xdata->SetName(m_optionsWidget.xAxisProperty->currentText().toStdString().c_str());
+    ydata->SetName(m_optionsWidget.yAxisProperty->currentText().toStdString().c_str());
+    plot->addDataArray(xdata);
+    plot->addDataArray(ydata);
+
+    rObj->createPlot(0,1);
+    rObj->getPlotAtIndex(0)->SetLabel(plot->getObjName().toStdString().c_str());
+    rObj->getPlotAtIndex(0)->GetXAxis()->SetTitle(xdata->GetName());
+    rObj->getPlotAtIndex(0)->GetYAxis()->SetTitle(ydata->GetName());
+}
+
 void rt3DPointBufferDataObject::updateGuiPointList() {
   QHash<int, rtNamedInfoPointData>::iterator i;
   QList<QString> tagList;
@@ -693,6 +800,7 @@ void rt3DPointBufferDataObject::tableCellChanged(int row, int col) {
 
 void rt3DPointBufferDataObject::pointListModifiedSlot() {
   updateGuiPointList();
+  updatePlotProperties();
   Modified();
 }
 
@@ -739,6 +847,9 @@ void rt3DPointBufferDataObject::setupGUI() {
   connect( m_optionsWidget.rotateYMinus, SIGNAL(clicked()), this, SLOT(rotMinusY()) );
   connect( m_optionsWidget.rotateZMinus, SIGNAL(clicked()), this, SLOT(rotMinusZ()) );
   connect( m_optionsWidget.scaleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(scaleChanged(double)) );
+
+  //connect the plot buttons
+  connect( m_optionsWidget.plotButton, SIGNAL(clicked()), this, SLOT(plotProperties()));
 }
 
 void rt3DPointBufferDataObject::cleanupGUI() {
@@ -766,6 +877,37 @@ void rt3DPointBufferDataObject::updateColumnHeaders() {
         m_columnHeaderList.append(tagList[ix1]);
     }
   }
+}
+
+void rt3DPointBufferDataObject::updatePlotProperties()
+{
+
+    m_optionsWidget.xAxisProperty->clear();
+    m_optionsWidget.yAxisProperty->clear();
+    /*
+    m_optionsWidget.xAxisProperty->insertItem(0,"Point ID" );
+    m_optionsWidget.xAxisProperty->insertItem(1, "X" );
+    m_optionsWidget.xAxisProperty->insertItem(2, "Y" );
+    m_optionsWidget.xAxisProperty->insertItem(3, "Z" );
+    m_optionsWidget.xAxisProperty->insertItem(4, "Timestamp (ms)" );
+
+    m_optionsWidget.yAxisProperty->insertItem(0,"Point ID" );
+    m_optionsWidget.yAxisProperty->insertItem(1, "X" );
+    m_optionsWidget.yAxisProperty->insertItem(2, "Y" );
+    m_optionsWidget.yAxisProperty->insertItem(3, "Z" );
+    m_optionsWidget.yAxisProperty->insertItem(4, "Timestamp (ms)" );
+
+    for (int ix1=0; ix1<m_columnHeaderList.size(); ix1++)
+    {
+        m_optionsWidget.xAxisProperty->insertItem(6+ix1,m_columnHeaderList[ix1]);
+        m_optionsWidget.yAxisProperty->insertItem(6+ix1,m_columnHeaderList[ix1]);
+    }
+    */
+    for (int ix1=0; ix1<m_columnHeaderList.size(); ix1++)
+    {
+        m_optionsWidget.xAxisProperty->insertItem(ix1,m_columnHeaderList[ix1]);
+        m_optionsWidget.yAxisProperty->insertItem(ix1,m_columnHeaderList[ix1]);
+    }
 }
 
 

@@ -29,6 +29,7 @@ class vtkProp;
 class vtk3DSImporter;
 
 #include "vtkSmartPointer.h"
+class vtkContextView;
 
 // Remove the conflict with AssertMacros.h
 // Conflict occurs in OSX
@@ -83,11 +84,26 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   */
   ~rtMainWindow();
 
-  //! Get the pointer to the render window
+  //! Get the pointer to a render window
   vtkRenderWindow* getRenderWindow(int window);
 
-  //! Get the pointer to the renderer
+  //! Get the pointer to a renderer
   vtkRenderer* getRenderer(int window = 0);
+
+  //////////////
+  // 2D Plots
+  //////////////
+  //! Get the pointer to a 2DContextView
+  vtkContextView* getContextView(int index) {return m_2DContextView[index];}
+  //vtkRenderWindowInteractor* getContextViewInteractor() { return m_2DContextViewInteractor; }
+  QVTKWidget* get2DPlotWidget(int index) { return m_2DPlotWidget[index]; }
+  //! add a new Plot window, return the index of the new plot made
+  int addNewPlot();
+  //! remove a Plot window
+  void removePlot(int index);
+  //! remove a Plot window given its context view
+  void removeContextView(vtkContextView *view);
+
   QTreeWidget* getObjectTree();
   customQVTKWidget* getRenderWidget(int window) { return m_render3DVTKWidget[window]; }
 
@@ -230,9 +246,16 @@ signals:
   QHBoxLayout m_only2DLayout;
   QHBoxLayout m_dual3DLayout;
 
+  // the 3D render windows
   QList<vtkRenderWindow *>m_renWin3D;
   QList<vtkRenderer *>m_renderer3D;
   QList<rtCameraControl *>m_cameraControl;
+
+  //the 2D Plot view
+  QList<vtkContextView*> m_2DContextView;
+  //vtkSmartPointer<vtkRenderWindowInteractor> m_2DContextViewInteractor;
+  QList<QVTKWidget *> m_2DPlotWidget;
+  QVBoxLayout *m_2DPlotLayout;
 
   //vtkRenderer * m_localRenderer3D;
   //rtCameraControl *m_localCameraControl;
@@ -312,6 +335,8 @@ signals:
   vtkSmartPointer<vtkProp3D> getOrientationProp();
   vtkProp3D *createDefaultProp();
   vtkProp3D *createXYZProp();
+
+  void setupContextView();
 
 private:
 
