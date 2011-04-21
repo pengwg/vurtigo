@@ -262,6 +262,10 @@ public:
   //! Get the move offset
   double getMoveOffset() {return m_moveOffset;}
 
+  void setCanGPU(bool canGPU) {m_canGPU = canGPU;}
+
+  void setupGPUGUI();
+
  public slots:
   //! Slot called when the user changes the surface function.
   void surfaceFunctionChanged();
@@ -347,6 +351,9 @@ public:
     }
   }
 
+  //! Turn GPU rendering on or off
+  void gpuBoxChecked(bool flag) {m_gpuBoxOn = flag; setupGPUGUI(); emit gpuSignal(flag);}
+
  signals:
   //! The volume has received new image data
   void newImageData();
@@ -359,6 +366,8 @@ public:
   void coronalResetSignal();
   //! Tell the render object to turn on/off bounding box
   void boundBoxSignal(bool);
+  //! Tell the render object to turn gpu render on/off
+  void gpuSignal(bool);
 
   //! Move the given slice planes to the move point
   void slicePlaneMoveSignal(bool,bool,bool);
@@ -448,6 +457,11 @@ public:
 
   //! The offset of the move point
   double m_moveOffset;
+
+  //! The GPU checkbox is on
+  bool m_gpuBoxOn;
+  //! GPU rendering is supported
+  bool m_canGPU;
 
 
 };

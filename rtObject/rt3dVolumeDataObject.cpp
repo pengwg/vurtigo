@@ -281,8 +281,6 @@ bool rt3DVolumeDataObject::copyNewImageData(vtkImageData* temp) {
   m_optionsWidget.isoValueSlider->setMaximum(m_window);
   m_optionsWidget.isoValueSlider->setValue(m_level);
 
-
-
   m_imgDataValid = true;
   emit newImageData();
   Modified();
@@ -803,6 +801,9 @@ void rt3DVolumeDataObject::setupGUI() {
   // Pickable volume
   connect(m_optionsWidget.volumePickableCheckBox, SIGNAL(toggled(bool)), this, SLOT(Modified()));
 
+  // GPU Enable
+  connect(m_optionsWidget.gpuBox,SIGNAL(toggled(bool)),this, SLOT(gpuBoxChecked(bool)));
+
   // Window Level
   connect(m_optionsWidget.wlButton, SIGNAL(clicked()), this, SLOT(showWindowLevel()));
 
@@ -868,6 +869,20 @@ void rt3DVolumeDataObject::setupGUI() {
     m_optionsWidget.comboCTFunc->addItem(QString::number(colorFuncs.at(ix1)));
   }
   m_optionsWidget.interpolateComboBox->setCurrentIndex(m_interpolationType);
+}
+
+void rt3DVolumeDataObject::setupGPUGUI()
+{
+    m_optionsWidget.gpuBox->setEnabled(m_canGPU);
+    if (m_canGPU)
+    {
+        m_optionsWidget.radioComposite->setEnabled(!m_gpuBoxOn);
+        m_optionsWidget.radioIsosurface->setEnabled(!m_gpuBoxOn);
+        m_optionsWidget.radioMIP->setEnabled(!m_gpuBoxOn);
+        m_optionsWidget.isoValueSlider->setEnabled(!m_gpuBoxOn);
+        m_optionsWidget.isoValueLabel->setEnabled(!m_gpuBoxOn);
+        m_optionsWidget.label_5->setEnabled(!m_gpuBoxOn);
+    }
 }
 
 
