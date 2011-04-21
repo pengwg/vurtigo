@@ -1,0 +1,4 @@
+<plugin>
+  <name title="Image Reader" version="1.0"/>
+  <lib libname="ImageReader" libpath="/home/spintilie/Code/Vurtigo-build/bin/"/>
+</plugin>

@@ -14,9 +14,9 @@ if (VURTIGO_PLUGIN_TEST_SUITE)
 add_subdirectory(TestSuite)
 endif (VURTIGO_PLUGIN_TEST_SUITE)
 
-set(VURTIGO_PLUGIN_DICOM_READER ON CACHE BOOL "Compile the DICOM Reader Plugin")
+set(VURTIGO_PLUGIN_DICOM_READER ON CACHE BOOL "Compile the Image Reader Plugin")
 if (VURTIGO_PLUGIN_DICOM_READER)
-add_subdirectory(DICOMReader)
+add_subdirectory(ImageReader)
 endif (VURTIGO_PLUGIN_DICOM_READER)
 
 set(VURTIGO_PLUGIN_CARDIACMESH_READER ON CACHE BOOL "Compile the Cardiac Mesh Reader Plugin")

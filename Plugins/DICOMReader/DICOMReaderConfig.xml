@@ -1,4 +1,0 @@
-<plugin>
-  <name title="DICOM Reader" version="1.0"/>
-  <lib libname="DICOMReader" libpath="/home/spintilie/Code/Vurtigo-build/bin/"/>
-</plugin>

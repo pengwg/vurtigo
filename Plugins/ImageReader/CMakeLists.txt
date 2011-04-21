@@ -21,16 +21,16 @@ qt4_wrap_ui(UI_DICOM_OUT ${UI_FILES_DICOM})
 qt4_wrap_cpp(DICOM_MOC_FILES_OUT ${DICOM_MOC_FILES} )
 
 include_directories( 
-  ${CMAKE_BINARY_DIR}/Plugins/DICOMReader 
+  ${CMAKE_BINARY_DIR}/Plugins/ImageReader 
 )
 
-add_library(DICOMReader SHARED 
+add_library(ImageReader SHARED 
   ${DICOM_SRC_FILES} 
   ${UI_DICOM_OUT} 
   ${DICOM_MOC_FILES_OUT}
 )
 
-target_link_libraries(DICOMReader 
+target_link_libraries(ImageReader 
   ${QT_LIBRARIES} 
   VurtigoBase 
   DCMTKVurtigo
