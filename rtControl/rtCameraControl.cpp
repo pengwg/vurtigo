@@ -227,6 +227,12 @@ void rtCameraControl::keyPress(QKeyEvent* ev) {
     case (Qt::Key_Down):
     m_camera->Elevation(1);
     break;
+  case (Qt::Key_PageUp):
+    m_camera->Roll(1);
+    break;
+  case (Qt::Key_PageDown):
+    m_camera->Roll(-1);
+    break;
     default:
     refresh = false;
     break;
