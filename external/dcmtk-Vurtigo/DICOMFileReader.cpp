@@ -195,6 +195,10 @@ bool DICOMFileReader::setDirectory(QString dirPath, imageType type) {
               m_comments.append("Image Number: ===== " + QString::number(ix1+1) + " ===== \n");
               nameList->InsertValue(ix1,fileDir.filePath(files.at(ix1)).toStdString().c_str());
           }
+          else
+          {
+              m_comments.append("Image Number: ===== " + QString::number(ix1+1) + " =====   NOT LOADED\n");
+          }
       }
 
       if (type == DICOMFileReader::I_JPEG)
