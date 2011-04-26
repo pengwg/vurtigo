@@ -168,6 +168,15 @@ void customQVTKWidget::mouseDoubleClickEvent(QMouseEvent* event) {
 
 void customQVTKWidget::keyPressEvent(QKeyEvent* event) {
 
+    for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+    {
+        if (this == rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1))
+        {
+            emit cameraKeyPress(event,ix1);
+            event->ignore();
+        }
+    }
+
 }
 
 

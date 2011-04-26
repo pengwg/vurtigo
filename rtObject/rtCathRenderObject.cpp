@@ -20,6 +20,9 @@
 #include "rtCathRenderObject.h"
 #include "rtCathDataObject.h"
 #include <iostream>
+#include "rtApplication.h"
+#include "rtMainWindow.h"
+#include "customQVTKWidget.h"
 
 rtCathRenderObject::rtCathRenderObject() {
   setObjectType(rtConstants::OT_Cath);
@@ -188,6 +191,19 @@ bool rtCathRenderObject::addToRenderer(vtkRenderer* ren, int window) {
   if (!ren->HasViewProp(m_cathArrow.getConeActor())) {
     ren->AddViewProp(m_cathArrow.getConeActor());
   }
+
+  // Connect signals and slots for interaction.
+  customQVTKWidget* renWid;
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
+  // Connect mouse actions
+  connect(renWid, SIGNAL(interMousePress(QMouseEvent*,int)), this, SLOT(mousePressEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMoveEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(mouseReleaseEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interKeyPress(QKeyEvent*,int)), this, SLOT(keyPressEvent(QKeyEvent*,int)));
+  connect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), this, SLOT(keyReleaseEvent(QKeyEvent*,int)));
+  connect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), this, SLOT(wheelEvent(QWheelEvent*,int)));
+
   return true;
 }
 
@@ -204,6 +220,19 @@ bool rtCathRenderObject::removeFromRenderer(vtkRenderer* ren, int window) {
   if (ren->HasViewProp(m_cathArrow.getConeActor())) {
     ren->RemoveViewProp(m_cathArrow.getConeActor());
   }
+
+  customQVTKWidget* renWid;
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
+
+  // Disconnect mouse actions
+  disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*,int)), this, SLOT(mousePressEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMoveEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(mouseReleaseEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interKeyPress(QKeyEvent*,int)), this, SLOT(keyPressEvent(QKeyEvent*,int)));
+  disconnect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), this, SLOT(keyReleaseEvent(QKeyEvent*,int)));
+  disconnect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), this, SLOT(wheelEvent(QWheelEvent*,int)));
+
   return true;
 }
 
@@ -264,3 +293,39 @@ void rtCathRenderObject::visibilityOff() {
   m_cathArrow.tubeVisibilityOff();
   m_cathArrow.coneVisibilityOff();
 }
+
+void rtCathRenderObject::mousePressEvent(QMouseEvent* event, int window)
+{
+    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
+}
+
+void rtCathRenderObject::mouseMoveEvent(QMouseEvent *event,int window)
+{
+    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
+}
+
+void rtCathRenderObject::mouseReleaseEvent(QMouseEvent *event, int window)
+{
+    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
+}
+
+void rtCathRenderObject::mouseDoubleClickEvent(QMouseEvent *event, int window)
+{
+
+}
+
+void rtCathRenderObject::keyPressEvent(QKeyEvent *event, int window)
+{
+
+}
+
+void rtCathRenderObject::keyReleaseEvent(QKeyEvent *event, int window)
+{
+
+}
+
+void rtCathRenderObject::wheelEvent(QWheelEvent *event, int window)
+{
+    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window);
+}
+

@@ -19,6 +19,9 @@
 *******************************************************************************/
 #include "rtMatrixRenderObject.h"
 #include "rtMatrixDataObject.h"
+#include "rtApplication.h"
+#include "rtMainWindow.h"
+#include "customQVTKWidget.h"
 
 rtMatrixRenderObject::rtMatrixRenderObject() {
   setObjectType(rtConstants::OT_vtkMatrix4x4);
@@ -65,6 +68,19 @@ bool rtMatrixRenderObject::addToRenderer(vtkRenderer* ren,int window) {
   if(!ren->HasViewProp(m_actor)) {
     ren->AddViewProp(m_actor);
   }
+
+  // Connect signals and slots for interaction.
+  customQVTKWidget* renWid;
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
+  // Connect mouse actions
+  connect(renWid, SIGNAL(interMousePress(QMouseEvent*,int)), this, SLOT(mousePressEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMoveEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(mouseReleaseEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*,int)));
+  connect(renWid, SIGNAL(interKeyPress(QKeyEvent*,int)), this, SLOT(keyPressEvent(QKeyEvent*,int)));
+  connect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), this, SLOT(keyReleaseEvent(QKeyEvent*,int)));
+  connect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), this, SLOT(wheelEvent(QWheelEvent*,int)));
+
   return true;
 }
 
@@ -76,6 +92,19 @@ bool rtMatrixRenderObject::removeFromRenderer(vtkRenderer* ren,int window) {
   if(ren->HasViewProp(m_actor)) {
     ren->RemoveViewProp(m_actor);
   }
+
+  customQVTKWidget* renWid;
+  renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
+
+  // Disconnect mouse actions
+  disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*,int)), this, SLOT(mousePressEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), this, SLOT(mouseMoveEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), this, SLOT(mouseReleaseEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), this, SLOT(mouseDoubleClickEvent(QMouseEvent*,int)));
+  disconnect(renWid, SIGNAL(interKeyPress(QKeyEvent*,int)), this, SLOT(keyPressEvent(QKeyEvent*,int)));
+  disconnect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), this, SLOT(keyReleaseEvent(QKeyEvent*,int)));
+  disconnect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), this, SLOT(wheelEvent(QWheelEvent*,int)));
+
   return true;
 }
 
@@ -111,3 +140,39 @@ bool rtMatrixRenderObject::getObjectLocation(double loc[6]) {
 
   return true;
 }
+
+void rtMatrixRenderObject::mousePressEvent(QMouseEvent* event, int window)
+{
+    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
+}
+
+void rtMatrixRenderObject::mouseMoveEvent(QMouseEvent *event,int window)
+{
+    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
+}
+
+void rtMatrixRenderObject::mouseReleaseEvent(QMouseEvent *event, int window)
+{
+    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
+}
+
+void rtMatrixRenderObject::mouseDoubleClickEvent(QMouseEvent *event, int window)
+{
+
+}
+
+void rtMatrixRenderObject::keyPressEvent(QKeyEvent *event, int window)
+{
+
+}
+
+void rtMatrixRenderObject::keyReleaseEvent(QKeyEvent *event, int window)
+{
+
+}
+
+void rtMatrixRenderObject::wheelEvent(QWheelEvent *event, int window)
+{
+    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window);
+}
+
