@@ -37,6 +37,7 @@
 #include "vtkMath.h"
 #include "vtkPlane.h"
 #include "rtMainWindow.h"
+#include <QInputDialog>
 
 //! Constructor to the dialog
 pointPlacementDialog::pointPlacementDialog(QWidget *parent, Qt::WindowFlags flags) {
@@ -57,6 +58,9 @@ pointPlacementDialog::pointPlacementDialog(QWidget *parent, Qt::WindowFlags flag
 
   m_colorList = QColor::colorNames();
   m_moved = false;
+
+  //start with a new set of points
+  m_currPoints = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,"Placement");
   setupCombo();
 
 
@@ -143,10 +147,13 @@ void pointPlacementDialog::addPoint(QMouseEvent *event,int window)
 
 void pointPlacementDialog::addNewPoints()
 {
-    QString name = "Placement " + newPointsName->text();
-
-    rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,name);
-    setupCombo();
+    bool ok;
+    QString name = QInputDialog::getText(this,"Point Set Name","New Point Set Name: ",QLineEdit::Normal,"Placement",&ok);
+    if (!name.isEmpty() && ok)
+    {
+        m_currPoints = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,name);
+        setupCombo();
+    }
 }
 
 
@@ -158,15 +165,20 @@ void pointPlacementDialog::setupCombo()
     setTable->clearContents();
 
     m_points = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_3DPointBuffer);
-    if (m_points.empty()) return;   
+    if (m_points.empty()) return;
+    int index = 0;
     for (int ix1=0; ix1<m_points.count(); ix1++)
     {
-        rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(ix1))->getDataObject());
-        QString objName = dObj->getObjName();
+        rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(ix1));
+        if (rObj == m_currPoints)
+            index = ix1;
+        rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rObj->getDataObject());
         if (!dObj) return;
+        QString objName = dObj->getObjName();
         setCombo->addItem(objName + " " + QString::number(m_points.at(ix1)));
 
     }
+    setCombo->setCurrentIndex(index);
     setupTable();
     // reconnect
     connect (setCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setupTable()));
@@ -180,7 +192,10 @@ void pointPlacementDialog::setupTable()
     // remove old data
     setTable->clearContents();
     int ix1;
-    rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setCombo->currentIndex()))->getDataObject());
+    if (setCombo->currentIndex() < 0) return;
+    rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setCombo->currentIndex()));
+    m_currPoints = rObj;
+    rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rObj->getDataObject());
     if (!dObj) return;
     
     setTable->setRowCount(dObj->getPointListSize());

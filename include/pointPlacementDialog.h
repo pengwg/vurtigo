@@ -6,8 +6,8 @@
 #include <QMouseEvent>
 #include <QColor>
 
-
-
+class rtRenderObject;
+//! A Dialog for Point Placement
 class pointPlacementDialog : public QDialog, private Ui::pointPlacement {
 
 Q_OBJECT
@@ -38,6 +38,9 @@ protected:
 
     //! The list of 3D point objects
     QList<int> m_points;
+
+    //! The currently selected point object
+    rtRenderObject *m_currPoints;
 
     //! The current color
     QColor m_color;

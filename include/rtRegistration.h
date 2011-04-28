@@ -27,7 +27,8 @@
 #include <QPalette>
 
 class rt3DPointBufferDataObject;
-
+class rtRenderObject;
+//! A Dialog box for LandMark Registration
 class rtRegistration : public QDialog, private Ui::landmarkRegistration {
 Q_OBJECT
 
@@ -82,6 +83,16 @@ protected:
 
  //! The list of all 3D volume objects
  QList<int> m_volumes;
+
+ //! The currently selected source points
+ rtRenderObject *m_currSetSource;
+ //! The currently selected target points
+ rtRenderObject *m_currSetTarget;
+ //! The currently selected source volume
+ rtRenderObject *m_currVolSource;
+ //! The currently selected target volume
+ rtRenderObject *m_currVolTarget;
+
 
  //! the active point set
  int m_activeSet;

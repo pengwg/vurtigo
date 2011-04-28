@@ -42,6 +42,7 @@
 #include "vtkMath.h"
 #include "vtkPlane.h"
 #include "rtMainWindow.h"
+#include <QInputDialog>
 
 rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
 {
@@ -79,6 +80,8 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
   // set the source active
   m_activeSet = 0;
   m_error = 0;
+  m_currVolSource = NULL;
+  m_currVolTarget = NULL;
   sourceFrame->setLineWidth(5);
   targetFrame->setLineWidth(5);
   sourceFrame->setFrameStyle(QFrame::Panel | QFrame::Raised);
@@ -91,10 +94,11 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
 
   regInfo->clear();
 
+  //start with 2 new sets of points
+  m_currSetSource = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,"Placement SOURCE");
+  m_currSetTarget = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,"Placement TARGET");
+
   setupAllCombos();
-
-
-
 }
 
 //! Destructor
@@ -104,6 +108,8 @@ rtRegistration::~rtRegistration() {
 void rtRegistration::sourceRadioChosen()
 {
     m_activeSet = 0;
+    sourceRadio->setToolTip("Source is active");
+    targetRadio->setToolTip("Target is inactive");
     sourceFrame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     targetFrame->setFrameStyle(QFrame::NoFrame);
     // update synchs
@@ -114,6 +120,8 @@ void rtRegistration::sourceRadioChosen()
 void rtRegistration::targetRadioChosen()
 {
     m_activeSet = 1;
+    sourceRadio->setToolTip("Source is inactive");
+    targetRadio->setToolTip("Target is active");
     targetFrame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     sourceFrame->setFrameStyle(QFrame::NoFrame);
     syncToggled(syncSTBox->isChecked());
@@ -150,6 +158,13 @@ void rtRegistration::placementOff()
 void rtRegistration::volumeChanged()
 {
     syncToggled(syncSTBox->isChecked());
+    rtRenderObject *rObj;
+    if (volSource->currentIndex() < 0) return;
+    rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volSource->currentIndex()));
+    m_currVolSource = rObj;
+    if (volTarget->currentIndex() < 0) return;
+    rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volTarget->currentIndex()));
+    m_currVolTarget = rObj;
 }
 
 void rtRegistration::mouseMoved(QMouseEvent *event,int window)
@@ -498,10 +513,13 @@ void rtRegistration::addActivePoint(QMouseEvent *event,int window)
 
 void rtRegistration::addNewPoints()
 {
-    QString name = "Placement " + newPointsName->text();
-
-    rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,name);
-    setupPointCombos();
+    bool ok;
+    QString name = QInputDialog::getText(this,"Point Set Name","New Point Set Name: ",QLineEdit::Normal,"Placement",&ok);
+    if (!name.isEmpty() && ok)
+    {
+        rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,name);
+        setupPointCombos();
+    }
 }
 
 void rtRegistration::setupPointCombos()
@@ -515,15 +533,24 @@ void rtRegistration::setupPointCombos()
     setTwoTable->clearContents();
     m_points = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_3DPointBuffer);
     if (m_points.empty()) return;
+    int indexS = 0;
+    int indexT = 0;
     for (int ix1=0; ix1<m_points.count(); ix1++)
     {
-        rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(ix1))->getDataObject());
-        QString objName = dObj->getObjName();
+        rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(ix1));
+        if (rObj == m_currSetSource)
+            indexS = ix1;
+        if (rObj == m_currSetTarget)
+            indexT = ix1;
+        rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rObj->getDataObject());
         if (!dObj) return;
+        QString objName = dObj->getObjName();
         setSource->addItem(objName + " " + QString::number(m_points.at(ix1)));
         setTarget->addItem(objName + " " + QString::number(m_points.at(ix1)));
 
     }
+    setSource->setCurrentIndex(indexS);
+    setTarget->setCurrentIndex(indexT);
     setupSourceTable();
     setupTargetTable();
     // reconnect
@@ -535,20 +562,36 @@ void rtRegistration::setupPointCombos()
 
 void rtRegistration::setupVolumeCombos()
 {
+    // need to turn these off or they cause problems
+    disconnect (volSource, SIGNAL(currentIndexChanged(int)), this, SLOT(volumeChanged()));
+    disconnect (volTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(volumeChanged()));
     volSource->clear();
     volTarget->clear();
 
     m_volumes = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_3DObject);
     if (m_volumes.empty()) return;
+    int indexS = 0;
+    int indexT = 0;
     for (int ix1=0; ix1<m_volumes.count(); ix1++)
     {
-        rt3DVolumeDataObject *dObj = static_cast<rt3DVolumeDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(ix1))->getDataObject());
-        QString objName = dObj->getObjName();
+        rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(ix1));
+        if (rObj == m_currVolSource)
+            indexS = ix1;
+        if (rObj == m_currVolTarget)
+            indexT = ix1;
+        rt3DVolumeDataObject *dObj = static_cast<rt3DVolumeDataObject*>(rObj->getDataObject());
         if (!dObj) return;
+        QString objName = dObj->getObjName();
         volSource->addItem(objName + " " + QString::number(m_volumes.at(ix1)));
         volTarget->addItem(objName + " " + QString::number(m_volumes.at(ix1)));
 
     }
+    volSource->setCurrentIndex(indexS);
+    volTarget->setCurrentIndex(indexT);
+    volumeChanged();
+    // reconnect
+    connect (volSource, SIGNAL(currentIndexChanged(int)), this, SLOT(volumeChanged()));
+    connect (volTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(volumeChanged()));
 
 }
 
@@ -559,7 +602,10 @@ void rtRegistration::setupSourceTable()
     // remove old data
     setOneTable->clearContents();
     int ix1;
-    rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
+    if (setSource->currentIndex() < 0) return;
+    rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()));
+    m_currSetSource = rObj;
+    rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rObj->getDataObject());
     if (!dObj) return;
 
     setOneTable->setRowCount(dObj->getPointListSize());
@@ -597,7 +643,10 @@ void rtRegistration::setupTargetTable()
     // remove old data
     setTwoTable->clearContents();
     int ix1;
-    rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()))->getDataObject());
+    if (setTarget->currentIndex() < 0) return;
+    rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()));
+    m_currSetTarget = rObj;
+    rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rObj->getDataObject());
     if (!dObj) return;
 
 
