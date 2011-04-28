@@ -179,12 +179,15 @@ void rtRegistration::syncToggled(bool flag)
         if (sObj) sObj->removeAllSync();
     }
 
-    if (flag && (sObj != tObj))
+    if (flag)
     {
         sObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volSource->currentIndex())));
         tObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volTarget->currentIndex())));
-        sObj->addSyncObject(tObj);
-        tObj->addSyncObject(sObj);
+        if (sObj != tObj)
+        {
+            sObj->addSyncObject(tObj);
+            tObj->addSyncObject(sObj);
+        }
 
     }
 
@@ -426,6 +429,11 @@ void rtRegistration::addActivePoint(QMouseEvent *event,int window)
 
             if (m_activeSet == 0)
             {
+                // can't put  a point on anything other than the chosen object
+                if (volSource->currentIndex() < 0) return;
+                rt3DVolumeRenderObject *rObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volSource->currentIndex())));
+                if (!rObj->hasProp(pick->GetViewProp())) return;
+
                 dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
 
                 newPoint.setPoint(pos);
@@ -452,8 +460,11 @@ void rtRegistration::addActivePoint(QMouseEvent *event,int window)
             }
             else if (m_activeSet == 1)
             {
+                // can't put  a point on anything other than the chosen object
+                if (volTarget->currentIndex() < 0) return;
                 rt3DVolumeRenderObject *rObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_volumes.at(volTarget->currentIndex())));
                 if (!rObj->hasProp(pick->GetViewProp())) return;
+
                 dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()))->getDataObject());
                 // set position and color of new point
                 newPoint.setPoint(pos);
@@ -475,6 +486,7 @@ void rtRegistration::addActivePoint(QMouseEvent *event,int window)
                 dObj->getPointAtIndex(dObj->getPointListSize() - 1)->setLabel("T" + QString::number(dObj->getPointListSize()-1));
                 setupSourceTable();
                 setupTargetTable();
+
             }
 
         }
@@ -544,7 +556,6 @@ void rtRegistration::setupSourceTable()
 {
     // turn off signals so they don't get called while we update
     disconnect(setOneTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableOneChanged(int,int)));
-
     // remove old data
     setOneTable->clearContents();
     int ix1;
@@ -573,6 +584,9 @@ void rtRegistration::setupSourceTable()
     }
 
     connect(setOneTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableOneChanged(int,int)));
+
+    //connect a signal so if the point changes. we update the list
+    connect(dObj, SIGNAL(pointListModifiedSignal()),this,SLOT(setupSourceTable()));
 
 }
 
@@ -609,6 +623,9 @@ void rtRegistration::setupTargetTable()
     }
 
     connect(setTwoTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableTwoChanged(int,int)));
+
+    //connect a signal so if the point changes. we update the list
+    connect(dObj, SIGNAL(pointListModifiedSignal()),this,SLOT(setupTargetTable()));
 
 }
 
@@ -648,17 +665,11 @@ void rtRegistration::tableOneChanged(int row,int col)
         QTableWidgetItem *item = setOneTable->item(row,col);
         rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());
         if (!dObj) return;
-        if (row < dObj->getPointListSize())
-        {
-            dObj->getPointAtIndex(row)->setLabel(item->text());
-            dObj->pointListModifiedSlot();
-            dObj->tableCellChanged(row,5);
-        }
-        else
-        {
-            setupSourceTable();
-            setupTargetTable();
-        }
+
+        dObj->getPointAtIndex(row)->setLabel(item->text());
+        dObj->pointListModifiedSlot();
+        dObj->tableCellChanged(row,5);
+
 
         //matching label on other side?
         dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()))->getDataObject());
@@ -680,17 +691,11 @@ void rtRegistration::tableTwoChanged(int row,int col)
         QTableWidgetItem *item = setTwoTable->item(row,col);
         rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()))->getDataObject());
         if (!dObj) return;
-        if (row < dObj->getPointListSize())
-        {
-            dObj->getPointAtIndex(row)->setLabel(item->text());
-            dObj->pointListModifiedSlot();
-            dObj->tableCellChanged(row,5);
-        }
-        else
-        {
-            setupSourceTable();
-            setupTargetTable();
-        }
+
+        dObj->getPointAtIndex(row)->setLabel(item->text());
+        dObj->pointListModifiedSlot();
+        dObj->tableCellChanged(row,5);
+
 
         //matching label on other side?
         dObj = static_cast<rt3DPointBufferDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()))->getDataObject());

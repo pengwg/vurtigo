@@ -207,6 +207,9 @@ void pointPlacementDialog::setupTable()
 
     connect(setTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableChanged(int,int)));
 
+    //connect a signal so if the point changes. we update the list
+    connect(dObj, SIGNAL(pointListModifiedSignal()),this,SLOT(setupTable()));
+
 }
 
 void pointPlacementDialog::tableChanged(int row,int col)
