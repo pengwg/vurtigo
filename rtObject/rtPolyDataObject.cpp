@@ -34,7 +34,7 @@
 
 //! Constructor
 rtPolyDataObject::rtPolyDataObject() {
-  setObjectType(rtConstants::OT_vtkPolyData);
+  setObjectType("OT_vtkPolyData");
 
   m_cineFrame = new QTimer(this);
   connect( m_cineFrame,SIGNAL(timeout()), this, SLOT(nextVisibleComponent()) );
@@ -314,7 +314,7 @@ bool rtPolyDataObject::loadFile(QFile *file) {
 
   QXmlStreamReader reader(file);
   QXmlStreamAttributes attrib;
-  rtConstants::rtObjectType objType;
+  QString objType;
   QString objName="";
   bool valueOK;
 

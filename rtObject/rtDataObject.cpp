@@ -38,6 +38,8 @@ rtDataObject::rtDataObject() {
   }
   setId(nextID);
 
+  m_objType = "";
+
   // When the object changes we can update the GUI.
   connect(this, SIGNAL(objectChanged(int)), this, SLOT(updateGUI()));
 }
@@ -63,12 +65,14 @@ void rtDataObject::setObjName(QString name) {
 }
 
 
-rtConstants::rtObjectType rtDataObject::getObjectType() {
-  return m_objType;
+QString rtDataObject::getObjectType()
+{
+    return m_objType;
 }
 
-void rtDataObject::setObjectType(rtConstants::rtObjectType ot) {
-  m_objType = ot;
+void rtDataObject::setObjectType(QString type)
+{
+    m_objType = type;
 }
 
 void rtDataObject::Modified() {
@@ -87,42 +91,54 @@ void rtDataObject::updateGUI() {
 }
 
 void rtDataObject::saveHeader(QXmlStreamWriter *writer) {
-  rtDataObject::saveHeader(writer, m_objType, m_objName);
+  // the default is the QString version
+    rtDataObject::saveHeader(writer, m_objType, m_objName);
 }
 
-void rtDataObject::saveHeader(QXmlStreamWriter *writer, rtConstants::rtObjectType type, QString name) {
-  writer->writeStartElement("FileInfo");
-  writer->writeTextElement( "type", QString::number( (int)type ) );
-  writer->writeTextElement( "name", name );
-  writer->writeEndElement();
+void rtDataObject::saveHeader(QXmlStreamWriter *writer, QString type, QString name)
+{
+    writer->writeStartElement("FileInfo");
+    writer->writeTextElement( "type", type );
+    writer->writeTextElement( "name", name );
+    writer->writeEndElement();
 }
 
-void rtDataObject::loadHeader(QXmlStreamReader *reader, rtConstants::rtObjectType &type, QString &name) {
-  if (!reader) {
-    type = rtConstants::OT_None;
-    name = "";
-    return;
-  }
 
-  if ( !(reader->name()=="FileInfo" || reader->isStartElement()) ) {
-    rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to load file header."));
-    return;
-  }
-
-  name = "";
-  while ( reader->name() != "FileInfo" || !reader->isEndElement() ) {
-    if(reader->readNext() == QXmlStreamReader::StartElement) {
-
-      if(reader->name() == "type") {
-        type = rtConstants::intToObjectType( getIntFromString(reader->readElementText(), rtConstants::OT_None) );
-      } else if (reader->name() == "name") {
-        name = reader->readElementText();
-      }
-
+void rtDataObject::loadHeader(QXmlStreamReader *reader, QString &type, QString &name)
+{
+    if (!reader) {
+      type = "";
+      name = "";
+      return;
     }
-  }
 
-  rtApplication::instance().getMessageHandle()->log(QString("Finished reading file header."));
+    if ( !(reader->name()=="FileInfo" || reader->isStartElement()) ) {
+      rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to load file header."));
+      return;
+    }
+
+    name = "";
+    bool ok;
+    int tmpi;
+    QString tmpType;
+    while ( reader->name() != "FileInfo" || !reader->isEndElement() ) {
+      if(reader->readNext() == QXmlStreamReader::StartElement) {
+
+        if(reader->name() == "type") {
+            tmpType = reader->readElementText();
+            tmpi = tmpType.toInt(&ok);
+            if (ok)
+                type = rtConstants::objectTypeToQString(rtConstants::intToObjectType(tmpi));
+            else
+                type = tmpType;
+        } else if (reader->name() == "name") {
+          name = reader->readElementText();
+        }
+
+      }
+    }
+
+    rtApplication::instance().getMessageHandle()->log(QString("Finished reading file header."));
 }
 
 

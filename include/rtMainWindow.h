@@ -146,6 +146,8 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   rtCameraControl* getCameraControl(int window = 0) { return m_cameraControl[window]; }
 
   void setCoordManual(int ct);
+  //! Add a new object type to the object tree
+  void addNewObjectType(QString type);
 
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
@@ -244,9 +246,9 @@ signals:
   QSemaphore m_renderLock;
 
   //! Hash of tree root objects.
-  QHash<rtConstants::rtObjectType, QTreeWidgetItem *> m_topItems;
+  QHash<QString, QTreeWidgetItem *> m_topItems;
   //! Hash of the names root objects.
-  QHash<rtConstants::rtObjectType, QString> m_rtObjectTypeNames;
+  QHash<QString, QString> m_rtObjectTypeNames;
 
   QHBoxLayout m_scrollArea2DImagesLayout;
 

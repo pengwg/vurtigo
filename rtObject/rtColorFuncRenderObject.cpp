@@ -21,7 +21,7 @@
 #include "rtColorFuncDataObject.h"
 
 rtColorFuncRenderObject::rtColorFuncRenderObject() {
-  setObjectType(rtConstants::OT_vtkColorTransferFunction);
+  setObjectType("OT_vtkColorTransferFunction");
   setName("Color Transfer Func Renderer");
   setupDataObject();
   setupPipeline();

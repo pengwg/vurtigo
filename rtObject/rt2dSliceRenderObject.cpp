@@ -36,7 +36,7 @@
 /////////////////
 
 rt2DSliceRenderObject::rt2DSliceRenderObject() {
-  setObjectType(rtConstants::OT_2DObject);
+  setObjectType("OT_2DObject");
   setName("2DSlice Renderer");
   // initialize!!!
   m_selectedProp = NULL;

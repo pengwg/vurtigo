@@ -31,7 +31,7 @@
 #include <vtkMatrix4x4.h>
 
 rt3DVolumeRenderObject::rt3DVolumeRenderObject() {
-  setObjectType(rtConstants::OT_3DObject);
+  setObjectType("OT_3DObject");
   setName("3D Volume Renderer");
 
   m_imgReslice[0] = vtkImageReslice::New();
@@ -812,7 +812,7 @@ void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event, int window) {
     // apply the interaction to all synched objects
     for (int ix1=0; ix1<m_syncList.size(); ix1++)
     {
-        if (m_syncList.at(ix1)->getObjectType() == rtConstants::OT_3DObject)
+        if (m_syncList.at(ix1)->getObjectType() == "OT_3DObject")
         {
             rt3DVolumeRenderObject *rObj = static_cast<rt3DVolumeRenderObject *>(m_syncList.at(ix1));
             // call a "fake" event
@@ -959,7 +959,7 @@ void rt3DVolumeRenderObject::syncWheel(int plane,QWheelEvent* event , int window
 void rt3DVolumeRenderObject::copyObject(rtRenderObject *from)
 {
     if (!from) return;
-    if (from->getObjectType() != rtConstants::OT_3DObject) return;
+    if (from->getObjectType() != "OT_3DObject") return;
     rt3DVolumeRenderObject *fromRender = static_cast<rt3DVolumeRenderObject*>(from);
     if (!fromRender) return;
     rt3DVolumeDataObject *fromData = static_cast<rt3DVolumeDataObject*>(from->getDataObject());

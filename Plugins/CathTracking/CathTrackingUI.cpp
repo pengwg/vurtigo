@@ -27,9 +27,9 @@
 CathTrackingUI::CathTrackingUI() {
   setupUi(this);
 
-  m_cathComboBox.addObjectType(rtConstants::OT_Cath);
-  m_planeComboBox.addObjectType(rtConstants::OT_2DObject);
-  m_volumeComboBox.addObjectType(rtConstants::OT_3DObject);
+  m_cathComboBox.addObjectType("OT_Cath");
+  m_planeComboBox.addObjectType("OT_2DObject");
+  m_volumeComboBox.addObjectType("OT_3DObject");
 
   this->gridLayout->addWidget(&m_cathComboBox, 0, 1, 1, 2);
   this->gridLayout->addWidget(&m_planeComboBox, 1, 1, 1, 2);

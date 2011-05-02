@@ -20,6 +20,8 @@
 #ifndef OBJ_TYPES_H
 #define OBJ_TYPES_H
 
+#include <QString>
+
 //! A vurtigo container class for constants such as object types.
 class rtConstants {
 
@@ -48,6 +50,58 @@ class rtConstants {
     */
   static int objectTypeToInt(rtObjectType type) {
     return (int)type;
+  }
+
+  //! Convert the object type into a QString.
+  /*!
+    \param type The object type as an enum.
+    \return The same value but as an integer.
+    */
+  static QString objectTypeToQString(rtObjectType type)
+  {
+      QString result;
+      switch (type) {
+        case OT_None:
+          result = "OT_None";
+          break;
+        case OT_3DObject:
+          result = "OT_3DObject";
+          break;
+        case OT_2DObject:
+          result = "OT_2DObject";
+          break;
+        case OT_Cath:
+          result = "OT_Cath";
+          break;
+        case OT_vtkMatrix4x4:
+          result = "OT_vtkMatrix4x4";
+          break;
+        case OT_vtkPolyData:
+          result = "OT_vtkPolyData";
+          break;
+        case OT_vtkPiecewiseFunction:
+          result = "OT_vtkPiecewiseFunction";
+          break;
+        case OT_vtkColorTransferFunction:
+          result = "OT_vtkColorTransferFunction";
+          break;
+        case OT_ImageBuffer:
+          result = "OT_ImageBuffer";
+          break;
+        case OT_2DPointBuffer:
+          result = "OT_2DPointBuffer";
+          break;
+        case OT_3DPointBuffer:
+          result = "OT_3DPointBuffer";
+          break;
+        case OT_TextLabel:
+          result = "OT_TextLabel";
+          break;
+        default:
+          result = "OT_None";
+          break;
+      }
+      return result;
   }
 
   //! Convert an int into a variable of type rtObjectType.

@@ -26,7 +26,7 @@
 #include "rtMessage.h"
 
 rtPolyRenderObject::rtPolyRenderObject() {
-  setObjectType(rtConstants::OT_vtkPolyData);
+  setObjectType("OT_vtkPolyData");
   setName("Poly Renderer");
   setupDataObject();
   setupPipeline();

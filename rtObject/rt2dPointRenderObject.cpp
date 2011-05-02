@@ -21,7 +21,7 @@
 #include "rt2dPointDataObject.h"
 
 rt2DPointRenderObject::rt2DPointRenderObject() {
-  setObjectType(rtConstants::OT_2DPointBuffer);
+  setObjectType("OT_2DPointBuffer");
   setName("2D Point Renderer");
   setupDataObject();
   setupPipeline();

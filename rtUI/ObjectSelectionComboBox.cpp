@@ -36,14 +36,14 @@ ObjectSelectionComboBox::ObjectSelectionComboBox()
 }
 
 
-void ObjectSelectionComboBox::addObjectType(rtConstants::rtObjectType type) {
+void ObjectSelectionComboBox::addObjectType(QString type) {
   if (!m_objectTypes.contains(type)) {
     m_objectTypes.append(type);
     updateComboList();
   }
 }
 
-void ObjectSelectionComboBox::removeObjectType(rtConstants::rtObjectType type) {
+void ObjectSelectionComboBox::removeObjectType(QString type) {
   if (m_objectTypes.contains(type)) {
     m_objectTypes.removeAll(type);
     updateComboList();

@@ -44,7 +44,7 @@ rtEPDataObject::rtEPDataObject()
     : m_currentPhase(-1),  m_objTransform(0), m_inPlaneInterval(1.0), m_crossPlaneInterval(1.0), m_surfaceOpacity(1.0), m_pointsOpacity(1.0), m_rep(EP_SURFACE),
     m_minSliceNum(0), m_maxSliceNum(0), m_showInfoPoints(false)
 {
-  setObjectType(rtConstants::OT_EPMesh);
+  setObjectType("OT_EPMesh");
 
   m_phaseDataList.clear();
 
@@ -444,7 +444,7 @@ bool rtEPDataObject::loadFile(QFile *file) {
 
   QXmlStreamReader reader(file);
   QXmlStreamAttributes attrib;
-  rtConstants::rtObjectType objType;
+  QString objType;
   QString objName="";
   bool valueOK;
 
@@ -781,7 +781,7 @@ void rtEPDataObject::setupGUI() {
   temp = static_cast<QBoxLayout*>(m_optionsWidget.epTabs->widget(2)->layout());
   temp->insertWidget(0, &m_objectSelectionBox);
 
-  m_objectSelectionBox.addObjectType(rtConstants::OT_3DPointBuffer);
+  m_objectSelectionBox.addObjectType("OT_3DPointBuffer");
 
   m_optionsWidget.surfaceOpacitySlider->setValue(100);
   m_optionsWidget.pointsOpacitySlider->setValue(100);

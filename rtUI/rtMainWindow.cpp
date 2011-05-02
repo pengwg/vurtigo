@@ -234,7 +234,7 @@ void rtMainWindow::updateObjectList(QHash<int, rtRenderObject*>* hash) {
 #endif
 
   QHash<int, rtRenderObject*>::iterator i;
-  QHash<rtConstants::rtObjectType, QTreeWidgetItem *>::iterator wIter;
+  QHash<QString, QTreeWidgetItem *>::iterator wIter;
   bool objExists;
 
   if (!hash) {
@@ -247,12 +247,13 @@ void rtMainWindow::updateObjectList(QHash<int, rtRenderObject*>* hash) {
     i.value()->updateTreeItem();
   }
 
-  if (objectTree->topLevelItemCount() == 0) {
-    // Setup the new items.
-    for (wIter = m_topItems.begin(); wIter!=m_topItems.end(); ++wIter){
-      objectTree->addTopLevelItem(wIter.value());
-    }
+
+  // Setup the items
+  for (wIter = m_topItems.begin(); wIter!=m_topItems.end(); ++wIter){
+      if (objectTree->findItems(wIter.value()->text(0),Qt::MatchExactly).isEmpty())
+          objectTree->addTopLevelItem(wIter.value());
   }
+
 
   for (int ix1=0; ix1<objectTree->topLevelItemCount(); ix1++) {
     for (int ix2=0; ix2<objectTree->topLevelItem(ix1)->childCount(); ix2++) {
@@ -273,7 +274,7 @@ void rtMainWindow::updateObjectList(QHash<int, rtRenderObject*>* hash) {
     } else {
       QString warn;
       warn = "Could not find category: ";
-      warn.append( QString::number(i.value()->getObjectType()) );
+      warn.append( i.value()->getObjectType() );
       warn.append( " for object: ");
       warn.append( QString::number((long)i.value(), 16) );
       rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, warn);
@@ -783,7 +784,7 @@ void rtMainWindow::setupObjectTree() {
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::setupObjectTree() start") );
 #endif
 
-  QHash<rtConstants::rtObjectType, QString>::iterator i;
+  QHash<QString, QString>::iterator i;
   QTreeWidgetItem * temp=NULL;
 
   m_topItems.clear();
@@ -826,18 +827,17 @@ void rtMainWindow::populateObjectTypeNames() {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::populateObjectTypeNames() start") );
 #endif
-  m_rtObjectTypeNames.insert(rtConstants::OT_3DObject, "3D Object");
-  m_rtObjectTypeNames.insert(rtConstants::OT_2DObject, "2D Object");
-  m_rtObjectTypeNames.insert(rtConstants::OT_Cath, "Catheter");
-  m_rtObjectTypeNames.insert(rtConstants::OT_vtkMatrix4x4, "4 by 4 vtkMatrix");
-  m_rtObjectTypeNames.insert(rtConstants::OT_vtkPolyData, "Polygon Data");
-  m_rtObjectTypeNames.insert(rtConstants::OT_vtkPiecewiseFunction, "Piecewise Function");
-  m_rtObjectTypeNames.insert(rtConstants::OT_vtkColorTransferFunction, "Color Function");
-  m_rtObjectTypeNames.insert(rtConstants::OT_ImageBuffer, "Image Buffer");
-  m_rtObjectTypeNames.insert(rtConstants::OT_2DPointBuffer, "2D Point Buffer");
-  m_rtObjectTypeNames.insert(rtConstants::OT_3DPointBuffer, "3D Point Buffer");
-  m_rtObjectTypeNames.insert(rtConstants::OT_TextLabel, "Text Label");
-  m_rtObjectTypeNames.insert(rtConstants::OT_EPMesh, "EP Mesh");
+  m_rtObjectTypeNames.insert("OT_3DObject", "3D Object");
+  m_rtObjectTypeNames.insert("OT_2DObject", "2D Object");
+  m_rtObjectTypeNames.insert("OT_Cath", "Catheter");
+  m_rtObjectTypeNames.insert("OT_vtkMatrix4x4", "4 by 4 vtkMatrix");
+  m_rtObjectTypeNames.insert("OT_vtkPolyData", "Polygon Data");
+  m_rtObjectTypeNames.insert("OT_vtkPiecewiseFunction", "Piecewise Function");
+  m_rtObjectTypeNames.insert("OT_vtkColorTransferFunction", "Color Function");
+  m_rtObjectTypeNames.insert("OT_ImageBuffer", "Image Buffer");
+  m_rtObjectTypeNames.insert("OT_2DPointBuffer", "2D Point Buffer");
+  m_rtObjectTypeNames.insert("OT_3DPointBuffer", "3D Point Buffer");
+  m_rtObjectTypeNames.insert("OT_TextLabel", "Text Label");
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::populateObjectTypeNames() end") );
 #endif
@@ -1145,9 +1145,9 @@ void rtMainWindow::addNewObject() {
     name = setupDlg.objNameLineEdit->text();
     if (name.length() <= 0) name = "Not Named";
     if (setupDlg.objTypeCombo->currentText() == "Piecewise Function") {
-      rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_vtkPiecewiseFunction, name);
+      rtApplication::instance().getObjectManager()->addObjectOfType("OT_vtkPiecewiseFunction", name);
     } else if (setupDlg.objTypeCombo->currentText() == "Color Transfer Function") {
-      rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_vtkColorTransferFunction, name);
+      rtApplication::instance().getObjectManager()->addObjectOfType("OT_vtkColorTransferFunction", name);
     }
   }
 
@@ -1175,7 +1175,7 @@ QList<int> rtMainWindow::loadObject(QString fname) {
       QXmlStreamReader::TokenType type;
       bool typeRead=false;
       bool nameRead=false;
-      rtConstants::rtObjectType objType;
+      QString objType;
       QString objName="";
 
       while (!reader.atEnd()) {
@@ -1188,7 +1188,7 @@ QList<int> rtMainWindow::loadObject(QString fname) {
         rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::loadObject() QXmlStreamReader reports an error: ").append(reader.errorString()) );
       }
 
-      if (objType != rtConstants::OT_None) typeRead = true;
+      if (objType != "OT_None") typeRead = true;
       if (objName != "") nameRead = true;
 
       rtRenderObject* obj;
@@ -1735,4 +1735,12 @@ void rtMainWindow::setGlobalOn(QTreeWidgetItem *item)
     item->setCheckState(2,Qt::Checked);
     connect(objectTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemChanged(QTreeWidgetItem*,int)));
 
+}
+
+void rtMainWindow::addNewObjectType(QString type)
+{
+    m_rtObjectTypeNames.insert(type,type);
+    QTreeWidgetItem *temp = new QTreeWidgetItem();
+    temp->setText(0, type);
+    m_topItems.insert(type, temp);
 }

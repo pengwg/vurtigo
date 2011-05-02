@@ -24,7 +24,7 @@
 #include "rtMainWindow.h"
 
 rtRenderObject::rtRenderObject()
-: m_dataObj(NULL), m_canRender3D(false),  m_renderName("None"), m_objType(rtConstants::OT_None)
+: m_dataObj(NULL), m_canRender3D(false), m_renderName("None"), m_objType("")
 {
   m_treeItem = new QTreeWidgetItem();
   m_treeItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
@@ -49,8 +49,9 @@ QString rtRenderObject::getName() {
   return m_renderName;
 }
 
-rtConstants::rtObjectType rtRenderObject::getObjectType() {
-  return m_objType;
+QString rtRenderObject::getObjectType()
+{
+    return m_objType;
 }
 
 void rtRenderObject::setDataObject(rtDataObject* dataObj) {
@@ -61,7 +62,7 @@ void rtRenderObject::setName(QString renName) {
   m_renderName = renName;
 }
 
-void rtRenderObject::setObjectType(rtConstants::rtObjectType objType) {
+void rtRenderObject::setObjectType(QString objType) {
   m_objType = objType;
 }
 

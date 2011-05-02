@@ -43,17 +43,16 @@ class rtObjectManager : public QObject {
   rtObjectManager();
   ~rtObjectManager();
 
-  rtRenderObject* addObjectOfType(rtConstants::rtObjectType objType, QString objName="Not Named");
   rtRenderObject* addObjectOfType(QString objType, QString objName="Not Named");
   //! Register a new object type in Vurtigo and store the object to create more if needed
   void addNewObject(QString newType,rtRenderObjectMaker *newObj);
-  rtRenderObject* addReadOnlyObject(rtConstants::rtObjectType objType, QString objName="Not Named");
+  rtRenderObject* addReadOnlyObject(QString objType, QString objName="Not Named");
   void renameObjectWithID(int objID, QString newName);
   bool removeObject(int objID);
   bool removeReadOnly(int objID);
   rtRenderObject* getObjectWithID(int objID);
-  QList<int> getObjectsOfType(rtConstants::rtObjectType objType);
-  int getNumObjectsOfType(rtConstants::rtObjectType objType);
+  QList<int> getObjectsOfType(QString objType);
+  int getNumObjectsOfType(QString objType);
 
   //! Set an object to be permanent (cannot be deleted)
   void setPermanent(int objID) { if (!m_permanentObjects.contains(objID)) m_permanentObjects.append(objID); }
@@ -91,6 +90,9 @@ class rtObjectManager : public QObject {
 
   //! A list of object makers added from plugins
   QList<QPair<QString,rtRenderObjectMaker *> > m_extObjects;
+
+  //! A list of object types Vurtigo can create
+  QList<QString> m_objectTypeList;
 signals:
   void objectCreated(int objID);
   void objectRemoved(int objID);

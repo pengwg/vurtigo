@@ -23,7 +23,7 @@
 #include "rtApplication.h"
 
 rtLabelRenderObject::rtLabelRenderObject() {
-  setObjectType(rtConstants::OT_TextLabel);
+  setObjectType("OT_TextLabel");
   setName("Simple Label Renderer");
   setupDataObject();
   setupPipeline();

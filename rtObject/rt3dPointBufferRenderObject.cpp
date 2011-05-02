@@ -37,7 +37,7 @@
 
 
 rt3DPointBufferRenderObject::rt3DPointBufferRenderObject() {
-  setObjectType(rtConstants::OT_3DPointBuffer);
+  setObjectType("OT_3DPointBuffer");
   setName("Simple 3D Point Renderer");
 
   m_currTransform = vtkTransform::New();

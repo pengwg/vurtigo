@@ -37,7 +37,7 @@ rt3DPointBufferDataObject::rt3DPointBufferDataObject()
 : m_currentScale(1.0), m_pointZoom(1.0), m_saveFileName("")
 {
   removeAllPoints();
-  setObjectType(rtConstants::OT_3DPointBuffer);
+  setObjectType("OT_3DPointBuffer");
   setupGUI();
 
   connect( this, SIGNAL(pointListModifiedSignal()), this, SLOT(pointListModifiedSlot()), Qt::QueuedConnection );
@@ -229,7 +229,7 @@ bool rt3DPointBufferDataObject::loadFile(QFile *file) {
     return false;
 
   QXmlStreamReader reader(file);
-  rtConstants::rtObjectType objType;
+  QString objType;
   QString objName = "";
 
   // Remove previous points before adding the new ones.

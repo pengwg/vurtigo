@@ -100,8 +100,8 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
   regInfo->clear();
 
   //start with 2 new sets of points
-  m_currSetSource = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,"Placement SOURCE");
-  m_currSetTarget = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,"Placement TARGET");
+  m_currSetSource = rtApplication::instance().getObjectManager()->addObjectOfType("OT_3DPointBuffer","Placement SOURCE");
+  m_currSetTarget = rtApplication::instance().getObjectManager()->addObjectOfType("OT_3DPointBuffer","Placement TARGET");
 
   setupAllCombos();
 }
@@ -333,7 +333,7 @@ void rtRegistration::registerButtonPressed() {
     }
 
     rtRenderObject* newObject;
-    newObject = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DObject,QString(volume->getObjName() + ":" + strRegType + "_R_" + QString::number(source->getId()) + "_to_" + QString::number(target->getId())));
+    newObject = rtApplication::instance().getObjectManager()->addObjectOfType("OT_3DObject",QString(volume->getObjName() + ":" + strRegType + "_R_" + QString::number(source->getId()) + "_to_" + QString::number(target->getId())));
 
     if (newObject)
     {
@@ -362,7 +362,7 @@ void rtRegistration::registerButtonPressed() {
 
 
 
-            rt3DPointBufferDataObject *sourceTransPoints = static_cast<rt3DPointBufferDataObject *>(rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,QString(strRegType + "_R_" + QString::number(source->getId()) + "_to_" + QString::number(target->getId())))->getDataObject());
+            rt3DPointBufferDataObject *sourceTransPoints = static_cast<rt3DPointBufferDataObject *>(rtApplication::instance().getObjectManager()->addObjectOfType("OT_3DPointBuffer",QString(strRegType + "_R_" + QString::number(source->getId()) + "_to_" + QString::number(target->getId())))->getDataObject());
             if (sourceTransPoints)
             {
                 rtBasic3DPointData *newPoint = new rtBasic3DPointData();
@@ -523,7 +523,7 @@ void rtRegistration::addNewPoints()
     QString name = QInputDialog::getText(this,"Point Set Name","New Point Set Name: ",QLineEdit::Normal,"Placement",&ok);
     if (!name.isEmpty() && ok)
     {
-        rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,name);
+        rtApplication::instance().getObjectManager()->addObjectOfType("OT_3DPointBuffer",name);
         setupPointCombos();
     }
 }
@@ -537,7 +537,7 @@ void rtRegistration::setupPointCombos()
     setTarget->clear();
     setOneTable->clearContents();
     setTwoTable->clearContents();
-    m_points = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_3DPointBuffer);
+    m_points = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_3DPointBuffer");
     if (m_points.empty()) return;
     int indexS = 0;
     int indexT = 0;
@@ -575,16 +575,13 @@ void rtRegistration::setupVolumeCombos()
     volSource->clear();
     volTarget->clear();
 
-    m_volumes = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_3DObject);
-
+    m_volumes = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_3DObject");
 
     // sort by studydate
     QMultiMap<QDate, int> map;
     foreach (const int &i, m_volumes)
         map.insert(static_cast<rt3DVolumeDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(i)->getDataObject())->getDicomCommonData()->getStudyDate(), i);
     m_volumes = map.values();
-
-
 
     if (m_volumes.empty()) return;
     int indexS = 0;

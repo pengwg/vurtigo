@@ -21,7 +21,7 @@
 
 //! Constructor
 rtMatrixDataObject::rtMatrixDataObject() {
-  setObjectType(rtConstants::OT_vtkMatrix4x4);
+  setObjectType("OT_vtkMatrix4x4");
 
   m_currTransform = vtkTransform::New();
 

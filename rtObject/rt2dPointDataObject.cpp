@@ -21,7 +21,7 @@
 
 //! Constructor
 rt2DPointDataObject::rt2DPointDataObject() {
-  setObjectType(rtConstants::OT_2DPointBuffer);
+  setObjectType("OT_2DPointBuffer");
   setupGUI();
 }
 

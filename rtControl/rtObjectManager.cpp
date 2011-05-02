@@ -53,6 +53,10 @@ rtObjectManager::rtObjectManager() {
   m_list2DHash.clear();
   m_extObjects.clear();
   m_list2DHash.insert(-1, "NONE");
+  for (int i=0; i<12; i++)
+  {
+      m_objectTypeList.append(rtConstants::objectTypeToQString(rtConstants::intToObjectType(i)));
+  }
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtObjectManager::rtObjectManager() end") );
 #endif
@@ -66,110 +70,6 @@ rtObjectManager::~rtObjectManager() {
     }
 }
 
-
-//! Create and return a new object.
-/*!
-  This function will create a new object and add it to the object list. It will then return an instance of that object to the caller. The function returns NULL if the object was not created. Since the Object Manager is the only class that can create objects all other classes must call this particular function to request a new object.
-  @param objType The type of object that is to be added
-  @param objName The name of the object to be added. All objects have names.
-  @return An instance of a new object of a particular type. NULL is returned if the object could not be created.
- */
-rtRenderObject* rtObjectManager::addObjectOfType(rtConstants::rtObjectType objType, QString objName) {
-#ifdef DEBUG_VERBOSE_MODE_ON
-  rtApplication::instance().getMessageHandle()->debug( QString("rtObjectManager::addObjectOfType() start") );
-#endif
-
-  rtRenderObject* temp = NULL;
-  rtDataObject* dataO = NULL;
-  int nextID;
-
-  // Lock this function
-  QMutexLocker locker(&m_objectLock);
-
-  // Find out which object will be used.
-  switch(objType) {
-  case rtConstants::OT_None:
-    temp=new rtNoneRenderObject();
-    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("Warning: None Object Requested. "));
-    break;
-  case rtConstants::OT_3DObject:
-    temp=new rt3DVolumeRenderObject();
-    break;
-  case rtConstants::OT_2DObject:
-    temp=new rt2DSliceRenderObject();
-    break;
-  case rtConstants::OT_Cath:
-    temp=new rtCathRenderObject();
-    break;
-  case rtConstants::OT_vtkMatrix4x4:
-    temp=new rtMatrixRenderObject();
-    break;
-  case rtConstants::OT_vtkPolyData:
-    temp=new rtPolyRenderObject();
-    break;
-  case rtConstants::OT_vtkPiecewiseFunction:
-    temp=new rtPieceFuncRenderObject();
-    break;
-  case rtConstants::OT_vtkColorTransferFunction:
-    temp=new rtColorFuncRenderObject();
-    break;
-  case rtConstants::OT_ImageBuffer:
-    temp=new rtImageBufferRenderObject();
-    break;
-  case rtConstants::OT_2DPointBuffer:
-    temp=new rt2DPointRenderObject();
-    break;
-  case rtConstants::OT_3DPointBuffer:
-    temp=new rt3DPointBufferRenderObject();
-    break;
-  case rtConstants::OT_TextLabel:
-    temp=new rtLabelRenderObject();
-    break;
-  case rtConstants::OT_EPMesh:
-    temp = new rtEPRenderObject();
-    break;
-  default:
-    rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("No object of type: ").append(QString::number(objType)));
-    temp=NULL;
-    break;
-  }
-
-  // The object has been created.
-  if (temp){
-    dataO = temp->getDataObject();
-
-    // Try to get the valid ID.
-    nextID = dataO->getId();
-    if (nextID == -1) {
-      rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Could not find a valid ID for a new object! "));
-      delete temp;
-      return NULL;
-    }
-
-    // Push the new object creation to the log.
-    rtApplication::instance().getMessageHandle()->log(QString("Created Object with ID: ").append(QString::number(nextID)));
-
-    dataO->setObjName(objName);
-    dataO->update();
-    m_objectHash.insert(nextID, temp);
-    updateGuiObjectList();
-
-    QList<QString> twoDViews = temp->get2DViewNameList();
-    for (int ix1=0; ix1<twoDViews.size(); ix1++) {
-      m_list2DHash.insertMulti(nextID, twoDViews[ix1]);
-    }
-    if (twoDViews.size()>0 && rtApplication::instance().getMainWinHandle()) {
-      rtApplication::instance().getMainWinHandle()->update2DWindowLists(&m_list2DHash);
-    }
-
-    emit objectCreated(nextID);
-  }
-
-#ifdef DEBUG_VERBOSE_MODE_ON
-  rtApplication::instance().getMessageHandle()->debug( QString("rtObjectManager::addObjectOfType() end") );
-#endif
-  return temp;
-}
 
 //! Create and return a new object.
 /*!
@@ -286,11 +186,11 @@ rtRenderObject* rtObjectManager::addObjectOfType(QString objType, QString objNam
   return temp;
 }
 
-//! Add an exisiting rtRender object into Vurtigo
+//! Add an exisiting rtRenderObjectMaker into Vurtigo
 /*!
   This function will add the given object to the external object list which will be used to create instances of those objects when needed.
   @param newType The new object type to be added
-  @param newObj The object that is to be added.
+  @param newObj The object maker that is to be added.
  */
 void rtObjectManager::addNewObject(QString newType,rtRenderObjectMaker *newObj)
 {
@@ -304,7 +204,15 @@ void rtObjectManager::addNewObject(QString newType,rtRenderObjectMaker *newObj)
       return;
   }
 
-  m_extObjects.append(qMakePair(newType,newObj));
+  if (!m_objectTypeList.contains(newType))
+  {
+      m_extObjects.append(qMakePair(newType,newObj));
+      m_objectTypeList.append(newType);
+      rtApplication::instance().getMainWinHandle()->addNewObjectType(newType);
+      updateGuiObjectList();
+  }
+  else
+      rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("Warning: This type already exists "));
 
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtObjectManager::addNewObject() end") );
@@ -317,7 +225,7 @@ void rtObjectManager::addNewObject(QString newType,rtRenderObjectMaker *newObj)
   @see addObjectOfType()
   @return An instance of a new object of a particular type. NULL is returned if the object could not be created.
  */
-rtRenderObject* rtObjectManager::addReadOnlyObject(rtConstants::rtObjectType objType, QString objName) {
+rtRenderObject* rtObjectManager::addReadOnlyObject(QString objType, QString objName) {
   rtRenderObject* newObj;
 
   newObj = addObjectOfType(objType, objName);
@@ -400,7 +308,7 @@ rtRenderObject* rtObjectManager::getObjectWithID(int objID) {
   A QList of IDs will be returned to the caller. This operation is expensive if there are many objects of that type since the QList is copied over to the caller. A long list will take a long time to traverse and copy.
   @return A list of IDs. If there are no objects of that type the list will be empty.
  */
-QList<int> rtObjectManager::getObjectsOfType(rtConstants::rtObjectType objType) {
+QList<int> rtObjectManager::getObjectsOfType(QString objType) {
   QList<int> objList;
 
   // Start with an empty list.
@@ -421,7 +329,7 @@ QList<int> rtObjectManager::getObjectsOfType(rtConstants::rtObjectType objType) 
 /*!
   @return The number of objects of that type.
  */
-int rtObjectManager::getNumObjectsOfType(rtConstants::rtObjectType objType) {
+int rtObjectManager::getNumObjectsOfType(QString objType) {
   int numObj = 0;
 
   QHashIterator<int, rtRenderObject*> i(m_objectHash);

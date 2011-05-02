@@ -21,7 +21,7 @@
 
 //! Constructor
 rtNoneDataObject::rtNoneDataObject() {
-  setObjectType(rtConstants::OT_None);
+  setObjectType("OT_None");
   setupGUI();
 }
 

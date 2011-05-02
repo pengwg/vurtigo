@@ -28,7 +28,7 @@
 rtEPRenderObject::rtEPRenderObject()
     : m_pointMapper(0), m_meshMapper(0), m_pointActor(0), m_meshActor(0)
 {
-  setObjectType(rtConstants::OT_EPMesh);
+  setObjectType("OT_EPMesh");
   setName("EP Renderer");
 
   m_pointMapper = vtkPolyDataMapper::New();

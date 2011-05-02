@@ -25,7 +25,7 @@
 #include "customQVTKWidget.h"
 
 rtCathRenderObject::rtCathRenderObject() {
-  setObjectType(rtConstants::OT_Cath);
+  setObjectType("OT_Cath");
   setName("Cath Renderer");
 
   setupDataObject();

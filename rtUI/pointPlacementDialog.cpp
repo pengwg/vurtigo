@@ -65,7 +65,7 @@ pointPlacementDialog::pointPlacementDialog(QWidget *parent, Qt::WindowFlags flag
   m_moved = false;
 
   //start with a new set of points
-  m_currPoints = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,"Placement");
+  m_currPoints = rtApplication::instance().getObjectManager()->addObjectOfType("OT_3DPointBuffer","Placement");
   setupCombo();
 
 
@@ -156,7 +156,7 @@ void pointPlacementDialog::addNewPoints()
     QString name = QInputDialog::getText(this,"Point Set Name","New Point Set Name: ",QLineEdit::Normal,"Placement",&ok);
     if (!name.isEmpty() && ok)
     {
-        m_currPoints = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_3DPointBuffer,name);
+        m_currPoints = rtApplication::instance().getObjectManager()->addObjectOfType("OT_3DPointBuffer",name);
         setupCombo();
     }
 }
@@ -169,7 +169,7 @@ void pointPlacementDialog::setupCombo()
     setCombo->clear();
     setTable->clearContents();
 
-    m_points = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_3DPointBuffer);
+    m_points = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_3DPointBuffer");
     if (m_points.empty()) return;
     int index = 0;
     for (int ix1=0; ix1<m_points.count(); ix1++)

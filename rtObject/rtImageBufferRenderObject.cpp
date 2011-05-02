@@ -21,7 +21,7 @@
 #include "rtImageBufferDataObject.h"
 
 rtImageBufferRenderObject::rtImageBufferRenderObject() {
-  setObjectType(rtConstants::OT_ImageBuffer);
+  setObjectType("OT_ImageBuffer");
   setName("Image Buffer Renderer");
   setupDataObject();
   setupPipeline();

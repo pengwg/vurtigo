@@ -59,12 +59,12 @@ Q_OBJECT
   //! Get the name of this render object.
   QString getName();
 
-  //! Get the type of this render object.
+  //! Get the type of this render object
   /*!
     \return The type of this object
-    \sa rtConstants::rtObjectType
+    \sa QString
     */
-  rtConstants::rtObjectType getObjectType();
+  QString getObjectType();
 
   QList<QString> get2DViewNameList() { return m_pipe2D.keys(); }
   bool viewWithNameExists(QString name) { return m_pipe2D.contains(name); }
@@ -148,9 +148,9 @@ Q_OBJECT
   //! Set the type for this render object
   /*!
     \param objType The type of object to use
-    \sa rtConstants::rtObjectType
+    \sa QString
     */
-  void setObjectType(rtConstants::rtObjectType objType);
+  void setObjectType(QString objType);
 
   //! Apply changes from the modified data object.
   virtual void update() = 0;
@@ -187,7 +187,7 @@ Q_OBJECT
   //! The name of the render object
   QString m_renderName;
   //! The type of the render object
-  rtConstants::rtObjectType m_objType;
+  QString m_objType;
 };
 
 #endif

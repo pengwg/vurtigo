@@ -21,7 +21,7 @@
 #include "rtNoneDataObject.h"
 
 rtNoneRenderObject::rtNoneRenderObject() {
-  setObjectType(rtConstants::OT_None);
+  setObjectType("OT_None");
   setName("None Renderer");
   setupDataObject();
   setupPipeline();

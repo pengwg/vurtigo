@@ -58,10 +58,10 @@ Q_OBJECT
   void setObjName(QString name);
 
   //! Get the type of data object
-  rtConstants::rtObjectType getObjectType();
+  QString getObjectType();
 
   //! Set the type of data object
-  void setObjectType(rtConstants::rtObjectType ot);
+  void setObjectType(QString type);
 
   //! Check if the object is read only
   bool isReadOnly() { return m_readOnly; }
@@ -153,7 +153,7 @@ Q_OBJECT
     \param type The object type to save
     \param name The object name to save
     */
-  static void saveHeader(QXmlStreamWriter *writer, rtConstants::rtObjectType type, QString name);
+  static void saveHeader(QXmlStreamWriter *writer, QString type, QString name);
 
   //! Load a header from a file to get the object type and name
   /*!
@@ -162,7 +162,7 @@ Q_OBJECT
     \param type The variable where the object type will be stored. OT_None if the read failed.
     \param name The variable where the object name will be stored. Blank string if the name read has failed.
     */
-  static void loadHeader(QXmlStreamReader *reader, rtConstants::rtObjectType &type, QString &name);
+  static void loadHeader(QXmlStreamReader *reader, QString &type, QString &name);
 
 
   //! Save a vtkProperty type of object.
@@ -216,7 +216,7 @@ Q_OBJECT
   QString m_objName;
 
   //! Object type
-  rtConstants::rtObjectType m_objType;
+  QString m_objType;
 
   //! Flag is true if the object is read only.
   bool m_readOnly;

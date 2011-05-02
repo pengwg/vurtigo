@@ -24,7 +24,7 @@
 rtCathDataObject::rtCathDataObject()
  : m_tension(0.0), m_continuity(0.0), m_tipValue(0.0), m_endValue(0.0), m_splineThickness(3.0)
 {
-  setObjectType(rtConstants::OT_Cath);
+  setObjectType("OT_Cath");
 
   // Allocate new objects
   m_splineProperty = vtkProperty::New();

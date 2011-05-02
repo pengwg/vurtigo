@@ -153,7 +153,7 @@ void rtApplication::setupOrigin() {
 #endif
 
   // Setup the origin.
-  rt3DPointBufferRenderObject *renObj = static_cast<rt3DPointBufferRenderObject*>(m_objManager->addObjectOfType(rtConstants::OT_3DPointBuffer, "True Origin"));
+  rt3DPointBufferRenderObject *renObj = static_cast<rt3DPointBufferRenderObject*>(m_objManager->addObjectOfType("OT_3DPointBuffer", "True Origin"));
   rt3DPointBufferDataObject *datObj = static_cast<rt3DPointBufferDataObject*>(renObj->getDataObject());
   rtBasic3DPointData origin;
   rtBasic3DPointData xDir, yDir, zDir;

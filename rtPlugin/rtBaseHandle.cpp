@@ -74,7 +74,7 @@ int rtBaseHandle::requestNewObject(rtConstants::rtObjectType objType, QString na
     while (!m_newObjectLock.tryLock()) QCoreApplication::processEvents();
 
     rtRenderObject* temp;
-    temp = rtApplication::instance().getObjectManager()->addObjectOfType(objType, name);
+    temp = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::objectTypeToQString(objType), name);
     if (temp) {
       result = temp->getDataObject()->getId();
     }
@@ -148,7 +148,7 @@ void rtBaseHandle::addNewObject(QString newType,rtRenderObjectMaker *newObj)
 void rtBaseHandle::requestNewObjectSlot(rtConstants::rtObjectType objType, QString name) {
   rtRenderObject* temp;
   int result=-1;
-  temp = rtApplication::instance().getObjectManager()->addObjectOfType(objType, name);
+  temp = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::objectTypeToQString(objType), name);
   if (temp) {
     result = temp->getDataObject()->getId();
   }
@@ -183,11 +183,20 @@ bool rtBaseHandle::removeObject(int ID) {
 }
 
 QList<int> rtBaseHandle::getObjectsOfType(rtConstants::rtObjectType objType) {
-  return rtApplication::instance().getObjectManager()->getObjectsOfType(objType);
+  return rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::objectTypeToQString(objType));
+}
+
+QList<int> rtBaseHandle::getObjectsOfType(QString objType)
+{
+    return rtApplication::instance().getObjectManager()->getObjectsOfType(objType);
 }
 
 
 int rtBaseHandle::getNumObjectsOfType(rtConstants::rtObjectType objType) {
+  return rtApplication::instance().getObjectManager()->getNumObjectsOfType(rtConstants::objectTypeToQString(objType));
+}
+
+int rtBaseHandle::getNumObjectsOfType(QString objType) {
   return rtApplication::instance().getObjectManager()->getNumObjectsOfType(objType);
 }
 

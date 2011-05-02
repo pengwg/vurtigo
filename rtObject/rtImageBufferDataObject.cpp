@@ -21,7 +21,7 @@
 
 //! Constructor
 rtImageBufferDataObject::rtImageBufferDataObject() {
-  setObjectType(rtConstants::OT_ImageBuffer);
+  setObjectType("OT_ImageBuffer");
   setupGUI();
 }
 

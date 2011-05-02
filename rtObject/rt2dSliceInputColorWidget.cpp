@@ -94,7 +94,7 @@ void rt2DSliceInputColorWidget::newVurtigoObject(int objID) {
 
   tempR = rtApplication::instance().getObjectManager()->getObjectWithID(objID);
   if (tempR) {
-    if (tempR->getObjectType() == rtConstants::OT_3DObject) {
+    if (tempR->getObjectType() == "OT_3DObject") {
       tempD = tempR->getDataObject();
       loc = m_dropdownToObjectId.size();
       m_dropdownToObjectId.insert(loc, objID);
@@ -137,7 +137,7 @@ void rt2DSliceInputColorWidget::fillDropdownList() {
   m_itemName.insertItem(1, "Real-Time 2D Input");
 
   // Get a list of all the 3D/4D type objects.
-  QList<int> volumeObjects = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_3DObject);
+  QList<int> volumeObjects = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_3DObject");
   for (int ix1=0; ix1<volumeObjects.size(); ix1++) {
     tempR = rtApplication::instance().getObjectManager()->getObjectWithID(volumeObjects.at(ix1));
     if (tempR) {

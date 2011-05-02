@@ -24,7 +24,7 @@
 
 //! Constructor
 rtPieceFuncDataObject::rtPieceFuncDataObject() {
-  setObjectType(rtConstants::OT_vtkPiecewiseFunction);
+  setObjectType("OT_vtkPiecewiseFunction");
   m_pieceFunc = vtkPiecewiseFunction::New();
   setupGUI();
 }
@@ -114,7 +114,7 @@ bool rtPieceFuncDataObject::loadFile(QFile* file) {
     return false;
 
   QXmlStreamReader reader(file);
-  rtConstants::rtObjectType objType;
+  QString objType;
   QString objName="";
 
   while (!reader.atEnd()) {

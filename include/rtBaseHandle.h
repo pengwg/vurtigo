@@ -104,6 +104,15 @@ Only one thread may request the creation (or removal) of an object at a time.
  */
   QList<int> getObjectsOfType(rtConstants::rtObjectType objType);
 
+  //! Get a list of IDs for all the objects of a particular type.
+  /*!
+    There may be any number of objects of one type. Given a type of object this function will return a list of IDs corresponding to all of the objects of that type. This function is useful for those plugins that take a specific type of object as input.
+    @see getNumObjectsOfType()
+    @param objType The type of object that the plugin is looking for.
+    @return A list of IDs for all the objects of that type. Returns an empty list if there are no objects of that type.
+   */
+    QList<int> getObjectsOfType(QString objType);
+
 //! Get the number of objects of a particular type.
 /*!
   Get the number of objects of one type.
@@ -112,6 +121,15 @@ Only one thread may request the creation (or removal) of an object at a time.
   @return The number of objects of that type
  */
   int getNumObjectsOfType(rtConstants::rtObjectType objType);
+
+  //! Get the number of objects of a particular type.
+  /*!
+    Get the number of objects of one type.
+    @see getObjectsOfType()
+    @param objType The type of object that the plugin is looking for.
+    @return The number of objects of that type
+   */
+    int getNumObjectsOfType(QString objType);
 
   //! Get the object that has this ID
   /*!

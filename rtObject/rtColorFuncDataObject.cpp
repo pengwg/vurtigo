@@ -21,7 +21,7 @@
 
 //! Constructor
 rtColorFuncDataObject::rtColorFuncDataObject() {
-  setObjectType(rtConstants::OT_vtkColorTransferFunction);
+  setObjectType("OT_vtkColorTransferFunction");
   m_ctf = vtkColorTransferFunction::New();
   setupGUI();
 }
@@ -115,7 +115,7 @@ bool rtColorFuncDataObject::loadFile(QFile *file) {
     return false;
 
   QXmlStreamReader reader(file);
-  rtConstants::rtObjectType objType;
+  QString objType;
   QString objName="";
 
   while (!reader.atEnd()) {

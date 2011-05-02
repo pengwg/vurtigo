@@ -24,7 +24,7 @@
 #include "customQVTKWidget.h"
 
 rtMatrixRenderObject::rtMatrixRenderObject() {
-  setObjectType(rtConstants::OT_vtkMatrix4x4);
+  setObjectType("OT_vtkMatrix4x4");
   setName("Matrix Renderer");
   setupDataObject();
   setupPipeline();

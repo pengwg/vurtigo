@@ -21,7 +21,7 @@
 #include "rtPieceFuncDataObject.h"
 
 rtPieceFuncRenderObject::rtPieceFuncRenderObject() {
-  setObjectType(rtConstants::OT_vtkPiecewiseFunction);
+  setObjectType("OT_vtkPiecewiseFunction");
   setName("Piecewise Function Renderer");
   setupDataObject();
   setupPipeline();

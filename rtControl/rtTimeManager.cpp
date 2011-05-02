@@ -316,7 +316,7 @@ void rtTimeManager::calcFrameRate() {
 
   if (!m_frameRateLabel)
   {
-    m_frameRateLabel = rtApplication::instance().getObjectManager()->addObjectOfType(rtConstants::OT_TextLabel, "Frame Rate");
+    m_frameRateLabel = rtApplication::instance().getObjectManager()->addObjectOfType("OT_TextLabel", "Frame Rate");
     rtApplication::instance().getObjectManager()->setPermanent(m_frameRateLabel->getDataObject()->getId());
   }
 

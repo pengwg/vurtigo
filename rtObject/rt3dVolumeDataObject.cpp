@@ -38,7 +38,7 @@
 #include "vtkLinearTransform.h"
 
 rt3DVolumeDataObject::rt3DVolumeDataObject() {
-  setObjectType(rtConstants::OT_3DObject);
+  setObjectType("OT_3DObject");
 
   m_rayCastFunction=RCF_COMPOSITE;
   m_imgDataValid = false;
@@ -339,20 +339,20 @@ void rt3DVolumeDataObject::setDirectionCosinesXY(float* dirCos) {
 void rt3DVolumeDataObject::newObjectCreated(int id) {
   rtRenderObject * temp = rtApplication::instance().getObjectManager()->getObjectWithID(id);
   if (temp) {
-    if (temp->getObjectType()==rtConstants::OT_vtkPiecewiseFunction) {
+    if (temp->getObjectType()=="OT_vtkPiecewiseFunction") {
       // New Piecewise Function.
       // Do the reset... It may be faster to just add the object but this is more robust.
       m_optionsWidget.comboPieceFunc->clear();
       m_optionsWidget.comboPieceFunc->addItem("Default");
-      QList<int> pieceFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_vtkPiecewiseFunction);
+      QList<int> pieceFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_vtkPiecewiseFunction");
       for (int ix1=0; ix1<pieceFuncs.count() ; ix1++) {
         m_optionsWidget.comboPieceFunc->addItem(QString::number(pieceFuncs.at(ix1)));
       }
-    } else if (temp->getObjectType()==rtConstants::OT_vtkColorTransferFunction) {
+    } else if (temp->getObjectType()=="OT_vtkColorTransferFunction") {
       // New Color Function.
       m_optionsWidget.comboCTFunc->clear();
       m_optionsWidget.comboCTFunc->addItem("Default");
-      QList<int> colorFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_vtkColorTransferFunction);
+      QList<int> colorFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_vtkColorTransferFunction");
       for (int ix1=0; ix1<colorFuncs.count() ; ix1++) {
         m_optionsWidget.comboCTFunc->addItem(QString::number(colorFuncs.at(ix1)));
       }
@@ -767,7 +767,7 @@ void rt3DVolumeDataObject::createNewPWF() {
     return;
   }
 
-  pieceFunc = static_cast<rtPieceFuncRenderObject*>(oManage->addObjectOfType(rtConstants::OT_vtkPiecewiseFunction, this->getObjName().append("_PWF")));
+  pieceFunc = static_cast<rtPieceFuncRenderObject*>(oManage->addObjectOfType("OT_vtkPiecewiseFunction", this->getObjName().append("_PWF")));
   if (!pieceFunc) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to create piecewise function. Action aborted."));
     return;
@@ -804,7 +804,7 @@ void rt3DVolumeDataObject::createNewCTF() {
     return;
   }
 
-  colorFunc = static_cast<rtColorFuncRenderObject*>(oManage->addObjectOfType(rtConstants::OT_vtkColorTransferFunction, this->getObjName().append("_CTF")));
+  colorFunc = static_cast<rtColorFuncRenderObject*>(oManage->addObjectOfType("OT_vtkColorTransferFunction", this->getObjName().append("_CTF")));
   if (!colorFunc) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Failed to create color function. Action aborted."));
     return;
@@ -921,14 +921,14 @@ void rt3DVolumeDataObject::setupGUI() {
 
   m_optionsWidget.comboPieceFunc->clear();
   m_optionsWidget.comboPieceFunc->addItem("Default");
-  QList<int> pieceFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_vtkPiecewiseFunction);
+  QList<int> pieceFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_vtkPiecewiseFunction");
   for (int ix1=0; ix1<pieceFuncs.count() ; ix1++) {
     m_optionsWidget.comboPieceFunc->addItem(QString::number(pieceFuncs.at(ix1)));
   }
 
   m_optionsWidget.comboCTFunc->clear();
   m_optionsWidget.comboCTFunc->addItem("Default");
-  QList<int> colorFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_vtkColorTransferFunction);
+  QList<int> colorFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_vtkColorTransferFunction");
   for (int ix1=0; ix1<colorFuncs.count() ; ix1++) {
     m_optionsWidget.comboCTFunc->addItem(QString::number(colorFuncs.at(ix1)));
   }
@@ -1019,7 +1019,7 @@ bool rt3DVolumeDataObject::loadFile(QFile *file)
       return false;
 
     QXmlStreamReader reader(file);
-    rtConstants::rtObjectType objType;
+    QString objType;
     QString objName = "";
     QList<double> trigs;
     vtkTransform *trans = vtkTransform::New();
@@ -1103,7 +1103,7 @@ bool rt3DVolumeDataObject::loadFile(QFile *file)
 void rt3DVolumeDataObject::setupVolumes()
 {
     m_optionsWidget.volumeBox->clear();
-    QList<int> vols = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_3DObject);
+    QList<int> vols = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_3DObject");
     rt3DVolumeDataObject *v;
     for (int ix1=0; ix1<vols.size(); ix1++)
     {
@@ -1114,7 +1114,7 @@ void rt3DVolumeDataObject::setupVolumes()
 
 void rt3DVolumeDataObject::copyVolume()
 {
-    QList<int> vols = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_3DObject);
+    QList<int> vols = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_3DObject");
     rt3DVolumeDataObject *v;
     v = static_cast<rt3DVolumeDataObject *>(rtApplication::instance().getObjectManager()->getObjectWithID(vols.at(m_optionsWidget.volumeBox->currentIndex()))->getDataObject());
     this->lock();

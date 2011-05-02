@@ -126,7 +126,7 @@ void CathHistoryUI::objectAdded(int objID) {
   data = rtBaseHandle::instance().getObjectWithID(objID);
   if (!data) return;
 
-  if ( data->getObjectType() == rtConstants::OT_Cath ) {
+  if ( data->getObjectType() == "OT_Cath" ) {
     cath = static_cast<rtCathDataObject*>(data);
     if (!cath) return;
     m_cathObjectMap.insert(m_cathObjectMap.count(), cath);

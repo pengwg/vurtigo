@@ -150,7 +150,7 @@ void AlignmentToolUI::objectAdded(int objID) {
   data = rtBaseHandle::instance().getObjectWithID(objID);
   if (!data) return;
 
-  if ( data->getObjectType() == rtConstants::OT_2DObject ) {
+  if ( data->getObjectType() == "OT_2DObject" ) {
     slice = static_cast<rt2DSliceDataObject*>(data);
     if (!slice) return;
     m_planeObjectMap.insert(m_planeObjectMap.count(), slice);

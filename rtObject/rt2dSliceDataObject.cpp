@@ -36,7 +36,7 @@
 
 //! Constructor
 rt2DSliceDataObject::rt2DSliceDataObject() {
-  setObjectType(rtConstants::OT_2DObject);
+  setObjectType("OT_2DObject");
   setupGUI();
 
   m_imgDataValid = false;

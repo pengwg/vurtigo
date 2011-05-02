@@ -34,10 +34,10 @@ public:
   ObjectSelectionComboBox();
 
   //! Include a type of object into this list.
-  void addObjectType(rtConstants::rtObjectType type);
+  void addObjectType(QString type);
 
   //! Remove a type of object from this list.
-  void removeObjectType(rtConstants::rtObjectType type);
+  void removeObjectType(QString type);
 
   //! Return the ID of the current object.
   /*!
@@ -63,7 +63,7 @@ protected:
   void updateComboList();
 
   //! List of object types that may appear in this slection box.
-  QList<rtConstants::rtObjectType> m_objectTypes;
+  QList<QString> m_objectTypes;
 
   int m_currentObjectIndex;
 };
