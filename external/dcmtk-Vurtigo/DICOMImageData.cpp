@@ -120,8 +120,8 @@ double DICOMImageData::getTriggerFromFile(QString fName) {
 
   // Check that the file was loaded
   if (status.bad()) {
-    std::cout << "Error: cannot read DICOM file (" << status.text() << ")" << std::endl;
-    return false;
+    std::cout << "Error: cannot read DICOM file (" << status.text() << ") " << fName.toStdString() << std::endl;
+    return -2;
   }
 
   datSet = dcmFile.getDataset();

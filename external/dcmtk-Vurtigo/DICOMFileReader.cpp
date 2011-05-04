@@ -112,7 +112,6 @@ bool DICOMFileReader::setDirectory(QString dirPath, imageType type) {
   QStringList filters;
   if (type == DICOMFileReader::I_DICOM)
   {
-      filters << "*.dcm" << "*.DCM" << "*.MR.dcm";
 
       if (!fileDir.exists()) {
           std::cout << "No such directory: " << dirPath.toStdString() << std::endl;
@@ -120,7 +119,6 @@ bool DICOMFileReader::setDirectory(QString dirPath, imageType type) {
       }
 
       fileDir.setFilter(QDir::NoSymLinks | QDir::NoDotAndDotDot | QDir::Readable | QDir::Files);
-      fileDir.setNameFilters(filters);
       files = fileDir.entryList();
 
       if (files.count() <= 0) {
@@ -135,6 +133,8 @@ bool DICOMFileReader::setDirectory(QString dirPath, imageType type) {
       // Create the trigger list for the first set of images.
       for (int ix1=0; ix1<files.count(); ix1++) {
           double trig = DICOMImageData::getTriggerFromFile(fileDir.filePath(files.at(ix1)));
+          // if ONE file is not a DICOM, fail out of the entire directory
+          if (trig == -2) return false;
           if (!m_triggerList.contains(trig) && trig > maxTrig) {
               m_triggerList.append(trig);
               maxTrig = trig;
@@ -151,6 +151,7 @@ bool DICOMFileReader::setDirectory(QString dirPath, imageType type) {
           if ( !m_ddata->readFile(fileDir.filePath(files.at(ix1))) ) {
               // Failed to read the file.
               std::cout << "Failed to Read DICOM File: " << fileDir.filePath(files.at(ix1)).toStdString() << std::endl;
+              // if ONE file is not a DICOM, fail out of the entire directory
               return false;
           } else {
               // File was read correctly.
