@@ -32,6 +32,8 @@
 #include "rtApplication.h"
 #include "rtMessage.h"
 #include "rtTimeManager.h"
+#include "vtkXMLImageDataReader.h"
+#include "vtkXMLImageDataWriter.h"
 
 rt3DVolumeDataObject::rt3DVolumeDataObject() {
   setObjectType(rtConstants::OT_3DObject);
@@ -889,4 +891,92 @@ void rt3DVolumeDataObject::setupGPUGUI()
 
 void rt3DVolumeDataObject::cleanupGUI() {
 
+}
+
+bool rt3DVolumeDataObject::saveFile(QFile* file)
+{
+    if (!file->open(QIODevice::WriteOnly | QIODevice::Text))
+      return false;
+
+    QXmlStreamWriter writer(file);
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument();
+    writer.writeStartElement("VurtigoFile");
+    rtDataObject::saveHeader(&writer, getObjectType(), getObjName());
+    for (int ix1=0; ix1<m_triggerList.size(); ++ix1)
+    {
+        writer.writeTextElement("TriggerDelay",QString::number(m_triggerList[ix1]));
+    }
+    writer.writeTextElement("ImageType",QString::number(m_imgType));
+    writer.writeEndElement();
+    writer.writeEndDocument();
+    file->close();
+
+    vtkXMLImageDataWriter *imgWriter = vtkXMLImageDataWriter::New();
+    imgWriter->SetInput(this->getImageData());
+    imgWriter->SetFileName(QString(file->fileName() + "_img").toStdString().c_str());
+    imgWriter->Write();
+    imgWriter->Delete();
+
+    //this->getTransform()->GetNumberOfConcatenatedTransforms()
+    return true;
+}
+
+bool rt3DVolumeDataObject::loadFile(QFile *file)
+{
+    if (!file->open(QIODevice::ReadOnly | QIODevice::Text))
+      return false;
+
+    QXmlStreamReader reader(file);
+    rtConstants::rtObjectType objType;
+    QString objName = "";
+    QList<double> trigs;
+    int type;
+
+    while (!reader.atEnd())
+    {
+        if (reader.readNext() == QXmlStreamReader::StartElement)
+        {
+            if (reader.name() == "FileInfo")
+            {
+                rtDataObject::loadHeader(&reader,objType,objName);
+                if ( objType != this->getObjectType() ) {
+                  rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Object Type for data file is wrong."));
+                  break;
+                }
+            }
+            else if (reader.name() == "TriggerDelay")
+            {
+                trigs.append(reader.readElementText().toDouble());
+            }
+            else if (reader.name() == "ImageType")
+            {
+                type = reader.readElementText().toInt();
+            }
+        }
+    }
+    if (reader.hasError())
+    {
+        file->close();
+        return false;
+    }
+
+    file->close();
+    vtkXMLImageDataReader *imgReader = vtkXMLImageDataReader::New();
+    if (imgReader->CanReadFile(QString(file->fileName() + "_img").toStdString().c_str()))
+    {
+        imgReader->SetFileName(QString(file->fileName() + "_img").toStdString().c_str());
+        imgReader->Update();
+        this->lock();
+        this->copyTriggerDelayList(&trigs);
+        this->copyNewImageData(imgReader->GetOutput(),type);
+        this->unlock();
+        imgReader->Delete();
+        return true;
+    }
+    else
+    {
+        imgReader->Delete();
+        return false;
+    }
 }

@@ -1197,9 +1197,11 @@ QList<int> rtMainWindow::loadObject(QString fname) {
         if (obj) {
           objFile.setFileName(names.at(ix1));
           QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-          obj->loadFile(&objFile);
+          if (!obj->loadFile(&objFile))
+              rtApplication::instance().getObjectManager()->removeObject(obj->getDataObject()->getId());
+          else
+              objIDs.append(obj->getDataObject()->getId());
           QApplication::restoreOverrideCursor();
-          objIDs.append(obj->getDataObject()->getId());
         }
       }
 

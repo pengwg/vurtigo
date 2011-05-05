@@ -284,6 +284,11 @@ public:
 
   void setupGPUGUI();
 
+  //! Save this data object to file
+  virtual bool saveFile(QFile *file);
+  //! Load this data object from file
+  virtual bool loadFile(QFile *file);
+
  public slots:
   //! Slot called when the user changes the surface function.
   void surfaceFunctionChanged();
