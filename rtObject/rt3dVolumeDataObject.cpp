@@ -913,6 +913,12 @@ void rt3DVolumeDataObject::setupGUI() {
   connect(m_optionsWidget.frameSlider, SIGNAL(valueChanged(int)), this, SLOT(setVisibleComponent(int)));
   connect(m_optionsWidget.cineLoopPushButton, SIGNAL(toggled(bool)), this, SLOT(cineLoop(bool)));
 
+  // Volume Moving
+  connect(m_optionsWidget.volumeCopyButton, SIGNAL(clicked()),this,SLOT(copyVolume()));
+  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(setupVolumes()));
+  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectRemoved(int)), this, SLOT(setupVolumes()));
+  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectRenamed(int)), this, SLOT(setupVolumes()));
+
   m_optionsWidget.comboPieceFunc->clear();
   m_optionsWidget.comboPieceFunc->addItem("Default");
   QList<int> pieceFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_vtkPiecewiseFunction);
@@ -1092,4 +1098,29 @@ bool rt3DVolumeDataObject::loadFile(QFile *file)
 
     trans->Delete();
     mat->Delete();
+}
+
+void rt3DVolumeDataObject::setupVolumes()
+{
+    m_optionsWidget.volumeBox->clear();
+    QList<int> vols = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_3DObject);
+    rt3DVolumeDataObject *v;
+    for (int ix1=0; ix1<vols.size(); ix1++)
+    {
+        v = static_cast<rt3DVolumeDataObject *>(rtApplication::instance().getObjectManager()->getObjectWithID(vols[ix1])->getDataObject());
+        m_optionsWidget.volumeBox->addItem(v->getObjName() + " " + QString::number(vols[ix1]));
+    }
+}
+
+void rt3DVolumeDataObject::copyVolume()
+{
+    QList<int> vols = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_3DObject);
+    rt3DVolumeDataObject *v;
+    v = static_cast<rt3DVolumeDataObject *>(rtApplication::instance().getObjectManager()->getObjectWithID(vols.at(m_optionsWidget.volumeBox->currentIndex()))->getDataObject());
+    this->lock();
+    this->copyNewTransform(v->getTransform());
+    this->getImageData()->SetSpacing(v->getImageData()->GetSpacing());
+    //this->copyNewImageData(this->getImageData(),this->m_imgType);
+    this->unlock();
+    this->Modified();
 }

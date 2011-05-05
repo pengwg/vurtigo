@@ -187,6 +187,8 @@ bool DICOMFileReader::setDirectory(QString dirPath, imageType type) {
           return false;
       }
 
+      m_comments.clear();
+
       vtkStringArray *nameList = vtkStringArray::New();
       QImage first(fileDir.filePath(files.at(0)));
       for (int ix1=0; ix1<files.count(); ix1++) {

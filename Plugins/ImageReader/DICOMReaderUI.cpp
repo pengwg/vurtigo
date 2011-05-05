@@ -28,6 +28,8 @@
 #include "rt3dVolumeDataObject.h"
 #include "rtBaseHandle.h"
 #include "DICOMFileReader.h"
+#include "rtApplication.h"
+#include "rtObjectManager.h"
 
 DICOMReaderUI::DICOMReaderUI() {
   setupUi(this);
@@ -48,6 +50,9 @@ void DICOMReaderUI::connectSignals() {
   connect(spacingX, SIGNAL(valueChanged(double)), this, SLOT(spacingChanged()));
   connect(spacingY, SIGNAL(valueChanged(double)), this, SLOT(spacingChanged()));
   connect(spacingZ, SIGNAL(valueChanged(double)), this, SLOT(spacingChanged()));
+  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(setupVolumes()));
+  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectRemoved(int)), this, SLOT(setupVolumes()));
+  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectRenamed(int)), this, SLOT(setupVolumes()));
 }
 
 //! Slot called when the user changes the directory.
@@ -142,6 +147,9 @@ void DICOMReaderUI::saveAsVolume() {
     }
     else
     {
+        QList<int> vols = rtBaseHandle::instance().getObjectsOfType(rtConstants::OT_3DObject);
+        rt3DVolumeDataObject *v;
+        v = static_cast<rt3DVolumeDataObject *>(rtBaseHandle::instance().getObjectWithID(vols.at(volumeBox->currentIndex())));
         m_vol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, nameLineEdit->text());
         if (m_vol >=0) {
             rt3DVolumeDataObject* ptObj = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(m_vol));
@@ -150,10 +158,29 @@ void DICOMReaderUI::saveAsVolume() {
                 ptObj->lock();
                 // if we want to apply transform
                 //ptObj->copyNewTransform(m_customReader.getTransform());
+                if (autoRadio->isChecked())
+                {
+                    double s[3];
+                    v->getImageData()->GetSpacing(s);
+                    m_customReader.setSpacing(s[0],s[1],s[2]);
+                    ptObj->copyNewTransform(v->getTransform());
+                }
                 ptObj->copyNewImageData(m_customReader.getImageData(isDICOM),1);
                 ptObj->Modified();
                 ptObj->unlock();
             }
         }
+    }
+}
+
+void DICOMReaderUI::setupVolumes()
+{
+    volumeBox->clear();
+    QList<int> vols = rtBaseHandle::instance().getObjectsOfType(rtConstants::OT_3DObject);
+    rt3DVolumeDataObject *v;
+    for (int ix1=0; ix1<vols.size(); ix1++)
+    {
+        v = static_cast<rt3DVolumeDataObject *>(rtBaseHandle::instance().getObjectWithID(vols[ix1]));
+        volumeBox->addItem(v->getObjName() + " " + QString::number(vols[ix1]));
     }
 }

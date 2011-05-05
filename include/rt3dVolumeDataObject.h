@@ -395,6 +395,11 @@ public:
   //! Turn GPU rendering on or off
   void gpuBoxChecked(bool flag) {m_gpuBoxOn = flag; setupGPUGUI(); emit gpuSignal(flag);}
 
+  //! Setup volume combo box
+  void setupVolumes();
+  //! Copy the selected volume's transform
+  void copyVolume();
+
  signals:
   //! The volume has received new image data
   void newImageData();

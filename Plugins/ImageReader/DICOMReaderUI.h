@@ -41,6 +41,7 @@ public slots:
   void dirChooser();
   void saveAsVolume();
   void spacingChanged() {m_customReader.setSpacing(spacingX->value(),spacingY->value(),spacingZ->value());}
+  void setupVolumes();
 
 protected:
   void connectSignals();
