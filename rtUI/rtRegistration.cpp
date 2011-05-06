@@ -576,6 +576,16 @@ void rtRegistration::setupVolumeCombos()
     volTarget->clear();
 
     m_volumes = rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::OT_3DObject);
+
+
+    // sort by studydate
+    QMultiMap<QDate, int> map;
+    foreach (const int &i, m_volumes)
+        map.insert(static_cast<rt3DVolumeDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(i)->getDataObject())->getDicomCommonData()->getStudyDate(), i);
+    m_volumes = map.values();
+
+
+
     if (m_volumes.empty()) return;
     int indexS = 0;
     int indexT = 0;
@@ -824,4 +834,3 @@ double rtRegistration::calculateError(rt3DPointBufferDataObject *one, rt3DPointB
     return error / min;
 
 }
-

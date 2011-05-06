@@ -259,6 +259,9 @@ p, li { white-space: pre-wrap; }
          <layout class="QVBoxLayout" name="sourceLayout">
           <item>
            <widget class="QLabel" name="volSourceLabel">
+            <property name="toolTip">
+             <string>Source volumes (sorted by study date)</string>
+            </property>
             <property name="text">
              <string>Source Volume</string>
             </property>
@@ -336,6 +339,9 @@ p, li { white-space: pre-wrap; }
          <layout class="QVBoxLayout" name="targetLayout">
           <item>
            <widget class="QLabel" name="volTargetLabel">
+            <property name="toolTip">
+             <string>Target volumes (sorted by study date)</string>
+            </property>
             <property name="text">
              <string>Target Volume</string>
             </property>
