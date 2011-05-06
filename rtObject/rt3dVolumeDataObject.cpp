@@ -34,6 +34,8 @@
 #include "rtTimeManager.h"
 #include "vtkXMLImageDataReader.h"
 #include "vtkXMLImageDataWriter.h"
+#include "vtkMatrix4x4.h"
+#include "vtkLinearTransform.h"
 
 rt3DVolumeDataObject::rt3DVolumeDataObject() {
   setObjectType(rtConstants::OT_3DObject);
@@ -908,7 +910,29 @@ bool rt3DVolumeDataObject::saveFile(QFile* file)
         writer.writeTextElement("TriggerDelay",QString::number(m_triggerList[ix1]));
     }
     writer.writeTextElement("ImageType",QString::number(m_imgType));
-    writer.writeEndElement();
+    for (int ix1=0; ix1<getTransform()->GetNumberOfConcatenatedTransforms(); ix1++)
+    {
+        writer.writeStartElement("Transform");
+        writer.writeAttribute("a00",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(0,0)));
+        writer.writeAttribute("a01",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(0,1)));
+        writer.writeAttribute("a02",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(0,2)));
+        writer.writeAttribute("a03",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(0,3)));
+        writer.writeAttribute("a10",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(1,0)));
+        writer.writeAttribute("a11",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(1,1)));
+        writer.writeAttribute("a12",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(1,2)));
+        writer.writeAttribute("a13",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(1,3)));
+        writer.writeAttribute("a20",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(2,0)));
+        writer.writeAttribute("a21",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(2,1)));
+        writer.writeAttribute("a22",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(2,2)));
+        writer.writeAttribute("a23",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(2,3)));
+        writer.writeAttribute("a30",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(3,0)));
+        writer.writeAttribute("a31",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(3,1)));
+        writer.writeAttribute("a32",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(3,2)));
+        writer.writeAttribute("a33",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(3,3)));
+        writer.writeEndElement(); //Transform
+
+    }
+    writer.writeEndElement(); //VurtigoFile
     writer.writeEndDocument();
     file->close();
 
@@ -931,6 +955,9 @@ bool rt3DVolumeDataObject::loadFile(QFile *file)
     rtConstants::rtObjectType objType;
     QString objName = "";
     QList<double> trigs;
+    vtkTransform *trans = vtkTransform::New();
+    trans->Identity();
+    vtkMatrix4x4 *mat = vtkMatrix4x4::New();
     int type;
 
     while (!reader.atEnd())
@@ -953,6 +980,27 @@ bool rt3DVolumeDataObject::loadFile(QFile *file)
             {
                 type = reader.readElementText().toInt();
             }
+            else if (reader.name() == "Transform")
+            {
+                QXmlStreamAttributes attribs = reader.attributes();
+                mat->SetElement(0,0,attribs.value("a00").toString().toDouble());
+                mat->SetElement(0,1,attribs.value("a01").toString().toDouble());
+                mat->SetElement(0,2,attribs.value("a02").toString().toDouble());
+                mat->SetElement(0,3,attribs.value("a03").toString().toDouble());
+                mat->SetElement(1,0,attribs.value("a10").toString().toDouble());
+                mat->SetElement(1,1,attribs.value("a11").toString().toDouble());
+                mat->SetElement(1,2,attribs.value("a12").toString().toDouble());
+                mat->SetElement(1,3,attribs.value("a13").toString().toDouble());
+                mat->SetElement(2,0,attribs.value("a20").toString().toDouble());
+                mat->SetElement(2,1,attribs.value("a21").toString().toDouble());
+                mat->SetElement(2,2,attribs.value("a22").toString().toDouble());
+                mat->SetElement(2,3,attribs.value("a23").toString().toDouble());
+                mat->SetElement(3,0,attribs.value("a30").toString().toDouble());
+                mat->SetElement(3,1,attribs.value("a31").toString().toDouble());
+                mat->SetElement(3,2,attribs.value("a32").toString().toDouble());
+                mat->SetElement(3,3,attribs.value("a33").toString().toDouble());
+                trans->Concatenate(mat);
+            }
         }
     }
     if (reader.hasError())
@@ -968,6 +1016,7 @@ bool rt3DVolumeDataObject::loadFile(QFile *file)
         imgReader->SetFileName(QString(file->fileName() + "_img").toStdString().c_str());
         imgReader->Update();
         this->lock();
+        this->copyNewTransform(trans);
         this->copyTriggerDelayList(&trigs);
         this->copyNewImageData(imgReader->GetOutput(),type);
         this->unlock();
@@ -979,4 +1028,7 @@ bool rt3DVolumeDataObject::loadFile(QFile *file)
         imgReader->Delete();
         return false;
     }
+
+    trans->Delete();
+    mat->Delete();
 }
