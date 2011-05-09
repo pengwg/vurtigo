@@ -225,6 +225,9 @@ public:
   //! Has the user changed the coronal color
   bool didCoronalColorChange() {return m_CColor;}
 
+  //! Get the image spacing
+  void getSpacing(double s[3]) {m_imgUShortCast->GetOutput()->GetSpacing(s);}
+
   //! Get the annotation status.
   /*!
     \return true if the annotation check box is checked. false otherwise.

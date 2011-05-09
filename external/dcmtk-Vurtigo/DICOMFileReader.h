@@ -82,11 +82,8 @@ public:
   //! Set the spacing
   void setSpacing(double x, double y, double z)
   {
-      if (x >= 0)
           m_spacingX = x;
-      if (y >= 0)
           m_spacingY = y;
-      if (z >= 0)
           m_spacingZ = z;
   }
 

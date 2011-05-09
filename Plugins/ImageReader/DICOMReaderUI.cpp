@@ -148,20 +148,19 @@ void DICOMReaderUI::saveAsVolume() {
     else
     {
         QList<int> vols = rtBaseHandle::instance().getObjectsOfType(rtConstants::OT_3DObject);
-        rt3DVolumeDataObject *v;
-        v = static_cast<rt3DVolumeDataObject *>(rtBaseHandle::instance().getObjectWithID(vols.at(volumeBox->currentIndex())));
+        rt3DVolumeDataObject *v = NULL;
+        if (volumeBox->currentIndex() >= 0)
+            v = static_cast<rt3DVolumeDataObject *>(rtBaseHandle::instance().getObjectWithID(vols.at(volumeBox->currentIndex())));
         m_vol = rtBaseHandle::instance().requestNewObject(rtConstants::OT_3DObject, nameLineEdit->text());
         if (m_vol >=0) {
             rt3DVolumeDataObject* ptObj = static_cast<rt3DVolumeDataObject*>(rtBaseHandle::instance().getObjectWithID(m_vol));
 
             if (ptObj) {
                 ptObj->lock();
-                // if we want to apply transform
-                //ptObj->copyNewTransform(m_customReader.getTransform());
-                if (autoRadio->isChecked())
+                if (autoRadio->isChecked() && v)
                 {
                     double s[3];
-                    v->getImageData()->GetSpacing(s);
+                    v->getSpacing(s);
                     m_customReader.setSpacing(s[0],s[1],s[2]);
                     ptObj->copyNewTransform(v->getTransform());
                 }
