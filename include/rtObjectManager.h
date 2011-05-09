@@ -26,6 +26,7 @@
 
 #include "objTypes.h"
 class rtRenderObject;
+class rtRenderObjectMaker;
 class rtMainWindow;
 class rtDataObject;
 
@@ -43,6 +44,9 @@ class rtObjectManager : public QObject {
   ~rtObjectManager();
 
   rtRenderObject* addObjectOfType(rtConstants::rtObjectType objType, QString objName="Not Named");
+  rtRenderObject* addObjectOfType(QString objType, QString objName="Not Named");
+  //! Register a new object type in Vurtigo and store the object to create more if needed
+  void addNewObject(QString newType,rtRenderObjectMaker *newObj);
   rtRenderObject* addReadOnlyObject(rtConstants::rtObjectType objType, QString objName="Not Named");
   void renameObjectWithID(int objID, QString newName);
   bool removeObject(int objID);
@@ -84,6 +88,9 @@ class rtObjectManager : public QObject {
     Only one object should be created or deleted at one time. This ensures that the object list remains consistent.
     */
   QMutex m_objectLock;
+
+  //! A list of object makers added from plugins
+  QList<QPair<QString,rtRenderObjectMaker *> > m_extObjects;
 signals:
   void objectCreated(int objID);
   void objectRemoved(int objID);
@@ -101,3 +108,4 @@ signals:
 };
 
 #endif
+

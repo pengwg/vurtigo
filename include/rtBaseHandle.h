@@ -30,6 +30,7 @@
 
 class rtDataObject;
 class rtRenderObject;
+class rtRenderObjectMaker;
 
 #include "vtkRenderWindow.h"
 #include "vtkImageData.h"
@@ -62,6 +63,27 @@ Only one thread may request the creation (or removal) of an object at a time.
   @return The ID of the newly created object. Will return -1 if the new object could not be created.
  */
   int requestNewObject(rtConstants::rtObjectType objType, QString name="pluginObj");
+
+  //! Ask the base to create a new object of a particular type.
+ /*!
+   Plugins cannot create objects or datasets directly. Only the object manager can create objects. This function is a request from the plugin to the data manager for the creation of a new object of a particular type.
+ The data manager will create the object and then return the ID to the plugin. The plugin can then modify the object with that ID. This is a blocking call as the base needs to allocate objects with a different thread.
+ Only one thread may request the creation (or removal) of an object at a time.
+   @param objType The type of object to be created as a QString.
+   @param name The name that will be displayed in the object list.
+   @return The ID of the newly created object. Will return -1 if the new object could not be created.
+  */
+   int requestNewObject(QString objType, QString name="pluginObj");
+
+
+   //! Ask the base to add a given object.
+ /*!
+   This function is a request from the plugin to the data manager for the addition of a new object type.
+ The data manager will add the object type to Vurtigo so subsequent calls to requestNewObject can include the new type and Vurtigo can invoke the given
+ Maker object to create a new object.
+   @param newObj An object that can make that type of object
+  */
+   void addNewObject(QString newType,rtRenderObjectMaker *newObj);
 
 
 //! Remove an object with a specified ID.
@@ -152,12 +174,21 @@ The use of the vtkRenderWindow object in a thread other than the main Vurtigo re
 
   //! Set an object to be permanent (cannot be deleted)
   void setObjectPermanent(int objID);
+
  public slots:
   //! This runs in the main execution thread to request an object.
   void requestNewObjectSlot(rtConstants::rtObjectType, QString);
+  //! This runs in the main execution thread to request an object.
+  void requestNewObjectSlot(QString, QString);
+  //! This run in he main execution thread to add an object.
+  void addNewObjectSlot(QString,rtRenderObjectMaker *);
  signals:
   //! Signal sent when an object is requested
   void requestNewObjectSignal(rtConstants::rtObjectType, QString);
+  //! Signal sent when an object is requested
+  void requestNewObjectSignal(QString, QString);
+  //! Signal sent when an object is added
+  void addNewObjectSignal(QString,rtRenderObjectMaker *);
 
  protected:
   //! Connect the signals to the slots for the base handle.

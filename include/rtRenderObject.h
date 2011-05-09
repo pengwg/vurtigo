@@ -98,6 +98,9 @@ Q_OBJECT
   //! Make this object a copy of another object
   virtual void copyObject(rtRenderObject *from) {}
 
+  //! Create an instance of this Render Object (to be implemented by each derived class)
+  virtual rtRenderObject *createObject() {return NULL;}
+
   bool tryUpdate();
 
   void resetUpdateTime();

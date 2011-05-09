@@ -59,7 +59,8 @@ void rtBaseHandle::connectSignals() {
   qRegisterMetaType<rtConstants::rtObjectType>("rtConstants::rtObjectType");
 
   connect(this, SIGNAL(requestNewObjectSignal(rtConstants::rtObjectType,QString)), this, SLOT(requestNewObjectSlot(rtConstants::rtObjectType,QString)), Qt::QueuedConnection);
-
+  connect(this, SIGNAL(requestNewObjectSignal(QString,QString)), this, SLOT(requestNewObjectSlot(QString,QString)), Qt::QueuedConnection);
+  connect(this,SIGNAL(addNewObjectSignal(QString,rtRenderObjectMaker*)),this,SLOT(addNewObjectSlot(QString,rtRenderObjectMaker*)),Qt::QueuedConnection);
 
 }
 
@@ -92,6 +93,57 @@ int rtBaseHandle::requestNewObject(rtConstants::rtObjectType objType, QString na
   return result;
 }
 
+int rtBaseHandle::requestNewObject(QString objType, QString name) {
+  int result;
+
+  if (QThread::currentThread() == m_masterThreadPointer) {
+    // Master Thread.  No need to use Queued signals and slots.
+    // If the lock is busy process some events... This makes waiting more useful.
+    while (!m_newObjectLock.tryLock()) QCoreApplication::processEvents();
+
+    rtRenderObject* temp;
+    temp = rtApplication::instance().getObjectManager()->addObjectOfType(objType, name);
+    if (temp) {
+      result = temp->getDataObject()->getId();
+    }
+  } else {
+    // Not in the master thread so we need to pass a message to the master.
+    // These threads we lock completely.
+    m_newObjectLock.lock();
+    // Send the request.
+    emit requestNewObjectSignal(objType, name);
+    // Wait for it
+    m_newObjectWait.acquire();
+    // Copy the result
+    result = m_newObjectID;
+  }
+  m_newObjectLock.unlock();
+  return result;
+}
+
+void rtBaseHandle::addNewObject(QString newType,rtRenderObjectMaker *newObj)
+{
+    rtConstants::rtObjectType objType;
+
+    if (QThread::currentThread() == m_masterThreadPointer) {
+        // Master Thread.  No need to use Queued signals and slots.
+        // If the lock is busy process some events... This makes waiting more useful.
+        while (!m_newObjectLock.tryLock()) QCoreApplication::processEvents();
+        rtApplication::instance().getObjectManager()->addNewObject(newType,newObj);
+    }
+    else
+    {
+        // Not in the master thread so we need to pass a message to the master.
+        // These threads we lock completely.
+        m_newObjectLock.lock();
+        // Send the request.
+        emit addNewObjectSignal(newType,newObj);
+        // Wait for it
+        m_newObjectWait.acquire();
+    }
+    m_newObjectLock.unlock();
+}
+
 
 void rtBaseHandle::requestNewObjectSlot(rtConstants::rtObjectType objType, QString name) {
   rtRenderObject* temp;
@@ -102,6 +154,23 @@ void rtBaseHandle::requestNewObjectSlot(rtConstants::rtObjectType objType, QStri
   }
   m_newObjectID = result;
   m_newObjectWait.release();
+}
+
+void rtBaseHandle::requestNewObjectSlot(QString objType, QString name) {
+  rtRenderObject* temp;
+  int result=-1;
+  temp = rtApplication::instance().getObjectManager()->addObjectOfType(objType, name);
+  if (temp) {
+    result = temp->getDataObject()->getId();
+  }
+  m_newObjectID = result;
+  m_newObjectWait.release();
+}
+
+void rtBaseHandle::addNewObjectSlot(QString newType,rtRenderObjectMaker *newObj)
+{
+    rtApplication::instance().getObjectManager()->addNewObject(newType,newObj);
+    m_newObjectWait.release();
 }
 
 
