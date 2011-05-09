@@ -92,10 +92,10 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
           fullName = "lib"+fullName;
         }
 
-        if ( QLibrary::isLibrary(appDir.absoluteFilePath(fullName)) ) {
+        if ( QFile::exists(appDir.absoluteFilePath(fullName)) && QLibrary::isLibrary(appDir.absoluteFilePath(fullName)) ) {
           tempLoader = new QPluginLoader(appDir.absoluteFilePath(fullName));
         }
-        else if ( QLibrary::isLibrary(givenDir.absoluteFilePath(fullName)) ) {
+        else if ( QFile::exists(givenDir.absoluteFilePath(fullName)) && QLibrary::isLibrary(givenDir.absoluteFilePath(fullName)) ) {
           tempLoader = new QPluginLoader(givenDir.absoluteFilePath(fullName));
         }
         else {
@@ -121,7 +121,7 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
 
           ok = true;
         } else if (tempLoader) {
-          std::cout << "Plugin: " << tempLoader->fileName().toStdString() << " could not be loaded." << std::endl;
+          std::cout << "Plugin: " << tempLoader->fileName().toStdString() << "(" << handler.pluginInfo[ix1].libName.toStdString() << ") could not be loaded." << std::endl;
           std::cout << tempLoader->errorString().toStdString() << std::endl;
           delete tempLoader;
         }
