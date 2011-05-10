@@ -46,6 +46,10 @@ rt3DPointBufferRenderObject::rt3DPointBufferRenderObject() {
   // initialize!
   m_selectedProp = NULL;
 
+  //signals from render window add/remove
+  connect(rtApplication::instance().getMainWinHandle(), SIGNAL(newRenderSignal()), this, SLOT(renderWindowChanged()));
+  connect(rtApplication::instance().getMainWinHandle(), SIGNAL(removeRenderSignal()), this, SLOT(renderWindowChanged()));
+
   setupDataObject();
   setupPipeline();
 }
@@ -64,10 +68,10 @@ void rt3DPointBufferRenderObject::update() {
   rt3DPointBufferDataObject *dObj = dynamic_cast<rt3DPointBufferDataObject*>(m_dataObj);
   rtSingle3DPointPipeline *tempPipe;
   double ptIn[3];
+
   QHash<int, rtNamedInfoPointData>* pointList = dObj->getNamedInfoHash();
   QList<int> hashKeys = pointList->keys();
   QList<int>* selectedList = dObj->getSelectedItemsList();
-
   // Find the total size of the list.
   int totalActors = hashKeys.size() + selectedList->size();
   int listPosition = 0;
@@ -89,16 +93,16 @@ void rt3DPointBufferRenderObject::update() {
     tempPipe->setRadius( psize );
 
     // set the label
-    tempPipe->setLabelPosition(ptIn[0] - psize,ptIn[1] - 1.5*psize , ptIn[2]);
     char text[100] = "";
     sprintf(text,"%s",qPrintable((*pointList)[hashKeys[ix1]].getLabel()));
     tempPipe->setLabelText(text);
-    tempPipe->setLabelScale(psize);
-    ///////////////////////////////
-    // WHICH CAMERA DO WE FOLLOW???
-    ///////////////////////////////
-    tempPipe->setLabelCamera(rtApplication::instance().getMainWinHandle()->getRenderer(0)->GetActiveCamera());
-    tempPipe->getLabelProperty()->SetColor(tempPipe->getPropertyHandle()->GetColor());
+    for (int win=0; win<tempPipe->getNumRenWin(); win++)
+    {
+        tempPipe->setLabelPosition(win,ptIn[0] - psize,ptIn[1] - 1.5*psize , ptIn[2]);
+        tempPipe->setLabelScale(win,psize);
+        tempPipe->setLabelCamera(win,rtApplication::instance().getMainWinHandle()->getRenderer(win)->GetActiveCamera());
+        tempPipe->getLabelProperty(win)->SetColor(tempPipe->getPropertyHandle()->GetColor());
+    }
 
     // If this point is selected then add the selection sphere.
     if ( selectedList->contains((*pointList)[hashKeys[ix1]].getPointId()) ) {
@@ -120,8 +124,8 @@ bool rt3DPointBufferRenderObject::addToRenderer(vtkRenderer* ren, int window) {
     if (!ren->HasViewProp(m_pipeList.at(ix1)->getActor())) {
       ren->AddViewProp( m_pipeList.at(ix1)->getActor() );
     }
-    if (!ren->HasViewProp(m_pipeList.at(ix1)->getLabelActor())) {
-      ren->AddViewProp( m_pipeList.at(ix1)->getLabelActor() );
+    if (!ren->HasViewProp(m_pipeList.at(ix1)->getLabelActor(window))) {
+      ren->AddViewProp( m_pipeList.at(ix1)->getLabelActor(window) );
     }
   }
 
@@ -146,7 +150,7 @@ bool rt3DPointBufferRenderObject::removeFromRenderer(vtkRenderer* ren,int window
   setVisible3D(window,false);
   for (int ix1=0; ix1<m_pipeList.count(); ix1++) {
     if (ren->HasViewProp( m_pipeList.at(ix1)->getActor() )) ren->RemoveViewProp( m_pipeList.at(ix1)->getActor() );
-    if (ren->HasViewProp( m_pipeList.at(ix1)->getLabelActor() )) ren->RemoveViewProp( m_pipeList.at(ix1)->getLabelActor() );
+    if (ren->HasViewProp( m_pipeList.at(ix1)->getLabelActor(window) )) ren->RemoveViewProp( m_pipeList.at(ix1)->getLabelActor(window) );
   }
 
   customQVTKWidget* renWid;
@@ -336,7 +340,7 @@ void rt3DPointBufferRenderObject::cleanupPipeList() {
         if (getVisible3D().at(ix1))
         {
             rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getActor(),ix1);
-            rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getLabelActor(),ix1);
+            rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getLabelActor(ix1),ix1);
         }
     }
     delete tempPipe;
@@ -356,7 +360,7 @@ void rt3DPointBufferRenderObject::resizePipeList(int size) {
         if (getVisible3D().at(ix1))
         {
             rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getActor(),ix1);
-            rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getLabelActor(),ix1);
+            rtApplication::instance().getMainWinHandle()->removeRenderItem(tempPipe->getLabelActor(ix1),ix1);
         }
     }
     delete tempPipe;
@@ -371,7 +375,7 @@ void rt3DPointBufferRenderObject::resizePipeList(int size) {
         if (getVisible3D().at(ix1))
         {
             rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getActor(),ix1);
-            rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getLabelActor(),ix1);
+            rtApplication::instance().getMainWinHandle()->addRenderItem(tempPipe->getLabelActor(ix1),ix1);
         }
     }
   }
@@ -395,4 +399,11 @@ void rt3DPointBufferRenderObject::setControlTransform(vtkTransform* t) {
 
   m_dataObj->Modified();
   tFinal->Delete();
+}
+
+void rt3DPointBufferRenderObject::renderWindowChanged()
+{
+    for (int ix1=0; ix1<m_pipeList.size(); ix1++)
+        m_pipeList[ix1]->setNumRenWin(rtApplication::instance().getMainWinHandle()->getNumRenWins());
+    this->update();
 }

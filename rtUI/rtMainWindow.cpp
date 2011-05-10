@@ -901,13 +901,13 @@ void rtMainWindow::viewChanged2DOnly() {
 
 void rtMainWindow::addRenWinPressed()
 {
-
     if (m_numRenWin < m_render3DVTKWidget.size())
         m_render3DVTKWidget[m_numRenWin]->show();
     else
         addNewRenderWindow();
 
     m_numRenWin++;
+    emit newRenderSignal();
     refreshRenderItems(true);
     if (m_visTable->isVisible()) showObjectVisibilities();
     if (m_axesProperties) {
@@ -924,6 +924,7 @@ void rtMainWindow::remRenWinPressed()
     {
         m_render3DVTKWidget[m_numRenWin-1]->hide();
         m_numRenWin--;
+        emit removeRenderSignal();
         refreshRenderItems(false);
         if (m_visTable->isVisible()) showObjectVisibilities();
     }

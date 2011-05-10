@@ -202,12 +202,11 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void activateWhatsThis() { QWhatsThis::enterWhatsThisMode(); }
 
 signals:
-  //! Emited when the interaction mode in Vurtigo is switched to camera mode.
-  void cameraModeSignal(bool);
-  //! Emited when the interaction mode in Vurtigo is switched to interactive mode.
-  void interactionModeSignal(bool);
-  //! Emited when the interaction mode in Vurtigo is switched to placement mode.
-  void placeModeSignal(bool);
+  //! Emitted when a new render window is added
+  void newRenderSignal();
+  //! Emitted when a render window is removed
+  void removeRenderSignal();
+
 
  protected:
   //! The widget that handles the 3D rendering window from VTK.

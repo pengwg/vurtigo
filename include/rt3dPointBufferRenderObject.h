@@ -63,6 +63,8 @@ public slots:
   virtual void keyReleaseEvent(QKeyEvent* event, int window);
   virtual void wheelEvent(QWheelEvent* event, int window);
 
+  void renderWindowChanged();
+
  protected:
   //! Create the correct data object.
   void setupDataObject();

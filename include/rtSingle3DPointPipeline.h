@@ -26,6 +26,7 @@
 #include <vtkActor.h>
 #include <vtkFollower.h>
 #include <vtkVectorText.h>
+#include <QList>
 
 //! Complete rendering pipeline for a single point in 3D space.
 class rtSingle3DPointPipeline
@@ -36,26 +37,26 @@ public:
 
   inline vtkActor* getActor() { return m_actor; }
 
-  inline vtkActor* getLabelActor() { return m_labelActor; }
+  inline vtkActor* getLabelActor(int i) { if (m_labelActor.size() > i) return m_labelActor[i]; }
 
   void setPosition(double x, double y, double z);
 
   void setPosition(double coords[3]);
 
-  void setLabelPosition(double x,double y,double z);
+  void setLabelPosition(int i, double x,double y,double z);
 
-  void setLabelPosition(double coords[3]);
+  void setLabelPosition(int i, double coords[3]);
 
   //! Set the radius of the displayed point.
   void setRadius(double r);
 
-  void setLabelScale(double s);
+  void setLabelScale(int i, double s);
 
   void setLabelText(char *text);
 
-  void setLabelCamera(vtkCamera *cam);
+  void setLabelCamera(int i, vtkCamera *cam);
 
-  inline vtkProperty* getLabelProperty() {return m_labelActor->GetProperty(); }
+  inline vtkProperty* getLabelProperty(int i) {return m_labelActor[i]->GetProperty(); }
 
   void setResolution(int resolution);
 
@@ -63,12 +64,15 @@ public:
 
   inline vtkProperty* getPropertyHandle() { return m_actor->GetProperty(); }
 
+  void setNumRenWin(int num);
+  int getNumRenWin() {return m_labelActor.size();}
+
 protected:
   // VTK pipeline objects.
   vtkSphereSource* m_sphere;
   vtkPolyDataMapper* m_mapper;
   vtkActor* m_actor;
-  vtkFollower *m_labelActor;
+  QList<vtkFollower *> m_labelActor;
   vtkPolyDataMapper *m_labelMapper;
   vtkVectorText *m_labelText;
 };
