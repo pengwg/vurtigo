@@ -18,6 +18,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 #include "rtCathDataObject.h"
+#include "rtColorFuncDataObject.h"
+#include "rtApplication.h"
+#include "rtObjectManager.h"
+#include "rtRenderObject.h"
+#include "rtDataObject.h"
 
 
 //! Constructor
@@ -52,7 +57,14 @@ rtCathDataObject::rtCathDataObject()
   // Start with no coils...
   m_coilIDList.clear();
 
-  connect(this, SIGNAL(updateCoilTableSignal()), this, SLOT(updateCoilTable()), Qt::QueuedConnection);
+  m_currProperty = "None";
+  m_currColor = NULL;
+
+  connect(this, SIGNAL(updateCoilTableSignal()), this, SLOT(updateCoilTable()),Qt::QueuedConnection);
+  connect(this, SIGNAL(cathPropsChanged()), this, SLOT(updatePropertyBox()));
+  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)),this,SLOT(updateColorBox()));
+  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectRemoved(int)),this,SLOT(updateColorBox()));
+  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectRenamed(int)),this,SLOT(updateColorBox()));
 }
 
 //! Destructor
@@ -90,7 +102,6 @@ int rtCathDataObject::addCoil(int loc) {
     coil.cx = 0.0;
     coil.cy = 0.0;
     coil.cz = 0.0;
-    coil.SNR = 1;
     coil.visible = true;
     m_coilList.insert(cID, coil);
     m_coilLocations.insert(loc, cID);
@@ -101,20 +112,44 @@ int rtCathDataObject::addCoil(int loc) {
   return cID;
 }
 
-//! Set the SNR for a coil
-bool rtCathDataObject::setCoilSNR(int coilID, double SNR) {
-  if (SNR <= 0.01) SNR = 0.01;
+bool rtCathDataObject::addCathProperty(QString property)
+{
+    if (!m_cathProperties.contains(property))
+        m_cathProperties.append(property);
+    else
+        return true;
+    emit cathPropsChanged();
+    int ix1;
+    QList<int> coilIDs = m_coilList.keys();
+    for (ix1=0; ix1<coilIDs.size(); ix1++)
+    {
+        // initialize all property values to 0
+        m_coilList[coilIDs[ix1]].coilPropValues.insert(property,0);
+    }
+    coilIDs = m_discardCoilList.keys();
+    for (ix1=0; ix1<coilIDs.size(); ix1++)
+    {
+        // initialize all property values to 0
+        m_discardCoilList[coilIDs[ix1]].coilPropValues.insert(property,0);
+    }
+    return true;
+}
+
+//! Set a property value for a coil
+bool rtCathDataObject::setCoilPropValue(int coilID, QString property, double value) {
+  if (value <= 0.01) value = 0.01;
 
   if(!m_coilIDList.contains(coilID)) return false;
+  if (!m_cathProperties.contains(property)) return false;
 
   if (m_coilList.contains(coilID)) {  
-    m_coilList[coilID].SNR = SNR;
-    emit updateCoilTableSignal();
-    return true;
+      m_coilList[coilID].coilPropValues.insert(property,value);
+      emit updateCoilTableSignal();
+      return true;
   } else if (m_discardCoilList.contains(coilID)) {
-    m_discardCoilList[coilID].SNR = SNR;
-    emit updateCoilTableSignal();
-    return true;
+      m_discardCoilList[coilID].coilPropValues.insert(property,value);
+      emit updateCoilTableSignal();
+      return true;
   }
   return false;
 }
@@ -233,9 +268,6 @@ bool rtCathDataObject::getPositionAtLocation(int loc, double out[3]) {
 
   QList<int> Ids = m_coilLocations.values(loc);
   int ix1=0;
-  double sumSNR=0;
-  double maxSNR=0;
-
   out[0] = 0; out[1] = 0; out[2] = 0;
 
   switch(m_eType) {
@@ -251,8 +283,9 @@ bool rtCathDataObject::getPositionAtLocation(int loc, double out[3]) {
     out[2] = out[2] / (double)Ids.size();
 
     break;
+    /*
     case (ET_WTMEAN):
-    // Weighted mean based on SNR
+    // Weighted mean based on property
     for (ix1=0; ix1<Ids.size(); ix1++) {
       sumSNR = sumSNR + m_coilList[Ids[ix1]].SNR;
       out[0] = out[0] + m_coilList[Ids[ix1]].cx*m_coilList[Ids[ix1]].SNR;
@@ -264,7 +297,7 @@ bool rtCathDataObject::getPositionAtLocation(int loc, double out[3]) {
     out[1] = out[1] / sumSNR;
     out[2] = out[2] / sumSNR;
     break;
-    case(ET_BESTSNR):
+    case(ET_BEST):
     for (ix1=0; ix1<Ids.size(); ix1++) {
       if ( m_coilList[Ids[ix1]].SNR > maxSNR ) {
         out[0] = m_coilList[Ids[ix1]].cx;
@@ -274,55 +307,67 @@ bool rtCathDataObject::getPositionAtLocation(int loc, double out[3]) {
       }
     }
     break;
+    */
   }
 
   return true;
 }
 
-//! Get the SNR at a particular location
+//! Get the property value at a particular location
 /*!
-  The SNR at a location is also defined by the estimation method. Coils that are not visible are not included in the calculation.
+  The property at a location is also defined by the estimation method. Coils that are not visible are not included in the calculation.
   */
-bool rtCathDataObject::getSNRAtLocation(int loc, double &SNR) {
+bool rtCathDataObject::getValueAtLocation(int loc, QString property, double &value) {
   if(!m_coilLocations.contains(loc)) return false;
 
   QList<int> Ids = m_coilLocations.values(loc);
   int ix1;
-  double sumSNR;
-  SNR = 0;
+  double sumVal;
+  value = 0;
 
   switch(m_eType) {
     case (ET_MEAN):
     for (ix1=0; ix1<Ids.size(); ix1++) {
-      SNR  = SNR + m_coilList[Ids[ix1]].SNR;
+        value = value + m_coilList[Ids[ix1]].coilPropValues.value(property);
     }
     // Then divide by the number of coils.
-    SNR = SNR / (double)Ids.size();
+    value = value / (double)Ids.size();
 
     break;
     case (ET_WTMEAN):
-    // Weighted mean based on SNR
+    // Weighted mean based on property
     for (ix1=0; ix1<Ids.size(); ix1++) {
-      sumSNR = sumSNR + m_coilList[Ids[ix1]].SNR;
-      SNR  = SNR + m_coilList[Ids[ix1]].SNR*m_coilList[Ids[ix1]].SNR;
+      sumVal = sumVal + m_coilList[Ids[ix1]].coilPropValues.value(property);
+      value = value + m_coilList[Ids[ix1]].coilPropValues.value(property)*m_coilList[Ids[ix1]].coilPropValues.value(property);
     }
-    SNR = SNR / sumSNR ;
+    value = value / sumVal ;
     break;
-    case(ET_BESTSNR):
+    case(ET_BEST):
     for (ix1=0; ix1<Ids.size(); ix1++) {
-      if ( m_coilList[Ids[ix1]].SNR > SNR ) {
-        SNR = m_coilList[Ids[ix1]].SNR;
+      if ( m_coilList[Ids[ix1]].coilPropValues.value(property) > value ) {
+        value = m_coilList[Ids[ix1]].coilPropValues.value(property);
       }
     }
     break;
   }
 
-  if (SNR < 0.01) {
-    // Safety test. All SNR of less than 0.01 is defaulted to the minimum.
-    SNR = 0.01;
+  if (value < 0.01) {
+    // Safety test. All values of less than 0.01 is defaulted to the minimum.
+    value = 0.01;
   }
 
   return true;
+}
+//! Get the color at a particular location
+bool rtCathDataObject::getColorAtLocation(int loc, QString property, double rgb[3])
+{
+    if(!m_coilLocations.contains(loc)) return false;
+    if(!m_cathProperties.contains(property)) return false;
+    double val;
+    getValueAtLocation(loc,property,val);
+    if (m_currColor)
+        m_currColor->getColorFunction()->GetColor(val,rgb);
+    return true;
 }
 
 
@@ -331,12 +376,6 @@ void rtCathDataObject::setupGUI() {
   QWidget* wid = getBaseWidget();
 
   m_cathGuiSetup.setupUi(wid);
-
-  // setup the use SNR checkbox.
-  m_useSNRSize = false;
-  m_cathGuiSetup.snrSizeCheckBox->setChecked(m_useSNRSize);
-  m_badSNR = m_cathGuiSetup.badSpin->value();
-  m_goodSNR = m_cathGuiSetup.goodSpin->value();
 
   // Setup the points table.
   m_cathGuiSetup.pointsTable->setColumnWidth(0, 60);
@@ -359,9 +398,13 @@ void rtCathDataObject::setupGUI() {
   connect(m_pointPropertyDlg, SIGNAL(propertyChanged()), this, SLOT(Modified()));
   connect(m_tipPropertyDlg, SIGNAL(propertyChanged()), this, SLOT(Modified()));
 
-  connect(m_cathGuiSetup.snrSizeCheckBox, SIGNAL(stateChanged(int)),  this, SLOT(useSNRSizeChanged(int)));
-  connect(m_cathGuiSetup.badSpin, SIGNAL(valueChanged(int)), this, SLOT(badSNRChanged(int)));
-  connect(m_cathGuiSetup.goodSpin, SIGNAL(valueChanged(int)), this, SLOT(goodSNRChanged(int)));
+  updatePropertyBox();
+  updateColorBox();
+
+  connect(m_cathGuiSetup.propertyBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertyChanged()));
+  connect(m_cathGuiSetup.colorBox, SIGNAL(currentIndexChanged(int)), this, SLOT(colorChanged(int)));
+
+
 
   connect( m_cathGuiSetup.thicknessSpinBox, SIGNAL(valueChanged(double)), this, SLOT(splineThicknessChanged(double)) );
   connect( m_cathGuiSetup.tensionSpinBox, SIGNAL(valueChanged(double)), this, SLOT(tensionChanged(double)) );
@@ -397,18 +440,29 @@ void rtCathDataObject::pointSizeChanged(int size) {
   Modified();
 }
 
-//! The SNR check box was changed
-void rtCathDataObject::useSNRSizeChanged(int status) {
-  if (status == Qt::Unchecked) {
-    m_useSNRSize = false;
-    m_cathGuiSetup.badSpin->setEnabled(false);
-    m_cathGuiSetup.goodSpin->setEnabled(false);
-  } else {
-    m_useSNRSize = true;
-    m_cathGuiSetup.badSpin->setEnabled(true);
-    m_cathGuiSetup.goodSpin->setEnabled(true);
-  }
-  Modified();
+//! The property check box was changed
+void rtCathDataObject::propertyChanged(){
+
+    m_currProperty = m_cathGuiSetup.propertyBox->currentText();
+    if (m_currProperty == "")
+        m_currProperty = "None";
+    Modified();
+}
+
+void rtCathDataObject::colorChanged(int index)
+{
+    if (m_cathGuiSetup.colorBox->currentText() == "None")
+        m_currColor = NULL;
+    else
+    {
+        int id = m_colorIDs.value(index);
+        rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(id);
+        if (!rObj) return;
+        m_currColor = static_cast<rtColorFuncDataObject*>(rObj->getDataObject());
+        connect(m_currColor, SIGNAL(objectChanged(int)), this, SLOT(Modified()));
+    }
+    Modified();
+
 }
 
 
@@ -470,6 +524,13 @@ void rtCathDataObject::updateCoilTable() {
     m_cathGuiSetup.pointsTable->setRowCount(m_coilIDList.size());
   }
 
+  m_cathGuiSetup.pointsTable->setColumnCount(6+m_cathProperties.size());
+  for (int ix1=0; ix1<m_cathProperties.size(); ix1++)
+  {
+      m_cathGuiSetup.pointsTable->setHorizontalHeaderItem(6+ix1,new QTableWidgetItem(m_cathProperties[ix1]));
+      m_cathGuiSetup.pointsTable->setColumnWidth(6+ix1,50);
+  }
+
   for (int ix1=0; ix1<m_coilIDList.size(); ix1++) {
     // Get the coil data.
     if( m_coilList.contains(m_coilIDList[ix1]) ) {
@@ -521,11 +582,21 @@ void rtCathDataObject::updateCoilTable() {
     tempItem->setText(QString::number(dat.cz));
     m_cathGuiSetup.pointsTable->setItem(ix1, 5, tempItem);
 
-    // SNR
-    tempItem = new QTableWidgetItem();
-    tempItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-    tempItem->setText(QString::number(dat.SNR));
-    m_cathGuiSetup.pointsTable->setItem(ix1, 6, tempItem);
+    //Custom Properties
+    if (dat.coilPropValues.isEmpty()) return;
+
+    for (int ix2=0; ix2<m_cathProperties.size(); ix2++)
+    {
+        tempItem = new QTableWidgetItem();
+        tempItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+        //need to lock this because reading the custom property values can cause thread issues with the GeomServer setting the same values
+        this->lock();
+        tempItem->setText(QString::number(dat.coilPropValues.value(m_cathProperties[ix2])));
+        this->unlock();
+        m_cathGuiSetup.pointsTable->setItem(ix1, 6+ix2, tempItem);
+
+    }
+
   }
 }
 
@@ -555,23 +626,40 @@ void rtCathDataObject::endValueChanged(double end) {
   Modified();
 }
 
-void rtCathDataObject::badSNRChanged(int value) {
-    if (value < m_goodSNR) {
-        m_badSNR = value;
-    } else {
-        m_badSNR = m_goodSNR - 1;
-        m_cathGuiSetup.badSpin->setValue(m_badSNR);
+void rtCathDataObject::updatePropertyBox()
+{
+    disconnect(m_cathGuiSetup.propertyBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertyChanged()));
+    m_cathGuiSetup.propertyBox->clear();
+    m_cathGuiSetup.propertyBox->insertItem(-1,"None");
+    int currInd = -1;
+    for (int ix1=0; ix1<m_cathProperties.size(); ix1++)
+    {
+        m_cathGuiSetup.propertyBox->insertItem(ix1,m_cathProperties[ix1]);
+        if (m_cathProperties[ix1] == m_currProperty)
+            currInd = ix1;
     }
-
-  Modified();
+    m_cathGuiSetup.propertyBox->setCurrentIndex(currInd);
+    connect(m_cathGuiSetup.propertyBox, SIGNAL(currentIndexChanged(int)), this, SLOT(propertyChanged()));
 }
 
-void rtCathDataObject::goodSNRChanged(int value) {
-    if (value > m_badSNR) {
-        m_goodSNR = value;
-    } else {
-        m_goodSNR = m_badSNR + 1;
-        m_cathGuiSetup.goodSpin->setValue(m_goodSNR);
+void rtCathDataObject::updateColorBox()
+{
+    disconnect(m_cathGuiSetup.colorBox, SIGNAL(currentIndexChanged(int)), this, SLOT(colorChanged(int)));
+    m_cathGuiSetup.colorBox->clear();
+    m_cathGuiSetup.colorBox->insertItem(-1,"None");
+    int currInd = -1;
+    QList<int> ids = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_vtkColorTransferFunction");
+    rtDataObject *dObj;
+    for (int ix1=0; ix1<ids.size(); ix1++)
+    {
+        dObj = rtApplication::instance().getObjectManager()->getObjectWithID(ids[ix1])->getDataObject();
+        if (!dObj) continue;
+
+        m_cathGuiSetup.colorBox->insertItem(ix1,QString(dObj->getObjName() + " " + QString::number(ids[ix1])));
+        m_colorIDs.insert(ix1,ids[ix1]);
+        if (dObj == m_currColor)
+            currInd = ix1;
     }
-  Modified();
+    m_cathGuiSetup.colorBox->setCurrentIndex(currInd);
+    connect(m_cathGuiSetup.colorBox, SIGNAL(currentIndexChanged(int)), this, SLOT(colorChanged(int)));
 }

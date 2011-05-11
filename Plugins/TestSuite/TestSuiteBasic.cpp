@@ -139,7 +139,8 @@ void TestSuiteBasic::run() {
       ptObj->lock();
       int c1 = ptObj->addCoil(0);
       ptObj->setCoilCoords(c1, 1.5, 1.5, 1.5);
-      ptObj->setCoilSNR(c1, 50);
+      ptObj->addCathProperty("SNR");
+      ptObj->setCoilPropValue(c1,"SNR",50);
       ptObj->Modified();
       ptObj->unlock();
     }
@@ -155,9 +156,10 @@ void TestSuiteBasic::run() {
       int c1 = ptObj->addCoil(0);
       int c2 = ptObj->addCoil(1);
       ptObj->setCoilCoords(c1, 1.5, 1.5, 1.5);
-      ptObj->setCoilSNR(c1, 50);
+      ptObj->addCathProperty("SNR");
+      ptObj->setCoilPropValue(c1,"SNR",50);
       ptObj->setCoilCoords(c2, 13.2, 7.5, 2.5);
-      ptObj->setCoilSNR(c2, 25);
+      ptObj->setCoilPropValue(c2,"SNR",25);
       ptObj->Modified();
       ptObj->unlock();
     }
@@ -175,16 +177,17 @@ void TestSuiteBasic::run() {
       int c3 = ptObj->addCoil(1);
       int c4 = ptObj->addCoil(2);
       int c5 = ptObj->addCoil(3);
+      ptObj->addCathProperty("SNR");
       ptObj->setCoilCoords(c1, 1.5, 1.5, 1.5);
-      ptObj->setCoilSNR(c1, 50);
+      ptObj->setCoilPropValue(c1,"SNR",50);
       ptObj->setCoilCoords(c2, 1.6, 1.4, 1.3);
-      ptObj->setCoilSNR(c2, 25);
+      ptObj->setCoilPropValue(c2,"SNR",25);
       ptObj->setCoilCoords(c3, 13.2, 7.5, 2.5);
-      ptObj->setCoilSNR(c3, 80);
+      ptObj->setCoilPropValue(c3,"SNR",80);
       ptObj->setCoilCoords(c4, 22.5, 9.0, 7.0);
-      ptObj->setCoilSNR(c4, 30);
+      ptObj->setCoilPropValue(c4,"SNR",30);
       ptObj->setCoilCoords(c5, 27.3, 11.2, 9.1);
-      ptObj->setCoilSNR(c5, 10);
+      ptObj->setCoilPropValue(c5,"SNR",10);
       ptObj->Modified();
       ptObj->unlock();
     }
@@ -435,6 +438,28 @@ void TestSuiteBasic::run() {
     }
   }
 
+  if (m_ctfTraffic >= 0)
+  {
+      rtColorFuncDataObject* ptObj = static_cast<rtColorFuncDataObject*>(rtBaseHandle::instance().getObjectWithID(m_ctfTraffic));
+      if (!ptObj) {
+        emit sendOutput("Could Not Get Color Transfer Function! FAIL!");
+      } else {
+        emit sendOutput("Load Color Function Points...");
+        vtkColorTransferFunction* temp = vtkColorTransferFunction::New();
+        temp->SetColorSpaceToRGB();
+        temp->RemoveAllPoints();
+        temp->AddRGBPoint(0.0,1.0,0.0,0.0,0.5,1.0);
+        temp->AddRGBPoint(30.0,1.0,1.0,0.0,0.5,1.0);
+        temp->AddRGBPoint(60.0,0.0,1.0,0.0,0.5,1.0);
+        // Send the color function to the object.
+        ptObj->lock();
+        ptObj->setColorFunction(temp);
+        ptObj->Modified();
+        ptObj->unlock();
+
+        temp->Delete();
+      }
+
   if (m_piece>=0) {
     rtPieceFuncDataObject* ptObj = static_cast<rtPieceFuncDataObject*>(rtBaseHandle::instance().getObjectWithID(m_piece));
     if (!ptObj) {
@@ -462,6 +487,7 @@ void TestSuiteBasic::run() {
   m_imgChange.stop();
 
   emit sendOutput("-------- End Basic Test ---------");
+}
 }
 
 //! Ask the base to create a number of objects of different types. The objects will be used later for testing.
@@ -504,8 +530,10 @@ void TestSuiteBasic::basicTestCreateObjects() {
   // Color transfer function
   m_ctf = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkColorTransferFunction, "Basic Grey");
   m_ctfGreen = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkColorTransferFunction, "Greenish");
+  m_ctfTraffic = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkColorTransferFunction, "Traffic");
   testObject(m_ctf, "Basic Grey");
   testObject(m_ctfGreen, "Greenish");
+  testObject(m_ctfTraffic,"Traffic");
 
   // Piecewise function
   m_piece = rtBaseHandle::instance().requestNewObject(rtConstants::OT_vtkPiecewiseFunction, "Standard Scale");

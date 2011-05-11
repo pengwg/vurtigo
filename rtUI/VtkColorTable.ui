@@ -41,6 +41,16 @@
        <string>Color</string>
       </property>
      </column>
+     <column>
+      <property name="text">
+       <string>Midpoint</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Sharpness</string>
+      </property>
+     </column>
     </widget>
    </item>
    <item>

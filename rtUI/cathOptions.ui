@@ -16,6 +16,9 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
+     <property name="toolTip">
+      <string/>
+     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -26,82 +29,70 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QPushButton" name="pointPropButton">
+         <property name="toolTip">
+          <string>Change representation, color, opacity,... of the catheter points</string>
+         </property>
          <property name="text">
           <string>Rendering Properties</string>
          </property>
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QCheckBox" name="snrSizeCheckBox">
-           <property name="text">
-            <string>Use SNR</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="Line" name="line">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_7">
-           <property name="text">
-            <string>Bad is &lt;</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="badSpin">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="keyboardTracking">
-            <bool>false</bool>
-           </property>
-           <property name="maximum">
-            <number>1000</number>
-           </property>
-           <property name="value">
-            <number>30</number>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_8">
-           <property name="text">
-            <string>Good is &gt;</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="goodSpin">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="keyboardTracking">
-            <bool>false</bool>
-           </property>
-           <property name="minimum">
-            <number>1</number>
-           </property>
-           <property name="maximum">
-            <number>1000</number>
-           </property>
-           <property name="value">
-            <number>50</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="colorGroup">
+         <property name="toolTip">
+          <string>Choose property and color transfer function to color catheter points by</string>
+         </property>
+         <property name="whatsThis">
+          <string>Choosing a catheter property (as listed in the table below) and a Vurtigo ColorTransferFunction object will define a scheme for coloring the points of the catheter in the 3D view.
+
+The values, colors and parameters of the color function are edited in the color transfer function object options.</string>
+         </property>
+         <property name="title">
+          <string>Catheter Color Scheme</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Use Property:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="propertyBox">
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>ColorFunc:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="colorBox">
+            <item>
+             <property name="text">
+              <string>None</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QLabel" name="label">
+           <property name="toolTip">
+            <string>The size of the points</string>
+           </property>
            <property name="text">
             <string>Size Of Points:</string>
            </property>
@@ -183,14 +174,6 @@
          <column>
           <property name="text">
            <string>Z</string>
-          </property>
-          <property name="textAlignment">
-           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>SNR</string>
           </property>
           <property name="textAlignment">
            <set>AlignHCenter|AlignVCenter|AlignCenter</set>
@@ -300,6 +283,9 @@
        </item>
        <item row="0" column="1">
         <widget class="QPushButton" name="splinePropButton">
+         <property name="toolTip">
+          <string>Change representation, color, opacity,... of the Catheter spline</string>
+         </property>
          <property name="text">
           <string>Rendering Properties</string>
          </property>
@@ -337,6 +323,9 @@
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="QPushButton" name="tipPropButton">
+         <property name="toolTip">
+          <string>Change representation, color, opacity,... of the Catheter tip</string>
+         </property>
          <property name="text">
           <string>Rendering Properties</string>
          </property>

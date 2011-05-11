@@ -25,6 +25,7 @@
 #include "rtApplication.h"
 #include "rtMainWindow.h"
 #include "customQVTKWidget.h"
+#include "rtColorFuncDataObject.h"
 
 rtCathRenderObject::rtCathRenderObject() {
   setObjectType("OT_Cath");
@@ -94,7 +95,7 @@ void rtCathRenderObject::update() {
 
   m_sphere->SetRadius( ((double)dObj->getPointSize())/10.0f );
 
-  double SNR;
+  double val;
   int loc;
   double coords[3];
 
@@ -102,23 +103,20 @@ void rtCathRenderObject::update() {
   if ( numLoc>0 ) {
     loc = dObj->getLocationList().value(0);
     dObj->getPositionAtLocation(loc, coords);
-    dObj->getSNRAtLocation(loc, SNR);
+    dObj->getValueAtLocation(loc, dObj->getCurrProperty(), val);
   }
 
+  double color[3];
 
   if (numLoc == 1) {
     // Just one location. Render just a ball and no spline or anything else.
     // The the first and only sphere.
     m_sphereActor[0]->SetPosition(coords);
 
-    if (dObj->useSNRSize()) {
+    if (dObj->getCurrProperty() != "None" && dObj->getCurrColor() != NULL) {
         m_sphereActor[0]->SetProperty(vtkProperty::New());
-        if ( SNR <= dObj->getBadSNR())
-        { m_sphereActor[0]->GetProperty()->SetColor(1.0,0.0,0.0); }
-        else if ( SNR <= dObj->getGoodSNR() )
-        { m_sphereActor[0]->GetProperty()->SetColor(1.0,1.0,0.0); }
-        else
-        { m_sphereActor[0]->GetProperty()->SetColor(0.0,1.0,0.0); }
+        dObj->getColorAtLocation(0, dObj->getCurrProperty(),color);
+        m_sphereActor[0]->GetProperty()->SetColor(color);
     } else {
         //refresh back to user given properties
         m_sphereActor[0]->SetProperty( dObj->getPointProperty() );
@@ -163,25 +161,15 @@ void rtCathRenderObject::update() {
     for (int ix1=0; ix1<numLoc; ix1++) {
       loc = dObj->getLocationList().value(ix1);
       dObj->getPositionAtLocation(loc, coords);
-      dObj->getSNRAtLocation(loc, SNR);
+      dObj->getValueAtLocation(loc, dObj->getCurrProperty(), val);
 
 
       m_sphereActor[ix1]->SetPosition(coords);
 
-      if (dObj->useSNRSize()) {
+      if (dObj->getCurrProperty() != "None" && dObj->getCurrColor() != NULL) {
           m_sphereActor[ix1]->SetProperty(vtkProperty::New());
-          if ( SNR <= dObj->getBadSNR() )
-          {
-              m_sphereActor[ix1]->GetProperty()->SetColor(1.0,0.0,0.0);
-          }
-          else if ( SNR <= dObj->getGoodSNR())
-          {
-              m_sphereActor[ix1]->GetProperty()->SetColor(1.0,1.0,0.0);
-          }
-          else
-          {
-              m_sphereActor[ix1]->GetProperty()->SetColor(0.0,1.0,0.0);
-          }
+          dObj->getColorAtLocation(loc, dObj->getCurrProperty(),color);
+          m_sphereActor[ix1]->GetProperty()->SetColor(color);
       } else {
           //refresh back to user given properties
           m_sphereActor[ix1]->SetProperty( dObj->getPointProperty() );

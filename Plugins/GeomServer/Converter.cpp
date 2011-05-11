@@ -68,8 +68,12 @@ void Converter::printAllLocalCath() {
     for (QHash<int, rtCathDataObject::CathCoilData>::iterator coilIt = coils->begin(); coilIt != coils->end(); coilIt++) {
       currCoil = coilIt.value();
       cout << "Coil Number: " << coilCounter++
-              << " locationID: " << currCoil.locationID
-              << " SNR: " << currCoil.SNR << endl;
+              << " locationID: " << currCoil.locationID;
+      QList<QString> props = currCoil.coilPropValues.keys();
+      for (int ix1=0; ix1<props.size(); ix1++)
+      {
+          cout << props[ix1].toStdString().c_str() << currCoil.coilPropValues.value(props[ix1]) << endl;
+      }
       cout << "Coords: [" << currCoil.cx << ", " << currCoil.cy << ", " << currCoil.cz << "]" << endl;
       cout << "Angles: [" << currCoil.angles[0] << ", " << currCoil.angles[1] << "]" << endl;
     }
@@ -256,6 +260,7 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
   //for all remote coils
   int coilIndex = 0;
   
+  local->addCathProperty("SNR");
 
   for (vector<COILDATA>::iterator currCoil = remote.coils.begin(); currCoil != remote.coils.end(); currCoil++) {
     #ifdef CONVERTER_DEBUG
@@ -271,7 +276,7 @@ bool Converter::setLocalCath(CATHDATA & remote, rtCathDataObject * local) {
     local->lock();
     success = success && local->setCoilAngles(localCoilId, currCoil->angles[0], currCoil->angles[1]);
     success = success && local->setCoilCoords(localCoilId, currCoil->coords[0], -currCoil->coords[1], -currCoil->coords[2]);
-    success = success && local->setCoilSNR(localCoilId, currCoil->SNR);
+    success = success && local->setCoilPropValue(localCoilId,"SNR",currCoil->SNR);
     local->unlock();
 
     coilIndex++;

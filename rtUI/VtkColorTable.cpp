@@ -53,7 +53,7 @@ void VtkColorTable::updateColorFunction() {
     const Point & point = points.at(mainTable->currentRow());
 
     colorFunction->RemovePoint(point.scalarValue);
-    colorFunction->AddRGBPoint(point.scalarValue, point.color.red()/255.0f, point.color.green()/255.0f, point.color.blue()/255.0f);
+    colorFunction->AddRGBPoint(point.scalarValue, point.color.red()/255.0f, point.color.green()/255.0f, point.color.blue()/255.0f,point.midpoint,point.sharpness);
     emit functionUpdated();
 }
 
@@ -68,12 +68,12 @@ void VtkColorTable::removeCheckDupe(int oldScalarVal) {
     if (currentRow > 0 && points.at(currentRow - 1).scalarValue == oldScalarVal) {
         const Point & point = points.at(currentRow - 1);
         colorFunction->AddRGBPoint(point.scalarValue, point.color.red()/255.0f,
-                                    point.color.green()/255.0f, point.color.blue()/255.0f);
+                                    point.color.green()/255.0f, point.color.blue()/255.0f,point.midpoint,point.sharpness);
     }
     else if (points.size() - 1 > currentRow && points.at(currentRow + 1).scalarValue == oldScalarVal) {
         const Point & point = points.at(currentRow + 1);
         colorFunction->AddRGBPoint(point.scalarValue, point.color.red()/255.0f,
-                                    point.color.green()/255.0f, point.color.blue()/255.0f);
+                                    point.color.green()/255.0f, point.color.blue()/255.0f,point.midpoint,point.sharpness);
     }
     emit functionUpdated();
 }
@@ -137,8 +137,14 @@ void VtkColorTable::addTableRow(int row, const Point & point) {
 
     newItem = new QTableWidgetItem();
     newItem->setBackgroundColor(point.color);
-    newItem->setFlags(Qt::ItemIsDragEnabled & Qt::ItemIsSelectable & Qt::ItemIsDragEnabled & Qt::ItemIsDropEnabled);
+    newItem->setFlags(Qt::ItemIsEnabled);
     mainTable->setItem(row, 4, newItem);
+
+    newItem = new QTableWidgetItem(tr("%1").arg(point.midpoint));
+    mainTable->setItem(row, 5, newItem);
+
+    newItem = new QTableWidgetItem(tr("%1").arg(point.sharpness));
+    mainTable->setItem(row, 6, newItem);
 }
 
 void VtkColorTable::updateTableRow(int row, const Point & point) {
@@ -146,6 +152,8 @@ void VtkColorTable::updateTableRow(int row, const Point & point) {
     mainTable->item(row, 2)->setText(tr("%1").arg(point.color.green()));
     mainTable->item(row, 3)->setText(tr("%1").arg(point.color.blue()));
     mainTable->item(row, 4)->setBackgroundColor(point.color);
+    mainTable->item(row, 5)->setText(tr("%1").arg(point.midpoint));
+    mainTable->item(row, 6)->setText(tr("%1").arg(point.sharpness));
 }
 
 //! Updates everything based on the points
@@ -162,14 +170,14 @@ void VtkColorTable::updateFromPoints() {
             updateTableRow(a, currPoint);
 
         colorFunction->AddRGBPoint(currPoint.scalarValue, currPoint.color.red()/255.0f,
-                                   currPoint.color.green()/255.0f, currPoint.color.blue()/255.0f);
+                                   currPoint.color.green()/255.0f, currPoint.color.blue()/255.0f,currPoint.midpoint,currPoint.sharpness);
     }
     emit functionUpdated();
 }
 
 //! Used to keep track which cell the user is editing
 void VtkColorTable::cellEditingSlot(int row, int column) {
-    if (row < 0 || column < 0 || row >= mainTable->rowCount() || column > 4 ) return;
+    if (row < 0 || column < 0 || row >= mainTable->rowCount() || column > 6 ) return;
 
     if (column == 4) {
       // At this point we change the color.
@@ -194,6 +202,7 @@ void VtkColorTable::updateCell(int row, int column) {
 
         bool ok;
         uint val = mainTable->currentItem()->text().toUInt(&ok);
+        // scalarValue
         if (column == 0) {
             //if the new value is invalid, take back the old value
             if (!ok) {
@@ -206,7 +215,7 @@ void VtkColorTable::updateCell(int row, int column) {
                 //update colorFunction
                 removeCheckDupe(point.scalarValue);
                 colorFunction->AddRGBPoint(val, point.color.red()/255.0f,
-                                           point.color.green()/255.0f, point.color.blue()/255.0f);
+                                           point.color.green()/255.0f, point.color.blue()/255.0f,point.midpoint,point.sharpness);
 
                 //add the point back in
                 point.scalarValue = val;
@@ -224,7 +233,64 @@ void VtkColorTable::updateCell(int row, int column) {
                 mainTable->setCurrentCell(currentRow, 0);
             }
         }
-        else {
+        // midpoint
+        else if (column == 5)
+        {
+            bool okD;
+            double valD = mainTable->currentItem()->text().toDouble(&okD);
+            //if the new value is invalid, take back the old value
+            if (!okD || valD < 0.0 || valD > 1.0)
+                mainTable->currentItem()->setText(QString::number(points.at(row).midpoint));
+            else
+            {
+                //take the new value
+                Point point = points.at(row);
+                //update colorFunction
+                colorFunction->AddRGBPoint(point.scalarValue, point.color.red()/255.0f,
+                                           point.color.green()/255.0f, point.color.blue()/255.0f,valD,point.sharpness);
+                //add the point back in
+                point.midpoint = valD;
+                points.remove(row);
+                points.append(point);
+                qStableSort(points.begin(), points.end(), point_sort);
+                emit functionUpdated();
+
+                //match the table with the points
+                mainTable->removeRow(row);
+                int currentRow = points.lastIndexOf(point);
+                addTableRow(currentRow, point);
+                mainTable->setCurrentCell(currentRow, 0);
+            }
+        }
+        // sharpness
+        else if (column == 6)
+        {
+            bool okD;
+            double valD = mainTable->currentItem()->text().toDouble(&okD);
+            //if the new value is invalid, take back the old value
+            if (!okD || valD < 0.0 || valD > 1.0)
+                mainTable->currentItem()->setText(QString::number(points.at(row).sharpness));
+            else
+            {
+                //take the new value
+                Point point = points.at(row);
+                //update colorFunction
+                colorFunction->AddRGBPoint(point.scalarValue, point.color.red()/255.0f,
+                                           point.color.green()/255.0f, point.color.blue()/255.0f,point.midpoint,valD);
+                //add the point back in
+                point.sharpness = valD;
+                points.remove(row);
+                points.append(point);
+                qStableSort(points.begin(), points.end(), point_sort);
+                emit functionUpdated();
+
+                //match the table with the points
+                mainTable->removeRow(row);
+                int currentRow = points.lastIndexOf(point);
+                addTableRow(currentRow, point);
+                mainTable->setCurrentCell(currentRow, 0);
+            }
+        } else {
             //if the new value is invalid, take back the old value
             if (!ok || val > 255) {
                 switch (column) {
@@ -280,11 +346,15 @@ void VtkColorTable::newPoint() {
         const Point & currPoint = points.at(currentRow);
         point.scalarValue = currPoint.scalarValue;
         point.color = currPoint.color;
+        point.midpoint = currPoint.midpoint;
+        point.sharpness = currPoint.sharpness;
     }
     else {
     //otherwise take the default (zeroes)
         point.scalarValue = 0;
         point.color = QColor(0,0,0);
+        point.midpoint = 0.5;
+        point.sharpness = 0.0;
     }
 
     //update points
@@ -293,7 +363,7 @@ void VtkColorTable::newPoint() {
 
     //update colorFunction
     colorFunction->AddRGBPoint(point.scalarValue, point.color.red()/255.0f,
-                               point.color.green()/255.0f, point.color.blue()/255.0f);
+                               point.color.green()/255.0f, point.color.blue()/255.0f,point.midpoint,point.sharpness);
 
     //update table
     currentRow = points.lastIndexOf(point);
@@ -356,6 +426,8 @@ void VtkColorTable::getDefaultProfile(Profile & profile) {
     Point point;
     point.scalarValue = 0;
     point.color = QColor(0, 0, 0);
+    point.midpoint = 0.5;
+    point.sharpness = 0.0;
 
     profile.points.append(point);
     profile.clamping = false;
@@ -366,15 +438,16 @@ bool VtkColorTable::setColorFunction(vtkColorTransferFunction * const func) {
 
     colorFunction->DeepCopy(func);
     points.clear();
-
-    double * data = colorFunction->GetDataPointer();
+    double vals[6];
     for (int a = 0; a < colorFunction->GetSize(); a++) {
+        colorFunction->GetNodeValue(a,vals);
         Point point;
-        point.scalarValue = data[4*a];
-        point.color = QColor(data[4*a + 1]*255.0f, data[4*a + 2]*255.0f, data[4*a + 3]*255.0f);
+        point.scalarValue = vals[0];
+        point.color = QColor(vals[1]*255.0f, vals[2]*255.0f, vals[3]*255.0f);
+        point.midpoint = vals[4];
+        point.sharpness = vals[5];
         points.append(point);
     }
-    delete data;
 
     updateFromPoints();
     emit functionUpdated();

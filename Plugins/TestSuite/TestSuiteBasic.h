@@ -64,7 +64,7 @@ protected:
   int m_2DPlane16;
   int m_matrix;
   int m_polyObj;
-  int m_ctf, m_ctfGreen;
+  int m_ctf, m_ctfGreen, m_ctfTraffic;
   int m_piece;
   
   vtkImageMapToColors       *m_imgMapToColors;

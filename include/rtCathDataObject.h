@@ -33,6 +33,8 @@
 
 #include "vtkProperty.h"
 
+class rtColorFuncDataObject;
+
 //! Catheter Data Object
 /*!
   Catheter information such as coil locations and SNR are kept here.
@@ -47,14 +49,14 @@ public:
       int locationID;
       int angles[2];
       double cx, cy, cz;
-      double SNR;
+      QHash<QString,double> coilPropValues;
       bool visible;
   };
 
   enum EstimationType {
     ET_MEAN,
     ET_WTMEAN,
-    ET_BESTSNR
+    ET_BEST
   };
 
   rtCathDataObject();
@@ -64,7 +66,7 @@ public:
 
   // Coil specific
   int addCoil(int loc);
-  bool setCoilSNR(int coilID, double SNR);
+  bool setCoilPropValue(int coilID, QString property, double value);
   bool setCoilAngles(int coilID, int a1, int a2);
   bool setCoilCoords(int coilID, double cx, double cy, double cz);
   CathCoilData* getCoilHandle(int coilID);
@@ -77,7 +79,8 @@ public:
   int getNumLocations();
   QList<int> getLocationList();
   bool getPositionAtLocation(int loc, double out[3]);
-  bool getSNRAtLocation(int loc, double &SNR);
+  bool getValueAtLocation(int loc, QString property, double &value);
+  bool getColorAtLocation(int loc, QString property, double rgb[3]);
 
   //Property
   vtkProperty* getSplineProperty() { return m_splineProperty; }
@@ -85,12 +88,15 @@ public:
   vtkProperty* getTipProperty() { return m_tipProperty; }
   void refreshProperties() { m_pointPropertyDlg->settingsChanged(); }
 
+  //! Add a new catheter property
+  bool addCathProperty(QString property);
+
+
   // Estimation Type
   EstimationType getEstimationType() { return m_eType; }
   void setEstimationType(EstimationType et) { m_eType = et; }
 
   int getPointSize() { return m_pointSize; }
-  bool useSNRSize() { return m_useSNRSize; }
 
   inline double getTension() { return m_tension; }
   inline void setTension(double t) { m_cathGuiSetup.tensionSpinBox->setValue(t); }
@@ -107,11 +113,9 @@ public:
   inline double getSplineThickness() { return m_splineThickness; }
   inline void setSplineThickness(double thickness) { m_cathGuiSetup.thicknessSpinBox->setValue(thickness); }
 
-  inline int getBadSNR() { return m_badSNR; }
-  inline void setBadSNR(int value) { badSNRChanged(value); }
+  inline QString getCurrProperty() {return m_currProperty; }
+  inline rtColorFuncDataObject* getCurrColor() {return m_currColor; }
 
-  inline int getGoodSNR() { return m_goodSNR; }
-  inline void setGoodSNR(int value) { goodSNRChanged(value); }
 
  public slots:
   void splinePropertyDialog();
@@ -120,22 +124,26 @@ public:
 
   void pointSizeChanged(int size);
 
-  void useSNRSizeChanged(int);
+  //! The property to color by has changed
+  void propertyChanged();
+  //! The color function has changed
+  void colorChanged(int);
 
   void tableCellChanged(int row, int col);
 
   void updateCoilTable();
+  void updatePropertyBox();
+  void updateColorBox();
 
   void splineThicknessChanged(double thickness);
   void tensionChanged(double tension);
   void continuityChanged(double continuity);
   void tipValueChanged(double tip);
   void endValueChanged(double end);
-  void badSNRChanged(int value);
-  void goodSNRChanged(int value);
 
 signals:
   void updateCoilTableSignal();
+  void cathPropsChanged();
  protected:
   // Functions
   void setupGUI();
@@ -150,6 +158,9 @@ signals:
 
   //! Storage for coils that are not visible.
   QHash<int, CathCoilData> m_discardCoilList;
+
+  //! A List of properties
+  QList<QString>  m_cathProperties;
 
   //! A hash with coil location and coil ID. Only contains the locations for visible coils.
   QMultiMap<int, int> m_coilLocations;
@@ -185,10 +196,12 @@ signals:
 
   double m_splineThickness;
 
-  //! Use the SNR value to determine the size of the rendered coil.
-  bool m_useSNRSize;
-  int m_badSNR;
-  int m_goodSNR;
+  //! The currently selected property
+  QString m_currProperty;
+  //! The currently selected color function
+  rtColorFuncDataObject *m_currColor;
+  //! A hash to map indices to color function object ids
+  QHash<int,int> m_colorIDs;
 
   //! The objects that sets the widgets for the cath options.
   Ui::cathOptions m_cathGuiSetup;

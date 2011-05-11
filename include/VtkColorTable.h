@@ -16,9 +16,14 @@ public:
     struct Point {
         int scalarValue;
         QColor color;
+        // The midpoint and sharpness values specified when adding a node are used to control the transition to the next node
+        // The midpoint is the normalized distance between control points at which the curve reaches the median Y value
+        double midpoint;
+        //A sharpness of 0 yields a piecewise linear function and a sharpness of 1 yields a piecewise constant function
+        double sharpness;
 
         bool operator==(const Point & p1) {
-            return p1.color == color && p1.scalarValue == scalarValue;
+            return p1.color == color && p1.scalarValue == scalarValue && p1.midpoint == midpoint && p1.sharpness == sharpness;
         }
     };
 
