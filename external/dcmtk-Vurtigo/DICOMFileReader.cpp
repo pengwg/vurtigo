@@ -34,6 +34,7 @@
 #include <vtkStringArray.h>
 #include <vtkImageActor.h>
 #include <vtkRendererCollection.h>
+#include <vtkImageFlip.h>
 
 #include <rtBaseHandle.h>
 #include <rt3dVolumeDataObject.h>
@@ -398,7 +399,11 @@ vtkImageData* DICOMFileReader::getImageData(bool isDICOM)
     {
         m_reader->SetDataSpacing(m_spacingX,m_spacingY,m_spacingZ);
         m_reader->Update();
-        return m_reader->GetOutput();
+        vtkImageFlip *flip = vtkImageFlip::New();
+        flip->SetFilteredAxis(1);
+        flip->SetInputConnection(m_reader->GetOutputPort());
+        flip->Update();
+        return flip->GetOutput();
     }
 
 }

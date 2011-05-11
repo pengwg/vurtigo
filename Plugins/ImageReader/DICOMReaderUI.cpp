@@ -170,6 +170,8 @@ void DICOMReaderUI::saveAsVolume() {
             }
         }
     }
+
+    spacingOptions->setEnabled(false);
 }
 
 void DICOMReaderUI::setupVolumes()
