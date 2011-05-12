@@ -181,6 +181,7 @@ add_executable(vurtigo ${MAIN_SRC_FILES})
 target_link_libraries(vurtigo VurtigoBase)
 
 add_dependencies(VurtigoBase UIFirst)
+add_dependencies(DCMTKVurtigo UIFirst)
 
 # After building the base we can now add the plugins.
 add_subdirectory(Plugins)

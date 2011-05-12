@@ -1,261 +1,152 @@
-# FindDCMTK.cmake - Find Offis DCMTK libraries
+# - find DCMTK libraries and applications
 #
-#  DCMTK_INCLUDE_DIR   - Directories to include to use DCMTK
+
+#  DCMTK_INCLUDE_DIRS   - Directories to include to use DCMTK
 #  DCMTK_LIBRARIES     - Files to link against to use DCMTK
 #  DCMTK_FOUND         - If false, don't try to use DCMTK
-#  DCMTK_DIR           - (optional input) Source directory for DCMTK
+#  DCMTK_DIR           - (optional) Source directory for DCMTK
 #
 # DCMTK_DIR can be used to make it simpler to find the various include
 # directories and compiled libraries if you've just compiled it in the
 # source tree. Just set it to the root of the tree where you extracted
-# or installed DCMTK.
+# the source (default to /usr/include/dcmtk/)
+
+#=============================================================================
+# Copyright 2004-2009 Kitware, Inc.
+# Copyright 2009-2010 Mathieu Malaterre <mathieu.malaterre@gmail.com>
+# Copyright 2010 Thomas Sondergaard <ts@medical-insight.com>
+#
+# Distributed under the OSI-approved BSD License (the "License");
+# see accompanying file Copyright.txt for details.
+#
+# This software is distributed WITHOUT ANY WARRANTY; without even the
+# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the License for more information.
+#=============================================================================
+# (To distribute this file outside of CMake, substitute the full
+#  License text for the above reference.)
+
 #
 # Written for VXL by Amitha Perera.
-# Updated by Jacob Foshee for DCMTK 3.5.4
+# Upgraded for GDCM by Mathieu Malaterre.
+# Modified for EasyViz by Thomas Sondergaard.
 #
 
-#####################################################################
+if(NOT DCMTK_FOUND AND NOT DCMTK_DIR)
+  set(DCMTK_DIR
+    "/usr/include/dcmtk/"
+    CACHE
+    PATH
+    "Root of DCMTK source tree (optional).")
+  mark_as_advanced(DCMTK_DIR)
+endif()
 
-SET(STD_PATHS
-    ~/Library/Frameworks
-    /Library/Frameworks
-    /usr/local
-    /usr
-    /sw          # Fink
-    /opt/local   # DarwinPorts
-    /opt/csw     # Blastwave
-    /opt
-)
 
-#####################################################################
-MACRO(FIND_INCLUDE_DIR  INCLUDE_DIR_VAR  THIS_DCMTK_LIB  THIS_DCMTK_INC)
+foreach(lib
+    dcmdata
+    dcmimage
+    dcmimgle
+    dcmjpeg
+    dcmnet
+    dcmqrdb
+    ijg12
+    ijg16
+    ijg8
+    oflog
+    ofstd)
 
-# Clear the Variable
-SET(${INCLUDE_DIR_VAR} ${INCLUDE_DIR_VAR}-NOTFOUND)
+  find_library(DCMTK_${lib}_LIBRARY
+    ${lib}
+    PATHS
+    ${DCMTK_DIR}/${lib}/libsrc
+    ${DCMTK_DIR}/${lib}/libsrc/Release
+    ${DCMTK_DIR}/${lib}/libsrc/Debug
+    ${DCMTK_DIR}/${lib}/Release
+    ${DCMTK_DIR}/${lib}/Debug
+    ${DCMTK_DIR}/lib)
 
-IF (NOT DCMTK_DIR)
-    FIND_PATH( ${INCLUDE_DIR_VAR} dcmtk/${THIS_DCMTK_LIB}/${THIS_DCMTK_INC}
-        PATHS
-            ${STD_PATHS}/
-        PATH_SUFFIXES
-            include
-    )
-ELSE (NOT DCMTK_DIR)
-  message(STATUS ${DCMTK_DIR})
-    FIND_PATH( ${INCLUDE_DIR_VAR} dcmtk/${THIS_DCMTK_LIB}/${THIS_DCMTK_INC}
-        PATHS
-            ${DCMTK_DIR}/
-            ${DCMTK_DIR}/${THIS_DCMTK_LIB}/
-            ${DCMTK_DIR}/include/${THIS_DCMTK_LIB}/
-            ${DCMTK_DIR}/include/
-            ${DCMTK_DIR}/${THIS_DCMTK_LIB}/include/
-        PATH_SUFFIXES
-            include
-        NO_DEFAULT_PATH
-    )
-ENDIF(NOT DCMTK_DIR)
+  mark_as_advanced(DCMTK_${lib}_LIBRARY)
 
-MARK_AS_ADVANCED(${INCLUDE_DIR_VAR})
+  if(DCMTK_${lib}_LIBRARY)
+    list(APPEND DCMTK_LIBRARIES ${DCMTK_${lib}_LIBRARY})
+  endif()
 
-ENDMACRO(FIND_INCLUDE_DIR)
+endforeach()
 
-#####################################################################
-MACRO(FIND_DCMTK_LIBS LIB_VAR THIS_DCMTK_LIB)
 
-# Clear the vaiables
-SET(${LIB_VAR}_RELEASE ${LIB_VAR}_RELEASE-NOTFOUND)
-SET(${LIB_VAR}_DEBUG ${LIB_VAR}_DEBUG-NOTFOUND)
+set(DCMTK_config_TEST_HEADER osconfig.h)
+set(DCMTK_dcmdata_TEST_HEADER dctypes.h)
+set(DCMTK_dcmimage_TEST_HEADER dicoimg.h)
+set(DCMTK_dcmimgle_TEST_HEADER dcmimage.h)
+set(DCMTK_dcmjpeg_TEST_HEADER djdecode.h)
+set(DCMTK_dcmnet_TEST_HEADER assoc.h)
+set(DCMTK_dcmqrdb_TEST_HEADER dcmqrdba.h)
+set(DCMTK_oflog_TEST_HEADER oflog.h)
+set(DCMTK_ofstd_TEST_HEADER ofstdinc.h)
 
-IF (NOT DCMTK_DIR)
-    FIND_LIBRARY( ${LIB_VAR}_RELEASE
-        NAMES
-            ${THIS_DCMTK_LIB}_o
-            ${THIS_DCMTK_LIB}o
-            ${THIS_DCMTK_LIB}
-        PATHS
-            ${STD_PATHS}/
-        PATH_SUFFIXES
-            Release
-            lib
-    )
-    FIND_LIBRARY( ${LIB_VAR}_DEBUG
-        NAMES
-            ${THIS_DCMTK_LIB}_d
-            ${THIS_DCMTK_LIB}d
-            ${THIS_DCMTK_LIB}
-        PATHS
-            ${STD_PATHS}/
-        PATH_SUFFIXES
-            Debug
-            lib
-    )
-ELSE (NOT DCMTK_DIR)
-    FIND_LIBRARY( ${LIB_VAR}_RELEASE
-        NAMES
-            ${THIS_DCMTK_LIB}_o
-            ${THIS_DCMTK_LIB}o
-            ${THIS_DCMTK_LIB}
-        PATHS   
-            ${DCMTK_DIR}/
-            ${DCMTK_DIR}/${THIS_DCMTK_LIB}/
-            ${DCMTK_DIR}/${THIS_DCMTK_LIB}/libsrc/
-        PATH_SUFFIXES
-            Release
-            lib
-        NO_DEFAULT_PATH
-    )
-    FIND_LIBRARY( ${LIB_VAR}_DEBUG
-        NAMES
-            ${THIS_DCMTK_LIB}_d
-            ${THIS_DCMTK_LIB}d
-            ${THIS_DCMTK_LIB}
-        PATHS  
-            ${DCMTK_DIR}/
-            ${DCMTK_DIR}/${THIS_DCMTK_LIB}/
-            ${DCMTK_DIR}/${THIS_DCMTK_LIB}/libsrc/
-        PATH_SUFFIXES
-            Debug
-            lib
-        NO_DEFAULT_PATH
-    )
-ENDIF(NOT DCMTK_DIR)
+foreach(dir
+    config
+    dcmdata
+    dcmimage
+    dcmimgle
+    dcmjpeg
+    dcmnet
+    dcmqrdb
+    oflog
+    ofstd)
 
-SET(${LIB_VAR}
-    debug     ${${LIB_VAR}_DEBUG}
-    optimized ${${LIB_VAR}_RELEASE}
-)
-MARK_AS_ADVANCED(${LIB_VAR}_RELEASE ${LIB_VAR}_DEBUG)
+ find_path(DCMTK_${dir}_INCLUDE_DIR
+    dcmtk/${dir}/${DCMTK_${dir}_TEST_HEADER}
+    PATHS
+    ${DCMTK_DIR}/include
+    ${DCMTK_DIR}/${dir}/include
+    ${DCMTK_DIR}/${dir}
+    ${DCMTK_DIR}/include/${dir})
 
-ENDMACRO(FIND_DCMTK_LIBS)
+  mark_as_advanced(DCMTK_${dir}_INCLUDE_DIR)
 
-#####################################################################
-#config
-FIND_INCLUDE_DIR(DCMTK_config_INCLUDE_DIR config osconfig.h)
+  if(DCMTK_${dir}_INCLUDE_DIR)
+    list(APPEND DCMTK_INCLUDE_DIRS ${DCMTK_${dir}_INCLUDE_DIR})
+  endif()
 
-#oflog
-FIND_INCLUDE_DIR(DCMTK_oflog_INCLUDE_DIR oflog oflog.h)
-FIND_DCMTK_LIBS(DCMTK_oflog_LIBRARY oflog)
+endforeach()
 
-# ofstd
-FIND_INCLUDE_DIR(DCMTK_ofstd_INCLUDE_DIR ofstd ofstdinc.h)
-FIND_DCMTK_LIBS(DCMTK_ofstd_LIBRARY ofstd)
+if(WIN32)
+  list(APPEND DCMTK_LIBRARIES netapi32 wsock32)
+endif()
 
-# dcmdata
-FIND_INCLUDE_DIR(DCMTK_dcmdata_INCLUDE_DIR dcmdata dctypes.h)
-FIND_DCMTK_LIBS(DCMTK_dcmdata_LIBRARY dcmdata)
+if(DCMTK_ofstd_INCLUDE_DIR)
+  get_filename_component(DCMTK_dcmtk_INCLUDE_DIR
+    ${DCMTK_ofstd_INCLUDE_DIR}
+    PATH
+    CACHE)
+  list(APPEND DCMTK_INCLUDE_DIRS ${DCMTK_dcmtk_INCLUDE_DIR})
+  mark_as_advanced(DCMTK_dcmtk_INCLUDE_DIR)
+endif()
 
-# dcmimgle
-FIND_INCLUDE_DIR(DCMTK_dcmimgle_INCLUDE_DIR dcmimgle dcmimage.h)
-FIND_DCMTK_LIBS(DCMTK_dcmimgle_LIBRARY dcmimgle)
+#include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+#include(${CMAKE_CURRENT_SOURCE_DIR}/FindPackageHandleStandardArgs.cmake)
+INCLUDE(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(DCMTK DEFAULT_MSG
+  DCMTK_config_INCLUDE_DIR
+  DCMTK_ofstd_INCLUDE_DIR
+  DCMTK_ofstd_LIBRARY
+  DCMTK_dcmdata_INCLUDE_DIR
+  DCMTK_dcmdata_LIBRARY
+  DCMTK_dcmimgle_INCLUDE_DIR
+  DCMTK_dcmimgle_LIBRARY)
 
-# dcmimage
-FIND_INCLUDE_DIR(DCMTK_dcmimage_INCLUDE_DIR dcmimage dicoimg.h)
-FIND_DCMTK_LIBS(DCMTK_dcmimage_LIBRARY dcmimage)
+if(DCMTK_oflog_INCLUDE_DIR)
+  find_package_handle_standard_args(DCMTK DEFAULT_MSG
+    DCMTK_oflog_INCLUDE_DIR
+    DCMTK_oflog_LIBRARY)
+endif()
 
-# dcmnet
-FIND_DCMTK_LIBS(DCMTK_dcmnet_LIBRARY dcmnet)
+# Compatibility: This variable is deprecated
+set(DCMTK_INCLUDE_DIR ${DCMTK_INCLUDE_DIRS})
 
-#####################################################################
-
-IF( DCMTK_config_INCLUDE_DIR )
-IF( DCMTK_ofstd_INCLUDE_DIR )
-IF( DCMTK_ofstd_LIBRARY )
-IF( DCMTK_dcmdata_INCLUDE_DIR )
-IF( DCMTK_dcmdata_LIBRARY )
-IF( DCMTK_dcmimgle_INCLUDE_DIR )
-IF( DCMTK_dcmimgle_LIBRARY )
-
-    SET( DCMTK_FOUND "YES" )
-    SET( DCMTK_INCLUDE_DIR
-        ${DCMTK_config_INCLUDE_DIR}
-        ${DCMTK_ofstd_INCLUDE_DIR}
-        ${DCMTK_dcmdata_INCLUDE_DIR}
-        ${DCMTK_dcmimgle_INCLUDE_DIR}
-        ${DCMTK_dcmimage_INCLUDE_DIR}
-    )
-
-    SET( DCMTK_LIBRARIES
-        ${DCMTK_dcmimgle_LIBRARY}
-        ${DCMTK_dcmdata_LIBRARY}
-        ${DCMTK_ofstd_LIBRARY}       
-        ${DCMTK_config_LIBRARY}
-    )
-
-    IF(DCMTK_dcmimage_LIBRARY)
-        LIST(APPEND DCMTK_LIBRARIES ${DCMTK_dcmimage_LIBRARY} )
-    ENDIF(DCMTK_dcmimage_LIBRARY)
-
-    IF(DCMTK_dcmnet_LIBRARY)
-        LIST(APPEND DCMTK_LIBRARIES ${DCMTK_dcmnet_LIBRARY})
-    ENDIF(DCMTK_dcmnet_LIBRARY)
-
-    IF( DCMTK_oflog_INCLUDE_DIR )
-    IF( DCMTK_oflog_LIBRARY )
-        LIST(APPEND DCMTK_INCLUDE_DIR ${DCMTK_oflog_INCLUDE_DIR} )
-        LIST(APPEND DCMTK_LIBRARIES ${DCMTK_oflog_LIBRARY} )
-    ENDIF( DCMTK_oflog_LIBRARY )
-    ENDIF( DCMTK_oflog_INCLUDE_DIR )
-
-    # Optional DCMTK Support:
-    # define user configurable options and paths to external libraries which might be used
-    # set precompiler switches according to settings
-    # libxml support
-    OPTION(DCMTK_WITH_LIBXML "Turn support for libxml on/off" OFF)
-    FIND_PATH(DCMTK_WITH_LIBXMLINC "include/libxml/parser.h" ${DCMTK_DIR}/../libxml2-2.6.26)
-    IF(DCMTK_WITH_LIBXML)
-        ADD_DEFINITIONS(-DDCMTK_WITH_LIBXML)
-        INCLUDE_DIRECTORIES(${DCMTK_WITH_LIBXMLINC}/include/libxml)
-        LINK_DIRECTORIES(${DCMTK_WITH_LIBXMLINC}/lib)
-        LIST(APPEND DCMTK_LIBRARIES debug iconv_d optimized iconv_o debug libxml2_d optimized libxml2_o)
-    ENDIF(DCMTK_WITH_LIBXML)
-    # libpng support
-    OPTION(DCMTK_WITH_LIBPNG "Turn support for libpng on/off" OFF)
-    FIND_PATH(DCMTK_WITH_LIBPNGINC "include/png.h" ${DCMTK_DIR}/../libpng-1.2.8)
-    IF(DCMTK_WITH_LIBPNG)
-        ADD_DEFINITIONS(-DDCMTK_WITH_LIBPNG)
-        INCLUDE_DIRECTORIES(${DCMTK_WITH_LIBPNGINC}/include)
-        LINK_DIRECTORIES(${DCMTK_WITH_LIBPNGINC}/lib)
-        LIST(APPEND DCMTK_LIBRARIES debug libpng_d optimized libpng_o)
-    ENDIF(DCMTK_WITH_LIBPNG)
-    # libtiff support
-    OPTION(DCMTK_WITH_LIBTIFF "Turn support for libtiff on/off" OFF)
-    FIND_PATH(DCMTK_WITH_LIBTIFFINC "include/tiff.h" ${DCMTK_DIR}/../tiff-3.7.4)
-    IF(DCMTK_WITH_LIBTIFF)
-        ADD_DEFINITIONS(-DDCMTK_WITH_LIBTIFF)
-        INCLUDE_DIRECTORIES(${DCMTK_WITH_LIBTIFFINC}/include)
-        LINK_DIRECTORIES(${DCMTK_WITH_LIBTIFFINC}/lib)
-        LIST(APPEND DCMTK_LIBRARIES debug libtiff_d optimized libtiff_o)
-    ENDIF(DCMTK_WITH_LIBTIFF)
-    # openssl support
-    OPTION(DCMTK_WITH_OPENSSL "Turn support for openssl on/off" OFF)
-    FIND_PATH(DCMTK_WITH_OPENSSLINC "include/openssl/ssl.h" ${DCMTK_DIR}/../openssl-0.9.8a)
-    IF(DCMTK_WITH_OPENSSL)
-        ADD_DEFINITIONS(-DDCMTK_WITH_OPENSSL)
-        INCLUDE_DIRECTORIES(${DCMTK_WITH_OPENSSLINC}/include/openssl)
-        LINK_DIRECTORIES(${DCMTK_WITH_OPENSSLINC}/lib)
-        LIST(APPEND DCMTK_LIBRARIES debug libeay32_d optimized libeay32_o debug ssleay32_d optimized ssleay32_o)
-    ENDIF(DCMTK_WITH_OPENSSL)
-    # zlib support
-    OPTION(DCMTK_WITH_ZLIB "Turn support for zlib on/off" OFF)
-    FIND_PATH(DCMTK_WITH_ZLIBINC "include/zlib.h" ${DCMTK_DIR}/../zlib-1.2.3)
-    IF(DCMTK_WITH_ZLIB)
-        ADD_DEFINITIONS(-DDCMTK_WITH_ZLIB)
-        INCLUDE_DIRECTORIES(${DCMTK_WITH_ZLIBINC}/include)
-        LINK_DIRECTORIES(${DCMTK_WITH_ZLIBINC}/lib)
-        LIST(APPEND DCMTK_LIBRARIES debug zlib_d optimized zlib_o)
-    ENDIF(DCMTK_WITH_ZLIB)
-
-    MARK_AS_ADVANCED(DCMTK_WITH_LIBXMLINC DCMTK_WITH_LIBPNGINC DCMTK_WITH_LIBTIFFINC DCMTK_WITH_OPENSSLINC DCMTK_WITH_ZLIBINC)
-
-    IF( WIN32 )
-        LIST(APPEND DCMTK_LIBRARIES netapi32 wsock32)
-    ENDIF( WIN32 )
-
-ENDIF( DCMTK_dcmimgle_LIBRARY )
-ENDIF( DCMTK_dcmimgle_INCLUDE_DIR )
-ENDIF( DCMTK_dcmdata_LIBRARY )
-ENDIF( DCMTK_dcmdata_INCLUDE_DIR )
-ENDIF( DCMTK_ofstd_LIBRARY )
-ENDIF( DCMTK_ofstd_INCLUDE_DIR )
-ENDIF( DCMTK_config_INCLUDE_DIR )
-
+foreach(executable dcmdump dcmdjpeg dcmdrle)
+  string(TOUPPER ${executable} EXECUTABLE)
+  find_program(DCMTK_${EXECUTABLE}_EXECUTABLE ${executable} ${DCMTK_DIR}/bin)
+  mark_as_advanced(DCMTK_${EXECUTABLE}_EXECUTABLE)
+endforeach()

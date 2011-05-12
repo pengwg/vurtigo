@@ -445,6 +445,6 @@ void HoverPoints::loadProfile(const Profile & profile) {
 //! Provides a copy of the instance's profile
 void HoverPoints::getProfile(Profile & profile) {
     profile.points = QPolygonF(points);
-    profile.locks = QVector<LockType>::QVector<LockType>(locks);
+    profile.locks = QVector<LockType>(locks);
     profile.dataSpace = settings.dataSpace;
 }
