@@ -124,6 +124,9 @@ public:
   //! Get the pointer to one of the three color widgets
   inline rt2DSliceInputColorWidget* getColorWidgetAt(int pos) { if ( pos <0 || pos>=maxNumberOfInputs() ) return 0; return m_colorInput[pos]; }
 
+  //! Returns the opacity value stored in the option's widget's slider.
+  inline double getOpacity() { return ((double)m_optionsWidget.opacitySlider->value())/100.0; }
+
  protected slots:
   //void spinRight();
   //void spinLeft();

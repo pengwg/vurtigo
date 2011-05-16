@@ -126,6 +126,7 @@ void rt2DSliceDataObject::setupGUI() {
  connect( this, SIGNAL(copyImageData2DSignal()), this, SLOT(copyImageData2DSlot()), Qt::QueuedConnection );
 
  connect( m_optionsWidget.windowLevelPushButton, SIGNAL(clicked()), this, SLOT(showWindowLevel()) );
+ connect( m_optionsWidget.opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(Modified()));
 }
 
 
