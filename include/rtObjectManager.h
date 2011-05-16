@@ -59,6 +59,9 @@ class rtObjectManager : public QObject {
   //! Is an object permanent?
   inline bool isPermanent(int objID) {return m_permanentObjects.contains(objID); }
 
+  //! Does Vurtigo have this object type?
+  bool hasType(QString objType) { return m_objectTypeList.contains(objType); }
+
   //! Get a pointer to the 2D object hash.
   inline QMultiHash<int, QString>* get2DObjectNameHash() { return &m_list2DHash; }
 

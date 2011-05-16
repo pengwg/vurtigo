@@ -64,7 +64,15 @@ void rtBaseHandle::connectSignals() {
 
 }
 
-
+/*!
+  Plugins cannot create objects or datasets directly. Only the object manager can create objects. This function is a request from the plugin to the data manager for the creation of a new object of a particular type.
+The data manager will create the object and then return the ID to the plugin. The plugin can then modify the object with that ID. This is a blocking call as the base needs to allocate objects with a different thread.
+Only one thread may request the creation (or removal) of an object at a time.
+  @param objType The type of object to be created (using old enumerated type).
+  @param name The name that will be displayed in the object list.
+  @return The ID of the newly created object. Will return -1 if the new object could not be created.
+  @deprecated Use requestNewObject(QString.QString)
+ */
 int rtBaseHandle::requestNewObject(rtConstants::rtObjectType objType, QString name) {
   int result;
 
@@ -93,6 +101,14 @@ int rtBaseHandle::requestNewObject(rtConstants::rtObjectType objType, QString na
   return result;
 }
 
+/*!
+  Plugins cannot create objects or datasets directly. Only the object manager can create objects. This function is a request from the plugin to the data manager for the creation of a new object of a particular type.
+The data manager will create the object and then return the ID to the plugin. The plugin can then modify the object with that ID. This is a blocking call as the base needs to allocate objects with a different thread.
+Only one thread may request the creation (or removal) of an object at a time.
+  @param objType The type of object to be created as a QString.
+  @param name The name that will be displayed in the object list.
+  @return The ID of the newly created object. Will return -1 if the new object could not be created.
+ */
 int rtBaseHandle::requestNewObject(QString objType, QString name) {
   int result;
 
@@ -121,6 +137,13 @@ int rtBaseHandle::requestNewObject(QString objType, QString name) {
   return result;
 }
 
+/*!
+  This function is a request from the plugin to the data manager for the addition of a new object type.
+The data manager will add the object type to Vurtigo so subsequent calls to requestNewObject can include the new type and Vurtigo can invoke the given
+Maker object to create a new object.
+  @param newType The new type
+  @param newObj An object that can make that type of object
+ */
 void rtBaseHandle::addNewObject(QString newType,rtRenderObjectMaker *newObj)
 {
     rtConstants::rtObjectType objType;
@@ -142,6 +165,50 @@ void rtBaseHandle::addNewObject(QString newType,rtRenderObjectMaker *newObj)
         m_newObjectWait.acquire();
     }
     m_newObjectLock.unlock();
+}
+
+/*!
+  This function is a request from the plugin to the main window handler to connect the given object
+  to the given render window widget in order to process QEvents (mouse/keyboard) that are generated.
+  Used in rtRenderObject::addToRenderer() method
+  @param obj The render object we want to connect
+  @param window The id of the render window widget we want to connect to
+  */
+void rtBaseHandle::connectObjectToEvents(rtRenderObject *obj, int window)
+{
+    // Connect signals and slots for interaction.
+    customQVTKWidget* renWid;
+    renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
+    // Connect mouse actions
+    connect(renWid, SIGNAL(interMousePress(QMouseEvent*,int)), obj, SLOT(mousePressEvent(QMouseEvent*,int)));
+    connect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), obj, SLOT(mouseMoveEvent(QMouseEvent*,int)));
+    connect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), obj, SLOT(mouseReleaseEvent(QMouseEvent*,int)));
+    connect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), obj, SLOT(mouseDoubleClickEvent(QMouseEvent*,int)));
+    connect(renWid, SIGNAL(interKeyPress(QKeyEvent*,int)), obj, SLOT(keyPressEvent(QKeyEvent*,int)));
+    connect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), obj, SLOT(keyReleaseEvent(QKeyEvent*,int)));
+    connect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), obj, SLOT(wheelEvent(QWheelEvent*,int)));
+}
+
+/*!
+  This function is a request from the plugin to the main window handler to disconnect the given object
+  from the given render window widget in order to stop processing QEvents (mouse/keyboard) that are generated.
+  Used in rtRenderObject::removeFomRenderer() method
+  @param obj The render object we want to disconnect
+  @param window The id of the render window widget we want to disconnect from
+  */
+void rtBaseHandle::disconnectObjectFromEvents(rtRenderObject *obj, int window)
+{
+    customQVTKWidget* renWid;
+    renWid = rtApplication::instance().getMainWinHandle()->getRenderWidget(window);
+
+    // Disconnect mouse actions
+    disconnect(renWid, SIGNAL(interMousePress(QMouseEvent*,int)), obj, SLOT(mousePressEvent(QMouseEvent*,int)));
+    disconnect(renWid, SIGNAL(interMouseMove(QMouseEvent*,int)), obj, SLOT(mouseMoveEvent(QMouseEvent*,int)));
+    disconnect(renWid, SIGNAL(interMouseRelease(QMouseEvent*,int)), obj, SLOT(mouseReleaseEvent(QMouseEvent*,int)));
+    disconnect(renWid, SIGNAL(interMouseDoubleClick(QMouseEvent*,int)), obj, SLOT(mouseDoubleClickEvent(QMouseEvent*,int)));
+    disconnect(renWid, SIGNAL(interKeyPress(QKeyEvent*,int)), obj, SLOT(keyPressEvent(QKeyEvent*,int)));
+    disconnect(renWid, SIGNAL(interKeyRelease(QKeyEvent*,int)), obj, SLOT(keyReleaseEvent(QKeyEvent*,int)));
+    disconnect(renWid, SIGNAL(interWheel(QWheelEvent*,int)), obj, SLOT(wheelEvent(QWheelEvent*,int)));
 }
 
 
@@ -173,7 +240,12 @@ void rtBaseHandle::addNewObjectSlot(QString newType,rtRenderObjectMaker *newObj)
     m_newObjectWait.release();
 }
 
-
+/*!
+  Request that the base remove an object. Plugins can remove those objects that are not read-only.
+  Only one thread may request to create or remove an object at a time.
+  @param ID The ID of the object to be removed.
+  @return True if an object with that ID was removed. False otherwise.
+ */
 bool rtBaseHandle::removeObject(int ID) {
   bool res;
   m_newObjectLock.lock();
@@ -182,24 +254,54 @@ bool rtBaseHandle::removeObject(int ID) {
   return res;
 }
 
+/*!
+  There may be any number of objects of one type. Given a type of object this function will return a list of IDs corresponding to all of the objects of that type. This function is useful for those plugins that take a specific type of object as input.
+  @see getNumObjectsOfType()
+  @param objType The type of object that the plugin is looking for (using old enumerated type).
+  @return A list of IDs for all the objects of that type. Returns an empty list if there are no objects of that type.
+  @deprecated Use getObjectsOfType(QString)
+ */
 QList<int> rtBaseHandle::getObjectsOfType(rtConstants::rtObjectType objType) {
   return rtApplication::instance().getObjectManager()->getObjectsOfType(rtConstants::objectTypeToQString(objType));
 }
 
+/*!
+  There may be any number of objects of one type. Given a type of object this function will return a list of IDs corresponding to all of the objects of that type. This function is useful for those plugins that take a specific type of object as input.
+  @see getNumObjectsOfType()
+  @param objType The type of object that the plugin is looking for.
+  @return A list of IDs for all the objects of that type. Returns an empty list if there are no objects of that type.
+ */
 QList<int> rtBaseHandle::getObjectsOfType(QString objType)
 {
     return rtApplication::instance().getObjectManager()->getObjectsOfType(objType);
 }
 
-
+/*!
+  Get the number of objects of one type.
+  @see getObjectsOfType()
+  @param objType The type of object that the plugin is looking for (Using old enumerated type).
+  @return The number of objects of that type
+  @deprecated Use getNumObjectsOfType(QString)
+ */
 int rtBaseHandle::getNumObjectsOfType(rtConstants::rtObjectType objType) {
   return rtApplication::instance().getObjectManager()->getNumObjectsOfType(rtConstants::objectTypeToQString(objType));
 }
 
+/*!
+  Get the number of objects of one type.
+  @see getObjectsOfType()
+  @param objType The type of object that the plugin is looking for.
+  @return The number of objects of that type
+ */
 int rtBaseHandle::getNumObjectsOfType(QString objType) {
   return rtApplication::instance().getObjectManager()->getNumObjectsOfType(objType);
 }
 
+/*!
+Each object in the base has a unique ID. This funciton requests a pointer to the object that has a certain ID. The object may be modified but the pointer cannot be changed.
+@param ID The id number of the requested object.
+@return A pointer to the object or NULL if no object with this ID exists or the reqested object is Read-Only.
+*/
 rtDataObject* const rtBaseHandle::getObjectWithID(int ID) {
   rtRenderObject* temp=NULL;
 
@@ -211,6 +313,12 @@ rtDataObject* const rtBaseHandle::getObjectWithID(int ID) {
   return NULL;
 }
 
+/*!
+  Each object in the base has a unique ID. Some objects in the base are considered read-only and the plugins may only access them via this function. This funciton requests a pointer to the object that has a certain ID. The object may be NOT be modified and the pointer cannot be changed.
+  @see getObjectWithID()
+  @param ID The id number of the requested object.
+  @return A pointer to the object or NULL if no object with this ID exists.
+ */
 const rtDataObject* const rtBaseHandle::getROObjectWithID(int ID) {
   rtRenderObject* temp=NULL;
 
@@ -221,11 +329,21 @@ const rtDataObject* const rtBaseHandle::getROObjectWithID(int ID) {
   return NULL;
 }
 
+/*!
+Used internally to request a render object for changing its rendering properties
+@param ID The id number of the requested object.
+@return A pointer to the object or NULL if no object with this ID exists or the reqested object is Read-Only.
+*/
 rtRenderObject* const rtBaseHandle::getRenderObjectWithID(int ID) {
   return rtApplication::instance().getObjectManager()->getObjectWithID(ID);
 }
 
-
+/*!
+  The plugin can register with the base to receive a callback every time the user sets a point in the 3D view.
+  \param pluginID The ID of the plugin to register.
+  \param watch True if the watch is to be added. False to remove a watch.
+  \return true if the watch was added/removed as was requested by the caller.
+ */
 bool rtBaseHandle::watchClick(int pluginID, bool watch) {
   bool res;
 
@@ -237,6 +355,9 @@ bool rtBaseHandle::watchClick(int pluginID, bool watch) {
   return res;
 }
 
+/*!
+  This function needs to access the graphics directly so it has to be executed in the same thread as the rendering pipeline. NOT THREAD SAFE!
+  */
 vtkImageData* rtBaseHandle::grabScreenshot(int window) {
   vtkRenderWindow* temp;
 
@@ -254,6 +375,11 @@ vtkImageData* rtBaseHandle::grabScreenshot(int window) {
   return m_screen;
 }
 
+/*!
+  This function returns a pointer to a modifyable render window. NOT THREAD SAFE!
+The user should be careful when using this pointer as changes to the render window object may have unexpected results.
+The use of the vtkRenderWindow object in a thread other than the main Vurtigo rendering thread is not cosidered safe.
+  */
 vtkRenderWindow* rtBaseHandle::getRenderWindow(int window) {
   vtkRenderWindow* temp;
 
@@ -261,6 +387,12 @@ vtkRenderWindow* rtBaseHandle::getRenderWindow(int window) {
   return temp;
 }
 
+/*!
+  Renderable objects will not get updated by the base unless they are being rendered.
+  This is desired behaviour since it is usually wasteful to update an object that is not being rendered. However in some cases it may be needed to force an update.
+  Plugin developers should use caution when calling this function since it may cause Vurtigo to slow down if abused.
+  @param objID The ID of the object to be updated.
+  */
 void rtBaseHandle::forceRenderUpdate(int objID) {
   rtRenderObject* temp=NULL;
   temp = rtApplication::instance().getObjectManager()->getObjectWithID(objID);
@@ -269,6 +401,12 @@ void rtBaseHandle::forceRenderUpdate(int objID) {
   }
 }
 
+/*!
+  This will also check/uncheck the 3D box for the given object in the Object Browser. It will only have an effect if the object can be rendered in 3D.
+  @param idObj The ID of the object
+  @param fVisible true to view the object in 3d, false otherwise
+  @param window the render window you want to change visiblity in. If -1, will apply to all windows
+  */
 void rtBaseHandle::setObjectVisible3D(int idObj, bool fVisible, int window)
   {
     rtRenderObject *pRenderObj = getRenderObjectWithID(idObj);

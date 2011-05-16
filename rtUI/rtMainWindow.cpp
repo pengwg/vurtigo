@@ -1188,8 +1188,14 @@ QList<int> rtMainWindow::loadObject(QString fname) {
         rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("rtMainWindow::loadObject() QXmlStreamReader reports an error: ").append(reader.errorString()) );
       }
 
-      if (objType != "OT_None") typeRead = true;
-      if (objName != "") nameRead = true;
+      if (rtApplication::instance().getObjectManager()->hasType(objType))
+          typeRead = true;
+      else
+          QMessageBox::critical(this,"Object Type Not Found", "Could not find the object type in Vurtigo.\n If the object type is from a Plugin, please load the plugin first and retry.");
+      if (objName != "")
+          nameRead = true;
+      else
+          QMessageBox::critical(this,"Unnamed Object", "Object has no name, aborting load.");
 
       rtRenderObject* obj;
       QFile objFile;
