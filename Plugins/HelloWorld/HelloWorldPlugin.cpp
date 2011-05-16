@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 #include "HelloWorldPlugin.h"
+#include "HelloWorldPluginUI.h"
 #include <iostream>
 
 void HelloWorldPlugin::objectModified(int objID) {
@@ -25,8 +26,8 @@ void HelloWorldPlugin::objectModified(int objID) {
 }
 
 bool HelloWorldPlugin::init() {
-  std::cout << "Hello World! " << std::endl;
-  return true;
+    m_mainWidget = new HelloWorldPluginUI();
+    return true;
 }
 
 void HelloWorldPlugin::cleanup() {

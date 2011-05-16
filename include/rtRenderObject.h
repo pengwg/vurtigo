@@ -33,6 +33,9 @@
 #include <vtkRenderer.h>
 #include <vtkSmartPointer.h>
 
+#include "rtApplication.h"
+#include "rtMainWindow.h"
+
 #include "objTypes.h"
 class rtDataObject;
 class rtMainWindow;
@@ -124,19 +127,19 @@ Q_OBJECT
 
  public slots:
   //! Called when one of the mouse buttons is pressed.
-  virtual void mousePressEvent(QMouseEvent* event,int window) {  }
+  virtual void mousePressEvent(QMouseEvent* event,int window) { rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window); }
   //! Called when the mouse position changes and at least one button is pressed. (See QMouseEvent)
-  virtual void mouseMoveEvent(QMouseEvent* event,int window) {  }
+  virtual void mouseMoveEvent(QMouseEvent* event,int window) { rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window); }
   //! Called when a mouse button is released
-  virtual void mouseReleaseEvent(QMouseEvent* event,int window) {  }
+  virtual void mouseReleaseEvent(QMouseEvent* event,int window) { rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window); }
   //! Called when the mouse button is double clicked.
   virtual void mouseDoubleClickEvent(QMouseEvent* event,int window) {  }
   //! Called when a key is pressed.
-  virtual void keyPressEvent(QKeyEvent* event,int window) {}
+  virtual void keyPressEvent(QKeyEvent* event,int window) { }
   //! Called when a key is released.
   virtual void keyReleaseEvent(QKeyEvent* event,int window) {}
   //! The mouse wheel was moved.
-  virtual void wheelEvent(QWheelEvent* event,int window) {}
+  virtual void wheelEvent(QWheelEvent* event,int window) { rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window); }
 
  protected:
   //! The rtRenderObject constructor.

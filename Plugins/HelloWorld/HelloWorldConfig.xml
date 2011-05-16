@@ -1,4 +1,4 @@
 <plugin>
   <name title="Hello World" version="1.0"/>
-  <lib libname="HelloWorld" libpath="/home/spintilie/Code/Vurtigo-build/bin/"/>
+  <lib libname="HelloWorld" libpath="@VURTIGO_BIN_DIR@"/>
 </plugin>
