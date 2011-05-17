@@ -64,6 +64,9 @@ public:
 
   void update();
 
+  virtual bool saveFile(QFile* file);
+  virtual bool loadFile(QFile* file);
+
   // Coil specific
   int addCoil(int loc);
   bool setCoilPropValue(int coilID, QString property, double value);

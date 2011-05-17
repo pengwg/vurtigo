@@ -23,6 +23,8 @@
 #include "rtObjectManager.h"
 #include "rtRenderObject.h"
 #include "rtDataObject.h"
+#include "rtMainWindow.h"
+#include <QMessageBox>
 
 
 //! Constructor
@@ -543,6 +545,8 @@ void rtCathDataObject::updateCoilTable() {
     if( !tempItem ) {
       tempItem = new QTableWidgetItem();
       tempItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+      tempItem->setCheckState(Qt::Checked);
+      tempItem->setText("ON");
     }
 
     if ( dat.visible && tempItem->checkState()!=Qt::Checked ) {
@@ -662,4 +666,230 @@ void rtCathDataObject::updateColorBox()
     }
     m_cathGuiSetup.colorBox->setCurrentIndex(currInd);
     connect(m_cathGuiSetup.colorBox, SIGNAL(currentIndexChanged(int)), this, SLOT(colorChanged(int)));
+}
+
+bool rtCathDataObject::saveFile(QFile *file)
+{
+    // each catheter has: list of coils, slider values, color by prop, transfer func
+    // each coil has: locID, list of properties
+    // each property has: name, value
+
+    if (!file->open(QIODevice::WriteOnly | QIODevice::Text))
+      return false;
+
+    QXmlStreamWriter writer(file);
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument();
+    writer.writeStartElement("VurtigoFile");
+
+    rtDataObject::saveHeader(&writer, getObjectType(), getObjName());
+
+    saveVtkProperty(&writer, getTipProperty(), "TipProperty");
+    saveVtkProperty(&writer,getSplineProperty(), "SplineProperty");
+
+    writer.writeStartElement("SplineValues");
+    writer.writeAttribute("thickness",QString::number(getSplineThickness()));
+    writer.writeAttribute("tension",QString::number(getTension()));
+    writer.writeAttribute("continuity",QString::number(getContinuity()));
+    writer.writeAttribute("tipValue",QString::number(getTipValue()));
+    writer.writeAttribute("endValue",QString::number(getEndValue()));
+    writer.writeEndElement(); // SplineValues
+
+    saveVtkProperty(&writer, getPointProperty(), "PointProperty");
+
+    // save the coloring info
+    if (m_currProperty != "None" && m_currColor)
+    {
+        writer.writeStartElement("colorScheme");
+        writer.writeAttribute("property",m_currProperty);
+        writer.writeAttribute("transferFuncName",m_currColor->getObjName());
+        writer.writeEndElement();
+
+    }
+
+    writer.writeTextElement("pointSize",QString::number(m_pointSize));
+    writer.writeTextElement("numCoils",QString::number(m_coilIDList.size()));
+
+    for (int ix1=0; ix1<m_cathProperties.size(); ix1++)
+    {
+        writer.writeTextElement("cathProperty",m_cathProperties[ix1]);
+    }
+
+    for (int ix1=0; ix1<m_coilIDList.size(); ix1++)
+    {
+        if (m_coilList.contains(m_coilIDList[ix1]))
+        {
+            writer.writeStartElement("Coil");
+            writer.writeAttribute("visible",QString::number(m_coilList[ix1].visible ? 1 : 0));
+            writer.writeAttribute("locID",QString::number(m_coilList[ix1].locationID));
+            writer.writeAttribute("x",QString::number(m_coilList[ix1].cx));
+            writer.writeAttribute("y",QString::number(m_coilList[ix1].cy));
+            writer.writeAttribute("z",QString::number(m_coilList[ix1].cz));
+            QList<QString> names = m_coilList[ix1].coilPropValues.keys();
+            for (int ix2=0; ix2<names.size(); ix2++)
+            {
+                writer.writeStartElement("CustomProperty");
+                writer.writeAttribute("name",names[ix2]);
+                writer.writeAttribute("value",QString::number(m_coilList[ix1].coilPropValues.value(names[ix2])));
+                writer.writeEndElement(); //CustomProperty
+            }
+            writer.writeEndElement(); // Coil
+        }
+        else if (m_discardCoilList.contains(m_coilIDList[ix1]))
+        {
+            writer.writeStartElement("Coil");
+            writer.writeAttribute("visible",QString::number(m_discardCoilList[ix1].visible ? 1 : 0));
+            writer.writeAttribute("locID",QString::number(m_discardCoilList[ix1].locationID));
+            writer.writeAttribute("x",QString::number(m_discardCoilList[ix1].cx));
+            writer.writeAttribute("y",QString::number(m_discardCoilList[ix1].cy));
+            writer.writeAttribute("z",QString::number(m_discardCoilList[ix1].cz));
+            QList<QString> names = m_discardCoilList[ix1].coilPropValues.keys();
+            for (int ix2=0; ix2<names.size(); ix2++)
+            {
+                writer.writeStartElement("CustomProperty");
+                writer.writeAttribute("name",names[ix2]);
+                writer.writeAttribute("value",QString::number(m_discardCoilList[ix1].coilPropValues.value(names[ix2])));
+                writer.writeEndElement(); //CustomProperty
+            }
+            writer.writeEndElement(); // Coil
+        }
+    }
+
+    writer.writeEndElement(); // VurtigoFile
+    writer.writeEndDocument();
+
+    file->close();
+
+    if (m_currProperty != "None" && m_currColor)
+    {
+        m_currColor->saveFile(&QFile(file->fileName() + "_color"));
+    }
+
+    return true;
+}
+
+bool rtCathDataObject::loadFile(QFile *file)
+{
+    // addCoil(locID)
+    // then set the rest
+    if (!file->open(QIODevice::ReadOnly)) {
+      return false;
+    }
+
+    QXmlStreamReader reader(file);
+    QXmlStreamAttributes attrib;
+    QString objType;
+    QString objName="";
+    bool valueOK;
+    bool hadColor = false;
+    vtkProperty* inputProp = vtkProperty::New();
+    QString propName;
+    QString propByName = "prop";
+    QString colorName = "color";
+    int coilID;
+
+    while (!reader.atEnd()) {
+        if (reader.readNext() == QXmlStreamReader::StartElement )
+        {
+          if (reader.name() == "FileInfo")
+          {
+            rtDataObject::loadHeader(&reader, objType, objName);
+          } else if (reader.name() == "VtkProperty")
+          {
+              // Read each of the properties.
+              loadVtkProperty(&reader, inputProp, propName);
+              if (propName == "TipProperty") {
+                  getTipProperty()->DeepCopy(inputProp);
+              } else if (propName == "SplineProperty") {
+                  getSplineProperty()->DeepCopy(inputProp);
+              } else if (propName == "PointProperty") {
+                  getPointProperty()->DeepCopy(inputProp);
+              }
+          }
+          else if (reader.name() == "SplineValues")
+          {
+              attrib = reader.attributes();
+              m_cathGuiSetup.thicknessSpinBox->setValue(attrib.value("thickness").toString().toDouble(&valueOK));
+              m_cathGuiSetup.tensionSpinBox->setValue(attrib.value("tension").toString().toDouble(&valueOK));
+              m_cathGuiSetup.continuitySpinBox->setValue(attrib.value("continuity").toString().toDouble(&valueOK));
+              m_cathGuiSetup.tipSpinBox->setValue(attrib.value("tipValue").toString().toDouble(&valueOK));
+              m_cathGuiSetup.endSpinBox->setValue(attrib.value("endValue").toString().toDouble(&valueOK));
+          }
+          else if (reader.name() == "colorScheme")
+          {
+              attrib = reader.attributes();
+              propByName = attrib.value("property").toString();
+              colorName = attrib.value("transferFuncName").toString();
+              hadColor = true;
+          }
+          else if (reader.name() == "pointSize")
+          {
+              m_cathGuiSetup.pointSizeSlider->setValue(reader.readElementText().toInt(&valueOK));
+          }
+          else if (reader.name() == "cathProperty")
+          {
+              addCathProperty(reader.readElementText());
+          }
+          else if (reader.name() == "Coil")
+          {
+              attrib = reader.attributes();
+              coilID = addCoil(attrib.value("locID").toString().toInt(&valueOK));
+              setCoilCoords(coilID,attrib.value("x").toString().toDouble(&valueOK),attrib.value("y").toString().toDouble(&valueOK),attrib.value("z").toString().toDouble(&valueOK));
+              if (attrib.value("visible").toString().toInt(&valueOK) == 0)
+              {
+                  m_coilList[coilID].visible = false;
+                  m_coilLocations.remove(m_coilList[coilID].locationID,coilID);
+                  m_discardCoilList.insert(coilID,m_coilList.take(coilID));
+              }
+              while (!(reader.readNext() == QXmlStreamReader::EndElement && reader.name() == "Coil"))
+              {
+                  if (reader.name() == "CustomProperty")
+                  {
+                      attrib = reader.attributes();
+                      setCoilPropValue(coilID,attrib.value("name").toString(),attrib.value("value").toString().toDouble(&valueOK));
+                  }
+              }
+          }
+
+        }
+    }
+
+    if (reader.hasError()) {
+      return false;
+    }
+
+    if (hadColor)
+    {
+        QList<int> id;
+        id = rtApplication::instance().getMainWinHandle()->loadObject(QString(file->fileName() + "_color"));
+        if (!id.isEmpty())
+        {
+            for (int ix1=0; ix1<m_cathGuiSetup.propertyBox->count(); ix1++)
+            {
+                if (m_cathGuiSetup.propertyBox->itemText(ix1) == propByName)
+                {
+                    m_cathGuiSetup.propertyBox->setCurrentIndex(ix1);
+                    break;
+                }
+            }
+            for (int ix1=0; ix1<m_cathGuiSetup.colorBox->count(); ix1++)
+            {
+                if (m_cathGuiSetup.colorBox->itemText(ix1) == QString(colorName + " " + QString::number(id.last())))
+                {
+                    m_cathGuiSetup.colorBox->setCurrentIndex(ix1);
+                    break;
+                }
+            }
+        }
+        else
+        {
+            QApplication::restoreOverrideCursor();
+            QMessageBox::warning(0,"No Color!","Could not find Color Transfer Function file!");
+            QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        }
+    }
+
+    inputProp->Delete();
+    Modified();
+    return true;
 }
