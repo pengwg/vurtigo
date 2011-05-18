@@ -223,3 +223,8 @@ void rtBaseHandle::setObjectVisible3D(int idObj, bool fVisible, int window)
     pRenderObj->updateTreeItem();
     
   }
+
+void rtBaseHandle::setObjectPermanent(int objID)
+{
+    rtApplication::instance().getObjectManager()->setPermanent(objID);
+}

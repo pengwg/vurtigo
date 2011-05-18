@@ -806,7 +806,8 @@ void rtMainWindow::objectTreeContextMenu(QPoint pos)
         QMenu menu;
         menu.addAction(actionSave_Object);
         menu.addAction(actionRename_Object);
-        menu.addAction(actionDeleteSelected);
+        if (!rtApplication::instance().getObjectManager()->isPermanent(objectTree->currentItem()->text(1).toInt()))
+            menu.addAction(actionDeleteSelected);
         menu.addSeparator();
         menu.addAction(actionObject_Visibilities);
         menu.exec(QCursor::pos());

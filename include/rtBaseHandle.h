@@ -149,6 +149,9 @@ The use of the vtkRenderWindow object in a thread other than the main Vurtigo re
     @param window the render window you want to change visiblity in. If -1, will apply to all windows
     */
   void setObjectVisible3D(int idObj, bool fVisible, int window = -1);
+
+  //! Set an object to be permanent (cannot be deleted)
+  void setObjectPermanent(int objID);
  public slots:
   //! This runs in the main execution thread to request an object.
   void requestNewObjectSlot(rtConstants::rtObjectType, QString);

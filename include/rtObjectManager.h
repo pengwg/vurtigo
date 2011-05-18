@@ -51,6 +51,11 @@ class rtObjectManager : public QObject {
   QList<int> getObjectsOfType(rtConstants::rtObjectType objType);
   int getNumObjectsOfType(rtConstants::rtObjectType objType);
 
+  //! Set an object to be permanent (cannot be deleted)
+  void setPermanent(int objID) { if (!m_permanentObjects.contains(objID)) m_permanentObjects.append(objID); }
+  //! Is an object permanent?
+  inline bool isPermanent(int objID) {return m_permanentObjects.contains(objID); }
+
   //! Get a pointer to the 2D object hash.
   inline QMultiHash<int, QString>* get2DObjectNameHash() { return &m_list2DHash; }
 
@@ -87,6 +92,9 @@ signals:
  private:
   //! Maximum number of objects.
   int m_max_object;
+
+  //! A list of objects that cannot be deleted
+  QList<int> m_permanentObjects;
 
   rtObjectManager(const rtObjectManager&);
   rtObjectManager& operator=(const rtObjectManager&);

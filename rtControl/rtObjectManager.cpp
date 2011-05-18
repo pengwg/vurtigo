@@ -201,7 +201,7 @@ bool rtObjectManager::removeObject(int objID) {
 
   if (m_objectHash.contains(objID)) {
     temp = m_objectHash.value(objID);
-    if (!temp || temp->getDataObject()->isReadOnly()) return false;
+    if (!temp || temp->getDataObject()->isReadOnly() || isPermanent(objID)) return false;
     m_objectHash.remove(objID);
     if (m_list2DHash.remove(objID)>0 && rtApplication::instance().getMainWinHandle()) {
       rtApplication::instance().getMainWinHandle()->update2DWindowLists(&m_list2DHash);
@@ -227,7 +227,7 @@ bool rtObjectManager::removeReadOnly(int objID) {
 
   if (m_objectHash.contains(objID)) {
     temp = m_objectHash.value(objID);
-    if (!temp) return false;
+    if (!temp || isPermanent(objID)) return false;
     m_objectHash.remove(objID);
     if (m_list2DHash.remove(objID)>0 && rtApplication::instance().getMainWinHandle()) {
       rtApplication::instance().getMainWinHandle()->update2DWindowLists(&m_list2DHash);
