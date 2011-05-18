@@ -149,7 +149,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
-  void itemChanged(QTreeWidgetItem * current, int column);
+  void itemChanged(QTreeWidgetItem * current, int column, bool global = true);
   void centerOnObject(QTreeWidgetItem *item, int column);
   void viewChangedMixed();
   void viewChanged3DOnly();
@@ -298,6 +298,10 @@ signals:
 
   void addNewRenderWindow();
 
+private:
+
+  //set the global show in 3D checkbox to on without emitting a signal
+  void setGlobalOn(QTreeWidgetItem *item);
 };
 
 

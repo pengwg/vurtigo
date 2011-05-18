@@ -399,7 +399,7 @@ void rtMainWindow::currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * 
 /*!
   The main element that changes is the state of the check box. This function will add or remove elements form the renderer based on the state of the check box.
   */
-void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
+void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column, bool global) {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::itemChanged() start") );
 #endif
@@ -431,9 +431,8 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   if (current->checkState(column) == Qt::Checked) {
     for (int ix1=0; ix1<temp->getVisible3D().size(); ix1++)
       {
-        if (!m_visTable->isVisible() || (m_visTable->isVisible() && temp->getVisible3D().at(ix1)))
+        if (global || temp->getVisible3D().at(ix1))
         {
-            //if ( temp->addToRenderer(m_renderer3D) && temp->addToRenderer(m_localRenderer3D) ) {
             if ( temp->addToRenderer(m_renderer3D[ix1],ix1) ) {
                 m_renderFlag3D = true;
             }
@@ -443,8 +442,6 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column) {
   } else {
       for (int ix1=0; ix1<temp->getVisible3D().size(); ix1++)
       {
-
-          //if ( temp->removeFromRenderer(m_renderer3D) && temp->removeFromRenderer(m_localRenderer3D) ) {
           if ( temp->removeFromRenderer(m_renderer3D[ix1],ix1) ) {
               m_renderFlag3D = true;
           }
@@ -1616,7 +1613,7 @@ void rtMainWindow::refreshRenderItems(bool flag)
             else
                 visibles.takeLast();
             temp->setVisible3DAll(visibles);
-            itemChanged(objectTree->topLevelItem(ix1)->child(ix2),2);
+            itemChanged(objectTree->topLevelItem(ix1)->child(ix2),2,false);
         }
       }
       m_renderFlag3D = true;
@@ -1685,7 +1682,7 @@ void rtMainWindow::visTableChanged(int row,int col)
             item->setText("ON");
             temp->setVisible3D(col,true);
             // if we turn one on, set global check on as well
-            objectTree->currentItem()->setCheckState(2,Qt::Checked);
+            setGlobalOn(objectTree->currentItem());
             if (temp->addToRenderer(m_renderer3D[col],col))
                 m_renderFlag3D = true;
 
@@ -1701,4 +1698,13 @@ void rtMainWindow::visTableChanged(int row,int col)
                 m_renderFlag3D = true;
         }
     }
+}
+
+void rtMainWindow::setGlobalOn(QTreeWidgetItem *item)
+{
+    // disconnect the signal because we just want to toggle the checkbox
+    disconnect(objectTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemChanged(QTreeWidgetItem*,int)));
+    item->setCheckState(2,Qt::Checked);
+    connect(objectTree, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemChanged(QTreeWidgetItem*,int)));
+
 }
