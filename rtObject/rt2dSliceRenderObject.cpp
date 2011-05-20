@@ -242,6 +242,7 @@ void rt2DSliceRenderObject::mouseDoubleClickEvent(QMouseEvent* event,int window)
   if (temp) {
     if (temp == m_texturePlane.getActor() || temp == m_boxOutline.getActor()) {
       m_selectedProp = temp;
+      rtApplication::instance().getMainWinHandle()->getObjectTree()->setCurrentItem(this->getTreeItem());
       m_control.show();
     }
   }

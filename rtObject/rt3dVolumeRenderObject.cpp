@@ -813,6 +813,7 @@ void rt3DVolumeRenderObject::mouseDoubleClickEvent(QMouseEvent* event, int windo
     if (temp) {
       if (temp == m_texturePlane[ix1].getActor() || temp == m_boxOutline[ix1].getActor()) {
         m_selectedProp = temp;
+        rtApplication::instance().getMainWinHandle()->getObjectTree()->setCurrentItem(this->getTreeItem());
         showWidget(ix1);
 
         m_currentPlane = ix1;

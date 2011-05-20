@@ -253,6 +253,7 @@ void rt3DPointBufferRenderObject::mouseDoubleClickEvent(QMouseEvent* event,int w
     for (int ix1=0; ix1<m_pipeList.size(); ix1++) {
       if ( temp == m_pipeList[ix1]->getActor() ) {
         m_selectedProp = temp;
+        rtApplication::instance().getMainWinHandle()->getObjectTree()->setCurrentItem(this->getTreeItem());
 
         dObj->getPointListCenter(midPoint);
         dObj->getPointListExtents(pointExt);
