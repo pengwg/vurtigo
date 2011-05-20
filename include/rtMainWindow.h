@@ -26,6 +26,9 @@ class vtkRenderWindow;
 class vtkAxesActor;
 class vtkPropAssemply;
 class vtkProp;
+class vtk3DSImporter;
+
+#include "vtkSmartPointer.h"
 
 // Remove the conflict with AssertMacros.h
 // Conflict occurs in OSX
@@ -42,6 +45,7 @@ class vtkProp;
 #include <QtHelp>
 #include <QTreeWidget>
 #include <QTableWidget>
+#include <QMap>
 
 class rtRenderObject;
 class rtCameraControl;
@@ -149,6 +153,9 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   //! Add a new object type to the object tree
   void addNewObjectType(QString type);
 
+  //! Deselects all rtRenderObjects
+  void deselectAll();
+
  public slots:
   void currItemChanged(QTreeWidgetItem * current, QTreeWidgetItem * previous);
   void itemChanged(QTreeWidgetItem * current, int column, bool global = true);
@@ -230,11 +237,11 @@ signals:
   //vtkRenderer * m_localRenderer3D;
   //rtCameraControl *m_localCameraControl;
 
-  // The Axes in the corner
-  QList<vtkAxesActor *>m_axesActor;
-  QList<vtkPropAssembly *>m_propAssembly;
+  // The orientation marker widget/prop
   QList<rtOrientationMarkerWidget *>m_orientationWidget;
   rtAxesProperties* m_axesProperties;
+  // For managing / loading props for marking the orientation.
+  QMap<QString, vtkSmartPointer<vtkProp3D> > m_importedProps;
 
   // the point placement dialog
   pointPlacementDialog* m_pointPlacementDialog;
@@ -300,6 +307,9 @@ signals:
   void view2DHashCleanup();
 
   void addNewRenderWindow();
+
+  vtkSmartPointer<vtkProp3D> getOrientationProp();
+  vtkProp3D *createDefaultProp();
 
 private:
 

@@ -24,17 +24,20 @@
 #include <vtkRenderWindow.h>
 #include <vtkCamera.h>
 #include <vtkCaptionActor2D.h>
-#include <vtkPropAssembly.h>
 #include <vtkTextActor.h>
 #include <vtkTextProperty.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
-#include <vtkAxesActor.h>
-#include <vtkProp.h>
+#include <vtkTransform.h>
+#include <vtkActor.h>
+#include <vtkProp3D.h>
+#include <vtk3DSImporter.h>
+#include <vtkSmartPointer.h>
 
 #include <iostream>
 #include <cmath>
 
+#include "rtAxesActor.h"
 #include "rtMainWindow.h"
 #include "rtObjectManager.h"
 #include "rtRenderObject.h"
@@ -71,6 +74,9 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   m_render3DLayout = new QHBoxLayout();
   m_render3DLayout->setContentsMargins(0,0,0,0);
 
+  // This is required to go before the first call to addNewRenderWindow.
+  m_axesProperties = new rtAxesProperties();
+
   addNewRenderWindow();
   m_numRenWin = 1;
 
@@ -82,8 +88,6 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
   //initialize dialogs
   m_registrationDialog = NULL;
   m_pointPlacementDialog = NULL;
-
-  m_axesProperties = new rtAxesProperties();
 
   if (m_axesProperties) {
     setViewType( m_axesProperties->getViewType() );
@@ -124,7 +128,6 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   pluginBrowseFrame->setLayout(&m_pluginWidgetLayout);
 
-
 #ifdef DEBUG_VERBOSE_MODE_ON
   actionDebugText->setChecked(true);
 #endif
@@ -149,8 +152,6 @@ rtMainWindow::~rtMainWindow() {
       //if (m_localCameraControl) delete m_localCameraControl;
       if (m_render3DVTKWidget[ix1]) delete m_render3DVTKWidget[ix1];
       if (m_renderer3D[ix1]) m_renderer3D[ix1]->Delete();
-      if (m_axesActor[ix1]) m_axesActor[ix1]->Delete();
-      if (m_propAssembly[ix1]) m_propAssembly[ix1]->Delete();
       if (m_orientationWidget[ix1]) {
         m_orientationWidget[ix1]->SetInteractor(NULL);
         m_orientationWidget[ix1]->Delete();
@@ -965,8 +966,16 @@ void rtMainWindow::showAxesOptions() {
   }
 
   if (m_axesProperties->exec() == QDialog::Accepted) {
-    setViewType( m_axesProperties->getViewType() );
+    QListIterator<rtOrientationMarkerWidget*> itr(m_orientationWidget);
+    while(itr.hasNext())
+    {
+      rtOrientationMarkerWidget *widget = itr.next();
+      widget->SetEnabled(0);
+      widget->SetOrientationMarker(getOrientationProp());
+      widget->SetEnabled(1);
+    }
     setCoordType( m_axesProperties->getCoordType() );
+    setViewType( m_axesProperties->getViewType() );
   }
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::showAxesOptions() end") );
@@ -1328,12 +1337,17 @@ void rtMainWindow::setViewType(rtAxesProperties::ViewType vt) {
   switch (vt) {
     case(rtAxesProperties::VT_NONE):
     for (int ix1=0; ix1<m_orientationWidget.size(); ix1++)
+    {
+      m_orientationWidget[ix1]->InteractiveOff();
+      m_orientationWidget[ix1]->setOutlineVisibility(false);
       m_orientationWidget[ix1]->SetEnabled(0);
+    }
     break;
     case(rtAxesProperties::VT_VISIBLE):
     for (int ix1=0; ix1<m_orientationWidget.size(); ix1++)
     {
         m_orientationWidget[ix1]->SetEnabled(1);
+        m_orientationWidget[ix1]->setOutlineVisibility(false);
         m_orientationWidget[ix1]->InteractiveOff();
     }
     break;
@@ -1341,6 +1355,7 @@ void rtMainWindow::setViewType(rtAxesProperties::ViewType vt) {
     for (int ix1=0; ix1<m_orientationWidget.size(); ix1++)
     {
         m_orientationWidget[ix1]->SetEnabled(1);
+        m_orientationWidget[ix1]->setOutlineVisibility(true);
         m_orientationWidget[ix1]->InteractiveOn();
     }
     break;
@@ -1349,72 +1364,45 @@ void rtMainWindow::setViewType(rtAxesProperties::ViewType vt) {
 }
 
 void rtMainWindow::setCoordType(rtAxesProperties::CoordType ct) {
-  for (int ix1=0; ix1<m_axesActor.size(); ix1++)
+  QMapIterator<QString, vtkSmartPointer<vtkProp3D> > itr(m_importedProps);
+  while (itr.hasNext())
   {
-  switch (ct) {
-    case (rtAxesProperties::CT_HFS):
-    m_axesActor[ix1]->SetXAxisLabelText("Left");
-    m_axesActor[ix1]->SetYAxisLabelText("Posterior");
-    m_axesActor[ix1]->SetZAxisLabelText("Superior");
-    break;
-    case (rtAxesProperties::CT_FFS):
-    m_axesActor[ix1]->SetXAxisLabelText("Right");
-    m_axesActor[ix1]->SetYAxisLabelText("Posterior");
-    m_axesActor[ix1]->SetZAxisLabelText("Inferior");
-    break;
-    case (rtAxesProperties::CT_HFP):
-    m_axesActor[ix1]->SetXAxisLabelText("Right");
-    m_axesActor[ix1]->SetYAxisLabelText("Anterior");
-    m_axesActor[ix1]->SetZAxisLabelText("Superior");
-    break;
-    case (rtAxesProperties::CT_FFP):
-    m_axesActor[ix1]->SetXAxisLabelText("Left");
-    m_axesActor[ix1]->SetYAxisLabelText("Anterior");
-    m_axesActor[ix1]->SetZAxisLabelText("Inferior");
-    break;
-    case (rtAxesProperties::CT_HFDR):
-    m_axesActor[ix1]->SetXAxisLabelText("Posterior");
-    m_axesActor[ix1]->SetYAxisLabelText("Right");
-    m_axesActor[ix1]->SetZAxisLabelText("Superior");
-    break;
-    case (rtAxesProperties::CT_FFDR):
-    m_axesActor[ix1]->SetXAxisLabelText("Anterior");
-    m_axesActor[ix1]->SetYAxisLabelText("Right");
-    m_axesActor[ix1]->SetZAxisLabelText("Inferior");
-    break;
-    case (rtAxesProperties::CT_HFDL):
-    m_axesActor[ix1]->SetXAxisLabelText("Anterior");
-    m_axesActor[ix1]->SetYAxisLabelText("Left");
-    m_axesActor[ix1]->SetZAxisLabelText("Superior");
-    break;
-    case (rtAxesProperties::CT_FFDL):
-    m_axesActor[ix1]->SetXAxisLabelText("Posterior");
-    m_axesActor[ix1]->SetYAxisLabelText("Left");
-    m_axesActor[ix1]->SetZAxisLabelText("Inferior");
-    break;
+    vtkSmartPointer<vtkProp3D> prop = itr.next().value();
+    vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+    transform->Identity();
+    switch (ct) {
     case (rtAxesProperties::CT_VTK):
-    m_axesActor[ix1]->SetXAxisLabelText("X");
-    m_axesActor[ix1]->SetYAxisLabelText("Y");
-    m_axesActor[ix1]->SetZAxisLabelText("Z");
-    break;
+    case (rtAxesProperties::CT_HFS):
+      break;
+    case (rtAxesProperties::CT_FFS):
+      transform->RotateY(180);
+      break;
+    case (rtAxesProperties::CT_HFP):
+      transform->RotateZ(180);
+      break;
+    case (rtAxesProperties::CT_FFP):
+      transform->RotateX(180);
+      break;
+    case (rtAxesProperties::CT_HFDR):
+      transform->RotateZ(-90);
+      break;
+    case (rtAxesProperties::CT_FFDR):
+      transform->RotateZ(90);
+      transform->RotateY(180);
+      break;
+    case (rtAxesProperties::CT_HFDL):
+      transform->RotateZ(90);
+      break;
+    case (rtAxesProperties::CT_FFDL):
+      transform->RotateZ(-90);
+      transform->RotateY(180);
+      break;
+    }
+    // This call deletes the old user transform (if it exists).
+    // UserTransform is used here rather then prop->SetOrientation(x,y,z)
+    // because the latter does not work for the vtkAxesActor object.
+    prop->SetUserTransform(transform);
   }
-  
- // enlarge axis label text to make it readable
-  m_axesActor[ix1]->GetXAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
-  m_axesActor[ix1]->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
-  m_axesActor[ix1]->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
-
-  m_axesActor[ix1]->GetYAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
-  m_axesActor[ix1]->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
-  m_axesActor[ix1]->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
-
-  m_axesActor[ix1]->GetZAxisCaptionActor2D()->GetTextActor()->SetTextScaleMode(vtkTextActor::TEXT_SCALE_MODE_NONE);
-  m_axesActor[ix1]->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
-  m_axesActor[ix1]->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
-  
- // EthanB: It's a shame they only allow arrows/labels on +X/+Y/+Z, as I'd really rather have a visual depiction of "Right", "Anterior", and "Superior"
-}
-  
   m_renderFlag3D = true;
 }
 
@@ -1573,8 +1561,6 @@ void rtMainWindow::addNewRenderWindow()
   #endif
 
     m_renWin3D.append( newWindow );
-
-
     // Create the renderer
     vtkRenderer *newRenderer = vtkRenderer::New();
     m_renderer3D.append( newRenderer );
@@ -1585,16 +1571,9 @@ void rtMainWindow::addNewRenderWindow()
     m_cameraControl.append(newCameraControl);
     newCameraControl->setToDefaultPosition();
 
-
-    vtkAxesActor *newAxes = vtkAxesActor::New();
-    m_axesActor.append(newAxes);
-    vtkPropAssembly *newProps = vtkPropAssembly::New();
-    m_propAssembly.append(newProps );
     rtOrientationMarkerWidget *newOriWidget = new rtOrientationMarkerWidget(newWidget);
     m_orientationWidget.append(newOriWidget);
-
-    newProps->AddPart( m_axesActor.last() );
-    newOriWidget->SetOrientationMarker(newProps);
+    newOriWidget->SetOrientationMarker(getOrientationProp());
 
     // This is a bit of a hack.
     // Vurtigo does not use the vtk style interactor to get mouse events.
@@ -1608,6 +1587,49 @@ void rtMainWindow::addNewRenderWindow()
     newOriWidget->SetViewport( 0.75, 0.0, 1.0, 0.25 );
 
     m_render3DLayout->addWidget(newWidget);
+}
+
+vtkSmartPointer<vtkProp3D> rtMainWindow::getOrientationProp()
+{
+  QString path = m_axesProperties->getMarkerPath();
+  vtkSmartPointer<vtkProp3D> prop = m_importedProps.value(path);
+
+  if (!prop) {
+    if (path == "DEFAULT") {
+      prop = createDefaultProp();
+    } else {
+      vtk3DSImporter *importer = vtk3DSImporter::New();
+      importer->SetFileName(path.toAscii().data());
+      importer->Read();
+      prop = importer->GetRenderer()->GetActors()->GetLastActor();
+      importer->Delete();
+    }
+    m_importedProps.insert(path, prop);
+  }
+
+  return prop;
+}
+
+vtkProp3D *rtMainWindow::createDefaultProp()
+{
+  rtAxesActor *prop = rtAxesActor::New();
+
+  prop->SetXAxisLabelText("Left");
+  prop->GetXAxisCaptionActor2D()->GetTextActor()->SetTextScaleModeToNone();
+  prop->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
+  prop->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+
+  prop->SetYAxisLabelText("Posterior");
+  prop->GetYAxisCaptionActor2D()->GetTextActor()->SetTextScaleModeToNone();
+  prop->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
+  prop->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+
+  prop->SetZAxisLabelText("Superior");
+  prop->GetZAxisCaptionActor2D()->GetTextActor()->SetTextScaleModeToNone();
+  prop->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
+  prop->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+
+  return prop;
 }
 
 void rtMainWindow::refreshRenderItems(bool flag)
@@ -1751,4 +1773,11 @@ void rtMainWindow::addNewObjectType(QString type)
     QTreeWidgetItem *temp = new QTreeWidgetItem();
     temp->setText(0, type);
     m_topItems.insert(type, temp);
+}
+
+void rtMainWindow::deselectAll()
+{
+  QListIterator<rtRenderObject*> itr(rtApplication::instance().getObjectManager()->getAllObjects());
+  while (itr.hasNext())
+    itr.next()->deselect();
 }

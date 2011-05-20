@@ -22,6 +22,8 @@
 
 #include "ui_axesProperties.h"
 
+class QFile;
+
 class rtAxesProperties : public QDialog, private Ui::axesProperties {
 Q_OBJECT
 
@@ -52,6 +54,8 @@ Q_OBJECT
 
   ViewType getViewType() { return m_viewType; }
   CoordType getCoordType() { return m_coordType; }
+  QString getMarkerStyle() { return markerStyleCombo->currentText(); }
+  QString getMarkerPath() { return m_markerStylesToPaths.value(getMarkerStyle()); }
   void setCoordType(int ct);
 
  public slots:
@@ -63,7 +67,9 @@ Q_OBJECT
 
   ViewType m_viewType;
   CoordType m_coordType;
+  QMap<QString, QString> m_markerStylesToPaths;
 
+  bool loadMarkerStylesFromConfig(QFile*);
 };
 
 #endif

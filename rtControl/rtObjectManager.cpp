@@ -359,3 +359,12 @@ int rtObjectManager::getNextID() {
 
   return -1;
 }
+
+QList<rtRenderObject*> rtObjectManager::getAllObjects()
+{
+  QList<rtRenderObject*> objects;
+  QHashIterator<int, rtRenderObject*> itr(m_objectHash);
+  while(itr.hasNext())
+    objects.append(itr.next().value());
+  return objects;
+}

@@ -52,6 +52,7 @@ class rtObjectManager : public QObject {
   bool removeReadOnly(int objID);
   rtRenderObject* getObjectWithID(int objID);
   QList<int> getObjectsOfType(QString objType);
+  QList<rtRenderObject*> getAllObjects();
   int getNumObjectsOfType(QString objType);
 
   //! Set an object to be permanent (cannot be deleted)

@@ -21,6 +21,7 @@
 #define RT_ORIENTATION_MARKER_WIDGET_H
 
 #include <vtkOrientationMarkerWidget.h>
+#include <vtkActor2D.h>
 #include <QObject>
 #include <QMouseEvent>
 #include <QKeyEvent>
@@ -38,6 +39,8 @@ public:
 
   //! Destructor
   ~rtOrientationMarkerWidget();
+
+  void setOutlineVisibility(bool visible) { this->OutlineActor->SetVisibility( visible ); };
 
 public slots:
   void mousePress(QMouseEvent*);

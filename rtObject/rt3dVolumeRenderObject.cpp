@@ -826,10 +826,6 @@ void rt3DVolumeRenderObject::mouseDoubleClickEvent(QMouseEvent* event, int windo
 
 void rt3DVolumeRenderObject::keyPressEvent(QKeyEvent* event, int window) {
   if (!m_selectedProp || m_currentPlane == -1) return;
-  if (event->key() == Qt::Key_D)
-  {
-      this->deselect();
-  }
 }
 
 void rt3DVolumeRenderObject::keyReleaseEvent(QKeyEvent* event, int window) {

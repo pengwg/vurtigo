@@ -168,6 +168,11 @@ void customQVTKWidget::mouseDoubleClickEvent(QMouseEvent* event) {
 
 void customQVTKWidget::keyPressEvent(QKeyEvent* event) {
 
+  if (event->key() == Qt::Key_D) {
+    rtApplication::instance().getMainWinHandle()->deselectAll();
+  }
+
+  else {
     for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
     {
         if (this == rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1))
@@ -177,7 +182,7 @@ void customQVTKWidget::keyPressEvent(QKeyEvent* event) {
             event->ignore();
         }
     }
-
+  }
 }
 
 

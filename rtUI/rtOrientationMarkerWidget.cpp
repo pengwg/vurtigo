@@ -76,11 +76,15 @@ void rtOrientationMarkerWidget::mousePress(QMouseEvent* ev) {
     this->State = this->ComputeStateBasedOnPosition( this->StartPosition[0], this->StartPosition[1], pos1, pos2 );
     this->SetCursor( this->State );
 
-    this->OutlineActor->SetVisibility( true );
     if (this->State == vtkOrientationMarkerWidget::Outside)
     {
-      this->OutlineActor->SetVisibility( false );
       this->Moving = 0;
+    }
+    else {
+      if (rtApplication::instance().getMainWinHandle()->getRenderWidget(0)->getChosenProp() != NULL)
+        rtApplication::instance().getMainWinHandle()->deselectAll();
+      for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+        rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1)->setChosenProp(this->GetOrientationMarker());
     }
     rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   } else if (ev->button() == Qt::RightButton) {
@@ -88,11 +92,16 @@ void rtOrientationMarkerWidget::mousePress(QMouseEvent* ev) {
   } else if (ev->button() == Qt::MidButton) {
     m_midMouseDown = true;
   }
-
 }
 
 void rtOrientationMarkerWidget::mouseMove(QMouseEvent* ev) {
   if (!GetInteractive()) return;
+
+  if (rtApplication::instance().getMainWinHandle()->getRenderWidget(0)->
+        getChosenProp() != this->GetOrientationMarker())
+  {
+    return;
+  }
 
   m_winSize = m_eventWidget->size();
 
@@ -153,14 +162,20 @@ void rtOrientationMarkerWidget::mouseRelease(QMouseEvent* ev) {
   m_winSize = m_eventWidget->size();
 
   if (ev->button() == Qt::LeftButton) {
+
+    if (rtApplication::instance().getMainWinHandle()->getRenderWidget(0)->
+          getChosenProp() == this->GetOrientationMarker())
+    {
+      for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+         rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1)->setChosenProp(NULL);
+    }
+
     m_leftMouseDown = false;
     if (this->State == vtkOrientationMarkerWidget::Outside) return;
 
     // finalize any corner adjustments
     this->SquareRenderer();
     this->UpdateOutline();
-
-    this->OutlineActor->SetVisibility( false );
 
     // stop adjusting
     this->State = vtkOrientationMarkerWidget::Outside;

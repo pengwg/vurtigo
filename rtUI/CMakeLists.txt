@@ -20,6 +20,7 @@ set (RTUI_SRC_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/cineWidget.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/ObjectSelectionComboBox.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/FilterDialog.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rtAxesActor.cpp
   CACHE INTERNAL "Vurtigo rtUI Source Files"
 )
 

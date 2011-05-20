@@ -40,6 +40,7 @@ class rtConfigOptions
   QString getWLFileName();
   QString getSourceCodeHelpFileName();
   QString getHelpCollectionFileName();
+  QString getConfigPath() { return m_configPath; };
   QList<QString> getPluginList();
 
  protected:

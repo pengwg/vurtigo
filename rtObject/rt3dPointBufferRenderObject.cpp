@@ -280,10 +280,6 @@ void rt3DPointBufferRenderObject::mouseDoubleClickEvent(QMouseEvent* event,int w
 
 void rt3DPointBufferRenderObject::keyPressEvent(QKeyEvent* event,int window) {
   if (!m_selectedProp) return;
-  if (event->key() == Qt::Key_D)
-  {
-      this->deselect();
-  }
 }
 
 void rt3DPointBufferRenderObject::keyReleaseEvent(QKeyEvent* event, int window) {

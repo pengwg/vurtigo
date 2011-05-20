@@ -1,0 +1,6 @@
+<DefStyles>
+  <MarkerStyle name="Head" filename="head.3ds"/>
+  <MarkerStyle name="Heart" filename="heart.3ds"/>
+  <MarkerStyle name="Body" filename="body.3ds"/>
+</DefStyles>
+

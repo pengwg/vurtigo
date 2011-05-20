@@ -259,10 +259,6 @@ void rt2DSliceRenderObject::mouseDoubleClickEvent(QMouseEvent* event,int window)
 
 void rt2DSliceRenderObject::keyPressEvent(QKeyEvent* event,int window) {
   if (!m_selectedProp) return;
-  if (event->key() == Qt::Key_D)
-  {
-      this->deselect();
-  }
 }
 
 void rt2DSliceRenderObject::keyReleaseEvent(QKeyEvent* event,int window) {
