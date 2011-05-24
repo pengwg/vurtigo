@@ -24,6 +24,7 @@
 #include "rtRenderObject.h"
 #include "rtDataObject.h"
 #include "rtMainWindow.h"
+#include "rtTimeManager.h"
 #include <QMessageBox>
 
 
@@ -177,6 +178,9 @@ bool rtCathDataObject::setCoilAngles(int coilID, int a1, int a2) {
 //! Set the coords for a coil.
 bool rtCathDataObject::setCoilCoords(int coilID, double cx, double cy, double cz) {
   if(!m_coilIDList.contains(coilID)) return false;
+
+  if (m_cathGuiSetup.gateBox->isChecked() && !withinBounds(rtApplication::instance().getTimeManager()->getTriggerDelay()))
+      return false;
 
   if (m_coilList.contains(coilID)) {
     m_coilList[coilID].cx = cx;
@@ -413,6 +417,9 @@ void rtCathDataObject::setupGUI() {
   connect( m_cathGuiSetup.continuitySpinBox, SIGNAL(valueChanged(double)), this, SLOT(continuityChanged(double)) );
   connect( m_cathGuiSetup.tipSpinBox, SIGNAL(valueChanged(double)), this, SLOT(tipValueChanged(double)) );
   connect( m_cathGuiSetup.endSpinBox, SIGNAL(valueChanged(double)), this, SLOT(endValueChanged(double)) );
+
+  //gating
+  connect(m_cathGuiSetup.minBox, SIGNAL(valueChanged(int)),this,SLOT(gateBoundsChanged()));
 }
 
 //! Clean the GUI widgets.
@@ -892,4 +899,11 @@ bool rtCathDataObject::loadFile(QFile *file)
     inputProp->Delete();
     Modified();
     return true;
+}
+
+void rtCathDataObject::gateBoundsChanged()
+{
+    if (m_cathGuiSetup.minBox->value() > m_cathGuiSetup.maxBox->value())
+        m_cathGuiSetup.maxBox->setValue(m_cathGuiSetup.minBox->value());
+
 }

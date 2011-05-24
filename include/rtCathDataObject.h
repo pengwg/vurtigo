@@ -144,6 +144,8 @@ public:
   void tipValueChanged(double tip);
   void endValueChanged(double end);
 
+  void gateBoundsChanged();
+
 signals:
   void updateCoilTableSignal();
   void cathPropsChanged();
@@ -208,6 +210,9 @@ signals:
 
   //! The objects that sets the widgets for the cath options.
   Ui::cathOptions m_cathGuiSetup;
+
+private:
+  bool withinBounds(int val) {return ( (val > m_cathGuiSetup.minBox->value()) && (val < m_cathGuiSetup.maxBox->value()) ); }
 };
 
 #endif 
