@@ -173,6 +173,7 @@ void customQVTKWidget::keyPressEvent(QKeyEvent* event) {
         if (this == rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1))
         {
             emit cameraKeyPress(event,ix1);
+            emit interKeyPress(event,ix1);
             event->ignore();
         }
     }
