@@ -29,7 +29,7 @@
 
 #include "rtPluginInterface.h"
 
-
+class PluginXmlInfo;
 
 //! Tries to load all of the plugins.
 /*!
@@ -50,6 +50,9 @@ class rtPluginLoader {
   \return True if at least one plugin was loaded from the file.
  */
   bool loadPluginsFromConfig(QFile *file);
+
+  //! Save plugins to the specified config file
+  bool savePluginsToFile(QFile *file);
 
   //! Return a plugin with a specific ID.
   DataInterface* getPluginWithID(int ID);
@@ -83,6 +86,7 @@ class rtPluginLoader {
   QHash<int, QPluginLoader*> m_loaderHash;
   QHash<int, DataInterface*> m_pluginHash;
   QHash<int, QTreeWidgetItem*> m_widgetItemHash;
+  QHash<int, PluginXmlInfo> m_pluginInfoHash;
 
   //! List of plugins that have registered for the click watch.
   QList<int> m_clickWatchList;

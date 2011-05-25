@@ -182,12 +182,16 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
   void addRenWinPressed();
   void remRenWinPressed();
   void loadPluginFile();
+  void savePluginFile();
 
   void addNewObject();
   QList<int> loadObject(QString file = QString());
   void saveObject();
   void removeSelectedObject();
   void renameObject();
+
+  void saveScene();
+  void loadScene();
 
   void showAxesOptions();
   void registerDialog();

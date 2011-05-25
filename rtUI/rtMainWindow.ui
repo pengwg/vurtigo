@@ -252,6 +252,7 @@
     </property>
     <addaction name="actionPlugin_File"/>
     <addaction name="separator"/>
+    <addaction name="actionSave_Plugins"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -307,6 +308,13 @@
     <property name="title">
      <string>Objects</string>
     </property>
+    <widget class="QMenu" name="menuScene">
+     <property name="title">
+      <string>Scene</string>
+     </property>
+     <addaction name="actionSaveScene"/>
+     <addaction name="actionLoadScene"/>
+    </widget>
     <addaction name="actionNewObject"/>
     <addaction name="actionLoad_Object"/>
     <addaction name="actionSave_Object"/>
@@ -314,6 +322,7 @@
     <addaction name="separator"/>
     <addaction name="actionDeleteSelected"/>
     <addaction name="separator"/>
+    <addaction name="menuScene"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -542,6 +551,21 @@
   <action name="actionControls">
    <property name="text">
     <string>Controls</string>
+   </property>
+  </action>
+  <action name="actionSaveScene">
+   <property name="text">
+    <string>Save Scene</string>
+   </property>
+  </action>
+  <action name="actionLoadScene">
+   <property name="text">
+    <string>Load Scene</string>
+   </property>
+  </action>
+  <action name="actionSave_Plugins">
+   <property name="text">
+    <string>Save Plugins...</string>
    </property>
   </action>
  </widget>

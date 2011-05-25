@@ -739,6 +739,7 @@ void rtMainWindow::connectSignals() {
 
   // File Menu
   connect(actionPlugin_File, SIGNAL(triggered()), this, SLOT(loadPluginFile()));
+  connect(actionSave_Plugins,SIGNAL(triggered()),this,SLOT(savePluginFile()));
   connect(actionQuit, SIGNAL(triggered()), qApp, SLOT(quit()));
 
   // Object Menu
@@ -749,6 +750,8 @@ void rtMainWindow::connectSignals() {
   connect( actionDeleteSelected, SIGNAL(triggered()), this, SLOT(removeSelectedObject()) );
   connect( actionRegistration, SIGNAL(triggered()), this, SLOT(registerDialog()));
   connect (actionPoint_Placement, SIGNAL(triggered()), this,SLOT(showPointPlacement()));
+  connect (actionSaveScene, SIGNAL(triggered()),this,SLOT(saveScene()));
+  connect (actionLoadScene, SIGNAL(triggered()),this,SLOT(loadScene()));
 
   // View Menu
   connect(actionMixed, SIGNAL(triggered()), this, SLOT(viewChangedMixed()));
@@ -1159,6 +1162,26 @@ void rtMainWindow::loadPluginFile() {
 #endif
 }
 
+//! Save all loaded plugin info into an XML file
+void rtMainWindow::savePluginFile()
+{
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::savePluginFile() start") );
+#endif
+
+  QString fName;
+  fName = QFileDialog::getSaveFileName(this, "Select Plugin XML File", QString(), "*.XML *.xml");
+  if (!fName.contains(".xml") && !fName.contains(".XML"))
+      fName += ".xml";
+  QFile file(fName);
+  if (!rtApplication::instance().getPluginLoader()->savePluginsToFile(&file))
+      rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("rtMainWindow::loadPluginFile() Failed to save plugins to: ").append(fName) );
+
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::savePluginFile() end") );
+#endif
+}
+
 
 //! Add an object of a particular type.
 void rtMainWindow::addNewObject() {
@@ -1284,6 +1307,56 @@ void rtMainWindow::saveObject() {
 #ifdef DEBUG_VERBOSE_MODE_ON
   rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::saveObject() end") );
 #endif
+}
+
+void rtMainWindow::saveScene()
+{
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::saveScene() start") );
+#endif
+
+  QString dName;
+  QFile file;
+  dName = QFileDialog::getExistingDirectory(this, "Select Scene Save Directory", QString(), QFileDialog::ShowDirsOnly);
+
+  // need to save:
+  // - plugin list
+  // - number of render windows
+  // - number of objects
+  // - visibilities for each object
+  // - models for orientation widgets
+  // - which model is used + coord type
+  // -mode (mixed,3d,2d)
+  // - 3D render options
+  // - timer options
+  // - 2d views?
+  // -- ALL OBJECTS
+
+
+  // for now save
+  // - plugin list as xml
+  // - all objects
+
+  // are the "/" 's *NIX specific?
+
+  rtApplication::instance().getPluginLoader()->savePluginsToFile(&QFile(QString(dName + "/plugins.xml")));
+  QList<rtRenderObject *> objs = rtApplication::instance().getObjectManager()->getAllObjects();
+  rtDataObject *dObj = NULL;
+  for (int ix1=0; ix1<objs.size(); ix1++)
+  {
+      dObj = objs[ix1]->getDataObject();
+      if (dObj)
+          dObj->saveFile(&QFile(QString(dName + "/" + dObj->getObjName())));
+  }
+
+#ifdef DEBUG_VERBOSE_MODE_ON
+  rtApplication::instance().getMessageHandle()->debug( QString("rtMainWindow::saveScene() end") );
+#endif
+}
+
+void rtMainWindow::loadScene()
+{
+
 }
 
 //! Rename the currrently selected item

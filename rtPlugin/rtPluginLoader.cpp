@@ -111,6 +111,13 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
           tempTreeItem->setText(1, handler.pluginInfo[ix1].title);
           tempTreeItem->setText(2, handler.pluginInfo[ix1].version);
 
+          PluginXmlInfo tmpInfo;
+          tmpInfo.title = handler.pluginInfo[ix1].title;
+          tmpInfo.version = handler.pluginInfo[ix1].version;
+          tmpInfo.libName = handler.pluginInfo[ix1].libName;
+          tmpInfo.libPath = handler.pluginInfo[ix1].libPath;
+          m_pluginInfoHash.insert(nextID,tmpInfo);
+
           m_loaderHash.insert(nextID, tempLoader);
           m_pluginHash.insert(nextID, tempPlugin);
           m_widgetItemHash.insert(nextID, tempTreeItem);
@@ -134,6 +141,38 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
   }
 
   return ok;
+}
+
+bool rtPluginLoader::savePluginsToFile(QFile *file)
+{
+    if (!file->open(QIODevice::WriteOnly | QIODevice::Text))
+      return false;
+
+    QXmlStreamWriter writer(file);
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument();
+    writer.writeStartElement("PluginList");
+
+    QHashIterator<int, PluginXmlInfo> itr(m_pluginInfoHash);
+    while (itr.hasNext())
+    {
+        itr.next();
+        writer.writeStartElement("plugin");
+        writer.writeStartElement("name");
+        writer.writeAttribute("title",itr.value().title);
+        writer.writeAttribute("version",itr.value().version);
+        writer.writeEndElement();
+
+        writer.writeStartElement("lib");
+        writer.writeAttribute("libname",itr.value().libName);
+        writer.writeAttribute("libpath",itr.value().libPath);
+        writer.writeEndElement();
+        writer.writeEndElement();
+    }
+    writer.writeEndElement();
+    writer.writeEndDocument();
+    file->close();
+    return true;
 }
 
 DataInterface* rtPluginLoader::getPluginWithID(int ID) {
