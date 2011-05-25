@@ -70,6 +70,8 @@ public:
   inline vtkActor* getObjectOfInterest() { return m_objOfInterest; }
   inline void setObjectOfInterest(vtkActor* obj) { m_objOfInterest = obj; }
 
+  inline void setVisibilities(QList<bool> list) {m_vis = list;}
+
 public slots:
 
   virtual void mousePressEvent(QMouseEvent* event, int window);
@@ -83,6 +85,9 @@ public slots:
 protected:
   //! Determine if this widget is being shown
   bool m_showing;
+
+  //! The visibilities of the object being controlled
+  QList<bool> m_vis;
 
   vtkTransform* m_transform;
   vtkTransform* m_userTransform;

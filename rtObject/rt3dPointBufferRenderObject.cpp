@@ -268,6 +268,7 @@ void rt3DPointBufferRenderObject::mouseDoubleClickEvent(QMouseEvent* event,int w
         m_controlWidget.setTransform(m_currTransform);
         m_controlWidget.setSize( widgetSize[0], widgetSize[1], widgetSize[2] );
 
+        m_controlWidget.setVisibilities(getVisible3D());
         m_controlWidget.show();
         break;
       }

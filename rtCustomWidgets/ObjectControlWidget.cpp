@@ -35,6 +35,7 @@
 
 ObjectControlWidget::ObjectControlWidget() {
   m_showing = false;
+  m_vis.clear();
   m_xsize = 1.0;
   m_ysize = 1.0;
   m_transform = vtkTransform::New();

@@ -120,7 +120,7 @@ public slots:
   //used for synching
   void syncWheel(int plane,QWheelEvent* event , int window);
   void hideWidget(int plane) {m_planeControl[plane].hide();}
-  void showWidget(int plane) {m_planeControl[plane].show();}
+  void showWidget(int plane) {m_planeControl[plane].setVisibilities(this->getVisible3D()); m_planeControl[plane].show();}
   int getCurrentPlane() {return m_currentPlane;}
 
 

@@ -44,21 +44,23 @@ void Plane2DControlWidget::sizeChanged() {
 }
 
 void Plane2DControlWidget::visibilityChanged() {
+    // sanity check
+    if (m_vis.size() != rtApplication::instance().getMainWinHandle()->getNumRenWins()) return;
+
   for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins();ix1++)
   {
       vtkRenderer* ren = rtApplication::instance().getMainWinHandle()->getRenderer(ix1);
 
-      if (m_showing) {
+      if (m_showing && m_vis[ix1]) {
           // Widget is showing
 
           updateWidgetPosition();
-
           ren->AddViewProp(m_centralSphere.getActor());
           ren->AddViewProp(m_boxOutline.getActor());
           ren->AddViewProp(m_crosshair.getActor());
 
-          for (int ix1=0; ix1<3; ix1++) {
-              ren->AddViewProp(m_compassWidget.getActor(ix1));
+          for (int ix2=0; ix2<3; ix2++) {
+              ren->AddViewProp(m_compassWidget.getActor(ix2));
           }
       } else {
           // Widget is not showing
@@ -67,8 +69,8 @@ void Plane2DControlWidget::visibilityChanged() {
           ren->RemoveViewProp(m_boxOutline.getActor());
           ren->RemoveViewProp(m_crosshair.getActor());
 
-          for (int ix1=0; ix1<3; ix1++) {
-              ren->RemoveViewProp(m_compassWidget.getActor(ix1));
+          for (int ix2=0; ix2<3; ix2++) {
+              ren->RemoveViewProp(m_compassWidget.getActor(ix2));
           }
       }
   }
