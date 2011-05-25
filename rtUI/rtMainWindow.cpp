@@ -448,6 +448,7 @@ void rtMainWindow::itemChanged(QTreeWidgetItem * current, int column, bool globa
           }
 
       }
+      temp->deselect();
   }
 
    if (m_visTable->isVisible()) showObjectVisibilities();
@@ -1702,6 +1703,7 @@ void rtMainWindow::visTableChanged(int row,int col)
         {
             item->setText("OFF");
             temp->setVisible3D(col,false);
+            temp->deselect();
             // if we just unchecked them all
             if (!temp->getVisible3D().contains(true))
                 objectTree->currentItem()->setCheckState(2,Qt::Unchecked);

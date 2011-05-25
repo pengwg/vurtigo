@@ -53,6 +53,10 @@ class rt2DSliceRenderObject : public rtRenderObject {
 
   //! Get the bounds in 3D for this object.
   virtual bool getObjectLocation(double loc[6]);
+
+  //! Deselect this object
+  virtual void deselect();
+
 public slots:
   virtual void mousePressEvent(QMouseEvent* event,int window);
   virtual void mouseMoveEvent(QMouseEvent* event,int window);

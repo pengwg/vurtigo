@@ -281,15 +281,7 @@ void rt3DPointBufferRenderObject::keyPressEvent(QKeyEvent* event,int window) {
   if (!m_selectedProp) return;
   if (event->key() == Qt::Key_D)
   {
-      for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
-      {
-          rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1)->setChosenProp(NULL);
-      }
-      if (m_controlWidget.isShowing())
-      {
-        m_controlWidget.hide();
-        m_selectedProp = NULL;
-      }
+      this->deselect();
   }
 }
 
@@ -314,6 +306,19 @@ void rt3DPointBufferRenderObject::wheelEvent(QWheelEvent* event, int window) {
     t->Delete();
     if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
+}
+
+void rt3DPointBufferRenderObject::deselect()
+{
+    for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+    {
+        rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1)->setChosenProp(NULL);
+    }
+    if (m_controlWidget.isShowing())
+    {
+      m_controlWidget.hide();
+      m_selectedProp = NULL;
+    }
 }
 
 //////////////////

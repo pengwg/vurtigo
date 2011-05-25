@@ -260,19 +260,7 @@ void rt2DSliceRenderObject::keyPressEvent(QKeyEvent* event,int window) {
   if (!m_selectedProp) return;
   if (event->key() == Qt::Key_D)
   {
-      for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
-      {
-          rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1)->setChosenProp(NULL);
-      }
-      if (m_control.isShowing())
-      {
-          m_control.hide();
-      }
-      m_selectedProp = NULL;
-      rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
-      dObj->setManualOff();
-
-
+      this->deselect();
   }
 }
 
@@ -297,6 +285,22 @@ void rt2DSliceRenderObject::wheelEvent(QWheelEvent* event,int window) {
     dObj->Modified();
     t->Delete();
   }
+}
+
+void rt2DSliceRenderObject::deselect()
+{
+    for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+    {
+        rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1)->setChosenProp(NULL);
+    }
+    if (m_control.isShowing())
+    {
+        m_control.hide();
+    }
+    m_selectedProp = NULL;
+    rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);
+    dObj->setManualOff();
+
 }
 
 /////////////////////////////

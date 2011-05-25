@@ -125,6 +125,9 @@ Q_OBJECT
   //! Load this object from a file.
   virtual bool loadFile(QFile* file);
 
+  //! deselect this object
+  virtual void deselect() {}
+
  public slots:
   //! Called when one of the mouse buttons is pressed.
   virtual void mousePressEvent(QMouseEvent* event,int window) { rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window); }

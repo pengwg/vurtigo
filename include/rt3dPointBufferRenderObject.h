@@ -54,6 +54,9 @@ class rt3DPointBufferRenderObject : public rtRenderObject {
     */
   virtual void setRenderQuality(double quality);
 
+  //! deselect this object
+  virtual void deselect();
+
 public slots:
   virtual void mousePressEvent(QMouseEvent* event,int window);
   virtual void mouseMoveEvent(QMouseEvent* event, int window);

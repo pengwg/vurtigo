@@ -828,16 +828,7 @@ void rt3DVolumeRenderObject::keyPressEvent(QKeyEvent* event, int window) {
   if (!m_selectedProp || m_currentPlane == -1) return;
   if (event->key() == Qt::Key_D)
   {
-      m_selectedProp = NULL;
-      m_currentPlane = -1;
-      for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
-      {
-          rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1)->setChosenProp(NULL);
-      }
-      for (int ix1=0; ix1<3; ix1++) {
-        if (m_planeControl[ix1].isShowing())
-          m_planeControl[ix1].hide();
-      }
+      this->deselect();
   }
 }
 
@@ -876,6 +867,20 @@ void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event, int window) {
 
     if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
   }
+}
+
+void rt3DVolumeRenderObject::deselect()
+{
+    m_selectedProp = NULL;
+    m_currentPlane = -1;
+    for (int ix1=0; ix1<rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
+    {
+        rtApplication::instance().getMainWinHandle()->getRenderWidget(ix1)->setChosenProp(NULL);
+    }
+    for (int ix1=0; ix1<3; ix1++) {
+      if (m_planeControl[ix1].isShowing())
+        m_planeControl[ix1].hide();
+    }
 }
 
 void rt3DVolumeRenderObject::movePlanes(bool axial,bool sagittal,bool coronal)

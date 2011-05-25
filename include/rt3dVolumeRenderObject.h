@@ -73,6 +73,9 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   //! Copy the plane transformations from another Volume object
   void copyPlaneTransforms(rt3DVolumeRenderObject *from);
 
+  //! Deselect this object
+  virtual void deselect();
+
   // used for copying
   void getPlaneControlTransform(int plane, vtkTransform *trans) { m_planeControl[plane].getTransform(trans);}
   vtkTransform *getBoxOutlineTransform(int plane) { return m_boxOutline[plane].getTransform();}
