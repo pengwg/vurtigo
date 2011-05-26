@@ -77,6 +77,7 @@ rtAxesProperties::rtAxesProperties(QWidget *parent, Qt::WindowFlags flags) {
   setupUi(this);
 
   connect(this, SIGNAL(accepted()), this, SLOT(settingsChanged()));
+  connect(markerStyleCombo, SIGNAL(currentIndexChanged(QString)), this, SLOT(markerPropSelectionChanged(QString)));
 
   m_changed=false;
   m_viewType = VT_VISIBLE;
@@ -88,6 +89,10 @@ rtAxesProperties::rtAxesProperties(QWidget *parent, Qt::WindowFlags flags) {
   // The default marker style.
   m_markerStylesToPaths.insert("Labeled Axes", "DEFAULT");
   markerStyleCombo->addItem("Labeled Axes");
+
+  // The absolute coordinate system axes.
+  m_markerStylesToPaths.insert("XYZ", "XYZ");
+  markerStyleCombo->addItem("XYZ");
 
   QFile file(rtApplication::instance().getConfigOptions()->getConfigPath() + "/DefMarkerStyles.xml");
   loadMarkerStylesFromConfig(&file);
@@ -149,11 +154,13 @@ void rtAxesProperties::settingsChanged() {
   case 7:
     m_coordType = CT_FFDL;
     break;
-  case 8:
-    m_coordType = CT_VTK;
-    break;
   }
 
+}
+
+void rtAxesProperties::markerPropSelectionChanged(QString txt)
+{
+  coordComboBox->setEnabled(!(txt == "XYZ"));
 }
 
 bool rtAxesProperties::loadMarkerStylesFromConfig(QFile *file)

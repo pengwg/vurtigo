@@ -179,7 +179,7 @@ rtMainWindow::~rtMainWindow() {
 
 
   //if (m_localRenderer3D) m_localRenderer3D->Delete();
-
+  if (m_xyzProp) m_xyzProp->Delete();
   if (m_axesProperties) delete m_axesProperties;
   if (m_helpManager) delete m_helpManager;
   if (m_registrationDialog) delete m_registrationDialog;
@@ -1371,7 +1371,6 @@ void rtMainWindow::setCoordType(rtAxesProperties::CoordType ct) {
     vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
     transform->Identity();
     switch (ct) {
-    case (rtAxesProperties::CT_VTK):
     case (rtAxesProperties::CT_HFS):
       break;
     case (rtAxesProperties::CT_FFS):
@@ -1597,14 +1596,18 @@ vtkSmartPointer<vtkProp3D> rtMainWindow::getOrientationProp()
   if (!prop) {
     if (path == "DEFAULT") {
       prop = createDefaultProp();
+      m_importedProps.insert(path, prop);
+    } else if (path == "XYZ") {
+      if (!m_xyzProp) m_xyzProp = createXYZProp();
+      prop = m_xyzProp;
     } else {
       vtk3DSImporter *importer = vtk3DSImporter::New();
       importer->SetFileName(path.toAscii().data());
       importer->Read();
       prop = importer->GetRenderer()->GetActors()->GetLastActor();
       importer->Delete();
+      m_importedProps.insert(path, prop);
     }
-    m_importedProps.insert(path, prop);
   }
 
   return prop;
@@ -1625,6 +1628,28 @@ vtkProp3D *rtMainWindow::createDefaultProp()
   prop->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
 
   prop->SetZAxisLabelText("Superior");
+  prop->GetZAxisCaptionActor2D()->GetTextActor()->SetTextScaleModeToNone();
+  prop->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
+  prop->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+
+  return prop;
+}
+
+vtkProp3D *rtMainWindow::createXYZProp()
+{
+  rtAxesActor *prop = rtAxesActor::New();
+
+  prop->SetXAxisLabelText("X");
+  prop->GetXAxisCaptionActor2D()->GetTextActor()->SetTextScaleModeToNone();
+  prop->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
+  prop->GetXAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+
+  prop->SetYAxisLabelText("Y");
+  prop->GetYAxisCaptionActor2D()->GetTextActor()->SetTextScaleModeToNone();
+  prop->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
+  prop->GetYAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);
+
+  prop->SetZAxisLabelText("Z");
   prop->GetZAxisCaptionActor2D()->GetTextActor()->SetTextScaleModeToNone();
   prop->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetBold(false);
   prop->GetZAxisCaptionActor2D()->GetTextActor()->GetTextProperty()->SetFontSize(12);

@@ -241,6 +241,7 @@ signals:
   QList<rtOrientationMarkerWidget *>m_orientationWidget;
   rtAxesProperties* m_axesProperties;
   // For managing / loading props for marking the orientation.
+  vtkProp3D *m_xyzProp;
   QMap<QString, vtkSmartPointer<vtkProp3D> > m_importedProps;
 
   // the point placement dialog
@@ -310,6 +311,7 @@ signals:
 
   vtkSmartPointer<vtkProp3D> getOrientationProp();
   vtkProp3D *createDefaultProp();
+  vtkProp3D *createXYZProp();
 
 private:
 

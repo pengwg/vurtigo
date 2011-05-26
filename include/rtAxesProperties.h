@@ -43,8 +43,7 @@ Q_OBJECT
     CT_HFDR,
     CT_FFDR,
     CT_HFDL,
-    CT_FFDL,
-    CT_VTK
+    CT_FFDL
   };
 
   rtAxesProperties(QWidget *parent = 0, Qt::WindowFlags flags = 0);
@@ -60,6 +59,7 @@ Q_OBJECT
 
  public slots:
   void settingsChanged();
+  void markerPropSelectionChanged(QString);
 
  protected:
   //! True if the user clicked the OK button to apply the changes.
