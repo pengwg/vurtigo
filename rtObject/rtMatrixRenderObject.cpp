@@ -141,38 +141,3 @@ bool rtMatrixRenderObject::getObjectLocation(double loc[6]) {
   return true;
 }
 
-void rtMatrixRenderObject::mousePressEvent(QMouseEvent* event, int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
-}
-
-void rtMatrixRenderObject::mouseMoveEvent(QMouseEvent *event,int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
-}
-
-void rtMatrixRenderObject::mouseReleaseEvent(QMouseEvent *event, int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
-}
-
-void rtMatrixRenderObject::mouseDoubleClickEvent(QMouseEvent *event, int window)
-{
-
-}
-
-void rtMatrixRenderObject::keyPressEvent(QKeyEvent *event, int window)
-{
-
-}
-
-void rtMatrixRenderObject::keyReleaseEvent(QKeyEvent *event, int window)
-{
-
-}
-
-void rtMatrixRenderObject::wheelEvent(QWheelEvent *event, int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window);
-}
-

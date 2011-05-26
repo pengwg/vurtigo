@@ -139,38 +139,3 @@ bool rtPolyRenderObject::getObjectLocation(double loc[6]) {
   m_actor->GetBounds(loc);
   return true;
 }
-
-void rtPolyRenderObject::mousePressEvent(QMouseEvent* event, int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
-}
-
-void rtPolyRenderObject::mouseMoveEvent(QMouseEvent *event,int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
-}
-
-void rtPolyRenderObject::mouseReleaseEvent(QMouseEvent *event, int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
-}
-
-void rtPolyRenderObject::mouseDoubleClickEvent(QMouseEvent *event, int window)
-{
-
-}
-
-void rtPolyRenderObject::keyPressEvent(QKeyEvent *event, int window)
-{
-
-}
-
-void rtPolyRenderObject::keyReleaseEvent(QKeyEvent *event, int window)
-{
-
-}
-
-void rtPolyRenderObject::wheelEvent(QWheelEvent *event, int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window);
-}

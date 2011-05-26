@@ -677,13 +677,11 @@ bool rt3DVolumeRenderObject::getObjectLocation(double loc[6]) {
   return true;
 }
 
-void rt3DVolumeRenderObject::mousePressEvent(QMouseEvent* event, int window) {
-  if (!m_selectedProp || m_currentPlane == -1)
-    {
-     // if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
-           rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
-      return;
+void rt3DVolumeRenderObject::mousePressEvent(QMouseEvent* event, int window)
+{
+  if (!m_selectedProp || m_currentPlane == -1) {
+    rtRenderObject::mousePressEvent(event, window);
+    return;
   }
 
   if (m_planeControl[m_currentPlane].isShowing())
@@ -699,13 +697,11 @@ void rt3DVolumeRenderObject::mousePressEvent(QMouseEvent* event, int window) {
   }     
 }
 
-void rt3DVolumeRenderObject::mouseMoveEvent(QMouseEvent* event, int window) {
-  if (!m_selectedProp || m_currentPlane == -1)
-    {
-     // if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
-          rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
-      return;
+void rt3DVolumeRenderObject::mouseMoveEvent(QMouseEvent* event, int window)
+{
+  if (!m_selectedProp || m_currentPlane == -1) {
+    rtRenderObject::mouseMoveEvent(event, window);
+    return;
   }
 
   if (m_planeControl[m_currentPlane].isShowing())
@@ -753,14 +749,12 @@ void rt3DVolumeRenderObject::mouseMoveEvent(QMouseEvent* event, int window) {
   } 
 }
 
-void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event,int window) {
-  if (!m_selectedProp || m_currentPlane == -1)
-    {
-      // if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
-           rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
-       return;
-   }
+void rt3DVolumeRenderObject::mouseReleaseEvent(QMouseEvent* event,int window)
+{
+  if (!m_selectedProp || m_currentPlane == -1) {
+    rtRenderObject::mouseReleaseEvent(event, window);
+    return;
+  }
   // reset the last mouse press to nothing
   m_mousePos.setX(-1);
 
@@ -824,22 +818,13 @@ void rt3DVolumeRenderObject::mouseDoubleClickEvent(QMouseEvent* event, int windo
   if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
-void rt3DVolumeRenderObject::keyPressEvent(QKeyEvent* event, int window) {
-  if (!m_selectedProp || m_currentPlane == -1) return;
-}
-
-void rt3DVolumeRenderObject::keyReleaseEvent(QKeyEvent* event, int window) {
-  if (!m_selectedProp || m_currentPlane == -1) return;
-}
-
-void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event, int window) {
-  if (!m_selectedProp || m_currentPlane == -1)
-    {
-      //if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
-          rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window);
-      return;
+void rt3DVolumeRenderObject::wheelEvent(QWheelEvent* event, int window)
+{
+  if (!m_selectedProp || m_currentPlane == -1) {
+    rtRenderObject::wheelEvent(event, window);
+    return;
   }
+
   if (m_planeControl[m_currentPlane].isShowing()) {
     vtkTransform *t = vtkTransform::New();
     m_planeControl[m_currentPlane].wheelEvent(event,window);

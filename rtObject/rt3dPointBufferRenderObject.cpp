@@ -185,13 +185,11 @@ void rt3DPointBufferRenderObject::setRenderQuality(double quality) {
 // Public Slots
 ////////////////
 
-void rt3DPointBufferRenderObject::mousePressEvent(QMouseEvent* event, int window) {
-  if (!m_selectedProp)
-    {
-      //if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
-          rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
-      return;
+void rt3DPointBufferRenderObject::mousePressEvent(QMouseEvent* event, int window)
+{
+  if (!m_selectedProp) {
+    rtRenderObject::mousePressEvent(event, window);
+    return;
   }
 
   if ( m_controlWidget.isShowing() ) {
@@ -200,13 +198,11 @@ void rt3DPointBufferRenderObject::mousePressEvent(QMouseEvent* event, int window
   }
 }
 
-void rt3DPointBufferRenderObject::mouseMoveEvent(QMouseEvent* event,int window) {
-  if (!m_selectedProp)
-    {
-      //if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
-          rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
-      return;
+void rt3DPointBufferRenderObject::mouseMoveEvent(QMouseEvent* event,int window)
+{
+  if (!m_selectedProp) {
+    rtRenderObject::mouseMoveEvent(event, window);
+    return;
   }
 
   if (m_controlWidget.isShowing()) {
@@ -218,13 +214,11 @@ void rt3DPointBufferRenderObject::mouseMoveEvent(QMouseEvent* event,int window) 
   }
 }
 
-void rt3DPointBufferRenderObject::mouseReleaseEvent(QMouseEvent* event,int window) {
-  if (!m_selectedProp)
-    {
-      //if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
-          rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
-      return;
+void rt3DPointBufferRenderObject::mouseReleaseEvent(QMouseEvent* event,int window)
+{
+  if (!m_selectedProp) {
+    rtRenderObject::mouseReleaseEvent(event, window);
+    return;
   }
 
   if (m_controlWidget.isShowing()) {
@@ -278,21 +272,11 @@ void rt3DPointBufferRenderObject::mouseDoubleClickEvent(QMouseEvent* event,int w
   if ( rtApplication::instance().getMainWinHandle() ) rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
 }
 
-void rt3DPointBufferRenderObject::keyPressEvent(QKeyEvent* event,int window) {
-  if (!m_selectedProp) return;
-}
-
-void rt3DPointBufferRenderObject::keyReleaseEvent(QKeyEvent* event, int window) {
-  if (!m_selectedProp) return;
-}
-
-void rt3DPointBufferRenderObject::wheelEvent(QWheelEvent* event, int window) {
-  if (!m_selectedProp)
-    {
-      //if nothing is selected
-      if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
-          rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window);
-      return;
+void rt3DPointBufferRenderObject::wheelEvent(QWheelEvent* event, int window)
+{
+  if (!m_selectedProp) {
+    rtRenderObject::wheelEvent(event, window);
+    return;
   }
 
   if (m_controlWidget.isShowing()) {

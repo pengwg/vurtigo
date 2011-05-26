@@ -46,15 +46,6 @@ class rtEPRenderObject : public rtRenderObject {
   virtual bool removeFromRenderer(vtkRenderer* ren,int window);
   virtual bool getObjectLocation(double loc[6]);
 
-public slots:
-  virtual void mousePressEvent(QMouseEvent* event,int window);
-  virtual void mouseMoveEvent(QMouseEvent* event, int window);
-  virtual void mouseReleaseEvent(QMouseEvent* event, int window);
-  virtual void mouseDoubleClickEvent(QMouseEvent* event, int window);
-  virtual void keyPressEvent(QKeyEvent* event, int window);
-  virtual void keyReleaseEvent(QKeyEvent* event, int window);
-  virtual void wheelEvent(QWheelEvent* event, int window);
-
  protected:
   void setupDataObject();
   void setupPipeline();

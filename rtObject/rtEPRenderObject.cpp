@@ -216,40 +216,5 @@ bool rtEPRenderObject::getObjectLocation(double loc[6]) {
   return true;
 }
 
-void rtEPRenderObject::mousePressEvent(QMouseEvent* event, int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
-}
-
-void rtEPRenderObject::mouseMoveEvent(QMouseEvent *event,int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
-}
-
-void rtEPRenderObject::mouseReleaseEvent(QMouseEvent *event, int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
-}
-
-void rtEPRenderObject::mouseDoubleClickEvent(QMouseEvent *event, int window)
-{
-
-}
-
-void rtEPRenderObject::keyPressEvent(QKeyEvent *event, int window)
-{
-
-}
-
-void rtEPRenderObject::keyReleaseEvent(QKeyEvent *event, int window)
-{
-
-}
-
-void rtEPRenderObject::wheelEvent(QWheelEvent *event, int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window);
-}
-
 
 

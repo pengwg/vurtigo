@@ -139,14 +139,13 @@ bool rt2DSliceRenderObject::getObjectLocation(double loc[6]) {
 // Public Slots
 //////////////////
 
-void rt2DSliceRenderObject::mousePressEvent(QMouseEvent* event,int window) {
-  if (!m_selectedProp)
-    {
-      // if nothing is selected
-       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
-            rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
-      return;
+void rt2DSliceRenderObject::mousePressEvent(QMouseEvent* event,int window)
+{
+  if (!m_selectedProp){
+    rtRenderObject::mousePressEvent(event, window);
+    return;
   }
+
   if (m_control.isShowing()) {
       if (event->modifiers() == Qt::ShiftModifier)
       {
@@ -158,14 +157,13 @@ void rt2DSliceRenderObject::mousePressEvent(QMouseEvent* event,int window) {
   }
 }
 
-void rt2DSliceRenderObject::mouseMoveEvent(QMouseEvent* event,int window) {
-  if (!m_selectedProp)
-    {
-      // if nothing is selected
-       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
-            rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
-      return;
+void rt2DSliceRenderObject::mouseMoveEvent(QMouseEvent* event,int window)
+{
+  if (!m_selectedProp){
+    rtRenderObject::mouseMoveEvent(event, window);
+    return;
   }
+
   if (m_control.isShowing()) {
       // if we are holding down the button while moving
       if ((event->modifiers() == Qt::ShiftModifier) && (m_mousePos.x() != -1))
@@ -208,14 +206,13 @@ void rt2DSliceRenderObject::mouseMoveEvent(QMouseEvent* event,int window) {
   }
 }
 
-void rt2DSliceRenderObject::mouseReleaseEvent(QMouseEvent* event,int window) {
-  if (!m_selectedProp)
-    {
-      // if nothing is selected
-       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
-            rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
-      return;
+void rt2DSliceRenderObject::mouseReleaseEvent(QMouseEvent* event,int window)
+{
+  if (!m_selectedProp){
+    rtRenderObject::mouseReleaseEvent(event, window);
+    return;
   }
+
   // reset the last mouse press to nothing
    m_mousePos.setX(-1);
 
@@ -257,22 +254,13 @@ void rt2DSliceRenderObject::mouseDoubleClickEvent(QMouseEvent* event,int window)
   }
 }
 
-void rt2DSliceRenderObject::keyPressEvent(QKeyEvent* event,int window) {
-  if (!m_selectedProp) return;
-}
-
-void rt2DSliceRenderObject::keyReleaseEvent(QKeyEvent* event,int window) {
-  if (!m_selectedProp) return;
-}
-
-void rt2DSliceRenderObject::wheelEvent(QWheelEvent* event,int window) {
-  if (!m_selectedProp)
-    {
-      // if nothing is selected
-       if (!rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->getChosenProp())
-            rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window);
-      return;
+void rt2DSliceRenderObject::wheelEvent(QWheelEvent* event,int window)
+{
+  if (!m_selectedProp) {
+    rtRenderObject::wheelEvent(event, window);
+    return;
   }
+
   if (m_control.isShowing()) {
     vtkTransform *t = vtkTransform::New();
     rt2DSliceDataObject* dObj = static_cast<rt2DSliceDataObject*>(m_dataObj);

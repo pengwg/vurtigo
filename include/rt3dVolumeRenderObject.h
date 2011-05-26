@@ -88,8 +88,6 @@ public slots:
   virtual void mouseMoveEvent(QMouseEvent* event, int window);
   virtual void mouseReleaseEvent(QMouseEvent* event, int window);
   virtual void mouseDoubleClickEvent(QMouseEvent* event, int window);
-  virtual void keyPressEvent(QKeyEvent* event, int window);
-  virtual void keyReleaseEvent(QKeyEvent* event, int window);
   virtual void wheelEvent(QWheelEvent* event, int window);
 
   virtual void newDataAvailable();

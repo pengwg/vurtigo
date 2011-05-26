@@ -293,39 +293,3 @@ void rtCathRenderObject::visibilityOff() {
   m_cathArrow.tubeVisibilityOff();
   m_cathArrow.coneVisibilityOff();
 }
-
-void rtCathRenderObject::mousePressEvent(QMouseEvent* event, int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMousePress(event,window);
-}
-
-void rtCathRenderObject::mouseMoveEvent(QMouseEvent *event,int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseMove(event,window);
-}
-
-void rtCathRenderObject::mouseReleaseEvent(QMouseEvent *event, int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseRelease(event,window);
-}
-
-void rtCathRenderObject::mouseDoubleClickEvent(QMouseEvent *event, int window)
-{
-
-}
-
-void rtCathRenderObject::keyPressEvent(QKeyEvent *event, int window)
-{
-
-}
-
-void rtCathRenderObject::keyReleaseEvent(QKeyEvent *event, int window)
-{
-
-}
-
-void rtCathRenderObject::wheelEvent(QWheelEvent *event, int window)
-{
-    rtApplication::instance().getMainWinHandle()->getRenderWidget(window)->camTakeOverMouseWheel(event,window);
-}
-
