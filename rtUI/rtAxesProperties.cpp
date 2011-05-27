@@ -160,7 +160,7 @@ void rtAxesProperties::settingsChanged() {
 
 void rtAxesProperties::markerPropSelectionChanged(QString txt)
 {
-  coordComboBox->setEnabled(!(txt == "XYZ"));
+  coordComboBox->setEnabled(txt != "XYZ");
 }
 
 bool rtAxesProperties::loadMarkerStylesFromConfig(QFile *file)

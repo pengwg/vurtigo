@@ -76,6 +76,7 @@ rtMainWindow::rtMainWindow(QWidget *parent, Qt::WindowFlags flags) {
 
   // This is required to go before the first call to addNewRenderWindow.
   m_axesProperties = new rtAxesProperties();
+  m_xyzProp = NULL;
 
   addNewRenderWindow();
   m_numRenWin = 1;
