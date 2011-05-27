@@ -18,6 +18,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 #include "rt3dVolumeDataObject.h"
+#include "rt3dVolumeRenderObject.h"
 #include "rtObjectManager.h"
 #include "rtRenderObject.h"
 #include "objTypes.h"
@@ -966,7 +967,7 @@ bool rt3DVolumeDataObject::saveFile(QFile* file)
 {
     if (!file->open(QIODevice::WriteOnly | QIODevice::Text))
       return false;
-
+    rt3DVolumeRenderObject *rObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(this->getId()));
     QXmlStreamWriter writer(file);
     writer.setAutoFormatting(true);
     writer.writeStartDocument();
@@ -977,28 +978,34 @@ bool rt3DVolumeDataObject::saveFile(QFile* file)
         writer.writeTextElement("TriggerDelay",QString::number(m_triggerList[ix1]));
     }
     writer.writeTextElement("ImageType",QString::number(m_imgType));
-    for (int ix1=0; ix1<getTransform()->GetNumberOfConcatenatedTransforms(); ix1++)
-    {
-        writer.writeStartElement("Transform");
-        writer.writeAttribute("a00",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(0,0)));
-        writer.writeAttribute("a01",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(0,1)));
-        writer.writeAttribute("a02",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(0,2)));
-        writer.writeAttribute("a03",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(0,3)));
-        writer.writeAttribute("a10",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(1,0)));
-        writer.writeAttribute("a11",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(1,1)));
-        writer.writeAttribute("a12",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(1,2)));
-        writer.writeAttribute("a13",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(1,3)));
-        writer.writeAttribute("a20",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(2,0)));
-        writer.writeAttribute("a21",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(2,1)));
-        writer.writeAttribute("a22",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(2,2)));
-        writer.writeAttribute("a23",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(2,3)));
-        writer.writeAttribute("a30",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(3,0)));
-        writer.writeAttribute("a31",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(3,1)));
-        writer.writeAttribute("a32",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(3,2)));
-        writer.writeAttribute("a33",QString::number(getTransform()->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(3,3)));
-        writer.writeEndElement(); //Transform
 
-    }
+    this->saveTransformToXML("VolTransform",this->getTransform(),&writer);
+
+    writer.writeTextElement("window",QString::number(this->getWindow()));
+    writer.writeTextElement("level",QString::number(this->getLevel()));
+    writer.writeTextElement("phase",QString::number(this->getVisibleComponent()));
+
+    writer.writeStartElement("Axial");
+    writer.writeAttribute("Visibility",QString::number(this->getAxial3D()));
+    writer.writeAttribute("opacity",QString::number(this->getAxialOpacity()));
+    writer.writeAttribute("color",this->getAxialColor().name());
+    this->saveTransformToXML("PlaneTransform",rObj->getBoxOutlineTransform(0),&writer);
+    writer.writeEndElement();
+
+    writer.writeStartElement("Sagittal");
+    writer.writeAttribute("Visibility",QString::number(this->getSagittal3D()));
+    writer.writeAttribute("opacity",QString::number(this->getSagittalOpacity()));
+    writer.writeAttribute("color",this->getSagittalColor().name());
+    this->saveTransformToXML("PlaneTransform",rObj->getBoxOutlineTransform(1),&writer);
+    writer.writeEndElement();
+
+    writer.writeStartElement("Coronal");
+    writer.writeAttribute("Visibility",QString::number(this->getCoronal3D()));
+    writer.writeAttribute("opacity",QString::number(this->getCoronalOpacity()));
+    writer.writeAttribute("color",this->getCoronalColor().name());
+    this->saveTransformToXML("PlaneTransform",rObj->getBoxOutlineTransform(2),&writer);
+    writer.writeEndElement();
+
     writer.writeEndElement(); //VurtigoFile
     writer.writeEndDocument();
     file->close();
@@ -1023,9 +1030,21 @@ bool rt3DVolumeDataObject::loadFile(QFile *file)
     QString objName = "";
     QList<double> trigs;
     vtkTransform *trans = vtkTransform::New();
+    vtkTransform *Atrans = vtkTransform::New();
+    vtkTransform *Strans = vtkTransform::New();
+    vtkTransform *Ctrans = vtkTransform::New();
     trans->Identity();
-    vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+    Atrans->Identity();
+    Strans->Identity();
+    Ctrans->Identity();
     int type;
+    int window,level,phase;
+    bool Avis,Svis,Cvis;
+    double Aopac,Sopac,Copac;
+    QString Acolor,Scolor,Ccolor;
+    QXmlStreamAttributes attribs;
+
+    rt3DVolumeRenderObject *rObj = static_cast<rt3DVolumeRenderObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(this->getId()));
 
     while (!reader.atEnd())
     {
@@ -1047,26 +1066,69 @@ bool rt3DVolumeDataObject::loadFile(QFile *file)
             {
                 type = reader.readElementText().toInt();
             }
-            else if (reader.name() == "Transform")
+            else if (reader.name() == "VolTransform")
             {
-                QXmlStreamAttributes attribs = reader.attributes();
-                mat->SetElement(0,0,attribs.value("a00").toString().toDouble());
-                mat->SetElement(0,1,attribs.value("a01").toString().toDouble());
-                mat->SetElement(0,2,attribs.value("a02").toString().toDouble());
-                mat->SetElement(0,3,attribs.value("a03").toString().toDouble());
-                mat->SetElement(1,0,attribs.value("a10").toString().toDouble());
-                mat->SetElement(1,1,attribs.value("a11").toString().toDouble());
-                mat->SetElement(1,2,attribs.value("a12").toString().toDouble());
-                mat->SetElement(1,3,attribs.value("a13").toString().toDouble());
-                mat->SetElement(2,0,attribs.value("a20").toString().toDouble());
-                mat->SetElement(2,1,attribs.value("a21").toString().toDouble());
-                mat->SetElement(2,2,attribs.value("a22").toString().toDouble());
-                mat->SetElement(2,3,attribs.value("a23").toString().toDouble());
-                mat->SetElement(3,0,attribs.value("a30").toString().toDouble());
-                mat->SetElement(3,1,attribs.value("a31").toString().toDouble());
-                mat->SetElement(3,2,attribs.value("a32").toString().toDouble());
-                mat->SetElement(3,3,attribs.value("a33").toString().toDouble());
-                trans->Concatenate(mat);
+                this->loadTransformFromXML(trans,&reader);
+            }
+            else if (reader.name() == "window")
+            {
+                window = reader.readElementText().toInt();
+            }
+            else if (reader.name() == "level")
+            {
+                level = reader.readElementText().toInt();
+            }
+            else if (reader.name() == "phase")
+            {
+                phase = reader.readElementText().toInt();
+            }
+            else if (reader.name() == "Axial")
+            {
+                attribs = reader.attributes();
+                Avis = attribs.value("Visibility").toString().toInt();
+                Aopac = attribs.value("opacity").toString().toDouble();
+                Acolor = attribs.value("color").toString();
+                while(true)
+                {
+                    reader.readNext();
+                    if (reader.name() == "PlaneTransform")
+                    {
+                        this->loadTransformFromXML(Atrans,&reader);
+                        break;
+                    }
+                }
+            }
+            else if (reader.name() == "Sagittal")
+            {
+                attribs = reader.attributes();
+                Svis = attribs.value("Visibility").toString().toInt();
+                Sopac = attribs.value("opacity").toString().toDouble();
+                Scolor = attribs.value("color").toString();
+                while(true)
+                {
+                    reader.readNext();
+                    if (reader.name() == "PlaneTransform")
+                    {
+                        this->loadTransformFromXML(Strans,&reader);
+                        break;
+                    }
+                }
+            }
+            else if (reader.name() == "Coronal")
+            {
+                attribs = reader.attributes();
+                Cvis = attribs.value("Visibility").toString().toInt();
+                Copac = attribs.value("opacity").toString().toDouble();
+                Ccolor = attribs.value("color").toString();
+                while(true)
+                {
+                    reader.readNext();
+                    if (reader.name() == "PlaneTransform")
+                    {
+                        this->loadTransformFromXML(Ctrans,&reader);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -1086,7 +1148,32 @@ bool rt3DVolumeDataObject::loadFile(QFile *file)
         this->copyNewTransform(trans);
         this->copyTriggerDelayList(&trigs);
         this->copyNewImageData(imgReader->GetOutput(),type);
+        this->setAxial3D(Avis);
+        this->setAxialOpacity(Aopac);
+        this->setAxialColor(QColor(Acolor));
+        this->setSagittal3D(Svis);
+        this->setSagittalOpacity(Sopac);
+        this->setSagittalColor(QColor(Scolor));
+        this->setCoronal3D(Cvis);
+        this->setCoronalOpacity(Copac);
+        this->setCoronalColor(QColor(Ccolor));
+        m_wlDialog->windowSlider->setValue(window*1000);
+        m_wlDialog->windowSliderChange(window*1000);
+        m_wlDialog->levelSlider->setValue(level*1000);
+        m_wlDialog->levelSliderChange(level*1000);
+        this->setVisibleComponent(phase);
         this->unlock();
+
+        rObj->setBoxOutlineTransform(0,Atrans);
+        rObj->setTexturePlaneTransform(0,Atrans);
+        rObj->setPlaneControlTransform(0,Atrans);
+        rObj->setBoxOutlineTransform(1,Strans);
+        rObj->setTexturePlaneTransform(1,Strans);
+        rObj->setPlaneControlTransform(1,Strans);
+        rObj->setBoxOutlineTransform(2,Ctrans);
+        rObj->setTexturePlaneTransform(2,Ctrans);
+        rObj->setPlaneControlTransform(2,Ctrans);
+
         imgReader->Delete();
         return true;
     }
@@ -1097,7 +1184,9 @@ bool rt3DVolumeDataObject::loadFile(QFile *file)
     }
 
     trans->Delete();
-    mat->Delete();
+    Atrans->Delete();
+    Strans->Delete();
+    Ctrans->Delete();
 }
 
 void rt3DVolumeDataObject::setupVolumes()
@@ -1123,4 +1212,53 @@ void rt3DVolumeDataObject::copyVolume()
     //this->copyNewImageData(this->getImageData(),this->m_imgType);
     this->unlock();
     this->Modified();
+}
+
+void rt3DVolumeDataObject::saveTransformToXML(QString name, vtkTransform *trans,QXmlStreamWriter *writer )
+{
+    for (int ix1=0; ix1<trans->GetNumberOfConcatenatedTransforms(); ix1++)
+    {
+        writer->writeStartElement(name);
+        writer->writeAttribute("a00",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(0,0)));
+        writer->writeAttribute("a01",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(0,1)));
+        writer->writeAttribute("a02",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(0,2)));
+        writer->writeAttribute("a03",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(0,3)));
+        writer->writeAttribute("a10",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(1,0)));
+        writer->writeAttribute("a11",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(1,1)));
+        writer->writeAttribute("a12",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(1,2)));
+        writer->writeAttribute("a13",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(1,3)));
+        writer->writeAttribute("a20",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(2,0)));
+        writer->writeAttribute("a21",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(2,1)));
+        writer->writeAttribute("a22",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(2,2)));
+        writer->writeAttribute("a23",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(2,3)));
+        writer->writeAttribute("a30",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(3,0)));
+        writer->writeAttribute("a31",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(3,1)));
+        writer->writeAttribute("a32",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(3,2)));
+        writer->writeAttribute("a33",QString::number(trans->GetConcatenatedTransform(ix1)->GetMatrix()->GetElement(3,3)));
+        writer->writeEndElement();
+
+    }
+}
+
+void rt3DVolumeDataObject::loadTransformFromXML(vtkTransform *trans, QXmlStreamReader *reader)
+{
+    QXmlStreamAttributes attribs = reader->attributes();
+    vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
+    mat->SetElement(0,0,attribs.value("a00").toString().toDouble());
+    mat->SetElement(0,1,attribs.value("a01").toString().toDouble());
+    mat->SetElement(0,2,attribs.value("a02").toString().toDouble());
+    mat->SetElement(0,3,attribs.value("a03").toString().toDouble());
+    mat->SetElement(1,0,attribs.value("a10").toString().toDouble());
+    mat->SetElement(1,1,attribs.value("a11").toString().toDouble());
+    mat->SetElement(1,2,attribs.value("a12").toString().toDouble());
+    mat->SetElement(1,3,attribs.value("a13").toString().toDouble());
+    mat->SetElement(2,0,attribs.value("a20").toString().toDouble());
+    mat->SetElement(2,1,attribs.value("a21").toString().toDouble());
+    mat->SetElement(2,2,attribs.value("a22").toString().toDouble());
+    mat->SetElement(2,3,attribs.value("a23").toString().toDouble());
+    mat->SetElement(3,0,attribs.value("a30").toString().toDouble());
+    mat->SetElement(3,1,attribs.value("a31").toString().toDouble());
+    mat->SetElement(3,2,attribs.value("a32").toString().toDouble());
+    mat->SetElement(3,3,attribs.value("a33").toString().toDouble());
+    trans->Concatenate(mat);
 }

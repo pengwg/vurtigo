@@ -220,6 +220,14 @@ public:
   QColor getSagittalColor() {return m_sagittalColor;}
   //! Get the coronal color
   QColor getCoronalColor() {return m_coronalColor;}
+
+  //! set the axial color
+  void setAxialColor(QColor color) {m_axialColor = color;}
+  //! set the sagittal color
+  void setSagittalColor(QColor color) {m_sagittalColor = color;}
+  //! set the coronal color
+  void setCoronalColor(QColor color) {m_coronalColor = color;}
+
   //! Has the user changed the axial color
   bool didAxialColorChange() {return m_AColor;}
   //! Has the user changed the sagittal color
@@ -531,6 +539,9 @@ public:
   //! GPU rendering is supported
   bool m_canGPU;
 
+private:
+  void saveTransformToXML(QString name, vtkTransform *trans, QXmlStreamWriter *writer);
+  void loadTransformFromXML(vtkTransform *trans,QXmlStreamReader *reader);
 
 };
 

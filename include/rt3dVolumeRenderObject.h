@@ -77,6 +77,9 @@ class rt3DVolumeRenderObject : public rtRenderObject {
   virtual void deselect();
 
   // used for copying
+  void setPlaneControlTransform(int plane, vtkTransform *trans) {m_planeControl[plane].setTransform(trans);}
+  void setBoxOutlineTransform(int plane, vtkTransform *trans) {m_boxOutline[plane].setTransform(trans);}
+  void setTexturePlaneTransform(int plane, vtkTransform *trans) {m_texturePlane[plane].setTransform(trans);}
   void getPlaneControlTransform(int plane, vtkTransform *trans) { m_planeControl[plane].getTransform(trans);}
   vtkTransform *getBoxOutlineTransform(int plane) { return m_boxOutline[plane].getTransform();}
   vtkTransform *getTexturePlaneTransform(int plane) { return m_texturePlane[plane].getTransform();}
