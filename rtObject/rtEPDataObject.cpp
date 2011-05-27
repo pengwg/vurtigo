@@ -366,6 +366,9 @@ bool rtEPDataObject::saveFile(QFile *file) {
   writer.writeStartDocument();
   writer.writeStartElement("VurtigoFile");
   rtDataObject::saveHeader(&writer, getObjectType(), getObjName());
+  rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(this->getId());
+  rObj->saveVisibilities(&writer);
+
   writer.writeTextElement("numPhases", QString::number(m_phaseDataList.size()));
 
   writer.writeStartElement("Properties");
@@ -457,7 +460,13 @@ bool rtEPDataObject::loadFile(QFile *file) {
     if (reader.readNext() == QXmlStreamReader::StartElement ) {
       if (reader.name() == "FileInfo") {
         rtDataObject::loadHeader(&reader, objType, objName);
-      } else if (reader.name() == "Phase") {
+      }
+      else if (reader.name() == "Visibilities")
+      {
+          rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(this->getId());
+          rObj->loadVisibilities(&reader);
+      }
+      else if (reader.name() == "Phase") {
         attrib = reader.attributes();
         phaseNumber = attrib.value("phaseNumber").toString().toInt(&valueOK);
         triggerDelay = attrib.value("Trigger").toString().toInt(&valueOK);

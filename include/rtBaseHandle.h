@@ -107,6 +107,9 @@ class rtBaseHandle : public QObject {
   //! Toggle the visibility of an object in a given 3d view
   void setObjectVisible3D(int idObj, bool fVisible, int window = -1);
 
+  //! Get the visibilities of an object
+  QList<bool> getObjectVisible3D(int objID);
+
   //! Set an object to be permanent (cannot be deleted)
   void setObjectPermanent(int objID);
 

@@ -182,3 +182,34 @@ void rtRenderObject::removeSyncObject(rtRenderObject *rObj)
             m_syncList.removeAt(ix1);
     }
 }
+
+void rtRenderObject::saveVisibilities(QXmlStreamWriter *writer)
+{
+    writer->writeStartElement("Visibilities");
+    for (int ix1=0; ix1<this->getVisible3D().size(); ix1++)
+    {
+        writer->writeAttribute(QString("vis" + QString::number(ix1)),QString::number(this->getVisible3D().at(ix1)));
+    }
+    writer->writeEndElement();
+}
+
+void rtRenderObject::loadVisibilities(QXmlStreamReader *reader)
+{
+    if (!reader) return;
+
+    QXmlStreamAttributes attribs = reader->attributes();
+
+    while (rtApplication::instance().getMainWinHandle()->getNumRenWins() < attribs.size())
+        rtApplication::instance().getMainWinHandle()->addRenWinPressed();
+
+    while (rtApplication::instance().getMainWinHandle()->getNumRenWins() > attribs.size())
+        rtApplication::instance().getMainWinHandle()->remRenWinPressed();
+
+    QList<bool> vis;
+    for (int ix1=0; ix1<attribs.size(); ix1++)
+    {
+        vis.append(attribs.value(QString("vis"+QString::number(ix1))).toString().toInt());
+    }
+    this->setVisible3DAll(vis);
+
+}

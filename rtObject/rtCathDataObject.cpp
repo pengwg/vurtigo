@@ -690,6 +690,8 @@ bool rtCathDataObject::saveFile(QFile *file)
     writer.writeStartElement("VurtigoFile");
 
     rtDataObject::saveHeader(&writer, getObjectType(), getObjName());
+    rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(this->getId());
+    rObj->saveVisibilities(&writer);
 
     saveVtkProperty(&writer, getTipProperty(), "TipProperty");
     saveVtkProperty(&writer,getSplineProperty(), "SplineProperty");
@@ -801,7 +803,13 @@ bool rtCathDataObject::loadFile(QFile *file)
           if (reader.name() == "FileInfo")
           {
             rtDataObject::loadHeader(&reader, objType, objName);
-          } else if (reader.name() == "VtkProperty")
+          }
+          else if (reader.name() == "Visibilities")
+          {
+              rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(this->getId());
+              rObj->loadVisibilities(&reader);
+          }
+          else if (reader.name() == "VtkProperty")
           {
               // Read each of the properties.
               loadVtkProperty(&reader, inputProp, propName);

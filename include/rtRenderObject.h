@@ -92,6 +92,21 @@ Q_OBJECT
   void setVisible3DAllOff(){ for(int ix1=0; ix1<m_visible3D.size(); ix1++) m_visible3D[ix1] = false;}
   QList<bool> getVisible3D(){ return m_visible3D; }
 
+
+  //! Save an object's 3D visibilities
+  /*!
+    All Objects have a list of visibilities for the current set of render windows
+    \param writer The XML stream where the visibilities will be written to
+    */
+  void saveVisibilities(QXmlStreamWriter *writer);
+
+  //! Load an object's 3D visibilities
+  /*!
+    All Objects have a list of visibilities for the current set of render windows
+    \param reader The XML stream where the visibilities will be read from
+    */
+  void loadVisibilities(QXmlStreamReader *reader);
+
   //! Add this object to the given renderer.
   virtual bool addToRenderer(vtkRenderer* ren, int window) = 0;
 

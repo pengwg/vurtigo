@@ -27,6 +27,7 @@
 
 #include "rtApplication.h"
 #include "rtMainWindow.h"
+#include "rtRenderObject.h"
 #include "rtMessage.h"
 #include "rt3dPointBufferDataObject.h"
 #include "rtObjectManager.h"
@@ -196,6 +197,8 @@ bool rt3DPointBufferDataObject::saveFile(QFile *file) {
   writer.writeStartDocument();
   writer.writeStartElement("VurtigoFile");
   rtDataObject::saveHeader(&writer, getObjectType(), getObjName());
+  rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(this->getId());
+  rObj->saveVisibilities(&writer);
 
   QList<int> idList = m_namedInfoData.keys();
 
@@ -258,6 +261,10 @@ bool rt3DPointBufferDataObject::loadFile(QFile *file) {
           rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Object Type for data file is wrong."));
           break;
         }
+      } else if (reader.name() == "Visibilities")
+      {
+          rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(this->getId());
+          rObj->loadVisibilities(&reader);
       } else if (reader.name() == "BufferData") {
         loadBufferData(&reader);
       } else if (reader.name() == "InfoPoint") {

@@ -973,6 +973,8 @@ bool rt3DVolumeDataObject::saveFile(QFile* file)
     writer.writeStartDocument();
     writer.writeStartElement("VurtigoFile");
     rtDataObject::saveHeader(&writer, getObjectType(), getObjName());
+    rObj->saveVisibilities(&writer);
+
     for (int ix1=0; ix1<m_triggerList.size(); ++ix1)
     {
         writer.writeTextElement("TriggerDelay",QString::number(m_triggerList[ix1]));
@@ -1057,6 +1059,10 @@ bool rt3DVolumeDataObject::loadFile(QFile *file)
                   rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("Object Type for data file is wrong."));
                   break;
                 }
+            }
+            else if (reader.name() == "Visibilities")
+            {
+                rObj->loadVisibilities(&reader);
             }
             else if (reader.name() == "TriggerDelay")
             {

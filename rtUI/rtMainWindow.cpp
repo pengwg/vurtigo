@@ -1262,6 +1262,15 @@ QList<int> rtMainWindow::loadObject(QString fname) {
               rtApplication::instance().getObjectManager()->removeObject(obj->getDataObject()->getId());
           else
               objIDs.append(obj->getDataObject()->getId());
+
+          // This is a bit of a hack to get the visibilities to show up on a loaded object
+          // every other way would require a lot more work to get done.
+          if (obj->getVisible3D().contains(true))
+          {
+              this->setGlobalOn(obj->getTreeItem());
+              itemChanged(obj->getTreeItem(),2,false);
+          }
+
           QApplication::restoreOverrideCursor();
         }
       }
@@ -1786,12 +1795,11 @@ void rtMainWindow::refreshRenderItems(bool flag)
       m_renderFlag3D = true;
 }
 
-void rtMainWindow::showObjectVisibilities()
+void rtMainWindow:: showObjectVisibilities()
 {
-    QTreeWidgetItem* current=NULL;
     rtRenderObject* temp=NULL;
 
-    current = objectTree->currentItem();
+    QTreeWidgetItem *current = objectTree->currentItem();
 
     if (!current) return;
 

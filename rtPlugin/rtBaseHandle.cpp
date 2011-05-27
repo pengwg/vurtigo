@@ -440,6 +440,12 @@ void rtBaseHandle::setObjectVisible3D(int idObj, bool fVisible, int window)
     
   }
 
+QList<bool> rtBaseHandle::getObjectVisible3D(int objID)
+{
+    rtRenderObject *rObj = getRenderObjectWithID(objID);
+    return rObj->getVisible3D();
+}
+
 void rtBaseHandle::setObjectPermanent(int objID)
 {
     rtApplication::instance().getObjectManager()->setPermanent(objID);

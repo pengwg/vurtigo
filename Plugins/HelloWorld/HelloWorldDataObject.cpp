@@ -1,6 +1,7 @@
 #include "HelloWorldDataObject.h"
 #include "rtApplication.h"
 #include "rtMessage.h"
+#include "rtBaseHandle.h"
 
 //! Constructor
 HelloWorldDataObject::HelloWorldDataObject()
@@ -46,7 +47,13 @@ bool HelloWorldDataObject::saveFile(QFile *file)
     writer.writeStartDocument();
     writer.writeStartElement("VurtigoFile");
     rtDataObject::saveHeader(&writer, getObjectType(), getObjName());
+
+    ////////////////////////////////
+    // WRITE OBJECT SPECIFIC DATA HERE
     writer.writeTextElement("message",m_message);
+    ////////////////////////////////
+
+
     writer.writeEndElement(); // vurtigofile
     writer.writeEndDocument();
     file->close();

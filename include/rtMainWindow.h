@@ -211,6 +211,7 @@ class rtMainWindow : public QMainWindow, private Ui::rtMainWindowUI
 
   void showObjectVisibilities();
   void visTableChanged(int row,int col);
+  QTableWidget* getVisTable() {return m_visTable;}
 
   void add2DFrame();
   void remove2DFrame();
