@@ -728,7 +728,7 @@ vtkProp* rtMainWindow::getSelectedProp(int window) {
   if (m_render3DVTKWidget[window]->getChosenProp())
       return m_render3DVTKWidget[window]->getChosenProp();
 
-
+  return NULL;
 }
 
 //! Connect the menu actions to the functions that handle them.
@@ -1316,7 +1316,6 @@ void rtMainWindow::saveScene()
 #endif
 
   QString dName;
-  QFile file;
   dName = QFileDialog::getExistingDirectory(this, "Select Scene Save Directory", QString(), QFileDialog::ShowDirsOnly);
 
   // need to save:
@@ -1342,11 +1341,15 @@ void rtMainWindow::saveScene()
   rtApplication::instance().getPluginLoader()->savePluginsToFile(&QFile(QString(dName + "/plugins.xml")));
   QList<rtRenderObject *> objs = rtApplication::instance().getObjectManager()->getAllObjects();
   rtDataObject *dObj = NULL;
+  QDir dir(dName);
+  dir.mkdir("objects");
   for (int ix1=0; ix1<objs.size(); ix1++)
   {
       dObj = objs[ix1]->getDataObject();
       if (dObj)
-          dObj->saveFile(&QFile(QString(dName + "/" + dObj->getObjName())));
+      {
+          dObj->saveFile(&QFile(QString(dName + "/objects/" + dObj->getObjName() + ".vo")));
+      }
   }
 
 #ifdef DEBUG_VERBOSE_MODE_ON
@@ -1356,7 +1359,20 @@ void rtMainWindow::saveScene()
 
 void rtMainWindow::loadScene()
 {
+    QString dName;
+    dName = QFileDialog::getExistingDirectory(this, "Select Directory with Saved Scene", QString(), QFileDialog::ShowDirsOnly);
 
+    rtApplication::instance().getPluginLoader()->loadPluginsFromConfig(&QFile(QString(dName + "/plugins.xml")));
+
+    QDir dir(dName);
+    if (dir.cd("objects"))
+    {
+        dir.setNameFilters(QStringList("*.vo"));
+        for (int ix1=0; ix1<dir.entryList().count(); ix1++)
+        {
+            this->loadObject(dir.filePath(dir.entryList().at(ix1)));
+        }
+    }
 }
 
 //! Rename the currrently selected item

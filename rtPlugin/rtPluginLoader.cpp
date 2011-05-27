@@ -71,8 +71,26 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
     m_xmlReader.setContentHandler(&handler);
     m_xmlReader.setErrorHandler(&handler);	
 
+    bool alreadyExists;
+
     if (m_xmlReader.parse(&source)) {
       for (ix1=0; ix1<handler.pluginInfo.size(); ix1++) {
+
+          QHashIterator<int,PluginXmlInfo> itr(m_pluginInfoHash);
+
+          alreadyExists = false;
+          while (itr.hasNext())
+          {
+              itr.next();
+              // if that plugin is already loaded
+              if ( (itr.value().title == handler.pluginInfo[ix1].title) )
+              {
+                  alreadyExists = true;
+                  break;
+              }
+          }
+          if (alreadyExists) continue;
+
         nextID = getNextFreeID();
         QDir appDir(qApp->applicationDirPath());
         QDir givenDir(handler.pluginInfo[ix1].libPath);
