@@ -44,10 +44,10 @@ CathHistoryUI::CathHistoryUI() {
   autoSaveBox->setEnabled(false);
   resetButton->setEnabled(false);
   
-  updateCheckableStatus();
-
   populateLists();
   connectSignals();
+
+  trackingPairChanged();
 }
 
 CathHistoryUI::~CathHistoryUI() {
@@ -71,7 +71,7 @@ void CathHistoryUI::connectSignals() {
 
   connect( pointSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(pointSizeChanged(int)) );
 
-  connect( cathComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(cathChanged(int)) );
+  connect( cathComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(trackingPairChanged()) );
   
   connect( cathAutoTrackPushButton, SIGNAL(toggled(bool)), this, SLOT(cathAutoTrackChanged(bool)));
   connect( autoSaveBox, SIGNAL(toggled(bool)),this,SLOT(autoSaveChanged(bool)));
@@ -154,12 +154,6 @@ void CathHistoryUI::pointSizeChanged(int size) {
   if (m_historyRecorder) {
     m_historyRecorder->setPointSize(size);
   }
-}
-
-void CathHistoryUI::cathChanged(int newpos) {
-  trackingPairChanged();
-  
-  updateCheckableStatus();
 }
 
 void CathHistoryUI::trackingPairChanged() {

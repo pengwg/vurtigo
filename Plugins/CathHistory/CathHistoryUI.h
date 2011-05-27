@@ -43,8 +43,7 @@ public slots:
   void objectAdded(int);
   void objectRemoved(int);
   void pointSizeChanged(int);
-
-  void cathChanged(int);
+  void trackingPairChanged();
   void mark();
   void markNow();
   void pointsChanged(int num) {m_numPoints = num;}
@@ -61,8 +60,6 @@ protected:
   void connectSignals();
   void populateLists();
   void updateCheckableStatus();
-
-  void trackingPairChanged();
 
   void savePointObject();
 
