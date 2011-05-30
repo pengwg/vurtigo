@@ -18,7 +18,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
 #include <vtkImageData.h>
+#include <vtkSmartPointer.h>
 #include <vtkMath.h>
+#include <vtkImageMapper.h>
+#include <vtkImageExtractComponents.h>
+#include <vtkImageAppendComponents.h>
+#include <vtkImageLuminance.h>
 
 #include "rtTexture2DPlane.h"
 
@@ -71,14 +76,56 @@ void rtTexture2DPlane::setLevel(double l) {
   m_lookupTable->SetLevel(l);
 }
 
-void rtTexture2DPlane::setImageData(vtkImageData* img) {
-  if (img->GetNumberOfScalarComponents() == 1) {
-    m_texture->SetInputConnection(m_imgMapToColors->GetOutputPort());
-    m_imgMapToColors->SetInput(img);
-  }
-  else {
-    m_texture->SetInput(img); 
-  }
+void rtTexture2DPlane::setImageData(vtkImageData* img, bool isGrey) {
+
+    if (img->GetNumberOfScalarComponents() == 1)
+    {
+      m_imgMapToColors->SetInput(img);
+      m_texture->SetInputConnection(m_imgMapToColors->GetOutputPort());
+
+    }
+    else
+    {
+        if (isGrey)
+        {
+            vtkSmartPointer<vtkImageLuminance> il = vtkSmartPointer<vtkImageLuminance>::New();
+            il->SetInput(img);
+            m_imgMapToColors->SetInput(il->GetOutput());
+            m_texture->SetInputConnection(m_imgMapToColors->GetOutputPort());
+        }
+        else
+        {
+             m_texture->SetInput(img);
+        }
+    }
+
+
+      /*! \todo {
+        // trying to extract the 3 color components and window/level them individually
+
+      vtkSmartPointer<vtkImageData> comp1 = vtkSmartPointer<vtkImageData>::New();
+      vtkSmartPointer<vtkImageData> comp2 = vtkSmartPointer<vtkImageData>::New();
+      vtkSmartPointer<vtkImageData> comp3 = vtkSmartPointer<vtkImageData>::New();
+      vtkSmartPointer<vtkImageExtractComponents> extract = vtkSmartPointer<vtkImageExtractComponents>::New();
+      vtkSmartPointer<vtkImageAppendComponents> append = vtkSmartPointer<vtkImageAppendComponents>::New();
+
+      extract->SetInput(img);
+      extract->SetComponents(0);
+      m_imgMapToColors->SetInput(extract->GetOutput());
+      comp1 = m_imgMapToColors->GetOutput();
+      extract->SetComponents(1);
+      m_imgMapToColors->SetInput(extract->GetOutput());
+      comp2 = m_imgMapToColors->GetOutput();
+      extract->SetComponents(2);
+      m_imgMapToColors->SetInput(extract->GetOutput());
+      comp3 = m_imgMapToColors->GetOutput();
+
+      append->AddInput(comp1);
+      append->AddInput(comp2);
+      append->AddInput(comp3);
+
+    m_texture->SetInput(append->GetOutput()); }
+    */
 }
 
 void rtTexture2DPlane::update() {

@@ -108,25 +108,11 @@ void rt2DSliceDataObject::setupGUI() {
 
   connect(m_wlDialog, SIGNAL(valuesChanged(int,int)), this, SLOT(wlChanged(int,int)));
 
- //connect(m_optionsWidget.spinLeftButton, SIGNAL(clicked()), this, SLOT(spinLeft()));
- //connect(m_optionsWidget.spinRightButton, SIGNAL(clicked()), this, SLOT(spinRight()));
-
- //connect(m_optionsWidget.rotateUpButton, SIGNAL(clicked()), this, SLOT(rotateUp()));
- //connect(m_optionsWidget.rotateDownButton, SIGNAL(clicked()), this, SLOT(rotateDown()));
- //connect(m_optionsWidget.rotateLeftButton, SIGNAL(clicked()), this, SLOT(rotateLeft()));
- //connect(m_optionsWidget.rotateRightButton, SIGNAL(clicked()), this, SLOT(rotateRight()));
-
- //connect(m_optionsWidget.pushForwardButton, SIGNAL(clicked()), this, SLOT(pushPlane()));
- //connect(m_optionsWidget.pullBackButton, SIGNAL(clicked()), this, SLOT(pullPlane()));
-
- //connect(m_optionsWidget.xDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(xTranslate(double)));
- //connect(m_optionsWidget.yDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(yTranslate(double)));
- //connect(m_optionsWidget.zDoubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(zTranslate(double)));
-
  connect( this, SIGNAL(copyImageData2DSignal()), this, SLOT(copyImageData2DSlot()), Qt::QueuedConnection );
 
  connect( m_optionsWidget.windowLevelPushButton, SIGNAL(clicked()), this, SLOT(showWindowLevel()) );
  connect( m_optionsWidget.opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(Modified()));
+ connect (m_optionsWidget.greyBox, SIGNAL(clicked()),this,SLOT(Modified()));
 }
 
 

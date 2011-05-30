@@ -46,7 +46,7 @@ public:
   void setLevel(double l);
 
   //! Set the image data
-  void setImageData(vtkImageData* img);
+  void setImageData(vtkImageData* img,bool isGrey);
 
   //! Update the widget.
   virtual void update();

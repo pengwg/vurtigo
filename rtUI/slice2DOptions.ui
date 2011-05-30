@@ -65,6 +65,13 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QCheckBox" name="greyBox">
+           <property name="text">
+            <string>Greyscale</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
@@ -82,6 +89,69 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
+          <item row="5" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Z Translation</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="zDoubleSpinBox">
+              <property name="minimum">
+               <double>-20000.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>20000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="4" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>Y Translation</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="yDoubleSpinBox">
+              <property name="minimum">
+               <double>-20000.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>20000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="3" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>X Translation</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="xDoubleSpinBox">
+              <property name="minimum">
+               <double>-20000.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>20000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
           <item row="1" column="0">
            <widget class="QFrame" name="frame">
             <property name="sizePolicy">
@@ -168,69 +238,6 @@
              </item>
             </layout>
            </widget>
-          </item>
-          <item row="3" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>X Translation</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="xDoubleSpinBox">
-              <property name="minimum">
-               <double>-20000.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>20000.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="4" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QLabel" name="label_2">
-              <property name="text">
-               <string>Y Translation</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="yDoubleSpinBox">
-              <property name="minimum">
-               <double>-20000.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>20000.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="5" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QLabel" name="label_3">
-              <property name="text">
-               <string>Z Translation</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="zDoubleSpinBox">
-              <property name="minimum">
-               <double>-20000.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>20000.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-           </layout>
           </item>
          </layout>
         </widget>

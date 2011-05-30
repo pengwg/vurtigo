@@ -334,7 +334,7 @@ void rt2DSliceRenderObject::update() {
   dObj->getRawData()->GetScalarRange(scaleRange_raw);
   dObj->getRawData()->GetBounds(bounds);
       
-  m_texturePlane.setImageData(dObj->getRawData());
+  m_texturePlane.setImageData(dObj->getRawData(),dObj->isGreyscale());
   m_texturePlane.setScalarRange(scaleRange_raw[0], scaleRange_raw[1]);
   m_texturePlane.setWindow(dObj->getWindow());
   m_texturePlane.setLevel(dObj->getLevel());

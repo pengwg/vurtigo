@@ -206,7 +206,7 @@ void rt3DVolumeRenderObject::newDataAvailable() {
     // so we hack it back in
     if (dObj->getImageType() == 1)
         m_imgReslice[ix1]->GetOutput()->SetNumberOfScalarComponents(3);
-    m_texturePlane[ix1].setImageData(m_imgReslice[ix1]->GetOutput());
+    m_texturePlane[ix1].setImageData(m_imgReslice[ix1]->GetOutput(),false);
   }
 
   // The reset calls will lead to three modified calls on the data object and then to an update call.

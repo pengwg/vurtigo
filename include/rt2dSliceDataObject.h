@@ -118,6 +118,8 @@ public:
   //! Get the window level dialog
   rtWindowLevelDialog *getWLDialog() {return m_wlDialog;}
 
+  bool isGreyscale() {return m_optionsWidget.greyBox->isChecked();}
+
   inline void setManualOn() { m_optionsWidget.prescribeGroupBox->setChecked(true); }
   inline void setManualOff() { m_optionsWidget.prescribeGroupBox->setChecked(false); }
   inline void setManual(bool man) { m_optionsWidget.prescribeGroupBox->setChecked(man); }
