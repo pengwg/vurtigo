@@ -298,6 +298,8 @@ void rtCathRenderObject::setupPipeline() {
 
   // But set their visibility to off
   visibilityOff();
+
+  update();
 }
 
 //! The position of the catheter tip is returned.

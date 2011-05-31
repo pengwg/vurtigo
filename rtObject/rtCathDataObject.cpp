@@ -690,8 +690,6 @@ bool rtCathDataObject::saveFile(QFile *file)
     writer.writeStartElement("VurtigoFile");
 
     rtDataObject::saveHeader(&writer, getObjectType(), getObjName());
-    rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(this->getId());
-    rObj->saveVisibilities(&writer);
 
     saveVtkProperty(&writer, getTipProperty(), "TipProperty");
     saveVtkProperty(&writer,getSplineProperty(), "SplineProperty");
@@ -764,6 +762,9 @@ bool rtCathDataObject::saveFile(QFile *file)
         }
     }
 
+    rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(this->getId());
+    rObj->saveVisibilities(&writer);
+
     writer.writeEndElement(); // VurtigoFile
     writer.writeEndDocument();
 
@@ -796,6 +797,7 @@ bool rtCathDataObject::loadFile(QFile *file)
     QString propByName = "prop";
     QString colorName = "color";
     int coilID;
+    rtRenderObject *rObj;
 
     while (!reader.atEnd()) {
         if (reader.readNext() == QXmlStreamReader::StartElement )
@@ -806,7 +808,7 @@ bool rtCathDataObject::loadFile(QFile *file)
           }
           else if (reader.name() == "Visibilities")
           {
-              rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(this->getId());
+              rObj = rtApplication::instance().getObjectManager()->getObjectWithID(this->getId());
               rObj->loadVisibilities(&reader);
           }
           else if (reader.name() == "VtkProperty")
@@ -870,8 +872,10 @@ bool rtCathDataObject::loadFile(QFile *file)
     }
 
     if (reader.hasError()) {
+        file->close();
       return false;
     }
+    file->close();
 
     if (hadColor)
     {
