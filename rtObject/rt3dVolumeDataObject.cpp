@@ -476,45 +476,51 @@ void rt3DVolumeDataObject::axialColorChanged()
 {
     QColor clr = QColorDialog::getColor(m_axialColor);
     if (clr.isValid())
-    {
+        setAxialColor(clr);
+}
+
+void rt3DVolumeDataObject::setAxialColor(QColor clr)
+{
         m_axialColor = clr;
         QPalette palette;
         palette.setColor(m_optionsWidget.axialColor->backgroundRole(), clr);
         m_optionsWidget.axialColor->setPalette(palette);
         m_AColor = true;
         Modified();
-
-    }
 }
 
 void rt3DVolumeDataObject::sagittalColorChanged()
 {
     QColor clr = QColorDialog::getColor(m_sagittalColor);
     if (clr.isValid())
-    {
+        setSagittalColor(clr);
+}
+
+void rt3DVolumeDataObject::setSagittalColor(QColor clr)
+{
         m_sagittalColor = clr;
         QPalette palette;
         palette.setColor(m_optionsWidget.sagittalColor->backgroundRole(), clr);
         m_optionsWidget.sagittalColor->setPalette(palette);
         m_SColor = true;
         Modified();
-
-    }
 }
 
 void rt3DVolumeDataObject::coronalColorChanged()
 {
     QColor clr = QColorDialog::getColor(m_coronalColor);
     if (clr.isValid())
-    {
+        setCoronalColor(clr);
+}
+
+void rt3DVolumeDataObject::setCoronalColor(QColor clr)
+{
         m_coronalColor = clr;
         QPalette palette;
         palette.setColor(m_optionsWidget.coronalColor->backgroundRole(), clr);
         m_optionsWidget.coronalColor->setPalette(palette);
         m_CColor = true;
         Modified();
-
-    }
 }
 
 void rt3DVolumeDataObject::interpolationChanged(int interp) {

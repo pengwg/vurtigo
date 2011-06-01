@@ -222,11 +222,11 @@ public:
   QColor getCoronalColor() {return m_coronalColor;}
 
   //! set the axial color
-  void setAxialColor(QColor color) {m_axialColor = color;}
+  void setAxialColor(QColor clr);
   //! set the sagittal color
-  void setSagittalColor(QColor color) {m_sagittalColor = color;}
+  void setSagittalColor(QColor clr);
   //! set the coronal color
-  void setCoronalColor(QColor color) {m_coronalColor = color;}
+  void setCoronalColor(QColor clr);
 
   //! Has the user changed the axial color
   bool didAxialColorChange() {return m_AColor;}
