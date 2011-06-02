@@ -115,7 +115,7 @@ void rtCathRenderObject::update() {
 
     if (dObj->getCurrProperty() != "None" && dObj->getCurrColor() != NULL) {
         m_sphereActor[0]->SetProperty(vtkProperty::New());
-        dObj->getColorAtLocation(0, dObj->getCurrProperty(),color);
+        dObj->getColorAtLocation(dObj->getLocationList().value(0), dObj->getCurrProperty(),color);
         m_sphereActor[0]->GetProperty()->SetColor(color);
     } else {
         //refresh back to user given properties
