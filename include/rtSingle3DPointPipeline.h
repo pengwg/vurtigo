@@ -35,6 +35,8 @@ public:
   rtSingle3DPointPipeline();
   ~rtSingle3DPointPipeline();
 
+  inline void setMapper(vtkPolyDataMapper *mapper) { m_actor->SetMapper(mapper); }
+
   inline vtkActor* getActor() { return m_actor; }
 
   inline vtkActor* getLabelActor(int i) { if (m_labelActor.size() > i) return m_labelActor[i]; }
@@ -58,8 +60,6 @@ public:
 
   inline vtkProperty* getLabelProperty(int i) {return m_labelActor[i]->GetProperty(); }
 
-  void setResolution(int resolution);
-
   void setProperty(vtkProperty* prop);
 
   inline vtkProperty* getPropertyHandle() { return m_actor->GetProperty(); }
@@ -69,8 +69,6 @@ public:
 
 protected:
   // VTK pipeline objects.
-  vtkSphereSource* m_sphere;
-  vtkPolyDataMapper* m_mapper;
   vtkActor* m_actor;
   QList<vtkFollower *> m_labelActor;
   vtkPolyDataMapper *m_labelMapper;

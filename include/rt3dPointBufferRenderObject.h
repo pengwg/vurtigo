@@ -94,6 +94,8 @@ public slots:
  private:
   //! List of point pipelines.
   QList<rtSingle3DPointPipeline*> m_pipeList;
+  vtkSphereSource *m_sphere;
+  vtkPolyDataMapper *m_mapper;
 };
 
 #endif

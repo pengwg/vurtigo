@@ -23,15 +23,10 @@
 #include "rtMainWindow.h"
 
 rtSingle3DPointPipeline::rtSingle3DPointPipeline() {
-  m_sphere = vtkSphereSource::New();
-  m_mapper = vtkPolyDataMapper::New();
   m_actor = vtkActor::New();
 
   m_labelMapper = vtkPolyDataMapper::New();
   m_labelText = vtkVectorText::New();
-
-  m_mapper->SetInput(m_sphere->GetOutput());
-  m_actor->SetMapper(m_mapper);
   m_labelMapper->SetInputConnection(m_labelText->GetOutputPort());
   for (int ix1=0; ix1 < rtApplication::instance().getMainWinHandle()->getNumRenWins(); ix1++)
   {
@@ -41,8 +36,7 @@ rtSingle3DPointPipeline::rtSingle3DPointPipeline() {
 }
 
 rtSingle3DPointPipeline::~rtSingle3DPointPipeline() {
-  m_sphere->Delete();
-  m_mapper->Delete();
+
   m_actor->Delete();
   m_labelMapper->Delete();
   m_labelText->Delete();
@@ -51,11 +45,11 @@ rtSingle3DPointPipeline::~rtSingle3DPointPipeline() {
 }
 
 void rtSingle3DPointPipeline::setPosition(double x, double y, double z) {
-  m_sphere->SetCenter(x,y,z);
+  m_actor->SetPosition(x,y,z);
 }
 
 void rtSingle3DPointPipeline::setPosition(double coords[3]) {
-  m_sphere->SetCenter(coords);
+  m_actor->SetPosition(coords);
 }
 
 void rtSingle3DPointPipeline::setLabelPosition(int i, double x, double y, double z) {
@@ -70,7 +64,7 @@ void rtSingle3DPointPipeline::setLabelPosition(int i, double coords[3]) {
 
 void rtSingle3DPointPipeline::setRadius(double r) {
   if (r<=0.0) return;
-  m_sphere->SetRadius(r);
+  m_actor->SetScale(r);
 }
 
 void rtSingle3DPointPipeline::setLabelScale(int i, double s)
@@ -88,13 +82,6 @@ void rtSingle3DPointPipeline::setLabelCamera(int i, vtkCamera *cam)
 void rtSingle3DPointPipeline::setLabelText(char *text)
 {
         m_labelText->SetText(text);
-}
-
-void rtSingle3DPointPipeline::setResolution(int resolution) {
-  if (resolution <= 0) return;
-
-  m_sphere->SetThetaResolution(resolution);
-  m_sphere->SetPhiResolution(resolution);
 }
 
 void rtSingle3DPointPipeline::setProperty(vtkProperty* prop) {

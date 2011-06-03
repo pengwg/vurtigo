@@ -60,6 +60,8 @@ rt3DPointBufferRenderObject::~rt3DPointBufferRenderObject() {
     m_currTransform->Delete();
     m_currTransform = NULL;
   }
+  if (m_sphere) m_sphere->Delete();
+  if (m_mapper) m_mapper->Delete();
 }
 
 
@@ -75,6 +77,7 @@ void rt3DPointBufferRenderObject::update() {
   // Find the total size of the list.
   int totalActors = hashKeys.size() + selectedList->size();
   int listPosition = 0;
+
   // Resize the list
   resizePipeList(totalActors);
 
@@ -87,6 +90,8 @@ void rt3DPointBufferRenderObject::update() {
     double psize = (*pointList)[hashKeys[ix1]].getPointSize()*dObj->getPointZoom();
 
     (*pointList)[hashKeys[ix1]].getPoint(ptIn);
+
+    tempPipe->setMapper(m_mapper);
 
     tempPipe->setPosition(ptIn[0], ptIn[1], ptIn[2]);
     tempPipe->setProperty( (*pointList)[hashKeys[ix1]].getProperty() );
@@ -176,9 +181,8 @@ void rt3DPointBufferRenderObject::setRenderQuality(double quality) {
   else if (quality > 1.0) q = 1.0;
   else q = quality;
 
-  for (int ix1=0; ix1<m_pipeList.size(); ix1++) {
-    m_pipeList[ix1]->setResolution(q*8.0f+5);
-  }
+  m_sphere->SetPhiResolution(q*8.0f+5);
+  m_sphere->SetThetaResolution(q*8.0f+5);
 }
 
 ////////////////
@@ -312,7 +316,11 @@ void rt3DPointBufferRenderObject::setupDataObject() {
 
 
 void rt3DPointBufferRenderObject::setupPipeline() {
-  // Cleanup the pipe list.
+
+    m_sphere = vtkSphereSource::New();
+    m_mapper = vtkPolyDataMapper::New();
+  m_mapper->SetInput(m_sphere->GetOutput());
+    // Cleanup the pipe list.
   cleanupPipeList();
   m_canRender3D = true;
 }
