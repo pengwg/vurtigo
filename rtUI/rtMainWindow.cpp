@@ -491,15 +491,11 @@ void rtMainWindow::centerOnObject(QTreeWidgetItem *item, int column) {
   }
   double loc[6];
   if (temp->getObjectLocation(loc)) {
-    // Location is valid
-      if (m_renderer3D.size() != temp->getVisible3D().size())
-          std::cout << "rtMainWindow::centerOnObject number of visible3D flags in the current object doesn't match the numRenWin \n";
-    for (int ix1=0; ix1<m_renderer3D.size(); ix1++)
+    for (int ix1=0; ix1<temp->getVisible3D().size(); ix1++)
     {
         if (temp->getVisible3D().at(ix1))
             m_renderer3D[ix1]->ResetCamera(loc);
     }
-    //m_localRenderer3D->ResetCamera(loc);
     m_renderFlag3D = true;
   }
 
