@@ -118,9 +118,10 @@ void rtRenderObject::uncheckTreeItem() {
 
 void rtRenderObject::setVisible3D(int window,bool v) {
   if( !rtApplication::instance().getTimeManager() ) return;
-
-  if (window >= m_visible3D.size())
-      std::cout << "rtRenderObject::setVisible3D tried to set visibilty on a window the object didnt know about \n";
+  // This is to take care of the case when removeFromRenderer is called on an object deletion rather than just turning off visibility
+  // In the case of deletion, the actor must be removed from every render window (even those not currently visible).
+  // Rather than adding this check to every removeFromRenderer method in every object, I put the check here.
+  if (window >= m_visible3D.size()) return;
   m_visible3D[window] = v;
   if (v) {
     tryUpdate();

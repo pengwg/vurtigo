@@ -1322,7 +1322,6 @@ void rtMainWindow::removeSelectedObject() {
   for (int ix1=0; ix1<m_renderer3D.size(); ix1++)
   {
       temp->removeFromRenderer(m_renderer3D[ix1],ix1);
-     // temp->removeFromRenderer(m_localRenderer3D);
   }
   m_renderFlag3D = true;
   rtApplication::instance().getObjectManager()->removeObject(current->text(1).toInt());
