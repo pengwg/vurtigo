@@ -54,7 +54,7 @@ public:
 
   void setLabelScale(int i, double s);
 
-  void setLabelText(char *text);
+  void setLabelText(const char *text);
 
   void setLabelCamera(int i, vtkCamera *cam);
 

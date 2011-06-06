@@ -79,7 +79,7 @@ void rtSingle3DPointPipeline::setLabelCamera(int i, vtkCamera *cam)
         m_labelActor[i]->SetCamera(cam);
 }
 
-void rtSingle3DPointPipeline::setLabelText(char *text)
+void rtSingle3DPointPipeline::setLabelText(const char *text)
 {
         m_labelText->SetText(text);
 }

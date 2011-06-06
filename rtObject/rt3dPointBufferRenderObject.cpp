@@ -98,9 +98,7 @@ void rt3DPointBufferRenderObject::update() {
     tempPipe->setRadius( psize );
 
     // set the label
-    char text[100] = "";
-    sprintf(text,"%s",qPrintable((*pointList)[hashKeys[ix1]].getLabel()));
-    tempPipe->setLabelText(text);
+    tempPipe->setLabelText((*pointList)[hashKeys[ix1]].getLabel().toStdString().c_str());
     for (int win=0; win<tempPipe->getNumRenWin(); win++)
     {
         tempPipe->setLabelPosition(win,ptIn[0] - psize,ptIn[1] - 1.5*psize , ptIn[2]);
