@@ -38,6 +38,7 @@
 #include "vtkPlane.h"
 #include "rtMainWindow.h"
 #include <QInputDialog>
+#include <QColorDialog>
 
 //! Constructor to the dialog
 pointPlacementDialog::pointPlacementDialog(QWidget *parent, Qt::WindowFlags flags) {
@@ -55,6 +56,7 @@ pointPlacementDialog::pointPlacementDialog(QWidget *parent, Qt::WindowFlags flag
   connect(this, SIGNAL(rejected()), this, SLOT(placementOff()));
 
   connect(setTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableChanged(int,int)));
+  connect(setTable, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(changeColor(int,int)));
 
   // if an object is added, removed  or renamed from Vurtigo. reset the combo box just in case it was a 3DPoint object
   connect(rtApplication::instance().getObjectManager(),SIGNAL(objectCreated(int)),this,SLOT(setupCombo()));
@@ -243,5 +245,23 @@ void pointPlacementDialog::tableChanged(int row,int col)
         dObj->getPointAtIndex(row)->setLabel(item->text());
         dObj->pointListModifiedSlot();
         dObj->tableCellChanged(row,5);
+    }
+}
+
+void pointPlacementDialog::changeColor(int row, int col)
+{
+    if (!m_currPoints) return;
+    if (col == 3)
+    {
+        rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(m_currPoints->getDataObject());
+        QColor color = QColorDialog::getColor(dObj->getPointAtIndex(row)->getColor(),this);
+        if (color.isValid())
+        {
+            dObj->lock();
+            dObj->getPointAtIndex(row)->setColor(color);
+            dObj->Modified();
+            dObj->unlock();
+            setupTable();
+        }
     }
 }

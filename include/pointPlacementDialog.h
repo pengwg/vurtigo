@@ -31,6 +31,7 @@ public slots:
     void mouseMoved(QMouseEvent*,int);
 
     void tableChanged(int,int);
+    void changeColor(int,int);
 
 
 protected:
