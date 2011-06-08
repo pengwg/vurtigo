@@ -31,11 +31,17 @@ Points3DControlWidget::Points3DControlWidget()
   m_crosshair.setColor(1.0, 0.0, 0.0);
   m_crosshair.setVisible(false);
 
+  m_sphere = vtkSphereSource::New();
+  m_mapper = vtkPolyDataMapper::New();
+  m_mapper->SetInput(m_sphere->GetOutput());
+  m_centralSphere.setMapper(m_mapper);
+
   updateWidgetPosition();
 }
 
 Points3DControlWidget::~Points3DControlWidget() {
-
+    if (m_sphere) m_sphere->Delete();
+    if (m_mapper) m_mapper->Delete();
 }
 
 void Points3DControlWidget::sizeChanged() {

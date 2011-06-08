@@ -62,6 +62,8 @@ protected:
 
   // Central sphere.
   rtSingle3DPointPipeline m_centralSphere;
+  vtkSphereSource *m_sphere;
+  vtkPolyDataMapper *m_mapper;
 
   // Crosshair
   rtCrosshair2D m_crosshair;
