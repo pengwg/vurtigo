@@ -43,6 +43,8 @@ CathHistoryUI::CathHistoryUI() {
   intervalSpin->setEnabled(false);
   autoSaveBox->setEnabled(false);
   resetButton->setEnabled(false);
+
+  m_currCath = -1;
   
   populateLists();
   connectSignals();
@@ -68,6 +70,7 @@ CathHistoryUI::~CathHistoryUI() {
 void CathHistoryUI::connectSignals() {
   connect( rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(objectAdded(int)) );
   connect( rtApplication::instance().getObjectManager(), SIGNAL(objectRemoved(int)), this, SLOT(objectRemoved(int)) );
+  connect( rtApplication::instance().getObjectManager(), SIGNAL(objectRenamed(int)), this, SLOT(objectRemoved(int)) );
 
   connect( pointSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(pointSizeChanged(int)) );
 
@@ -99,6 +102,8 @@ void CathHistoryUI::updateCheckableStatus() {
 }
 
 void CathHistoryUI::populateLists() {
+
+  disconnect( cathComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(trackingPairChanged()) );
   QList<int> cathObjs;
   QList<int> planeObjs;
   rtCathDataObject* cath=NULL;
@@ -107,16 +112,22 @@ void CathHistoryUI::populateLists() {
 
   cathComboBox->clear();
 
+  int index = 0;
+
   for (int ix1=0; ix1<cathObjs.size(); ix1++) {
     cath = static_cast<rtCathDataObject*>(rtBaseHandle::instance().getObjectWithID(cathObjs[ix1]));
     if (cath) {
       m_cathObjectMap.insert(ix1, cath);
-      cathComboBox->insertItem(ix1, QString::number(cathObjs[ix1])+cath->getObjName());
+      cathComboBox->insertItem(ix1, QString::number(cathObjs[ix1])+" "+cath->getObjName());
+      if (m_currCath == cathObjs[ix1])
+          index = ix1;
     }
   }
 
-  updateCheckableStatus();
+  cathComboBox->setCurrentIndex(index);
 
+  updateCheckableStatus();
+  connect( cathComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(trackingPairChanged()) );
 }
 
 void CathHistoryUI::objectAdded(int objID) {
@@ -140,13 +151,8 @@ void CathHistoryUI::objectAdded(int objID) {
 void CathHistoryUI::objectRemoved(int objID) {
   int cathPos;
 
-  cathPos = cathComboBox->currentIndex();
-
   populateLists();
 
-  if ( cathPos >= 0 && cathPos < cathComboBox->count() ) 
-    cathComboBox->setCurrentIndex(cathPos);
-    
   updateCheckableStatus();
 }
 
@@ -173,6 +179,7 @@ void CathHistoryUI::trackingPairChanged() {
     intervalSpin->setEnabled(true);
     
     rtCathDataObject *cath = m_cathObjectMap.value(cathPos);
+    m_currCath = cath->getId();
     rt3DPointBufferDataObject *points = static_cast<rt3DPointBufferDataObject*>(rtBaseHandle::instance().getObjectWithID(m_points));
 
     if (m_historyRecorder == NULL) {

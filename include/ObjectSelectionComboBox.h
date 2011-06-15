@@ -48,6 +48,7 @@ public:
 public slots:
   void objectCreated(int id);
   void objectRemoved(int id);
+  void objectRenamed(int id);
   void newSelection(int sel);
   void currObjectModified(int id);
 

@@ -32,6 +32,7 @@ ObjectSelectionComboBox::ObjectSelectionComboBox()
 
   connect( objManagerHandle, SIGNAL(objectCreated(int)), this, SLOT(objectCreated(int)) );
   connect( objManagerHandle, SIGNAL(objectRemoved(int)), this, SLOT(objectRemoved(int)) );
+  connect( objManagerHandle, SIGNAL(objectRenamed(int)), this, SLOT(objectRenamed(int)) );
   connect( this, SIGNAL(currentIndexChanged(int)), this, SLOT(newSelection(int)) );
 }
 
@@ -81,6 +82,13 @@ void ObjectSelectionComboBox::objectRemoved(int id) {
     }
     this->removeItem(loc);
   }
+}
+
+void ObjectSelectionComboBox::objectRenamed(int id)
+{
+    disconnect( this, SIGNAL(currentIndexChanged(int)), this, SLOT(newSelection(int)) );
+    this->updateComboList();
+    connect( this, SIGNAL(currentIndexChanged(int)), this, SLOT(newSelection(int)) );
 }
 
 void ObjectSelectionComboBox::newSelection(int sel) {

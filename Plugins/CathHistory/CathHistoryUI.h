@@ -90,6 +90,9 @@ protected:
   //! The cath history data object
   HistoryData *m_historyRecorder;
 
+  //! the id of the currently selected catheter
+  int m_currCath;
+
 };
 
 #endif
