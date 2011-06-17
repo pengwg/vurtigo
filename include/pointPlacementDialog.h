@@ -33,6 +33,8 @@ public slots:
     void tableChanged(int,int);
     void changeColor(int,int);
 
+    void comboChanged();
+
 
 protected:
 

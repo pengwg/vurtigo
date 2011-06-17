@@ -76,6 +76,9 @@ Q_OBJECT
 
   void numberLabels();
 
+  void setSourceChanged();
+  void setTargetChanged();
+
 protected:
 
  //! The list of all 3D point objects

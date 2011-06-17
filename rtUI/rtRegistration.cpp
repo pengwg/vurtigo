@@ -61,8 +61,8 @@ rtRegistration::rtRegistration(QWidget *parent, Qt::WindowFlags flags)
   connect(rtApplication::instance().getObjectManager(),SIGNAL(objectRemoved(int)),this,SLOT(setupAllCombos()));
   connect(rtApplication::instance().getObjectManager(),SIGNAL(objectRenamed(int)),this,SLOT(setupAllCombos()));
 
-  connect (setSource, SIGNAL(currentIndexChanged(int)), this, SLOT(setupSourceTable()));
-  connect (setTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(setupTargetTable()));
+  connect (setSource, SIGNAL(currentIndexChanged(int)), this, SLOT(setSourceChanged()));
+  connect (setTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(setTargetChanged()));
 
   connect (volSource, SIGNAL(currentIndexChanged(int)), this, SLOT(volumeChanged()));
   connect (volTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(volumeChanged()));
@@ -531,8 +531,8 @@ void rtRegistration::addNewPoints()
 void rtRegistration::setupPointCombos()
 {
     // need to turn off these signals or they will cause assert failures
-    disconnect (setSource, SIGNAL(currentIndexChanged(int)), this, SLOT(setupSourceTable()));
-    disconnect (setTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(setupTargetTable()));
+    disconnect (setSource, SIGNAL(currentIndexChanged(int)), this, SLOT(setSourceChanged()));
+    disconnect (setTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(setTargetChanged()));
     setSource->clear();
     setTarget->clear();
     setOneTable->clearContents();
@@ -561,8 +561,8 @@ void rtRegistration::setupPointCombos()
     setupSourceTable();
     setupTargetTable();
     // reconnect
-    connect (setSource, SIGNAL(currentIndexChanged(int)), this, SLOT(setupSourceTable()));
-    connect (setTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(setupTargetTable()));
+    connect (setSource, SIGNAL(currentIndexChanged(int)), this, SLOT(setSourceChanged()));
+    connect (setTarget, SIGNAL(currentIndexChanged(int)), this, SLOT(setTargetChanged()));
 
 
 }
@@ -619,6 +619,7 @@ void rtRegistration::setupSourceTable()
     int ix1;
     if (setSource->currentIndex() < 0) return;
     rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()));
+    if (!rObj) return;
     m_currSetSource = rObj;
     rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rObj->getDataObject());
     if (!dObj) return;
@@ -645,10 +646,6 @@ void rtRegistration::setupSourceTable()
     }
 
     connect(setOneTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableOneChanged(int,int)));
-
-    //connect a signal so if the point changes. we update the list
-    connect(dObj, SIGNAL(pointListModifiedSignal()),this,SLOT(setupSourceTable()));
-
 }
 
 void rtRegistration::setupTargetTable()
@@ -660,6 +657,7 @@ void rtRegistration::setupTargetTable()
     int ix1;
     if (setTarget->currentIndex() < 0) return;
     rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()));
+    if (!rObj) return;
     m_currSetTarget = rObj;
     rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rObj->getDataObject());
     if (!dObj) return;
@@ -688,9 +686,40 @@ void rtRegistration::setupTargetTable()
 
     connect(setTwoTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableTwoChanged(int,int)));
 
-    //connect a signal so if the point changes. we update the list
-    connect(dObj, SIGNAL(pointListModifiedSignal()),this,SLOT(setupTargetTable()));
+}
 
+void rtRegistration::setSourceChanged()
+{
+    rtRenderObject *rObj = NULL;
+    if (setSource->currentIndex() >= 0)
+        rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setSource->currentIndex()));
+    rt3DPointBufferDataObject *dObj = NULL;
+    if (rObj)
+    {
+        dObj = static_cast<rt3DPointBufferDataObject*>(rObj->getDataObject());
+        m_currSetSource = rObj;
+    }
+    if (dObj)
+        //connect a signal so if the point changes. we update the list
+        connect(dObj, SIGNAL(pointListModifiedSignal()),this,SLOT(setupSourceTable()));
+    setupSourceTable();
+}
+
+void rtRegistration::setTargetChanged()
+{
+    rtRenderObject *rObj = NULL;
+    if (setTarget->currentIndex() >= 0)
+        rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setTarget->currentIndex()));
+    rt3DPointBufferDataObject *dObj = NULL;
+    if (rObj)
+    {
+        dObj = static_cast<rt3DPointBufferDataObject*>(rObj->getDataObject());
+        m_currSetTarget = rObj;
+    }
+    if (dObj)
+        //connect a signal so if the point changes. we update the list
+        connect(dObj, SIGNAL(pointListModifiedSignal()),this,SLOT(setupTargetTable()));
+    setupTargetTable();
 }
 
 void rtRegistration::setupAllCombos()

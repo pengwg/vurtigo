@@ -48,7 +48,7 @@ pointPlacementDialog::pointPlacementDialog(QWidget *parent, Qt::WindowFlags flag
 
   //connect when index changes on boxes - call setupTables
 
-  connect (setCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setupTable()));
+  connect (setCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(comboChanged()));
 
 
   connect (newPointsButton, SIGNAL(pressed()), this, SLOT(addNewPoints()));
@@ -167,7 +167,7 @@ void pointPlacementDialog::addNewPoints()
 void pointPlacementDialog::setupCombo()
 {
     // need to turn off these signals or they will cause assert failures
-    disconnect (setCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setupTable()));
+    disconnect (setCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(comboChanged()));
     setCombo->clear();
     setTable->clearContents();
 
@@ -189,7 +189,7 @@ void pointPlacementDialog::setupCombo()
     setCombo->setCurrentIndex(index);
     setupTable();
     // reconnect
-    connect (setCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setupTable()));
+    connect (setCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(comboChanged()));
 
 
 }
@@ -202,7 +202,7 @@ void pointPlacementDialog::setupTable()
     int ix1;
     if (setCombo->currentIndex() < 0) return;
     rtRenderObject *rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setCombo->currentIndex()));
-    m_currPoints = rObj;
+    if (!rObj) return;
     rt3DPointBufferDataObject *dObj = static_cast<rt3DPointBufferDataObject*>(rObj->getDataObject());
     if (!dObj) return;
     
@@ -230,9 +230,23 @@ void pointPlacementDialog::setupTable()
 
     connect(setTable, SIGNAL(cellChanged(int,int)), this, SLOT(tableChanged(int,int)));
 
-    //connect a signal so if the point changes. we update the list
-    connect(dObj, SIGNAL(pointListModifiedSignal()),this,SLOT(setupTable()));
+}
 
+void pointPlacementDialog::comboChanged()
+{
+    rtRenderObject *rObj = NULL;
+    if (setCombo->currentIndex() >= 0)
+        rObj = rtApplication::instance().getObjectManager()->getObjectWithID(m_points.at(setCombo->currentIndex()));
+    rt3DPointBufferDataObject *dObj = NULL;
+    if (rObj)
+    {
+        dObj = static_cast<rt3DPointBufferDataObject*>(rObj->getDataObject());
+        m_currPoints = rObj;
+    }
+    if (dObj)
+        //connect a signal so if the point changes. we update the list
+        connect(dObj, SIGNAL(pointListModifiedSignal()),this,SLOT(setupTable()));
+    setupTable();
 }
 
 void pointPlacementDialog::tableChanged(int row,int col)
