@@ -363,31 +363,43 @@ void rt3DPointBufferDataObject::pointZoomChanged(int zoom) {
 void rt3DPointBufferDataObject::transPlusX() {
   applyTranslateToPoints(1.0, 0.0, 0.0);
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::transMinusX() {
   applyTranslateToPoints(-1.0, 0.0, 0.0);
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::transPlusY() {
   applyTranslateToPoints(0.0, 1.0, 0.0);
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::transMinusY() {
   applyTranslateToPoints(0.0, -1.0, 0.0);
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::transPlusZ() {
   applyTranslateToPoints(0.0, 0.0, 1.0);
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::transMinusZ() {
   applyTranslateToPoints(0.0, 0.0, -1.0);
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::rotPlusX() {
@@ -396,6 +408,8 @@ void rt3DPointBufferDataObject::rotPlusX() {
   applyTransformToPoints(temp);
   if (temp) temp->Delete();
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::rotMinusX() {
@@ -404,6 +418,8 @@ void rt3DPointBufferDataObject::rotMinusX() {
   applyTransformToPoints(temp);
   if (temp) temp->Delete();
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::rotPlusY() {
@@ -412,6 +428,8 @@ void rt3DPointBufferDataObject::rotPlusY() {
   applyTransformToPoints(temp);
   if (temp) temp->Delete();
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::rotMinusY() {
@@ -420,6 +438,8 @@ void rt3DPointBufferDataObject::rotMinusY() {
   applyTransformToPoints(temp);
   if (temp) temp->Delete();
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::rotPlusZ() {
@@ -428,6 +448,8 @@ void rt3DPointBufferDataObject::rotPlusZ() {
   applyTransformToPoints(temp);
   if (temp) temp->Delete();
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::rotMinusZ() {
@@ -436,6 +458,8 @@ void rt3DPointBufferDataObject::rotMinusZ() {
   applyTransformToPoints(temp);
   if (temp) temp->Delete();
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::scaleChanged(double val) {
@@ -447,6 +471,8 @@ void rt3DPointBufferDataObject::scaleChanged(double val) {
   applyTransformToPoints(temp);
   if (temp) temp->Delete();
   Modified();
+  // shouldn't have both manual and compass controls on at the same time
+  rtApplication::instance().getObjectManager()->getObjectWithID(this->getId())->deselect();
 }
 
 void rt3DPointBufferDataObject::clearPointDataPressed() {
