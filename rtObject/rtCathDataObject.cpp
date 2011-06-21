@@ -539,6 +539,8 @@ void rtCathDataObject::updateCoilTable() {
       m_cathGuiSetup.pointsTable->setHorizontalHeaderItem(6+ix1,new QTableWidgetItem(m_cathProperties[ix1]));
       m_cathGuiSetup.pointsTable->setColumnWidth(6+ix1,50);
   }
+  //need to lock this because reading the hash values can cause thread issues with the GeomServer setting the same values
+  this->lock();
 
   for (int ix1=0; ix1<m_coilIDList.size(); ix1++) {
     // Get the coil data.
@@ -600,15 +602,14 @@ void rtCathDataObject::updateCoilTable() {
     {
         tempItem = new QTableWidgetItem();
         tempItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-        //need to lock this because reading the custom property values can cause thread issues with the GeomServer setting the same values
-        this->lock();
         tempItem->setText(QString::number(dat.coilPropValues.value(m_cathProperties[ix2])));
-        this->unlock();
         m_cathGuiSetup.pointsTable->setItem(ix1, 6+ix2, tempItem);
 
     }
 
   }
+
+  this->unlock();
 }
 
 
