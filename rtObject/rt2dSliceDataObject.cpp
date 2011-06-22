@@ -208,12 +208,12 @@ bool rt2DSliceDataObject::setPlaneCenter(double center[3], bool asUser) {
   m_imgData->GetDimensions(dims);
   m_imgData->GetSpacing(space);
 
-  vtkMatrix4x4* mat = vtkMatrix4x4::New();
+
 
   double xOff, yOff;
   xOff = dims[0]*space[0]/2.0f;
   yOff = dims[1]*space[1]/2.0f;
-
+  vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
   mat->DeepCopy(m_trans->GetMatrix());
   mat->SetElement(0, 3, -xOff*mat->GetElement(0, 0) - yOff*mat->GetElement(0, 1) + center[0]);
   mat->SetElement(1, 3, -xOff*mat->GetElement(1, 0) - yOff*mat->GetElement(1, 1) + center[1]);
@@ -221,7 +221,6 @@ bool rt2DSliceDataObject::setPlaneCenter(double center[3], bool asUser) {
   m_trans->Identity();
   m_trans->SetMatrix(mat);
 
-  if(mat) mat->Delete();
   Modified();
   return true;
 }
