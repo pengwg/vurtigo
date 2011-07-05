@@ -30,7 +30,6 @@ rtLabelRenderObject::rtLabelRenderObject() {
 }
 
 rtLabelRenderObject::~rtLabelRenderObject() {
-  if (m_dataObj) delete m_dataObj;
   if (m_textActor2D) m_textActor2D->Delete();
 }
 

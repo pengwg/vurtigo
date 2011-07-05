@@ -39,6 +39,7 @@ rtRenderObject::rtRenderObject()
 
 rtRenderObject::~rtRenderObject() {
   if (m_treeItem) delete m_treeItem;
+  if (m_dataObj) delete m_dataObj;
 }
 
 rtDataObject* rtRenderObject::getDataObject() {
