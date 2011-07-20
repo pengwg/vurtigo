@@ -73,6 +73,9 @@ public:
   inline QString getStudyID() { return m_commonData.getStudyID(); }
   inline QString getSeriesNumber() { return m_commonData.getSeriesNumber(); }
 
+  //! Get slice location
+  inline double getSliceLocation() { return m_commonData.getSliceLocation(); }
+
   //! Get the number of rows in one image
   inline unsigned short getNumRows() { return m_commonData.getNumRows(); }
 

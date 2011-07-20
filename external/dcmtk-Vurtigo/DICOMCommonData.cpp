@@ -183,6 +183,12 @@ void DICOMCommonData::readData(DcmDataset* datSet) {
     }
   }
 
+  // Image slice location.
+  if( !datSet->findAndGetFloat64(DCM_SliceLocation, m_slcLocation).good() ) {
+     m_error = true;
+  }
+
+
 }
 
 

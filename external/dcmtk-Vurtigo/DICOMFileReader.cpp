@@ -169,7 +169,10 @@ bool DICOMFileReader::setDirectory(QString dirPath, imageType type) {
               m_imgData.append(m_ddata);
           }
       }
-
+      
+      // Sort slices according to slice location
+      qSort(m_imgData.begin(), m_imgData.end(), sliceLessThan);  
+      
       // Give that volume a default name.
       m_volName = QString("E") + m_ddata->getStudyID() + QString("S") + m_ddata->getSeriesNumber();
       return true;

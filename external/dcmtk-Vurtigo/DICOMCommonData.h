@@ -74,6 +74,7 @@ public:
   inline QString getManufacturer() { return m_manufacturer; }
   inline QString getStudyID() { return m_studyID; }
   inline QString getSeriesNumber() { return m_seriesNumber; }
+  inline double getSliceLocation() { return m_slcLocation; }
 
   inline unsigned short getNumRows() { return m_numRows; }
   inline unsigned short getNumCols() { return m_numCols; }
@@ -129,6 +130,9 @@ protected:
 
   //! Direction cosines for the x and y directions.
   double m_imgOrient[6];
+
+  //! Slice location
+  double m_slcLocation;
 };
 
 #endif // DICOMCOMMONDATA_H
