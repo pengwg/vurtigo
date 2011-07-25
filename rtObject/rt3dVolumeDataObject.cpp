@@ -346,112 +346,38 @@ void rt3DVolumeDataObject::setDirectionCosinesXY(float* dirCos) {
   mat->Delete();
 }
 
-
-void rt3DVolumeDataObject::newObjectCreated(int id) {
-  rtRenderObject * temp = rtApplication::instance().getObjectManager()->getObjectWithID(id);
-  if (temp) {
-    if (temp->getObjectType()=="OT_vtkPiecewiseFunction") {
-      // New Piecewise Function.
-      // Do the reset... It may be faster to just add the object but this is more robust.
-      m_optionsWidget.comboPieceFunc->clear();
-      m_optionsWidget.comboPieceFunc->addItem("Default");
-      QList<int> pieceFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_vtkPiecewiseFunction");
-      for (int ix1=0; ix1<pieceFuncs.count() ; ix1++) {
-        m_optionsWidget.comboPieceFunc->addItem(QString::number(pieceFuncs.at(ix1)));
-      }
-    } else if (temp->getObjectType()=="OT_vtkColorTransferFunction") {
-      // New Color Function.
-      m_optionsWidget.comboCTFunc->clear();
-      m_optionsWidget.comboCTFunc->addItem("Default");
-      QList<int> colorFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_vtkColorTransferFunction");
-      for (int ix1=0; ix1<colorFuncs.count() ; ix1++) {
-        m_optionsWidget.comboCTFunc->addItem(QString::number(colorFuncs.at(ix1)));
-      }
-    }
-
-  }
-}
-
-void rt3DVolumeDataObject::oldObjectRemoved(int id) {
-
-}
-
-void rt3DVolumeDataObject::colorTransferChangedGUI(QString id) {
-  bool ok;
-  int idInt;
-
-  // Remove the old connection if there is one.
-  if(m_colorFuncID != -1) {
-    rtColorFuncDataObject* func = static_cast<rtColorFuncDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_colorFuncID)->getDataObject());
-    if (func) {
-      disconnect(func, SIGNAL(objectChanged(int)), this, SLOT(colorTransferChanged(int)));
-    }
-    m_colorFuncID = -1;
-  }
-
-  if (id == "Default") {
-    // Setup the default CTF.
-    m_colorTransFunc = m_colorTransFuncDefault;
-    m_colorFuncID = -1;
-  } else {
-
-    idInt = id.toInt(&ok);
-    if (ok) {
-      rtColorFuncDataObject* func = static_cast<rtColorFuncDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(idInt)->getDataObject());
-      m_colorTransFunc = func->getColorFunction();
-      m_colorFuncID = idInt;
-      connect(func, SIGNAL(objectChanged(int)), this, SLOT(colorTransferChanged(int)));
-    }
-  }
-
-  m_volumeProperty->SetColor(m_colorTransFunc);
-  Modified();
-}
-
 void rt3DVolumeDataObject::colorTransferChanged(int id) {
+    if (id == -1)
+    {
+        m_colorTransFunc = m_colorTransFuncDefault;
+        m_volumeProperty->SetColor(m_colorTransFunc);
+        m_colorFuncID = -1;
+        Modified();
+        return;
+    }
   rtColorFuncDataObject* func = static_cast<rtColorFuncDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(id)->getDataObject());
   if (func) {
     m_colorTransFunc = func->getColorFunction();
+    m_colorFuncID = id;
     m_volumeProperty->SetColor(m_colorTransFunc);
     Modified();
   }
 }
 
-void rt3DVolumeDataObject::piecewiseChangedGUI(QString id) {
-  bool ok;
-  int idInt;
-
-  // Remove the old connection if there is one.
-  if (m_piecewiseFuncID != -1) {
-    rtPieceFuncDataObject* func = static_cast<rtPieceFuncDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(m_piecewiseFuncID)->getDataObject());
-    if(func) {   
-      disconnect(func, SIGNAL(objectChanged(int)), this, SLOT(piecewiseChanged(int)));
-    }
-    m_piecewiseFuncID = -1;
-  }
-
-  if (id == "Default") {
-    // Setup the default PWF.
-    m_pieceFunc = m_pieceFuncDefault;
-    m_piecewiseFuncID = -1;
-  } else {
-
-    idInt = id.toInt(&ok);
-    if (ok) {
-      rtPieceFuncDataObject* func = static_cast<rtPieceFuncDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(idInt)->getDataObject());
-      m_pieceFunc = func->getPiecewiseFunction();
-      m_piecewiseFuncID = idInt;
-      connect(func, SIGNAL(objectChanged(int)), this, SLOT(piecewiseChanged(int)));
-    }
-  }
-  m_volumeProperty->SetScalarOpacity(m_pieceFunc);
-  Modified();
-}
 
 void rt3DVolumeDataObject::piecewiseChanged(int id) {
+    if (id == -1)
+    {
+        m_pieceFunc = m_pieceFuncDefault;
+        m_volumeProperty->SetScalarOpacity(m_pieceFunc);
+        m_piecewiseFuncID = -1;
+        Modified();
+        return;
+    }
   rtPieceFuncDataObject* func = static_cast<rtPieceFuncDataObject*>(rtApplication::instance().getObjectManager()->getObjectWithID(id)->getDataObject());
   if (func) {
     m_pieceFunc = func->getPiecewiseFunction();
+    m_piecewiseFuncID = id;
     m_volumeProperty->SetScalarOpacity(m_pieceFunc);
     Modified();
   }
@@ -800,12 +726,6 @@ void rt3DVolumeDataObject::createNewPWF() {
     rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("Piecewise function default was not set."));
   }
 
-  // Set the drop down too.
-  place = m_optionsWidget.comboPieceFunc->findText(QString::number(datObj->getId()));
-  if (place!=-1) {
-    m_optionsWidget.comboPieceFunc->setCurrentIndex(place);
-  }
-
 }
 
 
@@ -835,12 +755,6 @@ void rt3DVolumeDataObject::createNewCTF() {
 
   if (!datObj->setColorFunction(m_colorTransFuncDefault)) {
     rtApplication::instance().getMessageHandle()->warning(__LINE__, __FILE__, QString("Color function default was not set."));
-  }
-
-  // Set the drop down too.
-  place = m_optionsWidget.comboCTFunc->findText(QString::number(datObj->getId()));
-  if (place!=-1) {
-    m_optionsWidget.comboCTFunc->setCurrentIndex(place);
   }
 
 }
@@ -911,13 +825,9 @@ void rt3DVolumeDataObject::setupGUI() {
   connect(m_optionsWidget.sagittalColor, SIGNAL(clicked()), this, SLOT(sagittalColorChanged()));
   connect(m_optionsWidget.coronalColor, SIGNAL(clicked()), this, SLOT(coronalColorChanged()));
 
-  // Watch for new objects to update the lists.
-  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(newObjectCreated(int)));
-  connect(rtApplication::instance().getObjectManager(), SIGNAL(objectCreated(int)), this, SLOT(oldObjectRemoved(int)));
-
   // The combo boxes for the CTF and PWF.
-  connect(m_optionsWidget.comboCTFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(colorTransferChangedGUI(QString)));
-  connect(m_optionsWidget.comboPieceFunc, SIGNAL(currentIndexChanged(QString)), this, SLOT(piecewiseChangedGUI(QString)));
+  connect(&m_PWFunc, SIGNAL(objectSelectionChanged(int)), this, SLOT(piecewiseChanged(int)));
+  connect(&m_CTFunc, SIGNAL(objectSelectionChanged(int)), this, SLOT(colorTransferChanged(int)));
 
   // Creating new CTF and PWF
   connect(m_optionsWidget.newCTF, SIGNAL(clicked()), this, SLOT(createNewCTF()));
@@ -936,19 +846,12 @@ void rt3DVolumeDataObject::setupGUI() {
   connect(rtApplication::instance().getObjectManager(), SIGNAL(objectRemoved(int)), this, SLOT(setupVolumes()));
   connect(rtApplication::instance().getObjectManager(), SIGNAL(objectRenamed(int)), this, SLOT(setupVolumes()));
 
-  m_optionsWidget.comboPieceFunc->clear();
-  m_optionsWidget.comboPieceFunc->addItem("Default");
-  QList<int> pieceFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_vtkPiecewiseFunction");
-  for (int ix1=0; ix1<pieceFuncs.count() ; ix1++) {
-    m_optionsWidget.comboPieceFunc->addItem(QString::number(pieceFuncs.at(ix1)));
-  }
+  m_PWFunc.addObjectType("OT_vtkPiecewiseFunction");
+  static_cast<QGridLayout*>(m_optionsWidget.groupRayCastVolume->layout())->addWidget(&m_PWFunc,5,1);
 
-  m_optionsWidget.comboCTFunc->clear();
-  m_optionsWidget.comboCTFunc->addItem("Default");
-  QList<int> colorFuncs = rtApplication::instance().getObjectManager()->getObjectsOfType("OT_vtkColorTransferFunction");
-  for (int ix1=0; ix1<colorFuncs.count() ; ix1++) {
-    m_optionsWidget.comboCTFunc->addItem(QString::number(colorFuncs.at(ix1)));
-  }
+  m_CTFunc.addObjectType("OT_vtkColorTransferFunction");
+  static_cast<QGridLayout*>(m_optionsWidget.groupRayCastVolume->layout())->addWidget(&m_CTFunc,6,1);
+
   m_optionsWidget.interpolateComboBox->setCurrentIndex(m_interpolationType);
 
   m_optionsWidget.axialColor->setAutoFillBackground(true);

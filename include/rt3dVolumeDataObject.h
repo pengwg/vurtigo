@@ -51,6 +51,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <QTimer>
 
+#include "ObjectSelectionComboBox.h"
+
 //! 3D Volume Data Object
 /*!
   Data object that represents a 3D object. This object is also capable of playing back 4D (3D+time) cine volumes.
@@ -327,14 +329,6 @@ public:
   //! Slot called when the user changes the surface function.
   void surfaceFunctionChanged();
 
-  //! Slot is called when Vurtigo creates a new object.
-  void newObjectCreated(int id);
-
-  //! Slot is called when Vurtigo deletes an existing object.
-  void oldObjectRemoved(int id);
-
-  //! A new color transfer function was chosen through the GUI
-  void colorTransferChangedGUI(QString id);
   //! The color transfer function has changed
   void colorTransferChanged(int);
 
@@ -345,8 +339,6 @@ public:
   //! Choose a new coronal color
   void coronalColorChanged();
 
-  //! A new piecewise function has been chosen from the GUI
-  void piecewiseChangedGUI(QString id);
   //! The piecewise function has changed from the GUI
   void piecewiseChanged(int);
 
@@ -548,6 +540,11 @@ public:
   bool m_gpuBoxOn;
   //! GPU rendering is supported
   bool m_canGPU;
+
+  //! Color transfer function combo box
+  ObjectSelectionComboBox m_CTFunc;
+  //! Piecewise function combo box
+  ObjectSelectionComboBox m_PWFunc;
 
 private:
   void saveTransformToXML(QString name, vtkTransform *trans, QXmlStreamWriter *writer);
