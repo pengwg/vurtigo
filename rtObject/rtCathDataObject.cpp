@@ -783,7 +783,8 @@ bool rtCathDataObject::saveFile(QFile *file)
 
     if (m_currProperty != "None" && m_currColor)
     {
-        m_currColor->saveFile(&QFile(file->fileName() + "_color"));
+        QFile tmpfile(file->fileName() + "_color");
+        m_currColor->saveFile(&tmpfile);
     }
 
     return true;

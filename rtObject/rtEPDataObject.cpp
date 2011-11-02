@@ -443,8 +443,10 @@ bool rtEPDataObject::saveFile(QFile *file) {
 
   file->close();
   // save the 3D points as well
-  if (tmp)
-      tmp->getDataObject()->saveFile(&QFile(file->fileName() + "_points"));
+  if (tmp) {
+      QFile tmpfile(file->fileName() + "_points");
+      tmp->getDataObject()->saveFile(&tmpfile);
+  }
 
   return true;
 }

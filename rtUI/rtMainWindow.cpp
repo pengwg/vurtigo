@@ -1356,8 +1356,8 @@ void rtMainWindow::saveScene()
   // - all objects
 
   // are the "/" 's *NIX specific?
-
-  rtApplication::instance().getPluginLoader()->savePluginsToFile(&QFile(QString(dName + "/plugins.xml")));
+  QFile file(QString(dName + "/plugins.xml"));
+  rtApplication::instance().getPluginLoader()->savePluginsToFile(&file);
   QList<rtRenderObject *> objs = rtApplication::instance().getObjectManager()->getAllObjects();
   rtDataObject *dObj = NULL;
   QDir dir(dName);
@@ -1367,7 +1367,8 @@ void rtMainWindow::saveScene()
       dObj = objs[ix1]->getDataObject();
       if (dObj)
       {
-          dObj->saveFile(&QFile(QString(dName + "/objects/" + dObj->getObjName() + ".vo")));
+          QFile file(QString(dName + "/objects/" + dObj->getObjName() + ".vo"));
+          dObj->saveFile(&file);
       }
   }
 
@@ -1380,8 +1381,8 @@ void rtMainWindow::loadScene()
 {
     QString dName;
     dName = QFileDialog::getExistingDirectory(this, "Select Directory with Saved Scene", QString(), QFileDialog::ShowDirsOnly);
-
-    rtApplication::instance().getPluginLoader()->loadPluginsFromConfig(&QFile(QString(dName + "/plugins.xml")));
+    QFile file(QString(dName + "/plugins.xml"));
+    rtApplication::instance().getPluginLoader()->loadPluginsFromConfig(&file);
 
     QDir dir(dName);
     if (dir.cd("objects"))
