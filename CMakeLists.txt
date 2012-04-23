@@ -23,9 +23,9 @@ elseif (WIN32)
   message(STATUS "Windows Found!")
 endif (APPLE)
 
-
-add_definitions ( -Wall -g )
-##add_definitions ( -Wall -O2 )
+set(CMAKE_BUILD_TYPE Release)
+# add_definitions ( -Wall -g )
+# add_definitions ( -Wall -O2 )
 
 ####################
 # Setup for Qt
