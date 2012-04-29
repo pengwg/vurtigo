@@ -25,9 +25,10 @@
 /*!
 Stores maps that relate the local and remote objects. Also passes information along those objects
  */
-class Converter {
-  //! Struct that allows recursive mapping of embedded objects
-  /*!
+class Converter
+{
+    //! Struct that allows recursive mapping of embedded objects
+    /*!
     This struct is a solution of the problem where objects with id's contain other objects.
     It allows the parent object to contain an id and a mapping to child objects with ids.
 
@@ -38,64 +39,64 @@ class Converter {
       "nodeMap" is the mapping between the remote id to Nodes representing Coils.
       The "currId" of those nodes are the local id of the coil.
    */
-  struct Node {
-    //! Id of the object represented by the node
-    int currId;
-    //! Mapping to the nodes representing the object's children
-    std::map<int, Node *> * nodeMap;
+    struct Node {
+        //! Id of the object represented by the node
+        int currId;
+        //! Mapping to the nodes representing the object's children
+        std::map<int, Node *> * nodeMap;
 
-    Node(int currId) {
-      this->currId = currId;
-      nodeMap = new std::map<int, Node *>;
-    }
+        Node(int currId) {
+            this->currId = currId;
+            nodeMap = new std::map<int, Node *>;
+        }
 
-    ~Node() {
-      delete nodeMap;
-    }
-  };
+        ~Node() {
+            delete nodeMap;
+        }
+    };
 
-  //Typedefs to simplify working with maps
-  typedef std::map<int, Node *> NodeMap;
-  typedef std::pair<int, Node *> NodePair;
-  typedef std::map<int, int> IdMap;
-  typedef std::pair<int, int> IdPair;
-  //Typedef to easily define a void function pointer with no params
-  typedef void (Converter::*ConverterFunction)();
+    //Typedefs to simplify working with maps
+    typedef std::map<int, Node *> NodeMap;
+    typedef std::pair<int, Node *> NodePair;
+    typedef std::map<int, int> IdMap;
+    typedef std::pair<int, int> IdPair;
+    //Typedef to easily define a void function pointer with no params
+    typedef void (Converter::*ConverterFunction)();
 
-  //! remote Cath Id -> local Cath Id/(localCoilMao, remote Coil Id -> local Coil Id)
-  NodeMap * localCathMap;
-  //! local Cath Id -> remote Cath Id/(remoteCoilMap, local Coil Id -> remote Coil Id)
-  NodeMap * remoteCathMap;
-  //! remote Image Id -> local Image Id
-  IdMap * localImageMap;
-  //! //local Image Id -> remote Image Id
-  IdMap * remoteImageMap;
+    //! remote Cath Id -> local Cath Id/(localCoilMao, remote Coil Id -> local Coil Id)
+    NodeMap * localCathMap;
+    //! local Cath Id -> remote Cath Id/(remoteCoilMap, local Coil Id -> remote Coil Id)
+    NodeMap * remoteCathMap;
+    //! remote Image Id -> local Image Id
+    IdMap * localImageMap;
+    //! //local Image Id -> remote Image Id
+    IdMap * remoteImageMap;
 
-  Converter::Node * getLocalObjNode(int id, NodeMap * nodeMap, NodeMap * remoteMap = NULL, rtConstants::rtObjectType objType = UNDEFINED_RT_OBJECT_TYPE, const char * name = NULL);
-  Converter::Node * getNode(int id, NodeMap * nodeMap);
+    Converter::Node * getLocalObjNode(int id, NodeMap * nodeMap, NodeMap * remoteMap = NULL, rtConstants::rtObjectType objType = UNDEFINED_RT_OBJECT_TYPE, const char * name = NULL);
+    Converter::Node * getNode(int id, NodeMap * nodeMap);
 
-  int getLocalCoilId(int remoteCoilId, rtCathDataObject * localCath, int remoteCoilLoc = UNDEFINED_REMOTE_COIL_LOC);
+    int getLocalCoilId(int remoteCoilId, rtCathDataObject * localCath, int remoteCoilLoc = UNDEFINED_REMOTE_COIL_LOC);
 
-  int getRemoteCathId(int localId);
-  int getRemoteCoilId(int localCathId, int localCoilId);
+    int getRemoteCathId(int localId);
+    int getRemoteCoilId(int localCathId, int localCoilId);
 
 
 public:
-  Converter();
-  ~Converter();
+    Converter();
+    ~Converter();
 
-  void printHeaderFooter(ConverterFunction function);
-  void printAll();
-  void printAllLocalCath();
-  void printAllLocalImages();
+    void printHeaderFooter(ConverterFunction function);
+    void printAll();
+    void printAllLocalCath();
+    void printAllLocalImages();
 
-  rtCathDataObject * getLocalCath(int remoteId);
-  bool setLocalCath(CATHDATA & remote, rtCathDataObject * local);
+    rtCathDataObject * getLocalCath(int remoteId);
+    bool setLocalCath(CATHDATA & remote, rtCathDataObject * local);
 
-  rt2DSliceDataObject * getLocalImage(int remoteId, int imageSize);
-  vtkImageData* CopyImage(IMAGEDATA &remote);
-  bool setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local);
-  bool setLocalImageOnly(IMAGEDATA & remote, rt2DSliceDataObject * local);
-  bool setRemoteImageTransform(std::vector<IMAGEDATA> & image);
+    rt2DSliceDataObject * getLocalImage(int remoteId, int imageSize);
+    vtkImageData* CopyImage(IMAGEDATA &remote);
+    bool setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local);
+    bool setLocalImageOnly(IMAGEDATA & remote, rt2DSliceDataObject * local);
+    bool setRemoteImageTransform(std::vector<IMAGEDATA> & image);
 };
 #endif

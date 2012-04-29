@@ -23,7 +23,7 @@ elseif (WIN32)
   message(STATUS "Windows Found!")
 endif (APPLE)
 
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 # add_definitions ( -Wall -g )
 # add_definitions ( -Wall -O2 )
 
