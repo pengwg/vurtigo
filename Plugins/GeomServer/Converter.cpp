@@ -399,32 +399,26 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local)
 
     vtkMatrix4x4 *matrix = vtkMatrix4x4::New();
 
-    for (int ix1=0; ix1<9; ix1++) {
+    for (int ix1 = 0; ix1 < 3; ix1++) {
         matrix->SetElement(ix1/3, ix1%3, remote.rotMatrix[ix1]);
-
+    }
+    for (int ix1 = 3; ix1 < 9; ix1++) {
+        matrix->SetElement(ix1/3, ix1%3, -remote.rotMatrix[ix1]);
     }
 
     double ptIn[4], ptOut[4];
-    ptIn[0] = (((double)remote.FOV*10)/2.0f);
-    ptIn[1] = (((double)remote.FOV*10)/2.0f);
-    ptIn[2] = 0.0f;
-    ptIn[3] = 1.0f;
+    ptIn[0] = -remote.FOV * 10 / 2.0;
+    ptIn[1] = -remote.FOV * 10 / 2.0;
+    ptIn[2] = 0;
+    ptIn[3] = 1.0;
 
     matrix->MultiplyPoint(ptIn, ptOut);
 
-    for (int ix1=0; ix1<9; ix1++) {
-        if (ix1/3>0)  matrix->SetElement(ix1/3, ix1%3, -remote.rotMatrix[ix1]);
-    }
-
-    matrix->SetElement(0, 3, -(ptOut[0]-remote.transMatrix[0]));
-    matrix->SetElement(1, 3, ptOut[1]-remote.transMatrix[1]);
-    matrix->SetElement(2, 3, ptOut[2]-remote.transMatrix[2]);
-
-    //imgChangeInfo->GetOutput()->Print(std::cout);
-    //matrix->Print(std::cout);
+    matrix->SetElement(0, 3, ptOut[0] + remote.transMatrix[0]);
+    matrix->SetElement(1, 3, ptOut[1] + remote.transMatrix[1]);
+    matrix->SetElement(2, 3, ptOut[2] + remote.transMatrix[2]);
 
     local->lock();
-    // Translate the FOV into milimeters
     success = success && local->copyImageData2D(imgChangeInfo->GetOutput());
     success = success && local->setVtkMatrix(matrix);
     local->unlock();
