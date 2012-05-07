@@ -399,24 +399,27 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local)
 
     vtkMatrix4x4 *matrix = vtkMatrix4x4::New();
 
+    // Flip the origin of the image coordinates from top left to bottom left.
     for (int ix1 = 0; ix1 < 3; ix1++) {
-        matrix->SetElement(ix1/3, ix1%3, remote.rotMatrix[ix1]);
+        matrix->SetElement(0, ix1, remote.rotMatrix[ix1]);
     }
     for (int ix1 = 3; ix1 < 9; ix1++) {
-        matrix->SetElement(ix1/3, ix1%3, -remote.rotMatrix[ix1]);
+        matrix->SetElement(ix1 / 3, ix1 % 3, -remote.rotMatrix[ix1]);
     }
 
+    // Image coordinates of the center of the image.
     double ptIn[4], ptOut[4];
-    ptIn[0] = -remote.FOV * 10 / 2.0;
-    ptIn[1] = -remote.FOV * 10 / 2.0;
+    ptIn[0] = remote.FOV * 10 / 2.0;
+    ptIn[1] = remote.FOV * 10 / 2.0;
     ptIn[2] = 0;
     ptIn[3] = 1.0;
 
     matrix->MultiplyPoint(ptIn, ptOut);
 
-    matrix->SetElement(0, 3, ptOut[0] + remote.transMatrix[0]);
-    matrix->SetElement(1, 3, ptOut[1] + remote.transMatrix[1]);
-    matrix->SetElement(2, 3, ptOut[2] + remote.transMatrix[2]);
+    // Translation needed for the new center.
+    matrix->SetElement(0, 3, remote.transMatrix[0] - ptOut[0]);
+    matrix->SetElement(1, 3, remote.transMatrix[1] - ptOut[1]);
+    matrix->SetElement(2, 3, remote.transMatrix[2] - ptOut[2]);
 
     local->lock();
     success = success && local->copyImageData2D(imgChangeInfo->GetOutput());
