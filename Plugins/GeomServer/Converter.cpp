@@ -400,11 +400,15 @@ bool Converter::setLocalImage(IMAGEDATA & remote, rt2DSliceDataObject * local)
     vtkMatrix4x4 *matrix = vtkMatrix4x4::New();
 
     // Flip the origin of the image coordinates from top left to bottom left.
-    for (int ix1 = 0; ix1 < 3; ix1++) {
-        matrix->SetElement(0, ix1, remote.rotMatrix[ix1]);
-    }
-    for (int ix1 = 3; ix1 < 9; ix1++) {
+    // Negate the 1st and 2nd colomns of rotation matrix.
+    for (int ix1 = 0; ix1 < 9; ix1 += 3) {
         matrix->SetElement(ix1 / 3, ix1 % 3, -remote.rotMatrix[ix1]);
+    }
+    for (int ix1 = 1; ix1 < 9; ix1 += 3) {
+        matrix->SetElement(ix1 / 3, ix1 % 3, -remote.rotMatrix[ix1]);
+    }
+    for (int ix1 = 2; ix1 < 9; ix1 += 3) {
+        matrix->SetElement(ix1 / 3, ix1 % 3, remote.rotMatrix[ix1]);
     }
 
     // Image coordinates of the center of the image.
