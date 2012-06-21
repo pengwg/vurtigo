@@ -53,3 +53,8 @@ set(VURTIGO_PLUGIN_CAMERA_MOTION ON CACHE BOOL "Compile the Camera Motion Plugin
 if (VURTIGO_PLUGIN_CAMERA_MOTION)
 add_subdirectory(CameraMotion)
 endif (VURTIGO_PLUGIN_CAMERA_MOTION)
+
+set(VURTIGO_PLUGIN_HUMAN_SENSOR ON CACHE BOOL "Compile the Human Sensor Plugin")
+if (VURTIGO_PLUGIN_HUMAN_SENSOR)
+add_subdirectory(HumanSensor)
+endif (VURTIGO_PLUGIN_HUMAN_SENSOR)
