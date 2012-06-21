@@ -126,6 +126,15 @@ void rtCameraControl::setViewAngle(double angle) {
   }
 }
 
+void rtCameraControl::setViewAngle(double elevation, double azimuth)
+{
+    m_camera->OrthogonalizeViewUp();
+    m_camera->Elevation(elevation);
+    m_camera->Azimuth(azimuth);
+    m_renderer->ResetCameraClippingRange();
+    rtApplication::instance().getMainWinHandle()->setRenderFlag3D(true);
+}
+
 double rtCameraControl::getViewAngle() {
   if (!m_camera) {
     rtApplication::instance().getMessageHandle()->error(__LINE__, __FILE__, QString("VTK Camera pointer is NULL."));
