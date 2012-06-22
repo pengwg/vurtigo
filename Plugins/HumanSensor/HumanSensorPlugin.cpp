@@ -15,7 +15,6 @@ void HumanSensorPlugin::objectModified(int objID)
 
 bool HumanSensorPlugin::init()
 {
-
     m_mainWidget = new QWidget();
 
     m_mainPluginGuiLayout = new QHBoxLayout();
@@ -30,9 +29,9 @@ bool HumanSensorPlugin::init()
 
     m_viewAngleLabel->setText("View Angle: ");
     m_viewAngleAmtLabel->setText("0");
-    m_viewAngleSlider->setMinimum(0);
-    m_viewAngleSlider->setMaximum(100);
-    m_viewAngleSlider->setValue(50);
+    m_viewAngleSlider->setMinimum(-180);
+    m_viewAngleSlider->setMaximum(180);
+    m_viewAngleSlider->setValue(0);
     m_viewAngleSlider->setOrientation(Qt::Horizontal);
 
     m_viewAngleSlider->setMinimumSize(180, 20);
@@ -44,14 +43,14 @@ bool HumanSensorPlugin::init()
 
     createTestObject();
 
-
-    setUpdateTime(10);
+    setUpdateTime(-1);
 
     XnStatus rc = m_humanSensor.init();
     if (rc != XN_STATUS_OK)
         return false;
-    else
-        return true;
+
+    m_humanSensor.run();
+    return true;
 }
 
 void HumanSensorPlugin::cleanup()
@@ -62,7 +61,7 @@ void HumanSensorPlugin::cleanup()
 
 void HumanSensorPlugin::update()
 {
-    m_humanSensor.run();
+
 }
 
 void HumanSensorPlugin::point3DSelected(double px, double py, double pz, int intensity) {
@@ -72,22 +71,16 @@ void HumanSensorPlugin::point3DSelected(double px, double py, double pz, int int
 void HumanSensorPlugin::viewAngleChanged(int angle)
 {
 
-    // Change the text in the GUI to inform the user that a change has taken place.
-    m_viewAngleAmtLabel->setText(QString::number(angle - 50));
-
-    // Get a pointer to Vurtigo's camera control
-    rtCameraControl *camera;
-    camera = rtApplication::instance().getMainWinHandle()->getCameraControl();
-
-    // Give the camera control the new view angle.
-    camera->changeViewAngle(0, static_cast<double>(angle - 50) / 50);
-
 }
 
-void HumanSensorPlugin::setViewAngle(float fvalue)
+void HumanSensorPlugin::setViewAngle(float angle)
 {
-    m_viewAngleSlider->setValue(static_cast<int>(fvalue * 100));
-    viewAngleChanged(static_cast<int>(fvalue * 100));
+    m_viewAngleSlider->setValue(static_cast<int>(angle));
+    m_viewAngleAmtLabel->setText(QString::number(static_cast<int>(angle)));
+
+    rtCameraControl *camera;
+    camera = rtApplication::instance().getMainWinHandle()->getCameraControl();
+    camera->changeViewAngle(0, static_cast<double>(angle) / 180);
 }
 
 void HumanSensorPlugin::createTestObject()

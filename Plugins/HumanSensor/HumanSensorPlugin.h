@@ -23,7 +23,7 @@ public:
 
 public slots:
     void viewAngleChanged(int);
-    void setViewAngle(float fvalue);
+    void setViewAngle(float angle);
 
 protected:
     void createTestObject();

@@ -2,6 +2,7 @@
 #define HUMANSENSOR_H
 
 #include <QObject>
+#include <QTimer>
 
 #include <XnOpenNI.h>
 #include <XnCppWrapper.h>
@@ -56,6 +57,12 @@ private:
     XnVPointControl* m_pPointControl;
     XnVSwipeDetector* m_pSwipeDetector;
     XnVSelectableSlider1D* m_pSlider;
+
+    QTimer m_timer;
+
+private slots:
+    void update();
+
 };
 
 inline XnStatus HumanSensor::check_rc(XnStatus &rc, const char *what)

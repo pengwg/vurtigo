@@ -82,11 +82,14 @@ XnStatus HumanSensor::init()
 
 void HumanSensor::run()
 {
-    // while (1) {
-        m_Context.WaitOneUpdateAll(m_DepthGenerator);
-        m_pSessionManager->Update(&m_Context);
-    // }
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
+    m_timer.start(20);
+}
 
+void HumanSensor::update()
+{
+    m_Context.WaitOneUpdateAll(m_DepthGenerator);
+    m_pSessionManager->Update(&m_Context);
 }
 
 void XN_CALLBACK_TYPE HumanSensor::Swipe(XnVDirection eDir, XnFloat fVelocity, XnFloat fAngle, void *pUserCxt)
@@ -105,7 +108,7 @@ void XN_CALLBACK_TYPE HumanSensor::SliderValueChanged(XnFloat fValue, void *cxt)
 {
     printf("Slider value: %f\n", fValue);
     if (instance)
-        emit instance->viewAngleChanged(fValue);
+        emit instance->viewAngleChanged(fValue * 360 - 180);
 }
 
 void XN_CALLBACK_TYPE HumanSensor::FocusProgress(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* UserCxt)
