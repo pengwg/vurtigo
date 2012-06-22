@@ -67,15 +67,10 @@ rtPluginLoader::~rtPluginLoader() {
 
 bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
   bool ok = false;
-  int ix1;
-  int nextID;
 
   if (file->exists()) {
     QXmlInputSource source(file);
     PluginConfigHandler handler;
-    QPluginLoader* tempLoader;
-    DataInterface* tempPlugin;
-    QTreeWidgetItem* tempTreeItem;
     QString fullName;
 
     m_xmlReader.setContentHandler(&handler);
@@ -84,7 +79,7 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
     bool alreadyExists;
 
     if (m_xmlReader.parse(&source)) {
-      for (ix1=0; ix1<handler.pluginInfo.size(); ix1++) {
+      for (int ix1=0; ix1<handler.pluginInfo.size(); ix1++) {
 
           QHashIterator<int,PluginXmlInfo> itr(m_pluginInfoHash);
 
@@ -101,7 +96,6 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
           }
           if (alreadyExists) continue;
 
-        nextID = getNextFreeID();
         QDir appDir(qApp->applicationDirPath());
         QDir givenDir(handler.pluginInfo[ix1].libPath);
 
@@ -120,6 +114,7 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
           fullName = "lib"+fullName;
         }
 
+        QPluginLoader* tempLoader;
         if ( QFile::exists(appDir.absoluteFilePath(fullName)) && QLibrary::isLibrary(appDir.absoluteFilePath(fullName)) ) {
           tempLoader = new QPluginLoader(appDir.absoluteFilePath(fullName));
         }
@@ -132,9 +127,14 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
         }
 
         if (tempLoader && tempLoader->load()) {
-          tempPlugin = qobject_cast<DataInterface*>(tempLoader->instance());
+          DataInterface* tempPlugin = qobject_cast<DataInterface*>(tempLoader->instance());
+          if (!tempPlugin->init()) {
+              std::cout << "Plugin: " << handler.pluginInfo[ix1].libName.toStdString() << " could not be initialized." << std::endl;
+              continue;
+          }
 
-          tempTreeItem = new QTreeWidgetItem();
+          int nextID = getNextFreeID();
+          QTreeWidgetItem* tempTreeItem = new QTreeWidgetItem();
           tempTreeItem->setText(0, QString::number(nextID));
           tempTreeItem->setText(1, handler.pluginInfo[ix1].title);
           tempTreeItem->setText(2, handler.pluginInfo[ix1].version);
@@ -150,7 +150,6 @@ bool rtPluginLoader::loadPluginsFromConfig(QFile* file) {
           m_pluginHash.insert(nextID, tempPlugin);
           m_widgetItemHash.insert(nextID, tempTreeItem);
           tempPlugin->setUniqueID(nextID);
-          tempPlugin->init();
 
           rtApplication::instance().getMainWinHandle()->updatePluginList(&m_widgetItemHash);
 
