@@ -124,7 +124,7 @@ public:
     \param angle The new view angle to set. Should be in the range (0, 180).
     */
   void setViewAngle(double angle);
-  void setViewAngle(double elevation, double azimuth);
+  void changeViewAngle(double elevation, double azimuth);
 
   //! Gt the view angle for the camera.
   /*!
