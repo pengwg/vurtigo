@@ -83,7 +83,7 @@ XnStatus HumanSensor::init()
 void HumanSensor::run()
 {
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(update()));
-    m_timer.start(20);
+    m_timer.start(5);
 }
 
 void HumanSensor::update()

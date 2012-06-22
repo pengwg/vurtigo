@@ -41,6 +41,7 @@ bool HumanSensorPlugin::init()
     // connect(m_viewAngleSlider, SIGNAL(valueChanged(int)), this, SLOT(viewAngleChanged(int)));
     connect(&m_humanSensor, SIGNAL(viewAngleChanged(float)), this, SLOT(setViewAngle(float)));
 
+
     createTestObject();
 
     setUpdateTime(-1);
@@ -80,7 +81,13 @@ void HumanSensorPlugin::setViewAngle(float angle)
 
     rtCameraControl *camera;
     camera = rtApplication::instance().getMainWinHandle()->getCameraControl();
-    camera->changeViewAngle(0, static_cast<double>(angle) / 180);
+    // camera->changeViewAngle(0, static_cast<double>(angle) / 180);
+    double x, y, z;
+    camera->getDefaultPosition(x, y, z);
+
+    double r = sqrt(x * x + y * y + z * z);
+    double newAngle = atan2(z, x) + angle / 180 * M_PI;
+    camera->setPosition(r * cos(newAngle), y, z * sin(newAngle));
 }
 
 void HumanSensorPlugin::createTestObject()
