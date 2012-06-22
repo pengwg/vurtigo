@@ -124,13 +124,18 @@ public:
     \param angle The new view angle to set. Should be in the range (0, 180).
     */
   void setViewAngle(double angle);
-  void changeViewAngle(double elevation, double azimuth);
 
   //! Gt the view angle for the camera.
   /*!
     \return The view angle. Should be in the range (0, 180).
     */
   double getViewAngle();
+
+  void changeViewAngle(double elevation, double azimuth);
+  void setPosition(double x, double y, double z);
+  void getPosition(double &x, double &y, double &z);
+  void setDefaultPosition(double x, double y, double z);
+  void getDefaultPosition(double &x, double &y, double &z);
 
 public slots:
   //! Slot called when the mouse is pressed in the QVTK widget.
