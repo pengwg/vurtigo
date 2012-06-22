@@ -20,12 +20,30 @@ SessionState HumanSensor::m_SessionState = NOT_IN_SESSION;
 
 HumanSensor::HumanSensor()
 {
+
+}
+
+HumanSensor::~HumanSensor()
+{
+    m_ScriptNode.Release();
+    m_DepthGenerator.Release();
+    m_HandsGenerator.Release();
+    m_GestureGenerator.Release();
+    m_Context.Release();
+}
+
+XnStatus HumanSensor::init()
+{
     instance = this;
     xn::EnumerationErrors errors;
 
     XnStatus rc = m_Context.InitFromXmlFile(CONFIG_PATH, m_ScriptNode, &errors);
     check_errors(rc, errors, "InitFromXmlFile");
     check_rc(rc, "InitFromXmlFile");
+
+    if (rc != XN_STATUS_OK) {
+        return rc;
+    }
 
     rc = m_Context.FindExistingNode(XN_NODE_TYPE_DEPTH, m_DepthGenerator);
     check_rc(rc, "Find depth generator");
@@ -58,15 +76,8 @@ HumanSensor::HumanSensor()
 
     rc = m_Context.StartGeneratingAll();
     check_rc(rc, "StartGenerating");
-}
 
-HumanSensor::~HumanSensor()
-{
-    m_ScriptNode.Release();
-    m_DepthGenerator.Release();
-    m_HandsGenerator.Release();
-    m_GestureGenerator.Release();
-    m_Context.Release();
+    return rc;
 }
 
 void HumanSensor::run()
@@ -93,7 +104,8 @@ void XN_CALLBACK_TYPE HumanSensor::Swipe(XnVDirection eDir, XnFloat fVelocity, X
 void XN_CALLBACK_TYPE HumanSensor::SliderValueChanged(XnFloat fValue, void *cxt)
 {
     printf("Slider value: %f\n", fValue);
-    emit instance->viewAngleChanged(fValue);
+    if (instance)
+        emit instance->viewAngleChanged(fValue);
 }
 
 void XN_CALLBACK_TYPE HumanSensor::FocusProgress(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* UserCxt)

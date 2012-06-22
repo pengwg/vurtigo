@@ -24,6 +24,8 @@ public:
     HumanSensor();
     ~HumanSensor();
 
+    XnStatus init();
+
     XnStatus check_rc(XnStatus &rc, const char *what);
     XnStatus check_errors(XnStatus &rc, xn::EnumerationErrors &errors, const char *what);
 
