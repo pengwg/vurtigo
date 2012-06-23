@@ -33,23 +33,21 @@ bool HumanSensorPlugin::init()
     m_viewAngleSlider->setMaximum(180);
     m_viewAngleSlider->setValue(0);
     m_viewAngleSlider->setOrientation(Qt::Horizontal);
-
     m_viewAngleSlider->setMinimumSize(180, 20);
 
     m_mainWidget->setLayout(m_mainPluginGuiLayout);
-
     // connect(m_viewAngleSlider, SIGNAL(valueChanged(int)), this, SLOT(viewAngleChanged(int)));
-    connect(&m_humanSensor, SIGNAL(viewAngleChanged(float)), this, SLOT(setViewAngle(float)));
-
 
     createTestObject();
-
     setUpdateTime(-1);
 
     XnStatus rc = m_humanSensor.init();
     if (rc != XN_STATUS_OK)
         return false;
 
+    m_currElevation = 0;
+    m_currAzimuth = 0;
+    connect(&m_humanSensor, SIGNAL(viewAngleChanged(float, float)), this, SLOT(setViewAngle(float, float)));
     m_humanSensor.run();
     return true;
 }
@@ -74,20 +72,27 @@ void HumanSensorPlugin::viewAngleChanged(int angle)
 
 }
 
-void HumanSensorPlugin::setViewAngle(float angle)
+void HumanSensorPlugin::setViewAngle(float elevation, float azimuth)
 {
-    m_viewAngleSlider->setValue(static_cast<int>(angle));
-    m_viewAngleAmtLabel->setText(QString::number(static_cast<int>(angle)));
+    m_viewAngleSlider->setValue(static_cast<int>(azimuth));
+    m_viewAngleAmtLabel->setText(QString::number(static_cast<int>(azimuth)));
 
     rtCameraControl *camera;
     camera = rtApplication::instance().getMainWinHandle()->getCameraControl();
-    // camera->changeViewAngle(0, static_cast<double>(angle) / 180);
-    double x, y, z;
+
+    double dElevation = static_cast<double>(elevation - m_currElevation);
+    double dAzimuth = static_cast<double>(azimuth - m_currAzimuth);
+    camera->changeViewAngle(-dElevation, -dAzimuth);
+
+    m_currElevation = elevation;
+    m_currAzimuth = azimuth;
+
+    /*double x, y, z;
     camera->getDefaultPosition(x, y, z);
 
     double r = sqrt(x * x + y * y + z * z);
-    double newAngle = atan2(z, x) + angle / 180 * M_PI;
-    camera->setPosition(r * cos(newAngle), y, z * sin(newAngle));
+    double newAngle = atan2(z, x) + azimuth / 180 * M_PI;
+    camera->setPosition(r * cos(newAngle), y, z * sin(newAngle));*/
 }
 
 void HumanSensorPlugin::createTestObject()

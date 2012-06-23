@@ -17,6 +17,8 @@ void XN_CALLBACK_TYPE GestureProgressHandler(xn::GestureGenerator& generator, co
 
 HumanSensor *HumanSensor::instance = NULL;
 SessionState HumanSensor::m_SessionState = NOT_IN_SESSION;
+float HumanSensor::m_elevation = 0;
+float HumanSensor::m_azimuth = 0;
 
 HumanSensor::HumanSensor()
 {
@@ -90,6 +92,9 @@ void HumanSensor::update()
 {
     m_Context.WaitOneUpdateAll(m_DepthGenerator);
     m_pSessionManager->Update(&m_Context);
+
+    if (instance)
+        emit instance->viewAngleChanged(m_elevation, m_azimuth);
 }
 
 void XN_CALLBACK_TYPE HumanSensor::Swipe(XnVDirection eDir, XnFloat fVelocity, XnFloat fAngle, void *pUserCxt)
@@ -107,8 +112,9 @@ void XN_CALLBACK_TYPE HumanSensor::Swipe(XnVDirection eDir, XnFloat fVelocity, X
 void XN_CALLBACK_TYPE HumanSensor::SliderValueChanged(XnFloat fValue, void *cxt)
 {
     printf("Slider value: %f\n", fValue);
-    if (instance)
-        emit instance->viewAngleChanged(fValue * 360 - 180);
+
+    m_azimuth = fValue * 360 - 180;
+
 }
 
 void XN_CALLBACK_TYPE HumanSensor::FocusProgress(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* UserCxt)

@@ -33,7 +33,7 @@ public:
     void run();
 
 signals:
-    void viewAngleChanged(float);
+    void viewAngleChanged(float, float);
 
 private:
     static HumanSensor *instance;
@@ -57,6 +57,9 @@ private:
     XnVPointControl* m_pPointControl;
     XnVSwipeDetector* m_pSwipeDetector;
     XnVSelectableSlider1D* m_pSlider;
+
+    static float m_elevation;
+    static float m_azimuth;
 
     QTimer m_timer;
 

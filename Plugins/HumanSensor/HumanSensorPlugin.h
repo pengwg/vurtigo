@@ -23,22 +23,22 @@ public:
 
 public slots:
     void viewAngleChanged(int);
-    void setViewAngle(float angle);
+    void setViewAngle(float elevation, float azimuth);
 
 protected:
     void createTestObject();
     int m_smallVol;
 
-    HumanSensor m_humanSensor;
-    ////////////
-    // Gui Elements
-    ////////////
     QHBoxLayout *m_mainPluginGuiLayout;
     QLabel *m_viewAngleLabel;
     QLabel *m_viewAngleAmtLabel;
     QSlider *m_viewAngleSlider;
-private:
 
+private:
+    HumanSensor m_humanSensor;
+
+    float m_currElevation;
+    float m_currAzimuth;
 };
 
 #endif
