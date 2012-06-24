@@ -65,14 +65,8 @@ XnStatus HumanSensor::init()
 
     m_pSessionManager->RegisterSession(NULL, SessionStarting, SessionEnding, FocusProgress);
 
-    // m_pSwipeDetector = new XnVSwipeDetector;
-    // m_pSwipeDetector->RegisterSwipe(NULL, Swipe);
-
-    // m_pFlowRouter = new XnVFlowRouter;
-    // m_pFlowRouter->SetActive(g_pDrawer);
-
-    m_pSlider = new XnVSelectableSlider1D(100);
-    m_pSlider->RegisterValueChange(NULL, SliderValueChanged);
+    m_pSlider = new XnVSelectableSlider2D(1, 1);
+    m_pSlider->RegisterValueChange(NULL, SliderValueChanged2D);
 
     m_pSessionManager->AddListener(m_pSlider);
 
@@ -94,7 +88,7 @@ void HumanSensor::update()
     m_pSessionManager->Update(&m_Context);
 
     if (instance)
-        emit instance->viewAngleChanged(m_elevation, m_azimuth);
+        emit instance->viewAngleChanged(m_azimuth, m_elevation);
 }
 
 void XN_CALLBACK_TYPE HumanSensor::Swipe(XnVDirection eDir, XnFloat fVelocity, XnFloat fAngle, void *pUserCxt)
@@ -114,7 +108,14 @@ void XN_CALLBACK_TYPE HumanSensor::SliderValueChanged(XnFloat fValue, void *cxt)
     printf("Slider value: %f\n", fValue);
 
     m_azimuth = fValue * 360 - 180;
+}
 
+void XN_CALLBACK_TYPE HumanSensor::SliderValueChanged2D(XnFloat fXValue, XnFloat fYValue, void *cxt)
+{
+    printf("Slider value: %f -- %f\n", fXValue, fYValue);
+
+    m_azimuth = fXValue * 360 - 180;
+    m_elevation = fYValue * 180 - 90;
 }
 
 void XN_CALLBACK_TYPE HumanSensor::FocusProgress(const XnChar* strFocus, const XnPoint3D& ptPosition, XnFloat fProgress, void* UserCxt)

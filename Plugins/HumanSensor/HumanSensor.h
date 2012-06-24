@@ -43,6 +43,7 @@ private:
     static void XN_CALLBACK_TYPE NoHands(void* UserCxt);
     static void XN_CALLBACK_TYPE Swipe(XnVDirection eDir, XnFloat fVelocity, XnFloat fAngle, void *pUserCxt);
     static void XN_CALLBACK_TYPE SliderValueChanged(XnFloat fValue, void *cxt);
+    static void XN_CALLBACK_TYPE SliderValueChanged2D(XnFloat fXValue, XnFloat fYValue, void *cxt);
 
     static SessionState m_SessionState;
 
@@ -53,10 +54,8 @@ private:
     xn::GestureGenerator m_GestureGenerator;
 
     XnVSessionManager* m_pSessionManager;
-    XnVFlowRouter* m_pFlowRouter;
-    XnVPointControl* m_pPointControl;
-    XnVSwipeDetector* m_pSwipeDetector;
-    XnVSelectableSlider1D* m_pSlider;
+
+    XnVSelectableSlider2D* m_pSlider;
 
     static float m_elevation;
     static float m_azimuth;
