@@ -1,10 +1,10 @@
 
-set(SRC_FILES
+set(HUMANSENSOR_SRC_FILES
     HumanSensorPlugin.cpp
     HumanSensor.cpp
 )
 
-set(MOC_FILES
+set(HUMANSENSOR_MOC_FILES
     HumanSensorPlugin.h
     HumanSensor.h
 )
@@ -14,7 +14,7 @@ include_directories (
     /usr/include/nite
 )
 
-qt4_wrap_cpp(MOC_FILES_OUT ${MOC_FILES})
+qt4_wrap_cpp(HUMANSENSOR_MOC_FILES_OUT ${HUMANSENSOR_MOC_FILES})
 
-add_library(HumanSensor SHARED ${SRC_FILES} ${MOC_FILES_OUT})
+add_library(HumanSensor SHARED ${HUMANSENSOR_SRC_FILES} ${HUMANSENSOR_MOC_FILES_OUT})
 target_link_libraries(HumanSensor ${QT_LIBRARIES} VurtigoBase OpenNI XnVNite_1_5_2)
